@@ -16,7 +16,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
 - [ ] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
 - [x] **DATA-07**: System tracks first-seen date per property for new lead detection
-- [ ] **DATA-08**: System runs daily automated scraping on a scheduled basis
+- [x] **DATA-08**: System runs daily automated scraping on a scheduled basis
 - [x] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
 
 ### Distress Scoring
@@ -117,7 +117,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 1 | Complete |
 | DATA-07 | Phase 1 | Complete |
-| DATA-08 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Complete |
 | DATA-09 | Phase 1 | Complete |
 | SCORE-01 | Phase 1 | Complete |
 | SCORE-02 | Phase 1 | Complete |
