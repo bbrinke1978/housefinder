@@ -10,6 +10,7 @@ import {
 import { scoreAllProperties } from "../scoring/score.js";
 import { updateScrapeHealth, checkHealthAlert } from "../lib/health.js";
 import { seedDefaultConfig } from "../db/seed-config.js";
+import { sendAlerts } from "../alerts/index.js";
 
 /**
  * Daily scrape pipeline orchestrator.
@@ -139,13 +140,26 @@ async function dailyScrape(
     context.error("Health check failed", err);
   }
 
-  // Step 5: Log summary
+  // Step 5: Send alerts (after scoring)
+  let alertResults = { emailSent: 0, smsSent: 0 };
+  try {
+    alertResults = await sendAlerts(context);
+    context.log(
+      `Alerts: ${alertResults.emailSent} email, ${alertResults.smsSent} SMS`
+    );
+  } catch (err) {
+    context.error("Alert delivery failed", err);
+    // Non-fatal: scraping and scoring are already done
+  }
+
+  // Step 6: Log summary
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   context.log("Daily scrape complete", {
     assessor: results.assessor,
     delinquent: results.delinquent,
     recorder: results.recorder,
     scoring: scoreResults,
+    alerts: alertResults,
     isPastDue: myTimer.isPastDue,
     elapsedSeconds: elapsed,
   });
