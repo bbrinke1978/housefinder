@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 2 — Core Application
+**Current focus:** Phase 3 — Contact & Alerts
 
 ## Current Position
 
-Phase: 2 of 5 (Core Application)
-Plan: 5 of 5 in current phase
-Status: Phase Complete
-Last activity: 2026-03-18 — Completed 02-05 (Settings & Deployment)
+Phase: 3 of 5 (Contact & Alerts)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-03-18 — Completed 03-01 (Contact & Alert Foundation)
 
-Progress: [██████░░░░] 55%
+Progress: [██████░░░░] 59%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 4min
-- Total execution time: 0.51 hours
+- Total plans completed: 10
+- Average duration: 3min
+- Total execution time: 0.54 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [██████░░░░] 55%
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
 | 02-core-application | 5/5 | 23min | 5min |
+| 03-contact-and-alerts | 1/3 | 2min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 6min, 4min, 5min, 6min, 2min
+- Last 5 plans: 4min, 5min, 6min, 2min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [02-05]: force-dynamic export on settings page to prevent build-time DB queries
 - [02-05]: Target cities stored as JSON array in scraperConfig key-value table
 - [02-05]: Azure App Service deployment via standalone output with static asset copy step
+- [03-01]: Alert config keys use same scraperConfig table with onConflictDoNothing for idempotent seeding
+- [03-01]: ownerContacts unique on (propertyId, source) to allow multiple sources per property without duplicates
 
 ### Pending Todos
 
@@ -97,5 +100,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 02-05-PLAN.md (Phase 2 complete)
-Resume file: .planning/phases/02-core-application/02-05-SUMMARY.md
+Stopped at: Completed 03-01-PLAN.md
+Resume file: .planning/phases/03-contact-and-alerts/03-01-SUMMARY.md

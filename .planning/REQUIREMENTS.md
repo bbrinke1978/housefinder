@@ -51,8 +51,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Contact Lookup
 
-- [ ] **CONTACT-01**: System pulls owner name from county assessor data for every property
-- [ ] **CONTACT-02**: System cross-references voter registration rolls to find owner phone numbers for free
+- [x] **CONTACT-01**: System pulls owner name from county assessor data for every property
+- [x] **CONTACT-02**: System cross-references voter registration rolls to find owner phone numbers for free
 - [ ] **CONTACT-03**: System displays a "manual skip trace needed" flag when free sources don't yield contact info
 - [ ] **CONTACT-04**: User can tap-to-call owner phone number directly from mobile (tel: link)
 
@@ -151,8 +151,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LEAD-02 | Phase 2 | Complete |
 | LEAD-03 | Phase 2 | Complete |
 | LEAD-04 | Phase 2 | Complete |
-| CONTACT-01 | Phase 3 | Pending |
-| CONTACT-02 | Phase 3 | Pending |
+| CONTACT-01 | Phase 3 | Complete |
+| CONTACT-02 | Phase 3 | Complete |
 | CONTACT-03 | Phase 3 | Pending |
 | CONTACT-04 | Phase 3 | Pending |
 | ALERT-01 | Phase 3 | Pending |
