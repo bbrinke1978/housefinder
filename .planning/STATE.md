@@ -76,6 +76,9 @@ Recent decisions affecting current work:
 - [02-03]: Added leadId to PropertyWithLead type and getPropertyDetail query -- needed for notes tab
 - [02-03]: useOptimistic for immediate note display before server response
 - [02-03]: Integrated VoiceNoteInput from Plan 02-04 into notes tab
+- [02-04]: PipelineLead type extends PropertyWithLead with propertyId -- pipeline uses lead.id as primary id
+- [02-04]: Voice input gracefully degrades in non-Chrome browsers -- disabled button with tooltip
+- [02-04]: Status change auto-logged as note, optional user note for quick pipeline management
 
 ### Pending Todos
 
@@ -91,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 02-03-PLAN.md
-Resume file: .planning/phases/02-core-application/02-03-SUMMARY.md
+Stopped at: Completed 02-04-PLAN.md
+Resume file: .planning/phases/02-core-application/02-04-SUMMARY.md

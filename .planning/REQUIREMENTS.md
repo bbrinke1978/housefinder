@@ -44,10 +44,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Lead Management
 
-- [ ] **LEAD-01**: User can set lead status per property (New, Contacted, Follow-Up, Closed, Dead)
-- [ ] **LEAD-02**: User can add timestamped notes to any lead
-- [ ] **LEAD-03**: User can view their full pipeline by status (e.g., "show me all Follow-Ups")
-- [ ] **LEAD-04**: System flags leads where no contact info was found as "manual skip trace needed"
+- [x] **LEAD-01**: User can set lead status per property (New, Contacted, Follow-Up, Closed, Dead)
+- [x] **LEAD-02**: User can add timestamped notes to any lead
+- [x] **LEAD-03**: User can view their full pipeline by status (e.g., "show me all Follow-Ups")
+- [x] **LEAD-04**: System flags leads where no contact info was found as "manual skip trace needed"
 
 ### Contact Lookup
 
@@ -136,10 +136,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROP-02 | Phase 2 | Complete |
 | PROP-03 | Phase 2 | Complete |
 | PROP-04 | Phase 2 | Complete |
-| LEAD-01 | Phase 2 | Pending |
-| LEAD-02 | Phase 2 | Pending |
-| LEAD-03 | Phase 2 | Pending |
-| LEAD-04 | Phase 2 | Pending |
+| LEAD-01 | Phase 2 | Complete |
+| LEAD-02 | Phase 2 | Complete |
+| LEAD-03 | Phase 2 | Complete |
+| LEAD-04 | Phase 2 | Complete |
 | CONTACT-01 | Phase 3 | Pending |
 | CONTACT-02 | Phase 3 | Pending |
 | CONTACT-03 | Phase 3 | Pending |
