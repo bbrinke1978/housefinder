@@ -154,3 +154,58 @@ export const scraperConfig = pgTable("scraper_config", {
     .notNull()
     .defaultNow(),
 });
+
+// ── Owner Contacts ────────────────────────────────────────────────────────
+
+export const ownerContacts = pgTable(
+  "owner_contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    propertyId: uuid("property_id")
+      .notNull()
+      .references(() => properties.id),
+    phone: text("phone"),
+    email: text("email"),
+    source: text("source").notNull(),
+    isManual: boolean("is_manual").notNull().default(false),
+    needsSkipTrace: boolean("needs_skip_trace").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_owner_contacts_property_id").on(table.propertyId),
+    uniqueIndex("uq_owner_contacts_property_source").on(
+      table.propertyId,
+      table.source
+    ),
+  ]
+);
+
+// ── Alert History ─────────────────────────────────────────────────────────
+
+export const alertHistory = pgTable(
+  "alert_history",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    channel: text("channel").notNull(),
+    runDate: text("run_date").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_alert_history").on(
+      table.leadId,
+      table.channel,
+      table.runDate
+    ),
+    index("idx_alert_history_lead_id").on(table.leadId),
+  ]
+);

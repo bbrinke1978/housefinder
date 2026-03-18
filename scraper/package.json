@@ -12,17 +12,24 @@
   },
   "dependencies": {
     "@azure/functions": "^4.6.0",
+    "@react-email/components": "^1.0.10",
     "cheerio": "^1.0.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.0",
     "p-limit": "^6.2.0",
     "pg": "^8.13.0",
     "playwright": "^1.50.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "resend": "^6.9.4",
+    "twilio": "^5.13.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
     "@types/pg": "^8.11.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "drizzle-kit": "^0.30.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"

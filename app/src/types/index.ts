@@ -54,3 +54,15 @@ export interface LeadNote {
   newStatus: string | null;
   createdAt: Date;
 }
+
+export interface OwnerContact {
+  id: string;
+  propertyId: string;
+  phone: string | null;
+  email: string | null;
+  source: string;
+  isManual: boolean;
+  needsSkipTrace: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
