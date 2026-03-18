@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { properties, leads, distressSignals, leadNotes } from "@/db/schema";
+import { properties, leads, distressSignals, leadNotes, ownerContacts } from "@/db/schema";
 import { eq, and, sql, desc, asc, ilike, exists } from "drizzle-orm";
 import type {
   PropertyWithLead,
@@ -7,6 +7,7 @@ import type {
   DistressSignalRow,
   LeadNote,
   SignalType,
+  OwnerContact,
 } from "@/types";
 
 /**
@@ -99,6 +100,7 @@ export interface DashboardStats {
   hot: number;
   newToday: number;
   needsFollowUp: number;
+  needsSkipTrace: number;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -108,8 +110,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       hot: sql<number>`count(*) filter (where ${leads.isHot} = true)::int`,
       newToday: sql<number>`count(*) filter (where ${leads.firstSeenAt} > now() - interval '24 hours')::int`,
       needsFollowUp: sql<number>`count(*) filter (where ${leads.status} = 'follow_up')::int`,
+      needsSkipTrace: sql<number>`count(*) filter (where not exists (
+        select 1 from owner_contacts oc
+        where oc.property_id = ${properties.id} and oc.phone is not null
+      ) and ${properties.ownerType} in ('individual', 'unknown'))::int`,
     })
-    .from(leads);
+    .from(leads)
+    .innerJoin(properties, eq(leads.propertyId, properties.id));
 
   const row = result[0];
   return {
@@ -117,7 +124,32 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     hot: row?.hot ?? 0,
     newToday: row?.newToday ?? 0,
     needsFollowUp: row?.needsFollowUp ?? 0,
+    needsSkipTrace: row?.needsSkipTrace ?? 0,
   };
+}
+
+/**
+ * Get all owner contacts for a property.
+ * Manual entries first, then by creation date descending.
+ */
+export async function getOwnerContacts(propertyId: string): Promise<OwnerContact[]> {
+  const rows = await db
+    .select({
+      id: ownerContacts.id,
+      propertyId: ownerContacts.propertyId,
+      phone: ownerContacts.phone,
+      email: ownerContacts.email,
+      source: ownerContacts.source,
+      isManual: ownerContacts.isManual,
+      needsSkipTrace: ownerContacts.needsSkipTrace,
+      createdAt: ownerContacts.createdAt,
+      updatedAt: ownerContacts.updatedAt,
+    })
+    .from(ownerContacts)
+    .where(eq(ownerContacts.propertyId, propertyId))
+    .orderBy(desc(ownerContacts.isManual), desc(ownerContacts.createdAt));
+
+  return rows as unknown as OwnerContact[];
 }
 
 // -- Property list with filters and sorting --

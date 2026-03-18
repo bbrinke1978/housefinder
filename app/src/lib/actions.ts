@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
-import { leads, leadNotes, scraperConfig } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { leads, leadNotes, scraperConfig, ownerContacts } from "@/db/schema";
+import { eq, like } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
@@ -191,6 +191,142 @@ export async function updateTargetCities(cities: string[]): Promise<void> {
       value,
       description: "JSON array of target city names for scraping",
     });
+  }
+
+  revalidatePath("/settings");
+}
+
+// -- Owner Phone --
+
+const saveOwnerPhoneSchema = z.object({
+  propertyId: z.uuid(),
+  phone: z.string().min(1).max(20),
+});
+
+/**
+ * Save a manually-entered phone number for a property owner.
+ * Upserts into ownerContacts with source='manual'.
+ */
+export async function saveOwnerPhone(
+  propertyId: string,
+  phone: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = saveOwnerPhoneSchema.parse({ propertyId, phone });
+
+  // Upsert: insert or update on unique(propertyId, source) conflict
+  await db
+    .insert(ownerContacts)
+    .values({
+      propertyId: parsed.propertyId,
+      phone: parsed.phone,
+      source: "manual",
+      isManual: true,
+      needsSkipTrace: false,
+    })
+    .onConflictDoUpdate({
+      target: [ownerContacts.propertyId, ownerContacts.source],
+      set: {
+        phone: parsed.phone,
+        needsSkipTrace: false,
+        updatedAt: new Date(),
+      },
+    });
+
+  revalidatePath(`/properties/${parsed.propertyId}`);
+  revalidatePath("/");
+}
+
+// -- Alert Settings --
+
+export interface AlertSettings {
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  emailThreshold: number;
+  smsThreshold: number;
+}
+
+const ALERT_DEFAULTS: AlertSettings = {
+  emailEnabled: true,
+  smsEnabled: true,
+  emailThreshold: 2,
+  smsThreshold: 3,
+};
+
+/**
+ * Read alert settings from scraperConfig.
+ * Returns defaults if keys not found.
+ */
+export async function getAlertSettings(): Promise<AlertSettings> {
+  const rows = await db
+    .select({ key: scraperConfig.key, value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(like(scraperConfig.key, "alerts.%"));
+
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+
+  return {
+    emailEnabled: map.get("alerts.email.enabled") === "false" ? false : ALERT_DEFAULTS.emailEnabled,
+    smsEnabled: map.get("alerts.sms.enabled") === "false" ? false : ALERT_DEFAULTS.smsEnabled,
+    emailThreshold: map.has("alerts.email.threshold")
+      ? parseInt(map.get("alerts.email.threshold")!, 10)
+      : ALERT_DEFAULTS.emailThreshold,
+    smsThreshold: map.has("alerts.sms.threshold")
+      ? parseInt(map.get("alerts.sms.threshold")!, 10)
+      : ALERT_DEFAULTS.smsThreshold,
+  };
+}
+
+const updateAlertSettingsSchema = z.object({
+  emailEnabled: z.boolean(),
+  smsEnabled: z.boolean(),
+  emailThreshold: z.number().int().min(1).max(10),
+  smsThreshold: z.number().int().min(1).max(10),
+});
+
+/**
+ * Upsert alert settings in scraperConfig.
+ */
+export async function updateAlertSettings(
+  settings: AlertSettings
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = updateAlertSettingsSchema.parse(settings);
+
+  const entries: Array<{ key: string; value: string; description: string }> = [
+    { key: "alerts.email.enabled", value: String(parsed.emailEnabled), description: "Email alerts enabled" },
+    { key: "alerts.sms.enabled", value: String(parsed.smsEnabled), description: "SMS alerts enabled" },
+    { key: "alerts.email.threshold", value: String(parsed.emailThreshold), description: "Minimum score for email alerts" },
+    { key: "alerts.sms.threshold", value: String(parsed.smsThreshold), description: "Minimum score for SMS alerts" },
+  ];
+
+  for (const entry of entries) {
+    const existing = await db
+      .select({ id: scraperConfig.id })
+      .from(scraperConfig)
+      .where(eq(scraperConfig.key, entry.key))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(scraperConfig)
+        .set({ value: entry.value, updatedAt: new Date() })
+        .where(eq(scraperConfig.key, entry.key));
+    } else {
+      await db.insert(scraperConfig).values({
+        key: entry.key,
+        value: entry.value,
+        description: entry.description,
+      });
+    }
   }
 
   revalidatePath("/settings");

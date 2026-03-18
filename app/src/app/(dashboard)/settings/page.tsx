@@ -1,10 +1,13 @@
 import { SettingsForm } from "@/components/settings-form";
-import { getTargetCities } from "@/lib/actions";
+import { getTargetCities, getAlertSettings } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const cities = await getTargetCities();
+  const [cities, alertSettings] = await Promise.all([
+    getTargetCities(),
+    getAlertSettings(),
+  ]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -14,7 +17,7 @@ export default async function SettingsPage() {
           Manage your scraper configuration and application preferences.
         </p>
       </div>
-      <SettingsForm initialCities={cities} />
+      <SettingsForm initialCities={cities} initialAlertSettings={alertSettings} />
     </div>
   );
 }

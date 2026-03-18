@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { getPropertyDetail, getPropertySignals, getPropertyNotes } from "@/lib/queries";
+import { getPropertyDetail, getPropertySignals, getPropertyNotes, getOwnerContacts } from "@/lib/queries";
 import { markLeadViewed } from "@/lib/actions";
 import { PropertyOverview } from "@/components/property-overview";
 import { SignalTimeline } from "@/components/signal-timeline";
@@ -17,9 +17,10 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params;
 
-  const [property, signals] = await Promise.all([
+  const [property, signals, contacts] = await Promise.all([
     getPropertyDetail(id),
     getPropertySignals(id),
+    getOwnerContacts(id),
   ]);
 
   if (!property) {
@@ -82,7 +83,7 @@ export default async function PropertyDetailPage({
         </TabsContent>
 
         <TabsContent value="contact" className="mt-4">
-          <ContactTab ownerName={property.ownerName} />
+          <ContactTab ownerName={property.ownerName} ownerType={property.ownerType} propertyId={id} contacts={contacts} />
         </TabsContent>
       </Tabs>
     </div>
