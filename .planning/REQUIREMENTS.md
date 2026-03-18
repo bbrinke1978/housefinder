@@ -15,16 +15,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DATA-04**: System expands scraping to ~10 similar small Utah towns/counties (Emery, Sanpete, Juab, Millard, Sevier, Grand, San Juan, Wayne, Piute, Duchesne)
 - [ ] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
 - [ ] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
-- [ ] **DATA-07**: System tracks first-seen date per property for new lead detection
+- [x] **DATA-07**: System tracks first-seen date per property for new lead detection
 - [ ] **DATA-08**: System runs daily automated scraping on a scheduled basis
-- [ ] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
+- [x] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
 
 ### Distress Scoring
 
-- [ ] **SCORE-01**: System assigns distress signals per property (NOD, tax delinquent, lis pendens, probate, vacant, code violation)
+- [x] **SCORE-01**: System assigns distress signals per property (NOD, tax delinquent, lis pendens, probate, vacant, code violation)
 - [ ] **SCORE-02**: System calculates a distress score based on count of active signals per property
 - [ ] **SCORE-03**: System flags properties with 2+ distress signals as "hot leads"
-- [ ] **SCORE-04**: System distinguishes between signal types and displays each on property detail
+- [x] **SCORE-04**: System distinguishes between signal types and displays each on property detail
 
 ### Lead Dashboard
 
@@ -116,13 +116,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 1 | Pending |
 | DATA-02 | Phase 1 | Pending |
 | DATA-03 | Phase 1 | Pending |
-| DATA-07 | Phase 1 | Pending |
+| DATA-07 | Phase 1 | Complete |
 | DATA-08 | Phase 1 | Pending |
-| DATA-09 | Phase 1 | Pending |
-| SCORE-01 | Phase 1 | Pending |
+| DATA-09 | Phase 1 | Complete |
+| SCORE-01 | Phase 1 | Complete |
 | SCORE-02 | Phase 1 | Pending |
 | SCORE-03 | Phase 1 | Pending |
-| SCORE-04 | Phase 1 | Pending |
+| SCORE-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |
 | AUTH-03 | Phase 2 | Pending |
