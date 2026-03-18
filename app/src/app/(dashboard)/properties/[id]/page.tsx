@@ -70,7 +70,7 @@ export default async function PropertyDetailPage({
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <PropertyOverview property={property} />
+          <PropertyOverview property={property} signals={signals} />
         </TabsContent>
 
         <TabsContent value="signals" className="mt-4">

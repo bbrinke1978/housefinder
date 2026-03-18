@@ -7,10 +7,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Flame, MapPin, User, Home, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
-import type { PropertyWithLead } from "@/types";
+import { DollarSign } from "lucide-react";
+import type { PropertyWithLead, DistressSignalRow } from "@/types";
 
 interface PropertyOverviewProps {
   property: PropertyWithLead;
+  signals?: DistressSignalRow[];
 }
 
 function scoreColor(score: number): string {
@@ -30,7 +32,21 @@ function statusLabel(status: string): string {
   return labels[status] ?? status;
 }
 
-export function PropertyOverview({ property }: PropertyOverviewProps) {
+function deriveTaxStatus(signals?: DistressSignalRow[]): { taxStatus: string; hasLien: boolean; hasNod: boolean; hasLisPendens: boolean } {
+  if (!signals) return { taxStatus: "Unknown", hasLien: false, hasNod: false, hasLisPendens: false };
+  const active = signals.filter(s => s.status === "active");
+  const hasLien = active.some(s => s.signalType === "tax_lien");
+  const hasNod = active.some(s => s.signalType === "nod");
+  const hasLisPendens = active.some(s => s.signalType === "lis_pendens");
+  if (hasNod) return { taxStatus: "Notice of Default filed", hasLien, hasNod, hasLisPendens };
+  if (hasLisPendens) return { taxStatus: "Lis Pendens filed", hasLien, hasNod, hasLisPendens };
+  if (hasLien) return { taxStatus: "Tax Delinquent", hasLien, hasNod, hasLisPendens };
+  return { taxStatus: "Current (no active distress signals)", hasLien, hasNod, hasLisPendens };
+}
+
+export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
+  const { taxStatus, hasLien, hasNod, hasLisPendens } = deriveTaxStatus(signals);
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {/* Address Section */}
@@ -86,6 +102,37 @@ export function PropertyOverview({ property }: PropertyOverviewProps) {
           <p className="text-sm">
             <span className="text-muted-foreground">Parcel ID:</span>{" "}
             {property.parcelId}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Tax & Financial Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            Tax & Financial Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          <p className="text-sm">
+            <span className="text-muted-foreground">Tax Status:</span>{" "}
+            <span className={hasLien ? "font-medium text-red-600 dark:text-red-400" : ""}>
+              {taxStatus}
+            </span>
+          </p>
+          {hasNod && (
+            <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+              Notice of Default — foreclosure process initiated
+            </p>
+          )}
+          {hasLisPendens && (
+            <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">
+              Lis Pendens — legal action pending on property
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-2">
+            Derived from active distress signals. See Signals tab for full timeline.
           </p>
         </CardContent>
       </Card>
