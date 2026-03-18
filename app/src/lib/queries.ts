@@ -250,5 +250,5 @@ export async function getPipelineLeads(): Promise<PipelineLead[]> {
     .innerJoin(properties, eq(leads.propertyId, properties.id))
     .orderBy(desc(leads.distressScore));
 
-  return rows as unknown as PropertyWithLead[];
+  return rows as unknown as PipelineLead[];
 }
