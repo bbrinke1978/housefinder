@@ -65,7 +65,11 @@ Plans:
   2. When a property scores 3+ signals or has an imminent auction timeline, an SMS alert fires to the investor's own number with the address and detail page link
   3. Owner phone numbers sourced from free public records (county assessor, voter rolls) appear as tappable tel: links on the property detail page on mobile
   4. Properties where no contact information was found display a "manual skip trace needed" flag on both the detail page and dashboard
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — Schema additions (owner_contacts, alert_history), dependencies, alert config seeding
+- [ ] 03-02-PLAN.md — Alert pipeline (Resend email digest, Twilio SMS, dailyScrape integration)
+- [ ] 03-03-PLAN.md — Contact tab UI, manual phone entry, skip trace flag, alert settings
 
 ### Phase 4: County Expansion
 **Goal**: All ~10 target Utah counties are scraped daily and their distressed properties appear in the same pipeline as Carbon County
@@ -115,7 +119,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
 | 2. Core Application | 0/5 | Complete    | 2026-03-18 |
-| 3. Contact and Alerts | 0/? | Not started | - |
+| 3. Contact and Alerts | 0/3 | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
 | 5. Map View | 0/? | Not started | - |
 | 6. Data Analytics & Insights | 0/? | Not started | - |
