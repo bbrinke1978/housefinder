@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 2 of 5 (Core Application)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: Plan Complete
-Last activity: 2026-03-18 — Completed 02-01 (App Scaffold + Auth + Nav Shell)
+Last activity: 2026-03-18 — Completed 02-02 (Dashboard)
 
-Progress: [███░░░░░░░] 28%
+Progress: [████░░░░░░] 33%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 3min
-- Total execution time: 0.23 hours
+- Total execution time: 0.30 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
-| 02-core-application | 1/5 | 6min | 6min |
+| 02-core-application | 2/5 | 10min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 2min, 6min
+- Last 5 plans: 2min, 2min, 2min, 6min, 4min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - [02-01]: shadcn v4 uses render prop instead of asChild -- all components adapted accordingly
 - [02-01]: Drizzle migration not run locally -- to be applied via drizzle-kit migrate on deployment
 - [02-01]: Next.js 15 with Turbopack, output: standalone for Azure deployment
+- [02-02]: URL searchParams for filter state -- bookmarkable, SSR-compatible
+- [02-02]: count(*) filter (where ...) pattern for dashboard stats -- single query for all 4 metrics
+- [02-02]: exists subquery for distress type filter -- correct for many-to-many signal relationship
 
 ### Pending Todos
 
@@ -85,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-core-application/02-01-SUMMARY.md
+Stopped at: Completed 02-02-PLAN.md
+Resume file: .planning/phases/02-core-application/02-02-SUMMARY.md

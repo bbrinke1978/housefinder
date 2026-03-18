@@ -28,10 +28,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Lead Dashboard
 
-- [ ] **DASH-01**: User can view a list of all distressed properties in their target area
-- [ ] **DASH-02**: User can filter properties by city, county, distress type, and hot lead status
-- [ ] **DASH-03**: User can sort properties by distress score, date added, or city
-- [ ] **DASH-04**: User can see a "new since last visit" badge on recently discovered properties
+- [x] **DASH-01**: User can view a list of all distressed properties in their target area
+- [x] **DASH-02**: User can filter properties by city, county, distress type, and hot lead status
+- [x] **DASH-03**: User can sort properties by distress score, date added, or city
+- [x] **DASH-04**: User can see a "new since last visit" badge on recently discovered properties
 - [x] **DASH-05**: Dashboard is mobile-first responsive design with large tap targets
 - [ ] **DASH-06**: User can configure which cities/counties are in their target scope
 
@@ -126,10 +126,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-01 | Phase 2 | Complete |
 | AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Complete |
-| DASH-01 | Phase 2 | Pending |
-| DASH-02 | Phase 2 | Pending |
-| DASH-03 | Phase 2 | Pending |
-| DASH-04 | Phase 2 | Pending |
+| DASH-01 | Phase 2 | Complete |
+| DASH-02 | Phase 2 | Complete |
+| DASH-03 | Phase 2 | Complete |
+| DASH-04 | Phase 2 | Complete |
 | DASH-05 | Phase 2 | Complete |
 | DASH-06 | Phase 2 | Pending |
 | PROP-01 | Phase 2 | Pending |
