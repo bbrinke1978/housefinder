@@ -37,10 +37,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Property Detail
 
-- [ ] **PROP-01**: User can view a detail page for each property showing address, owner name, tax status, mortgage info, and all available public data
-- [ ] **PROP-02**: User can see all active distress signals with dates on the property detail page
-- [ ] **PROP-03**: User can see the property's distress score and hot lead status
-- [ ] **PROP-04**: User can see owner contact information (phone number) when available from free sources
+- [x] **PROP-01**: User can view a detail page for each property showing address, owner name, tax status, mortgage info, and all available public data
+- [x] **PROP-02**: User can see all active distress signals with dates on the property detail page
+- [x] **PROP-03**: User can see the property's distress score and hot lead status
+- [x] **PROP-04**: User can see owner contact information (phone number) when available from free sources
 
 ### Lead Management
 
@@ -132,10 +132,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-04 | Phase 2 | Complete |
 | DASH-05 | Phase 2 | Complete |
 | DASH-06 | Phase 2 | Pending |
-| PROP-01 | Phase 2 | Pending |
-| PROP-02 | Phase 2 | Pending |
-| PROP-03 | Phase 2 | Pending |
-| PROP-04 | Phase 2 | Pending |
+| PROP-01 | Phase 2 | Complete |
+| PROP-02 | Phase 2 | Complete |
+| PROP-03 | Phase 2 | Complete |
+| PROP-04 | Phase 2 | Complete |
 | LEAD-01 | Phase 2 | Pending |
 | LEAD-02 | Phase 2 | Pending |
 | LEAD-03 | Phase 2 | Pending |

@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 2 of 5 (Core Application)
-Plan: 2 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: Plan Complete
-Last activity: 2026-03-18 — Completed 02-02 (Dashboard)
+Last activity: 2026-03-18 — Completed 02-04 (Lead Pipeline)
 
-Progress: [████░░░░░░] 33%
+Progress: [██████░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 3min
-- Total execution time: 0.30 hours
+- Total plans completed: 8
+- Average duration: 4min
+- Total execution time: 0.48 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
-| 02-core-application | 2/5 | 10min | 5min |
+| 02-core-application | 4/5 | 21min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 6min, 4min
+- Last 5 plans: 2min, 6min, 4min, 5min, 6min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - [02-02]: URL searchParams for filter state -- bookmarkable, SSR-compatible
 - [02-02]: count(*) filter (where ...) pattern for dashboard stats -- single query for all 4 metrics
 - [02-02]: exists subquery for distress type filter -- correct for many-to-many signal relationship
+- [02-03]: Added leadId to PropertyWithLead type and getPropertyDetail query -- needed for notes tab
+- [02-03]: useOptimistic for immediate note display before server response
+- [02-03]: Integrated VoiceNoteInput from Plan 02-04 into notes tab
 
 ### Pending Todos
 
@@ -88,5 +91,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 02-02-PLAN.md
-Resume file: .planning/phases/02-core-application/02-02-SUMMARY.md
+Stopped at: Completed 02-03-PLAN.md
+Resume file: .planning/phases/02-core-application/02-03-SUMMARY.md
