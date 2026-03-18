@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 2 of 5 (Core Application)
-Plan: 4 of 5 in current phase
-Status: Plan Complete
-Last activity: 2026-03-18 — Completed 02-04 (Lead Pipeline)
+Plan: 5 of 5 in current phase
+Status: Phase Complete
+Last activity: 2026-03-18 — Completed 02-05 (Settings & Deployment)
 
-Progress: [██████░░░░] 50%
+Progress: [██████░░░░] 55%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 4min
-- Total execution time: 0.48 hours
+- Total execution time: 0.51 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
-| 02-core-application | 4/5 | 21min | 5min |
+| 02-core-application | 5/5 | 23min | 5min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 6min, 4min, 5min, 6min
+- Last 5 plans: 6min, 4min, 5min, 6min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -79,6 +79,9 @@ Recent decisions affecting current work:
 - [02-04]: PipelineLead type extends PropertyWithLead with propertyId -- pipeline uses lead.id as primary id
 - [02-04]: Voice input gracefully degrades in non-Chrome browsers -- disabled button with tooltip
 - [02-04]: Status change auto-logged as note, optional user note for quick pipeline management
+- [02-05]: force-dynamic export on settings page to prevent build-time DB queries
+- [02-05]: Target cities stored as JSON array in scraperConfig key-value table
+- [02-05]: Azure App Service deployment via standalone output with static asset copy step
 
 ### Pending Todos
 
@@ -94,5 +97,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 02-04-PLAN.md
-Resume file: .planning/phases/02-core-application/02-04-SUMMARY.md
+Stopped at: Completed 02-05-PLAN.md (Phase 2 complete)
+Resume file: .planning/phases/02-core-application/02-05-SUMMARY.md
