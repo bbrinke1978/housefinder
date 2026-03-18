@@ -30,7 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Properties with 2 or more distress signals are marked as hot leads automatically, with no manual intervention
   4. Each distress signal (NOD, tax lien, lis pendens) is stored as a distinct row linked to its property, with a recording date
   5. A scraper health check shows the last successful run time and raises a system alert after 3 consecutive zero-result runs
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold, Drizzle schema, DB client, GitHub Actions CI/CD
+- [ ] 01-02-PLAN.md — Carbon County scrapers (assessor, delinquent tax, recorder)
+- [ ] 01-03-PLAN.md — Configurable distress scoring engine with default weights
+- [ ] 01-04-PLAN.md — Daily timer trigger, upsert layer, health monitoring, end-to-end verification
 
 ### Phase 2: Core Application
 **Goal**: The investor can log in, browse and filter distressed properties, view full property detail, and manage their lead pipeline from any mobile device
@@ -80,13 +85,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be completed before Phase 4 begins, as planned. This is the optimal order.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation | 0/? | Not started | - |
+| 1. Data Foundation | 0/4 | Planning complete | - |
 | 2. Core Application | 0/? | Not started | - |
 | 3. Contact and Alerts | 0/? | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
