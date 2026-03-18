@@ -22,8 +22,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Distress Scoring
 
 - [x] **SCORE-01**: System assigns distress signals per property (NOD, tax delinquent, lis pendens, probate, vacant, code violation)
-- [x] **SCORE-02**: System calculates a distress score based on count of active signals per property
-- [x] **SCORE-03**: System flags properties with 2+ distress signals as "hot leads"
+- [x] **SCORE-02**: System calculates a weighted distress score from active signals per property (configurable weights per signal type)
+- [x] **SCORE-03**: System flags properties with weighted score >= configurable threshold as "hot leads" (default threshold: 4, with NOD=3, tax_lien=2, lis_pendens=2)
 - [x] **SCORE-04**: System distinguishes between signal types and displays each on property detail
 
 ### Lead Dashboard

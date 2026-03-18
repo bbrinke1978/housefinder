@@ -12,7 +12,7 @@ HouseFinder delivers a single-user lead generation tool for distressed propertie
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Data Foundation** - Scraping pipeline, database schema, and distress scoring for Carbon County (Price, UT) working end-to-end
+- [x] **Phase 1: Data Foundation** - Scraping pipeline, database schema, and distress scoring for Carbon County (Price, UT) working end-to-end (completed 2026-03-18)
 - [ ] **Phase 2: Core Application** - Authenticated dashboard, property detail, and lead management built against real pipeline data
 - [ ] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts
 - [ ] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties
@@ -26,11 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Requirements**: DATA-01, DATA-02, DATA-03, DATA-07, DATA-08, DATA-09, SCORE-01, SCORE-02, SCORE-03, SCORE-04
 **Success Criteria** (what must be TRUE):
   1. Running the scheduled job causes new property records to appear in the database within 15 minutes, sourced from Carbon County assessor and recorder data
-  2. Each property in the database has a first-seen date and a calculated distress score based on its active signal count
-  3. Properties with 2 or more distress signals are marked as hot leads automatically, with no manual intervention
+  2. Each property in the database has a first-seen date and a calculated weighted distress score based on its active signals
+  3. Properties with weighted score >= configurable threshold (default 4) are marked as hot leads automatically, with no manual intervention
   4. Each distress signal (NOD, tax lien, lis pendens) is stored as a distinct row linked to its property, with a recording date
   5. A scraper health check shows the last successful run time and raises a system alert after 3 consecutive zero-result runs
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 Plans:
 - [ ] 01-01-PLAN.md — Project scaffold, Drizzle schema, DB client, GitHub Actions CI/CD
 - [ ] 01-02-PLAN.md — Carbon County scrapers (assessor, delinquent tax, recorder)
@@ -91,7 +91,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Foundation | 0/4 | Planning complete | - |
+| 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
 | 2. Core Application | 0/? | Not started | - |
 | 3. Contact and Alerts | 0/? | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
