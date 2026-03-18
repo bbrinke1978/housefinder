@@ -1,0 +1,30 @@
+{
+  "name": "housefinder-scraper",
+  "version": "1.0.0",
+  "description": "Azure Functions scraper for distressed property leads in Carbon County, UT",
+  "type": "module",
+  "main": "dist/src/functions/*.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "func start",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.6.0",
+    "cheerio": "^1.0.0",
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.45.0",
+    "p-limit": "^6.2.0",
+    "pg": "^8.13.0",
+    "playwright": "^1.50.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/pg": "^8.11.0",
+    "drizzle-kit": "^0.30.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
