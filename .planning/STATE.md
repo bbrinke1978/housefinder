@@ -57,6 +57,9 @@ Recent decisions affecting current work:
 - [01-01]: ESM with Node16 module resolution -- .js extensions required in imports
 - [01-01]: Pool max 3 connections with 5s connect timeout for Azure PostgreSQL B1ms
 - [01-01]: Playwright Chromium installed in CI and deployed with package
+- [01-02]: Recorder approach: option-a placeholder (no confirmed online portal for Carbon County recorder)
+- [01-02]: Dynamic column mapping by header text for wpDataTables scraper resilience
+- [01-02]: Random 1-2s rate limiting between paginated scraper requests
 - [01-03]: Pure/orchestrator separation -- scoreProperty() pure function, scoreAllProperties() DB orchestrator
 - [01-03]: Signals with null recorded_date assumed recent and included in scoring
 - [01-03]: Unknown signal types silently skipped to allow gradual config expansion
@@ -75,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 01-03-PLAN.md
-Resume file: .planning/phases/01-data-foundation/01-03-SUMMARY.md
+Stopped at: Completed 01-02-PLAN.md (01-03 also complete)
+Resume file: .planning/phases/01-data-foundation/01-02-SUMMARY.md

@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Collection
 
-- [ ] **DATA-01**: System scrapes Carbon County (Price, UT) assessor records daily for property owner, address, tax status, and mortgage info
-- [ ] **DATA-02**: System scrapes Carbon County recorder for NOD (Notice of Default) and lis pendens filings
-- [ ] **DATA-03**: System scrapes tax delinquency records for properties with unpaid taxes
+- [x] **DATA-01**: System scrapes Carbon County (Price, UT) assessor records daily for property owner, address, tax status, and mortgage info
+- [x] **DATA-02**: System scrapes Carbon County recorder for NOD (Notice of Default) and lis pendens filings
+- [x] **DATA-03**: System scrapes tax delinquency records for properties with unpaid taxes
 - [ ] **DATA-04**: System expands scraping to ~10 similar small Utah towns/counties (Emery, Sanpete, Juab, Millard, Sevier, Grand, San Juan, Wayne, Piute, Duchesne)
 - [ ] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
 - [ ] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
@@ -113,9 +113,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
 | DATA-07 | Phase 1 | Complete |
 | DATA-08 | Phase 1 | Pending |
 | DATA-09 | Phase 1 | Complete |
