@@ -42,13 +42,18 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Init]: Use Turso (libSQL/SQLite) over Supabase/Neon — better free tier, lower serverless cold start latency
-- [Init]: Netlify two-function split is mandatory from day one — scheduled function triggers, background function scrapes (avoids 30s timeout)
-- [Init]: Parcel number (APN) is canonical deduplication key across all county data sources — must be in place before second scraper is built
+- [Init]: Azure PostgreSQL Flexible Server (B1ms) — always on, mirrors run4luv pattern
+- [Init]: Azure Functions with timer trigger for daily scraping (5 AM MT) — no timeout issues unlike Netlify
+- [Init]: Azure App Service + GitHub Actions CI/CD from day one — same pattern as run4luv
+- [Init]: Resource group `rg-housefinder` in West US 3, production only
+- [Init]: Parcel number (APN) is canonical deduplication key across all county data sources
 - [Init]: Distress signals stored as individual rows in distress_signals table, not boolean columns — allows new signal types without schema migrations
 - [Init]: SMS and email alerts go to the authenticated app user only — never to homeowner phone numbers (TCPA violation post-Jan 2025)
 - [Init]: Probate detection via Utah XChange requires paid subscription — treat as manual-entry-only for MVP, revisit at Phase 4 planning
-- [Init]: Alert order must be: scraper built → scoring validated → alerts enabled — premature alerts erode core tool value
+- [Init]: Alert order must be: scraper built → scoring validated → alerts enabled
+- [Context]: Historical distress signals preserved as "resolved" — never deleted
+- [Context]: Scoring rules configurable via settings (weights + thresholds)
+- [Context]: Tiered new-lead indicators: "New" → "Unreviewed" after 48h if not viewed
 
 ### Pending Todos
 
@@ -64,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Roadmap and STATE.md created. Ready to run /gsd:plan-phase 1.
-Resume file: None
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-data-foundation/01-CONTEXT.md
