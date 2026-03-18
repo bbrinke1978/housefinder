@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTheme } from "next-themes";
-import { X, Plus, Save, Sun, Moon, Monitor, Check } from "lucide-react";
+import { X, Plus, Save, Sun, Moon, Monitor, Check, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,13 +12,23 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { updateTargetCities } from "@/lib/actions";
+import { Label } from "@/components/ui/label";
+import { updateTargetCities, updateAlertSettings } from "@/lib/actions";
+import type { AlertSettings } from "@/lib/actions";
+
+const ALERT_DEFAULTS: AlertSettings = {
+  emailEnabled: true,
+  smsEnabled: true,
+  emailThreshold: 2,
+  smsThreshold: 3,
+};
 
 interface SettingsFormProps {
   initialCities: string[];
+  initialAlertSettings?: AlertSettings;
 }
 
-export function SettingsForm({ initialCities }: SettingsFormProps) {
+export function SettingsForm({ initialCities, initialAlertSettings }: SettingsFormProps) {
   const [cities, setCities] = useState<string[]>(initialCities);
   const [newCity, setNewCity] = useState("");
   const [message, setMessage] = useState<{
@@ -26,7 +36,16 @@ export function SettingsForm({ initialCities }: SettingsFormProps) {
     text: string;
   } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isAlertPending, startAlertTransition] = useTransition();
   const { theme, setTheme } = useTheme();
+
+  // Alert settings state
+  const defaults = initialAlertSettings ?? ALERT_DEFAULTS;
+  const [alertSettings, setAlertSettings] = useState<AlertSettings>(defaults);
+  const [alertMessage, setAlertMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   function handleAddCity() {
     const trimmed = newCity.trim();
@@ -59,6 +78,21 @@ export function SettingsForm({ initialCities }: SettingsFormProps) {
         setMessage({
           type: "error",
           text: err instanceof Error ? err.message : "Failed to save",
+        });
+      }
+    });
+  }
+
+  function handleSaveAlerts() {
+    setAlertMessage(null);
+    startAlertTransition(async () => {
+      try {
+        await updateAlertSettings(alertSettings);
+        setAlertMessage({ type: "success", text: "Alert settings saved successfully" });
+      } catch (err) {
+        setAlertMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Failed to save alert settings",
         });
       }
     });
@@ -154,6 +188,140 @@ export function SettingsForm({ initialCities }: SettingsFormProps) {
                     <Check className="inline h-3.5 w-3.5 mr-1" />
                   )}
                   {message.text}
+                </span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Alert Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Alert Settings
+          </CardTitle>
+          <CardDescription>
+            Configure how and when you receive alerts for new distressed properties.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Email alerts */}
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="emailEnabled" className="text-sm font-medium">
+                  Email Alerts
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Receive email notifications for new leads
+                </p>
+              </div>
+              <input
+                id="emailEnabled"
+                type="checkbox"
+                checked={alertSettings.emailEnabled}
+                onChange={(e) =>
+                  setAlertSettings((prev) => ({
+                    ...prev,
+                    emailEnabled: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </div>
+
+            {alertSettings.emailEnabled && (
+              <div className="ml-0 space-y-1">
+                <Label htmlFor="emailThreshold" className="text-xs text-muted-foreground">
+                  Minimum score for email alerts
+                </Label>
+                <Input
+                  id="emailThreshold"
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={alertSettings.emailThreshold}
+                  onChange={(e) =>
+                    setAlertSettings((prev) => ({
+                      ...prev,
+                      emailThreshold: parseInt(e.target.value, 10) || 1,
+                    }))
+                  }
+                  className="max-w-[100px]"
+                />
+              </div>
+            )}
+
+            {/* SMS alerts */}
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="smsEnabled" className="text-sm font-medium">
+                  SMS Alerts
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Receive text message notifications for high-priority leads
+                </p>
+              </div>
+              <input
+                id="smsEnabled"
+                type="checkbox"
+                checked={alertSettings.smsEnabled}
+                onChange={(e) =>
+                  setAlertSettings((prev) => ({
+                    ...prev,
+                    smsEnabled: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </div>
+
+            {alertSettings.smsEnabled && (
+              <div className="ml-0 space-y-1">
+                <Label htmlFor="smsThreshold" className="text-xs text-muted-foreground">
+                  Minimum score for SMS alerts
+                </Label>
+                <Input
+                  id="smsThreshold"
+                  type="number"
+                  min={1}
+                  max={10}
+                  value={alertSettings.smsThreshold}
+                  onChange={(e) =>
+                    setAlertSettings((prev) => ({
+                      ...prev,
+                      smsThreshold: parseInt(e.target.value, 10) || 1,
+                    }))
+                  }
+                  className="max-w-[100px]"
+                />
+              </div>
+            )}
+
+            {/* Save button */}
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                onClick={handleSaveAlerts}
+                disabled={isAlertPending}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {isAlertPending ? "Saving..." : "Save Alerts"}
+              </Button>
+              {alertMessage && (
+                <span
+                  className={`text-sm ${
+                    alertMessage.type === "success"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-destructive"
+                  }`}
+                >
+                  {alertMessage.type === "success" && (
+                    <Check className="inline h-3.5 w-3.5 mr-1" />
+                  )}
+                  {alertMessage.text}
                 </span>
               )}
             </div>

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Activity, Flame, Sparkles, Clock } from "lucide-react";
+import { Activity, Flame, Sparkles, Clock, Search } from "lucide-react";
 import type { DashboardStats } from "@/lib/queries";
 
 interface StatsBarProps {
@@ -35,11 +35,18 @@ const statCards = [
     color: "text-yellow-500",
     bg: "bg-yellow-500/10",
   },
+  {
+    label: "Needs Skip Trace",
+    key: "needsSkipTrace" as const,
+    icon: Search,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+  },
 ];
 
 export function StatsBar({ stats }: StatsBarProps) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
       {statCards.map((card) => {
         const Icon = card.icon;
         return (
