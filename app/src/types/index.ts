@@ -11,6 +11,7 @@ export type SignalStatus = "active" | "resolved";
 
 export interface PropertyWithLead {
   id: string;
+  leadId: string;
   parcelId: string;
   address: string;
   city: string;
@@ -27,6 +28,11 @@ export interface PropertyWithLead {
   firstSeenAt: Date | null;
   lastViewedAt: Date | null;
   lastContactedAt: Date | null;
+}
+
+/** Pipeline view: id = lead ID, propertyId = property ID */
+export interface PipelineLead extends PropertyWithLead {
+  propertyId: string;
 }
 
 export interface DistressSignalRow {

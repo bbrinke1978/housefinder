@@ -54,3 +54,74 @@ export async function addLeadNote(
 
   revalidatePath("/properties");
 }
+
+const VALID_STATUSES = ["new", "contacted", "follow_up", "closed", "dead"] as const;
+
+const updateLeadStatusSchema = z.object({
+  leadId: z.uuid(),
+  status: z.enum(VALID_STATUSES),
+  note: z.string().optional(),
+});
+
+/**
+ * updateLeadStatus — server action to change a lead's status.
+ * Auto-logs the status change as a note. Optionally adds a user note.
+ */
+export async function updateLeadStatus(
+  leadId: string,
+  status: string,
+  note?: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = updateLeadStatusSchema.parse({ leadId, status, note });
+
+  // Fetch current lead to record previous status
+  const [existing] = await db
+    .select({ status: leads.status })
+    .from(leads)
+    .where(eq(leads.id, parsed.leadId))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Lead not found");
+  }
+
+  const previousStatus = existing.status;
+
+  // Update lead status (and lastContactedAt if moving to "contacted")
+  const updateData: Record<string, unknown> = {
+    status: parsed.status,
+    updatedAt: new Date(),
+  };
+  if (parsed.status === "contacted") {
+    updateData.lastContactedAt = new Date();
+  }
+
+  await db.update(leads).set(updateData).where(eq(leads.id, parsed.leadId));
+
+  // Auto-log the status change
+  if (previousStatus !== parsed.status) {
+    await db.insert(leadNotes).values({
+      leadId: parsed.leadId,
+      noteText: `Status changed from ${previousStatus} to ${parsed.status}`,
+      noteType: "status_change",
+      previousStatus,
+      newStatus: parsed.status,
+    });
+  }
+
+  // If a user note was provided, add it separately
+  if (parsed.note && parsed.note.trim().length > 0) {
+    await db.insert(leadNotes).values({
+      leadId: parsed.leadId,
+      noteText: parsed.note.trim(),
+      noteType: "user",
+    });
+  }
+
+  revalidatePath("/pipeline");
+}

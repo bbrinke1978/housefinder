@@ -3,6 +3,7 @@ import { properties, leads, distressSignals, leadNotes } from "@/db/schema";
 import { eq, and, sql, desc, asc, ilike, exists } from "drizzle-orm";
 import type {
   PropertyWithLead,
+  PipelineLead,
   DistressSignalRow,
   LeadNote,
   SignalType,
@@ -18,6 +19,7 @@ export async function getPropertyDetail(
   const rows = await db
     .select({
       id: properties.id,
+      leadId: leads.id,
       parcelId: properties.parcelId,
       address: properties.address,
       city: properties.city,
@@ -214,4 +216,39 @@ export async function getDistinctCities(): Promise<string[]> {
     .orderBy(asc(properties.city));
 
   return rows.map((r) => r.city);
+}
+
+// -- Pipeline leads --
+
+/**
+ * getPipelineLeads — returns all leads joined with property data for the pipeline view.
+ * Ordered by distress score descending.
+ */
+export async function getPipelineLeads(): Promise<PipelineLead[]> {
+  const rows = await db
+    .select({
+      id: leads.id,
+      propertyId: leads.propertyId,
+      parcelId: properties.parcelId,
+      address: properties.address,
+      city: properties.city,
+      state: properties.state,
+      zip: properties.zip,
+      county: properties.county,
+      ownerName: properties.ownerName,
+      ownerType: properties.ownerType,
+      propertyType: properties.propertyType,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      leadStatus: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      firstSeenAt: properties.firstSeenAt,
+      lastViewedAt: leads.lastViewedAt,
+      lastContactedAt: leads.lastContactedAt,
+    })
+    .from(leads)
+    .innerJoin(properties, eq(leads.propertyId, properties.id))
+    .orderBy(desc(leads.distressScore));
+
+  return rows as unknown as PropertyWithLead[];
 }
