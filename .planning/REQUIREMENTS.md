@@ -113,13 +113,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-07 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Pending |
+| DATA-09 | Phase 1 | Pending |
+| SCORE-01 | Phase 1 | Pending |
+| SCORE-02 | Phase 1 | Pending |
+| SCORE-03 | Phase 1 | Pending |
+| SCORE-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| DASH-01 | Phase 2 | Pending |
+| DASH-02 | Phase 2 | Pending |
+| DASH-03 | Phase 2 | Pending |
+| DASH-04 | Phase 2 | Pending |
+| DASH-05 | Phase 2 | Pending |
+| DASH-06 | Phase 2 | Pending |
+| PROP-01 | Phase 2 | Pending |
+| PROP-02 | Phase 2 | Pending |
+| PROP-03 | Phase 2 | Pending |
+| PROP-04 | Phase 2 | Pending |
+| LEAD-01 | Phase 2 | Pending |
+| LEAD-02 | Phase 2 | Pending |
+| LEAD-03 | Phase 2 | Pending |
+| LEAD-04 | Phase 2 | Pending |
+| CONTACT-01 | Phase 3 | Pending |
+| CONTACT-02 | Phase 3 | Pending |
+| CONTACT-03 | Phase 3 | Pending |
+| CONTACT-04 | Phase 3 | Pending |
+| ALERT-01 | Phase 3 | Pending |
+| ALERT-02 | Phase 3 | Pending |
+| ALERT-03 | Phase 3 | Pending |
+| ALERT-04 | Phase 3 | Pending |
+| DATA-04 | Phase 4 | Pending |
+| DATA-05 | Phase 4 | Pending |
+| DATA-06 | Phase 4 | Pending |
+| MAP-01 | Phase 5 | Pending |
+| MAP-02 | Phase 5 | Pending |
+| MAP-03 | Phase 5 | Pending |
+| MAP-04 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 32 total
-- Mapped to phases: 0
-- Unmapped: 32
+- Mapped to phases: 32
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 — traceability populated after roadmap creation*
