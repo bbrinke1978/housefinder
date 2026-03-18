@@ -1,0 +1,217 @@
+import { db } from "@/db/client";
+import { properties, leads, distressSignals, leadNotes } from "@/db/schema";
+import { eq, and, sql, desc, asc, ilike, exists } from "drizzle-orm";
+import type {
+  PropertyWithLead,
+  DistressSignalRow,
+  LeadNote,
+  SignalType,
+} from "@/types";
+
+/**
+ * Get full property + lead data by property ID.
+ * Returns null if the property or its lead is not found.
+ */
+export async function getPropertyDetail(
+  propertyId: string
+): Promise<PropertyWithLead | null> {
+  const rows = await db
+    .select({
+      id: properties.id,
+      parcelId: properties.parcelId,
+      address: properties.address,
+      city: properties.city,
+      state: properties.state,
+      zip: properties.zip,
+      county: properties.county,
+      ownerName: properties.ownerName,
+      ownerType: properties.ownerType,
+      propertyType: properties.propertyType,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      leadStatus: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      firstSeenAt: leads.firstSeenAt,
+      lastViewedAt: leads.lastViewedAt,
+      lastContactedAt: leads.lastContactedAt,
+    })
+    .from(properties)
+    .innerJoin(leads, eq(leads.propertyId, properties.id))
+    .where(eq(properties.id, propertyId))
+    .limit(1);
+
+  if (rows.length === 0) return null;
+
+  const row = rows[0];
+  return row as unknown as PropertyWithLead;
+}
+
+/**
+ * Get all distress signals for a property, newest first.
+ */
+export async function getPropertySignals(
+  propertyId: string
+): Promise<DistressSignalRow[]> {
+  const rows = await db
+    .select({
+      id: distressSignals.id,
+      signalType: distressSignals.signalType,
+      status: distressSignals.status,
+      recordedDate: distressSignals.recordedDate,
+      sourceUrl: distressSignals.sourceUrl,
+      createdAt: distressSignals.createdAt,
+      resolvedAt: distressSignals.resolvedAt,
+    })
+    .from(distressSignals)
+    .where(eq(distressSignals.propertyId, propertyId))
+    .orderBy(desc(distressSignals.createdAt));
+
+  return rows as unknown as DistressSignalRow[];
+}
+
+/**
+ * Get all notes for a lead, newest first.
+ */
+export async function getPropertyNotes(leadId: string): Promise<LeadNote[]> {
+  const rows = await db
+    .select({
+      id: leadNotes.id,
+      leadId: leadNotes.leadId,
+      noteText: leadNotes.noteText,
+      noteType: leadNotes.noteType,
+      previousStatus: leadNotes.previousStatus,
+      newStatus: leadNotes.newStatus,
+      createdAt: leadNotes.createdAt,
+    })
+    .from(leadNotes)
+    .where(eq(leadNotes.leadId, leadId))
+    .orderBy(desc(leadNotes.createdAt));
+
+  return rows as unknown as LeadNote[];
+}
+
+// -- Dashboard stats --
+
+export interface DashboardStats {
+  total: number;
+  hot: number;
+  newToday: number;
+  needsFollowUp: number;
+}
+
+export async function getDashboardStats(): Promise<DashboardStats> {
+  const result = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      hot: sql<number>`count(*) filter (where ${leads.isHot} = true)::int`,
+      newToday: sql<number>`count(*) filter (where ${leads.firstSeenAt} > now() - interval '24 hours')::int`,
+      needsFollowUp: sql<number>`count(*) filter (where ${leads.status} = 'follow_up')::int`,
+    })
+    .from(leads);
+
+  const row = result[0];
+  return {
+    total: row?.total ?? 0,
+    hot: row?.hot ?? 0,
+    newToday: row?.newToday ?? 0,
+    needsFollowUp: row?.needsFollowUp ?? 0,
+  };
+}
+
+// -- Property list with filters and sorting --
+
+export interface GetPropertiesParams {
+  city?: string;
+  distressType?: string;
+  hot?: string;
+  status?: string;
+  sort?: string;
+}
+
+export async function getProperties(
+  params: GetPropertiesParams = {}
+): Promise<PropertyWithLead[]> {
+  const conditions = [];
+
+  if (params.city) {
+    conditions.push(ilike(properties.city, params.city));
+  }
+
+  if (params.distressType) {
+    conditions.push(
+      exists(
+        db
+          .select({ one: sql`1` })
+          .from(distressSignals)
+          .where(
+            and(
+              eq(distressSignals.propertyId, properties.id),
+              eq(distressSignals.signalType, params.distressType as SignalType)
+            )
+          )
+      )
+    );
+  }
+
+  if (params.hot === "true") {
+    conditions.push(eq(leads.isHot, true));
+  }
+
+  if (params.status) {
+    conditions.push(eq(leads.status, params.status));
+  }
+
+  // Sort
+  let orderBy;
+  switch (params.sort) {
+    case "date":
+      orderBy = desc(leads.firstSeenAt);
+      break;
+    case "city":
+      orderBy = asc(properties.city);
+      break;
+    case "score":
+    default:
+      orderBy = desc(leads.distressScore);
+      break;
+  }
+
+  const rows = await db
+    .select({
+      id: properties.id,
+      parcelId: properties.parcelId,
+      address: properties.address,
+      city: properties.city,
+      state: properties.state,
+      zip: properties.zip,
+      county: properties.county,
+      ownerName: properties.ownerName,
+      ownerType: properties.ownerType,
+      propertyType: properties.propertyType,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      leadStatus: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      firstSeenAt: leads.firstSeenAt,
+      lastViewedAt: leads.lastViewedAt,
+      lastContactedAt: leads.lastContactedAt,
+    })
+    .from(properties)
+    .innerJoin(leads, eq(leads.propertyId, properties.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(orderBy)
+    .limit(100);
+
+  return rows as PropertyWithLead[];
+}
+
+// -- Distinct cities for filter dropdown --
+
+export async function getDistinctCities(): Promise<string[]> {
+  const rows = await db
+    .selectDistinct({ city: properties.city })
+    .from(properties)
+    .orderBy(asc(properties.city));
+
+  return rows.map((r) => r.city);
+}
