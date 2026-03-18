@@ -17,6 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts
 - [ ] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties
 - [ ] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins
+- [ ] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions
 
 ## Phase Details
 
@@ -88,10 +89,25 @@ Plans:
   4. The map supports pinch-to-zoom and pan gestures on mobile and does not crash or produce a blank screen during server-side rendering
 **Plans**: TBD
 
+### Phase 6: Data Analytics & Insights
+**Goal**: The investor has full visibility into lead pipeline performance, market trends, outreach effectiveness, and scraper health — enabling data-driven decisions about which markets to focus on, when to act, and what's working
+**Depends on**: Phase 3
+**Requirements**: ANALYTICS-01, ANALYTICS-02, ANALYTICS-03, ANALYTICS-04, ANALYTICS-05, ANALYTICS-06, ANALYTICS-07, ANALYTICS-08
+**Success Criteria** (what must be TRUE):
+  1. An analytics dashboard shows pipeline conversion rates: how many leads move from New → Contacted → Closed, with average time at each stage
+  2. Market comparison view shows which cities/counties produce the most hot leads, highest conversion rates, and fastest response times
+  3. Outreach tracking records every call attempt, outcome (answered/voicemail/no-answer/wrong-number), and time spent — showing contact rate per source
+  4. Trend charts show distressed property volume over time per city/county — spot markets heating up or cooling down
+  5. Scraper health dashboard shows per-county success rates, data freshness, and alerts on degrading sources
+  6. Lead source attribution tracks which distress signal type (NOD, tax lien, etc.) produces the most conversions
+  7. Activity log captures all user actions (calls, notes, status changes) with timestamps for personal productivity review
+  8. Export capability for all analytics data (CSV) for external analysis
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be completed before Phase 4 begins, as planned. This is the optimal order.
 
@@ -102,3 +118,4 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 3. Contact and Alerts | 0/? | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
 | 5. Map View | 0/? | Not started | - |
+| 6. Data Analytics & Insights | 0/? | Not started | - |
