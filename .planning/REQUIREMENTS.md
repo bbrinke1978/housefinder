@@ -22,8 +22,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Distress Scoring
 
 - [x] **SCORE-01**: System assigns distress signals per property (NOD, tax delinquent, lis pendens, probate, vacant, code violation)
-- [ ] **SCORE-02**: System calculates a distress score based on count of active signals per property
-- [ ] **SCORE-03**: System flags properties with 2+ distress signals as "hot leads"
+- [x] **SCORE-02**: System calculates a distress score based on count of active signals per property
+- [x] **SCORE-03**: System flags properties with 2+ distress signals as "hot leads"
 - [x] **SCORE-04**: System distinguishes between signal types and displays each on property detail
 
 ### Lead Dashboard
@@ -120,8 +120,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-08 | Phase 1 | Pending |
 | DATA-09 | Phase 1 | Complete |
 | SCORE-01 | Phase 1 | Complete |
-| SCORE-02 | Phase 1 | Pending |
-| SCORE-03 | Phase 1 | Pending |
+| SCORE-02 | Phase 1 | Complete |
+| SCORE-03 | Phase 1 | Complete |
 | SCORE-04 | Phase 1 | Complete |
 | AUTH-01 | Phase 2 | Pending |
 | AUTH-02 | Phase 2 | Pending |

@@ -10,27 +10,27 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 1 of 5 (Data Foundation)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: Executing
-Last activity: 2026-03-18 — Completed 01-01 (Project Scaffold and Schema)
+Last activity: 2026-03-18 — Completed 01-03 (Distress Scoring Engine)
 
-Progress: [██░░░░░░░░] 5%
+Progress: [███░░░░░░░] 15%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 3
 - Average duration: 2min
-- Total execution time: 0.03 hours
+- Total execution time: 0.10 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-data-foundation | 1/4 | 2min | 2min |
+| 01-data-foundation | 3/4 | 6min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 2min
+- Last 5 plans: 2min, 2min, 2min
 - Trend: -
 
 *Updated after each plan completion*
@@ -57,6 +57,9 @@ Recent decisions affecting current work:
 - [01-01]: ESM with Node16 module resolution -- .js extensions required in imports
 - [01-01]: Pool max 3 connections with 5s connect timeout for Azure PostgreSQL B1ms
 - [01-01]: Playwright Chromium installed in CI and deployed with package
+- [01-03]: Pure/orchestrator separation -- scoreProperty() pure function, scoreAllProperties() DB orchestrator
+- [01-03]: Signals with null recorded_date assumed recent and included in scoring
+- [01-03]: Unknown signal types silently skipped to allow gradual config expansion
 
 ### Pending Todos
 
@@ -72,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 01-01-PLAN.md
-Resume file: .planning/phases/01-data-foundation/01-01-SUMMARY.md
+Stopped at: Completed 01-03-PLAN.md
+Resume file: .planning/phases/01-data-foundation/01-03-SUMMARY.md
