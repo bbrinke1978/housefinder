@@ -57,7 +57,8 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 
 - **Budget**: Minimal ongoing cost — no paid APIs, no paid skip tracing. Azure free/cheap tiers (F1 App Service, B1ms PostgreSQL ~$13/mo)
 - **Tech stack**: Next.js + TypeScript + Tailwind + shadcn/ui (frontend) + Azure PostgreSQL + Azure Functions (scraping)
-- **Hosting**: Azure App Service in West US 3, resource group `rg-housefinder`, production only
+- **Hosting**: Azure App Service in West US 3, resource group `rg-housefinder`, production only. No local development — build and deploy directly to Azure from day one.
+- **DNS**: Use Azure DNS zone for the domain (no external DNS needed)
 - **Geography**: Utah small towns only, starting with ~10 cities around Price, UT
 - **Data sources**: Public records only — county, state, and federal databases
 - **SMS provider**: Need to identify a free/cheap SMS service for text alerts
@@ -75,6 +76,8 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 | Mobile-first design | User needs to act on hot leads from phone — tap-to-call is critical | — Pending |
 | Distress signal stacking for scoring | Multiple indicators = higher urgency = hot lead alert | — Pending |
 | Email + SMS dual alerts | Email for details, SMS for urgency on hot leads | — Pending |
+| No local dev — all Azure | Deploy directly to Azure from day one; no local machine setup needed. Saves time and avoids local/cloud drift | — Pending |
+| Azure DNS for domain | Keep everything in Azure — DNS zone in rg-housefinder | — Pending |
 
 ---
-*Last updated: 2026-03-17 after platform decision (Azure over Netlify)*
+*Last updated: 2026-03-17 after no-local-dev decision (all Azure from day one)*
