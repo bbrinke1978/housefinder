@@ -5,32 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 1 — Data Foundation
+**Current focus:** Phase 2 — Core Application
 
 ## Current Position
 
-Phase: 1 of 5 (Data Foundation) -- COMPLETE
-Plan: 4 of 4 in current phase
-Status: Phase Complete
-Last activity: 2026-03-18 — Completed 01-04 (Daily Scrape Pipeline)
+Phase: 2 of 5 (Core Application)
+Plan: 1 of 5 in current phase
+Status: Plan Complete
+Last activity: 2026-03-18 — Completed 02-01 (App Scaffold + Auth + Nav Shell)
 
-Progress: [██░░░░░░░░] 20%
+Progress: [███░░░░░░░] 28%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 2min
-- Total execution time: 0.13 hours
+- Total plans completed: 5
+- Average duration: 3min
+- Total execution time: 0.23 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
+| 02-core-application | 1/5 | 6min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 2min
+- Last 5 plans: 2min, 2min, 2min, 2min, 6min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - [01-04]: Each scraper runs in independent try/catch for partial failure tolerance
 - [01-04]: runOnStartup: false to prevent Azure scale-out event firing
 - [01-04]: Health alert threshold at 3 consecutive zero-result runs
+- [02-01]: shadcn v4 uses render prop instead of asChild -- all components adapted accordingly
+- [02-01]: Drizzle migration not run locally -- to be applied via drizzle-kit migrate on deployment
+- [02-01]: Next.js 15 with Turbopack, output: standalone for Azure deployment
 
 ### Pending Todos
 
@@ -81,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-core-application/02-CONTEXT.md
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-core-application/02-01-SUMMARY.md

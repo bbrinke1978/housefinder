@@ -32,7 +32,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DASH-02**: User can filter properties by city, county, distress type, and hot lead status
 - [ ] **DASH-03**: User can sort properties by distress score, date added, or city
 - [ ] **DASH-04**: User can see a "new since last visit" badge on recently discovered properties
-- [ ] **DASH-05**: Dashboard is mobile-first responsive design with large tap targets
+- [x] **DASH-05**: Dashboard is mobile-first responsive design with large tap targets
 - [ ] **DASH-06**: User can configure which cities/counties are in their target scope
 
 ### Property Detail
@@ -72,9 +72,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can log in with email and password
-- [ ] **AUTH-02**: User session persists across browser refresh
-- [ ] **AUTH-03**: Unauthenticated users are redirected to login page
+- [x] **AUTH-01**: User can log in with email and password
+- [x] **AUTH-02**: User session persists across browser refresh
+- [x] **AUTH-03**: Unauthenticated users are redirected to login page
 
 ## v2 Requirements
 
@@ -123,14 +123,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCORE-02 | Phase 1 | Complete |
 | SCORE-03 | Phase 1 | Complete |
 | SCORE-04 | Phase 1 | Complete |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
+| AUTH-03 | Phase 2 | Complete |
 | DASH-01 | Phase 2 | Pending |
 | DASH-02 | Phase 2 | Pending |
 | DASH-03 | Phase 2 | Pending |
 | DASH-04 | Phase 2 | Pending |
-| DASH-05 | Phase 2 | Pending |
+| DASH-05 | Phase 2 | Complete |
 | DASH-06 | Phase 2 | Pending |
 | PROP-01 | Phase 2 | Pending |
 | PROP-02 | Phase 2 | Pending |
