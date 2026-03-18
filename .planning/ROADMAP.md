@@ -13,7 +13,7 @@ HouseFinder delivers a single-user lead generation tool for distressed propertie
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Data Foundation** - Scraping pipeline, database schema, and distress scoring for Carbon County (Price, UT) working end-to-end (completed 2026-03-18)
-- [ ] **Phase 2: Core Application** - Authenticated dashboard, property detail, and lead management built against real pipeline data
+- [x] **Phase 2: Core Application** - Authenticated dashboard, property detail, and lead management built against real pipeline data (completed 2026-03-18)
 - [ ] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts
 - [ ] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties
 - [ ] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins
@@ -47,7 +47,7 @@ Plans:
   3. Properties discovered since the user's last visit display a "new" badge on the dashboard without any manual action
   4. Each property detail page shows owner name, address, tax status, mortgage info, all active distress signals with dates, and the hot lead flag
   5. The user can set a lead status (New, Contacted, Follow-Up, Closed, Dead), add timestamped notes, and filter the dashboard by status to see their full pipeline
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 Plans:
 - [ ] 02-01-PLAN.md — Next.js scaffold, Drizzle schema extensions, Auth.js auth, navigation shell
 - [ ] 02-02-PLAN.md — Dashboard with stats bar, property list, filters, sorting, new-lead badges
@@ -98,7 +98,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
-| 2. Core Application | 0/5 | Not started | - |
+| 2. Core Application | 0/5 | Complete    | 2026-03-18 |
 | 3. Contact and Alerts | 0/? | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
 | 5. Map View | 0/? | Not started | - |
