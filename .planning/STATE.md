@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 3 of 5 (Contact & Alerts)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-03-18 — Completed 03-01 (Contact & Alert Foundation)
+Last activity: 2026-03-18 — Completed 03-02 (Alert Pipeline)
 
-Progress: [██████░░░░] 59%
+Progress: [███████░░░] 65%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: 3min
-- Total execution time: 0.54 hours
+- Total execution time: 0.57 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██████░░░░] 59%
 |-------|-------|-------|----------|
 | 01-data-foundation | 4/4 | 8min | 2min |
 | 02-core-application | 5/5 | 23min | 5min |
-| 03-contact-and-alerts | 1/3 | 2min | 2min |
+| 03-contact-and-alerts | 2/3 | 4min | 2min |
 
 **Recent Trend:**
-- Last 5 plans: 4min, 5min, 6min, 2min, 2min
+- Last 5 plans: 5min, 6min, 2min, 2min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -85,6 +85,9 @@ Recent decisions affecting current work:
 - [02-05]: Azure App Service deployment via standalone output with static asset copy step
 - [03-01]: Alert config keys use same scraperConfig table with onConflictDoNothing for idempotent seeding
 - [03-01]: ownerContacts unique on (propertyId, source) to allow multiple sources per property without duplicates
+- [03-02]: Email digest sent as function call not JSX -- avoids .tsx requirement in orchestrator
+- [03-02]: SMS to: always from ALERT_PHONE_NUMBER env var, never from owner_contacts table (TCPA compliance)
+- [03-02]: Alert config defaults (email threshold 2, SMS threshold 3) tunable via scraperConfig table
 
 ### Pending Todos
 
@@ -100,5 +103,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-18
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-contact-and-alerts/03-01-SUMMARY.md
+Stopped at: Completed 03-02-PLAN.md
+Resume file: .planning/phases/03-contact-and-alerts/03-02-SUMMARY.md

@@ -58,10 +58,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Alerts
 
-- [ ] **ALERT-01**: System sends email alert via Resend when a new hot lead (2+ signals) is detected
-- [ ] **ALERT-02**: System sends SMS alert for urgent hot leads (3+ signals or imminent auction timeline)
-- [ ] **ALERT-03**: Email includes property address, distress signals, owner name, and link to detail page
-- [ ] **ALERT-04**: SMS includes property address and link to detail page for quick mobile access
+- [x] **ALERT-01**: System sends email alert via Resend when a new hot lead (2+ signals) is detected
+- [x] **ALERT-02**: System sends SMS alert for urgent hot leads (3+ signals or imminent auction timeline)
+- [x] **ALERT-03**: Email includes property address, distress signals, owner name, and link to detail page
+- [x] **ALERT-04**: SMS includes property address and link to detail page for quick mobile access
 
 ### Map View
 
@@ -155,10 +155,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONTACT-02 | Phase 3 | Complete |
 | CONTACT-03 | Phase 3 | Pending |
 | CONTACT-04 | Phase 3 | Pending |
-| ALERT-01 | Phase 3 | Pending |
-| ALERT-02 | Phase 3 | Pending |
-| ALERT-03 | Phase 3 | Pending |
-| ALERT-04 | Phase 3 | Pending |
+| ALERT-01 | Phase 3 | Complete |
+| ALERT-02 | Phase 3 | Complete |
+| ALERT-03 | Phase 3 | Complete |
+| ALERT-04 | Phase 3 | Complete |
 | DATA-04 | Phase 4 | Pending |
 | DATA-05 | Phase 4 | Pending |
 | DATA-06 | Phase 4 | Pending |
