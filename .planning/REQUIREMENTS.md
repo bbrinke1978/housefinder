@@ -52,7 +52,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Contact Lookup
 
 - [x] **CONTACT-01**: System pulls owner name from county assessor data for every property
-- [x] **CONTACT-02**: System cross-references voter registration rolls to find owner phone numbers for free
+- [x] **CONTACT-02**: System provides owner phone lookup infrastructure (owner_contacts table, manual entry on Contact tab, skip trace flag with free search site links) — automated voter roll lookup infeasible per research (Utah voter data excludes phone numbers)
 - [x] **CONTACT-03**: System displays a "manual skip trace needed" flag when free sources don't yield contact info
 - [x] **CONTACT-04**: User can tap-to-call owner phone number directly from mobile (tel: link)
 
