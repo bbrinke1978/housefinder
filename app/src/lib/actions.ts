@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { leads, leadNotes } from "@/db/schema";
+import { leads, leadNotes, scraperConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -124,4 +124,74 @@ export async function updateLeadStatus(
   }
 
   revalidatePath("/pipeline");
+}
+
+// -- Target Cities --
+
+const DEFAULT_TARGET_CITIES = ["Price"];
+
+/**
+ * Read target cities from scraperConfig.
+ * Returns parsed JSON array or default ["Price"] if not set.
+ */
+export async function getTargetCities(): Promise<string[]> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "target_cities"))
+    .limit(1);
+
+  if (rows.length === 0) {
+    return DEFAULT_TARGET_CITIES;
+  }
+
+  try {
+    const parsed = JSON.parse(rows[0].value);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+    return DEFAULT_TARGET_CITIES;
+  } catch {
+    return DEFAULT_TARGET_CITIES;
+  }
+}
+
+const updateTargetCitiesSchema = z.object({
+  cities: z.array(z.string().min(1).max(100)).min(1).max(50),
+});
+
+/**
+ * Upsert target cities in scraperConfig.
+ */
+export async function updateTargetCities(cities: string[]): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = updateTargetCitiesSchema.parse({ cities });
+
+  const value = JSON.stringify(parsed.cities);
+
+  // Check if the key already exists
+  const existing = await db
+    .select({ id: scraperConfig.id })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "target_cities"))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db
+      .update(scraperConfig)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(scraperConfig.key, "target_cities"));
+  } else {
+    await db.insert(scraperConfig).values({
+      key: "target_cities",
+      value,
+      description: "JSON array of target city names for scraping",
+    });
+  }
+
+  revalidatePath("/settings");
 }
