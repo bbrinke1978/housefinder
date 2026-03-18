@@ -47,7 +47,13 @@ Plans:
   3. Properties discovered since the user's last visit display a "new" badge on the dashboard without any manual action
   4. Each property detail page shows owner name, address, tax status, mortgage info, all active distress signals with dates, and the hot lead flag
   5. The user can set a lead status (New, Contacted, Follow-Up, Closed, Dead), add timestamped notes, and filter the dashboard by status to see their full pipeline
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 02-01-PLAN.md — Next.js scaffold, Drizzle schema extensions, Auth.js auth, navigation shell
+- [ ] 02-02-PLAN.md — Dashboard with stats bar, property list, filters, sorting, new-lead badges
+- [ ] 02-03-PLAN.md — Tabbed property detail page (Overview, Signals, Notes, Contact)
+- [ ] 02-04-PLAN.md — Lead pipeline with kanban + list views, status management, voice notes
+- [ ] 02-05-PLAN.md — Settings page, GitHub Actions deployment, end-to-end verification
 
 ### Phase 3: Contact and Alerts
 **Goal**: Hot leads trigger immediate alerts to the investor and owner contact information is surfaced from free public sources
@@ -92,7 +98,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
-| 2. Core Application | 0/? | Not started | - |
+| 2. Core Application | 0/5 | Not started | - |
 | 3. Contact and Alerts | 0/? | Not started | - |
 | 4. County Expansion | 0/? | Not started | - |
 | 5. Map View | 0/? | Not started | - |
