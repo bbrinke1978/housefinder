@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Azure Functions scraper for distressed property leads in Carbon County, UT",
   "type": "module",
-  "main": "dist/src/functions/*.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
     "start": "func start",
@@ -31,6 +31,7 @@
     "@types/pg": "^8.11.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "archiver": "^7.0.1",
     "drizzle-kit": "^0.30.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"
