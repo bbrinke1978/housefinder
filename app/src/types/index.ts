@@ -30,6 +30,13 @@ export interface PropertyWithLead {
   lastContactedAt: Date | null;
 }
 
+/** Map view: includes coordinates and aggregated signal types */
+export interface MapProperty extends PropertyWithLead {
+  latitude: number;
+  longitude: number;
+  signalTypes: SignalType[];
+}
+
 /** Pipeline view: id = lead ID, propertyId = property ID */
 export interface PipelineLead extends PropertyWithLead {
   propertyId: string;

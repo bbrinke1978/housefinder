@@ -1,8 +1,9 @@
 import { db } from "@/db/client";
 import { properties, leads, distressSignals, leadNotes, ownerContacts } from "@/db/schema";
-import { eq, and, sql, desc, asc, ilike, exists } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, exists, isNotNull, or } from "drizzle-orm";
 import type {
   PropertyWithLead,
+  MapProperty,
   PipelineLead,
   DistressSignalRow,
   LeadNote,
@@ -283,4 +284,77 @@ export async function getPipelineLeads(): Promise<PipelineLead[]> {
     .orderBy(desc(leads.distressScore));
 
   return rows as unknown as PipelineLead[];
+}
+
+// -- Distinct counties for map filter dropdown --
+
+export async function getDistinctCounties(): Promise<string[]> {
+  const rows = await db
+    .selectDistinct({ county: properties.county })
+    .from(properties)
+    .orderBy(asc(properties.county));
+
+  return rows.map((r) => r.county);
+}
+
+// -- Map properties with coordinates and signal types --
+
+/**
+ * getMapProperties — returns all properties that have lat/lng coordinates,
+ * joined with lead data and aggregated active distress signal types.
+ * No limit — returns all for map display.
+ */
+export async function getMapProperties(): Promise<MapProperty[]> {
+  const rows = await db
+    .select({
+      id: properties.id,
+      leadId: leads.id,
+      parcelId: properties.parcelId,
+      address: properties.address,
+      city: properties.city,
+      state: properties.state,
+      zip: properties.zip,
+      county: properties.county,
+      ownerName: properties.ownerName,
+      ownerType: properties.ownerType,
+      propertyType: properties.propertyType,
+      latitude: properties.latitude,
+      longitude: properties.longitude,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      leadStatus: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      firstSeenAt: leads.firstSeenAt,
+      lastViewedAt: leads.lastViewedAt,
+      lastContactedAt: leads.lastContactedAt,
+    })
+    .from(properties)
+    .innerJoin(leads, eq(leads.propertyId, properties.id))
+    .where(and(isNotNull(properties.latitude), isNotNull(properties.longitude)))
+    .orderBy(desc(leads.distressScore));
+
+  // Fetch active signal types for all properties
+  const signalRows = await db
+    .select({
+      propertyId: distressSignals.propertyId,
+      signalType: distressSignals.signalType,
+    })
+    .from(distressSignals)
+    .where(eq(distressSignals.status, "active"));
+
+  // Build lookup: propertyId -> SignalType[]
+  const signalMap = new Map<string, SignalType[]>();
+  for (const row of signalRows) {
+    const existing = signalMap.get(row.propertyId) ?? [];
+    existing.push(row.signalType);
+    signalMap.set(row.propertyId, existing);
+  }
+
+  // Merge signal types into property rows
+  return rows.map((row) => ({
+    ...row,
+    latitude: row.latitude as number,
+    longitude: row.longitude as number,
+    signalTypes: signalMap.get(row.id) ?? [],
+  })) as MapProperty[];
 }

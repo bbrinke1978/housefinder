@@ -8,6 +8,7 @@ import {
   timestamp,
   date,
   serial,
+  doublePrecision,
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
@@ -51,6 +52,8 @@ export const properties = pgTable(
     ownerName: text("owner_name"),
     ownerType: ownerTypeEnum("owner_type").default("unknown"),
     propertyType: text("property_type"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
