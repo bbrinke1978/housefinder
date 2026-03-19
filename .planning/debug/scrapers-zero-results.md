@@ -2,14 +2,14 @@
 status: awaiting_human_verify
 trigger: "All 6 Azure Functions scrapers run successfully but return 0 results. No properties inserted."
 created: 2026-03-19T00:00:00Z
-updated: 2026-03-19T22:00:00Z
+updated: 2026-03-19T22:15:00Z
 ---
 
 ## Current Focus
 
-hypothesis: CONFIRMED (round 2) — 5 additional root causes identified and fixed.
-test: Push to master triggers GitHub Actions deploy-scraper.yml; timer triggers fire next morning or manually invoke functions
-expecting: scraper_health shows non-zero last_result_count for carbon-delinquent, carbon-assessor, millard, juab after next run. sevier=0 (PDF 404). sanpete=0 (no 2026 PDF yet).
+hypothesis: CONFIRMED (round 3) — Juab root cause re-investigated via live Azure App Insights logs. Two failure modes found and fixed.
+test: Push to master triggers GitHub Actions deploy-scraper.yml; Juab timer fires at 5:45 AM MT or manual invocation via Azure portal
+expecting: Juab scraper logs "[juab] Extracted PDF URL from REST API content" and then "Parsed 805 records from PDF"
 next_action: Commit and push; await next timer trigger or manual invocation
 
 ## Symptoms
@@ -111,9 +111,56 @@ started: Never worked — this is the first time scrapers have actually been abl
   found: Page explicitly says "Delinquent tax listing will be posted on or before December 31, 2026." Button labeled "DELINQUENT TAX LISTING" links to pub-36.pdf (not the delinquent list).
   implication: No delinquent PDF available for 2026 yet. Expected to return 0 records gracefully.
 
+- timestamp: 2026-03-19 (round 3)
+  checked: Azure App Insights traces for juab-scrape executions at 21:29 and 21:55 UTC
+  found: |
+    Run 1 (21:29, pre-fix deploy): Found 89 links on treasurer page.
+    First 30 logged links are ALL navigation menu items. No PDF link found.
+    Result: "No PDF link found on treasurer page" → 0 records.
+    Reason: Playwright navigated OK but PDF links (in the Elementor widget)
+    were in links 31-89. However the search returned "No PDF link found",
+    meaning the PDF links were either not rendered yet or didn't match the
+    pattern in the actual content scan. The Elementor JS may not have rendered
+    the widget content by the time link scanning ran.
+
+    Run 2 (21:55, post-fix deploy v2): Timeout! Error log:
+    "Juab delinquent PDF parser failed page.goto: Timeout 60000ms exceeded.
+     navigating to https://juabcounty.gov/notice-2025-delinquent-tax-list-copy/,
+     waiting until networkidle"
+    The Elementor page never reaches 'networkidle' within 60 seconds due to
+    continuous background requests (analytics, telemetry, Elementor-specific
+    requests). This is a well-known issue with Elementor + networkidle.
+  implication: |
+    Two separate failures:
+    1. Playwright 'networkidle' timeout: Elementor page never quiesces
+    2. Even when goto succeeds, Elementor content may not be fully rendered
+       by the time link scanning runs (JS rendering race condition)
+    Root fix: bypass Playwright entirely for Juab by extracting the PDF URL
+    directly from the WordPress REST API content.rendered HTML. The PDF href
+    is present in the static API response — no browser needed at all.
+
 ## Resolution
 
 root_cause: |
+  SEVEN root causes confirmed (rounds 1-3).
+
+  ROOT CAUSE 9 (Juab — Playwright networkidle timeout on Elementor page):
+  Confirmed via Azure App Insights logs. The juabcounty.gov Elementor page
+  (notice-2025-delinquent-tax-list-copy/) never reaches Playwright's 'networkidle'
+  state within 60s due to continuous background requests (Elementor telemetry,
+  analytics, etc.). Even when page.goto() succeeds (pre-fix run), the Elementor
+  widget content may not be fully rendered when link scanning runs, causing the
+  PDF links to appear missing. Fix: bypass Playwright entirely for Juab by
+  extracting the PDF URL directly from the WordPress REST API content.rendered HTML.
+  The PDF href (e.g. .../Account-Balance28.pdf) is present in the static API JSON
+  response — no browser rendering needed at all.
+
+  ROOT CAUSE 10 (All PDF counties — waitUntil: "networkidle" is fragile):
+  parsePdfDelinquent() used waitUntil: "networkidle" which can timeout on any
+  WordPress/Elementor site. Changed to "load" which waits for window.load event
+  (all scripts + images loaded) which is reliable and sufficient for static link
+  discovery.
+
   FIVE root causes confirmed via direct website inspection and PDF analysis (round 2):
 
   ROOT CAUSE 4 (Carbon assessor + Carbon delinquent — wpDataTable hideBeforeLoad):
@@ -159,6 +206,22 @@ root_cause: |
   delinquent list. Sanpete will correctly return 0 until December 2026.
 
 fix: |
+  Fix 9: juabScrape.ts — replace findJuabDelinquentPostUrl() with
+  findJuabDelinquentPdfInfo() which extracts the PDF URL directly from the
+  WordPress REST API content.rendered HTML using a simple href regex. When a
+  direct pdfUrl is found, calls parsePdfDelinquentFromUrl() (new function in
+  pdf-delinquent-parser.ts) that downloads the PDF and parses it without
+  launching Playwright at all. Falls back to Playwright-based parsePdfDelinquent()
+  only if the REST API doesn't contain a direct PDF href.
+  Verified locally: REST API returns PDF URL, 805 records parsed. E2E tested.
+
+  Fix 10: pdf-delinquent-parser.ts parsePdfDelinquent() — change waitUntil from
+  "networkidle" to "load" to prevent timeout on Elementor/WordPress sites with
+  continuous background requests.
+
+  Added: parsePdfDelinquentFromUrl() exported function in pdf-delinquent-parser.ts
+  for direct PDF download+parse without Playwright, reusable by any county.
+
   Fix 4: carbon-assessor.ts and carbon-delinquent.ts — add state:'attached' to all
   waitForSelector('.wpDataTable tbody tr') calls so they wait for DOM presence
   not CSS visibility (works with hideBeforeLoad:true tables).
@@ -186,3 +249,5 @@ files_changed:
   - scraper/src/sources/carbon-assessor.ts (round 2: waitForSelector state:'attached' for hideBeforeLoad:true tables)
   - scraper/src/sources/carbon-delinquent.ts (round 2: waitForSelector state:'attached' for hideBeforeLoad:true tables)
   - scraper/src/functions/juabScrape.ts (round 2: findJuabDelinquentPostUrl() via WordPress REST API)
+  - scraper/src/sources/pdf-delinquent-parser.ts (round 3: waitUntil 'networkidle' -> 'load'; added parsePdfDelinquentFromUrl())
+  - scraper/src/functions/juabScrape.ts (round 3: findJuabDelinquentPdfInfo() extracts PDF URL directly from REST API HTML; bypasses Playwright entirely for Juab)

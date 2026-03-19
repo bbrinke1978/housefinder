@@ -1,6 +1,7 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
 import {
   parsePdfDelinquent,
+  parsePdfDelinquentFromUrl,
   juabConfig,
   type PdfCountyConfig,
 } from "../sources/pdf-delinquent-parser.js";
@@ -14,16 +15,29 @@ import { scraperConfig } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 
 /**
- * Uses the Juab County WordPress REST API to find the URL of the most recent
- * post with "Delinquent Tax List" in the title (e.g. "NOTICE: 2025 Delinquent
- * Tax List"). Returns the post URL to use as the treasurerPageUrl, or falls
- * back to the hardcoded URL in juabConfig if the API is unavailable.
+ * Uses the Juab County WordPress REST API to find the current delinquent tax
+ * PDF URL directly — without launching Playwright.
  *
- * This handles the fact that Juab County posts each year's delinquent tax list
- * as a WordPress post with a new slug each year rather than updating a permanent
- * treasurer page.
+ * Strategy:
+ * 1. Fetch the WP REST API posts endpoint, searching for "delinquent tax list".
+ * 2. From the matching post's `content.rendered` HTML, extract the first
+ *    <a href="..."> whose href ends in .pdf. This is the delinquent tax PDF.
+ * 3. If no PDF href found in content, fall back to returning the post link so
+ *    parsePdfDelinquent() can scrape it with Playwright as a last resort.
+ *
+ * This bypasses Playwright entirely for Juab — the PDF href is present in the
+ * static HTML returned by the REST API, so no browser rendering is needed.
+ * The Elementor page at juabcounty.gov never reaches Playwright's "networkidle"
+ * within 60s due to continuous background requests from Elementor/analytics scripts.
+ *
+ * Returns:
+ *   - { pdfUrl: string } when the PDF URL is found directly (skip Playwright)
+ *   - { pageUrl: string } when only the post page URL is found (use Playwright)
+ *   - null when neither is found (use hardcoded fallback in juabConfig)
  */
-async function findJuabDelinquentPostUrl(context: InvocationContext): Promise<string> {
+async function findJuabDelinquentPdfInfo(
+  context: InvocationContext
+): Promise<{ pdfUrl: string } | { pageUrl: string } | null> {
   const apiUrl =
     "https://juabcounty.gov/wp-json/wp/v2/posts?search=delinquent+tax+list&per_page=3&orderby=date&order=desc";
 
@@ -31,32 +45,60 @@ async function findJuabDelinquentPostUrl(context: InvocationContext): Promise<st
     const res = await fetch(apiUrl, { signal: AbortSignal.timeout(15000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const posts = await res.json() as Array<{ link: string; title: { rendered: string } }>;
+    const posts = await res.json() as Array<{
+      link: string;
+      title: { rendered: string };
+      content: { rendered: string };
+    }>;
+
     const currentYear = new Date().getFullYear().toString();
 
-    // Find a post for the current year with "Delinquent Tax List" in the title
+    // Find the best matching post: current year preferred, then most recent
+    let targetPost: typeof posts[0] | null = null;
     for (const post of posts) {
       const title = post.title?.rendered ?? "";
-      if (/delinquent.*tax.*list/i.test(title) && title.includes(currentYear)) {
-        context.log(`[juab] Found delinquent post via REST API: "${title}" -> ${post.link}`);
-        return post.link;
+      if (/delinquent.*tax.*list/i.test(title)) {
+        if (title.includes(currentYear)) {
+          targetPost = post;
+          break;
+        }
+        if (!targetPost) targetPost = posts[0]; // fallback: most recent match
       }
     }
-
-    // Fall back: any post with delinquent tax list (most recent)
-    if (posts.length > 0 && /delinquent.*tax.*list/i.test(posts[0].title?.rendered ?? "")) {
-      context.log(
-        `[juab] No ${currentYear} post found; using most recent: "${posts[0].title?.rendered}" -> ${posts[0].link}`
-      );
-      return posts[0].link;
+    if (!targetPost && posts.length > 0) {
+      targetPost = posts[0];
     }
 
-    context.log("[juab] REST API returned no matching posts; falling back to hardcoded URL");
+    if (!targetPost) {
+      context.log("[juab] REST API returned no delinquent tax list posts");
+      return null;
+    }
+
+    context.log(
+      `[juab] Found delinquent post via REST API: "${targetPost.title?.rendered}" -> ${targetPost.link}`
+    );
+
+    // Extract PDF href directly from the post's rendered HTML content.
+    // The Elementor widget embeds the PDF link as:
+    //   <a href="https://juabcounty.gov/wp-content/uploads/YYYY/MM/Account-Balance28.pdf"
+    // This avoids launching Playwright for a page that never reaches networkidle.
+    const htmlContent = targetPost.content?.rendered ?? "";
+    const pdfHrefMatch = htmlContent.match(/href="([^"]+\.pdf)"/i);
+    if (pdfHrefMatch) {
+      const pdfUrl = pdfHrefMatch[1];
+      context.log(`[juab] Extracted PDF URL from REST API content: ${pdfUrl}`);
+      return { pdfUrl };
+    }
+
+    // PDF href not found in content — return the page URL for Playwright fallback
+    context.log(
+      `[juab] No PDF href in REST API content; falling back to Playwright on page: ${targetPost.link}`
+    );
+    return { pageUrl: targetPost.link };
   } catch (err) {
     context.log(`[juab] REST API lookup failed: ${err}; falling back to hardcoded URL`);
+    return null;
   }
-
-  return juabConfig.treasurerPageUrl;
 }
 
 /**
@@ -104,10 +146,24 @@ async function juabScrapeHandler(
         `[juab] PDF already parsed for ${currentYear}, skipping`
       );
     } else {
-      // Dynamically discover the current year's delinquent tax list post URL
-      const postUrl = await findJuabDelinquentPostUrl(context);
-      const dynamicConfig: PdfCountyConfig = { ...juabConfig, treasurerPageUrl: postUrl };
-      const records = await parsePdfDelinquent(dynamicConfig);
+      // Attempt to get the PDF URL directly from the WordPress REST API.
+      // This avoids launching Playwright against the Elementor page, which never
+      // reaches "networkidle" within 60s due to ongoing background requests.
+      const pdfInfo = await findJuabDelinquentPdfInfo(context);
+
+      let records: import("../lib/validation.js").DelinquentRecord[];
+
+      if (pdfInfo && "pdfUrl" in pdfInfo) {
+        // Best path: direct PDF URL extracted from REST API — no Playwright needed
+        records = await parsePdfDelinquentFromUrl(pdfInfo.pdfUrl, juabConfig);
+      } else {
+        // Fallback: use Playwright to scrape the post page for the PDF link
+        const pageUrl = pdfInfo && "pageUrl" in pdfInfo
+          ? pdfInfo.pageUrl
+          : juabConfig.treasurerPageUrl;
+        const dynamicConfig: PdfCountyConfig = { ...juabConfig, treasurerPageUrl: pageUrl };
+        records = await parsePdfDelinquent(dynamicConfig);
+      }
       delinquentResult = await upsertFromDelinquent(records, "juab");
 
       if (records.length > 0) {

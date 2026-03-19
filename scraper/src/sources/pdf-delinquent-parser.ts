@@ -106,7 +106,10 @@ export async function parsePdfDelinquent(
   try {
     const page = await createPage(browser);
     await page.goto(config.treasurerPageUrl, {
-      waitUntil: "networkidle",
+      // "load" waits for window.load (all scripts/images). "networkidle" waits for
+      // no network activity for 500ms, which can timeout on Elementor/WordPress sites
+      // that make continuous background requests (analytics, telemetry, etc.).
+      waitUntil: "load",
       timeout: 60000,
     });
 
@@ -223,6 +226,76 @@ export async function parsePdfDelinquent(
   }
 
   // Step 3: Parse line-by-line using the county-specific line parser
+  const lines = pdfText.split("\n");
+  for (const line of lines) {
+    const parsed = config.lineParser(line);
+    if (!parsed) continue;
+
+    totalParsed++;
+    const result = delinquentRecordSchema.safeParse(parsed);
+    if (result.success) {
+      records.push(result.data);
+    } else {
+      invalidCount++;
+      console.log(
+        `${tag} Invalid record skipped:`,
+        JSON.stringify(parsed),
+        result.error.issues.map((i) => i.message).join(", ")
+      );
+    }
+  }
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(
+    `${tag} Parsed ${records.length} records from PDF (${totalParsed} lines matched, ${invalidCount} invalid, ${elapsed}s elapsed)`
+  );
+
+  return records;
+}
+
+/**
+ * Downloads and parses a PDF from a known direct URL, bypassing Playwright.
+ *
+ * Used when the PDF URL is already known (e.g. extracted from the WordPress
+ * REST API response) so there's no need to launch a browser to discover it.
+ * Applies the same line parser and validation as parsePdfDelinquent().
+ *
+ * @param pdfUrl  Direct URL to the PDF file
+ * @param config  County config (uses county name, lineParser, and tag)
+ * @returns Validated array of DelinquentRecord objects
+ */
+export async function parsePdfDelinquentFromUrl(
+  pdfUrl: string,
+  config: PdfCountyConfig
+): Promise<DelinquentRecord[]> {
+  const startTime = Date.now();
+  const records: DelinquentRecord[] = [];
+  let totalParsed = 0;
+  let invalidCount = 0;
+  const tag = `[${config.county}-delinquent-pdf]`;
+
+  console.log(`${tag} Downloading PDF directly (bypassing Playwright): ${pdfUrl}`);
+
+  // Download and parse the PDF
+  let pdfText: string;
+  try {
+    const response = await fetch(pdfUrl);
+    if (!response.ok) {
+      console.log(`${tag} Failed to download PDF: ${response.status} ${response.statusText}`);
+      return [];
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const PDFParse = await getPDFParse();
+    const parser = new PDFParse({ data: buffer });
+    const textResult = await parser.getText();
+    pdfText = textResult.text;
+    await parser.destroy();
+  } catch (err) {
+    console.log(`${tag} Error downloading/parsing PDF:`, err);
+    return [];
+  }
+
+  // Parse line-by-line using the county-specific line parser
   const lines = pdfText.split("\n");
   for (const line of lines) {
     const parsed = config.lineParser(line);
