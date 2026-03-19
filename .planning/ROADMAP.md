@@ -72,15 +72,19 @@ Plans:
 - [ ] 03-03-PLAN.md — Contact tab UI, manual phone entry, skip trace flag, alert settings
 
 ### Phase 4: County Expansion
-**Goal**: All ~10 target Utah counties are scraped daily and their distressed properties appear in the same pipeline as Carbon County
+**Goal**: Scraping expanded to 5 new counties (Emery, Sevier, Juab, Millard, Sanpete) covering ~10 target cities, with manual signal entry for probate and vacant properties
 **Depends on**: Phase 1
 **Requirements**: DATA-04, DATA-05, DATA-06
 **Success Criteria** (what must be TRUE):
-  1. Properties from Emery, Sanpete, Juab, Millard, Sevier, Grand, San Juan, Wayne, Piute, and Duchesne counties appear in the database alongside Carbon County records
-  2. Probate and estate filings from Utah court records are matched to property addresses and recorded as a distinct distress signal type
-  3. Vacant and neglected properties detected from code violation records or utility shutoff data appear with their own signal type where county data is available
+  1. Properties from Emery, Sanpete, Juab, Millard, and Sevier counties appear in the database alongside Carbon County records
+  2. Probate signals can be manually added to any property from the detail page (XChange subscription declined per user decision)
+  3. Vacant properties can be flagged from the property detail page with a toggle, creating/resolving a vacant distress signal
   4. Per-county scraper health status is visible — each county shows its last successful scrape timestamp independently so a failing county is immediately identifiable
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Emery County wpDataTables scraper, county-parameterized upsert, pdf-parse install
+- [ ] 04-02-PLAN.md — Manual vacant/probate signal UI on property detail page, target cities update
+- [ ] 04-03-PLAN.md — PDF delinquent parsers for Sevier/Juab/Millard/Sanpete + staggered Azure Function timers
 
 ### Phase 5: Map View
 **Goal**: The investor can browse all distressed properties geographically on a mobile-friendly interactive map
@@ -120,6 +124,6 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
 | 2. Core Application | 0/5 | Complete    | 2026-03-18 |
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
-| 4. County Expansion | 0/? | Not started | - |
+| 4. County Expansion | 0/3 | Planning complete | - |
 | 5. Map View | 0/? | Not started | - |
 | 6. Data Analytics & Insights | 0/? | Not started | - |
