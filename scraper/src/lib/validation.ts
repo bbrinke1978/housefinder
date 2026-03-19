@@ -8,6 +8,7 @@ export const propertyRecordSchema = z.object({
   parcelId: z.string().min(1),
   address: z.string().min(1),
   city: z.string().min(1),
+  county: z.string().optional(),
   ownerName: z.string().optional(),
   taxStatus: z.string().optional(),
   mortgageInfo: z.string().optional(),
@@ -21,6 +22,7 @@ export type PropertyRecord = z.infer<typeof propertyRecordSchema>;
  */
 export const delinquentRecordSchema = z.object({
   parcelId: z.string().min(1),
+  county: z.string().optional(),
   ownerName: z.string().optional(),
   year: z.string().optional(),
   amountDue: z.string().optional(),

@@ -17,6 +17,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.0",
     "p-limit": "^6.2.0",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.13.0",
     "playwright": "^1.50.0",
     "react": "^19.2.4",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
+    "@types/pdf-parse": "^1.1.5",
     "@types/pg": "^8.11.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

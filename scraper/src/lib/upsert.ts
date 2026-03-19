@@ -10,7 +10,7 @@ import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validat
  *
  * @returns The property UUID id
  */
-export async function upsertProperty(record: PropertyRecord): Promise<string> {
+export async function upsertProperty(record: PropertyRecord, county?: string): Promise<string> {
   const now = new Date();
   const ownerType = classifyOwnerType(record.ownerName);
 
@@ -20,7 +20,7 @@ export async function upsertProperty(record: PropertyRecord): Promise<string> {
       parcelId: record.parcelId,
       address: record.address,
       city: record.city,
-      county: "carbon",
+      county: county ?? record.county ?? "carbon",
       state: "UT",
       ownerName: record.ownerName ?? null,
       ownerType,
@@ -71,12 +71,13 @@ export async function upsertSignal(
  * Each record creates/updates a property row.
  */
 export async function upsertFromAssessor(
-  records: PropertyRecord[]
+  records: PropertyRecord[],
+  county?: string
 ): Promise<{ upserted: number }> {
   let upserted = 0;
 
   for (const record of records) {
-    await upsertProperty(record);
+    await upsertProperty(record, county);
     upserted++;
   }
 
@@ -89,7 +90,8 @@ export async function upsertFromAssessor(
  * then inserts a tax_lien distress signal.
  */
 export async function upsertFromDelinquent(
-  records: DelinquentRecord[]
+  records: DelinquentRecord[],
+  county?: string
 ): Promise<{ upserted: number; signals: number }> {
   let upserted = 0;
   let signals = 0;
@@ -100,7 +102,7 @@ export async function upsertFromDelinquent(
       address: record.propertyAddress ?? "",
       city: record.propertyCity ?? "",
       ownerName: record.ownerName,
-    });
+    }, county);
     upserted++;
 
     await upsertSignal(propertyId, {
