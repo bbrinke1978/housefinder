@@ -4,11 +4,12 @@ import { ArrowLeft, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getPropertyDetail, getPropertySignals, getPropertyNotes, getOwnerContacts } from "@/lib/queries";
-import { markLeadViewed } from "@/lib/actions";
+import { markLeadViewed, getActiveVacantFlag } from "@/lib/actions";
 import { PropertyOverview } from "@/components/property-overview";
 import { SignalTimeline } from "@/components/signal-timeline";
 import { LeadNotes } from "@/components/lead-notes";
 import { ContactTab } from "@/components/contact-tab";
+import { FieldObservations } from "@/components/field-observations";
 
 export default async function PropertyDetailPage({
   params,
@@ -17,10 +18,11 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params;
 
-  const [property, signals, contacts] = await Promise.all([
+  const [property, signals, contacts, vacantFlag] = await Promise.all([
     getPropertyDetail(id),
     getPropertySignals(id),
     getOwnerContacts(id),
+    getActiveVacantFlag(id),
   ]);
 
   if (!property) {
@@ -76,6 +78,7 @@ export default async function PropertyDetailPage({
 
         <TabsContent value="signals" className="mt-4">
           <SignalTimeline signals={signals} />
+          <FieldObservations propertyId={id} isVacant={vacantFlag} signals={signals} />
         </TabsContent>
 
         <TabsContent value="notes" className="mt-4">
