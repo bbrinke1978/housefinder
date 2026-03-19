@@ -36,33 +36,22 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
       { waitUntil: "networkidle", timeout: 60000 }
     );
 
-    // Wait for wpDataTable to render -- may require a search action first
+    // Wait for wpDataTable to render via server-side AJAX.
+    // Carbon County's property-search table has hideBeforeLoad:true, so the
+    // table starts with CSS display:none (wdt-no-display class). Using
+    // state:'attached' waits for rows to exist in the DOM regardless of CSS
+    // visibility — rows are attached after the AJAX response populates them.
     try {
-      await page.waitForSelector(".wpDataTable tbody tr", { timeout: 30000 });
+      await page.waitForSelector(".wpDataTable tbody tr", {
+        timeout: 30000,
+        state: "attached",
+      });
     } catch {
-      // Table may be empty initially -- try triggering a browse-all search
-      // Look for a search input and submit with wildcard or empty search
-      const searchInput = await page.$(".wpDataTable input[type='search'], .dataTables_filter input");
-      if (searchInput) {
-        await searchInput.fill("*");
-        await searchInput.press("Enter");
-        await delay(2000);
-        try {
-          await page.waitForSelector(".wpDataTable tbody tr", { timeout: 15000 });
-        } catch {
-          console.log(
-            "[assessor] No table rows found after search. Page title:",
-            await page.title()
-          );
-          return [];
-        }
-      } else {
-        console.log(
-          "[assessor] No table rows and no search input found. Page title:",
-          await page.title()
-        );
-        return [];
-      }
+      console.log(
+        "[assessor] No table rows found after 30s. Page title:",
+        await page.title()
+      );
+      return [];
     }
 
     // Build dynamic column index mapping from header text
@@ -156,7 +145,7 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
       if (nextButton) {
         await nextButton.click();
         await delay(rateLimitDelay());
-        await page.waitForSelector(".wpDataTable tbody tr", { timeout: 15000 });
+        await page.waitForSelector(".wpDataTable tbody tr", { timeout: 15000, state: "attached" });
       } else {
         hasNextPage = false;
       }

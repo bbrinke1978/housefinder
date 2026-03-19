@@ -2,14 +2,14 @@
 status: awaiting_human_verify
 trigger: "All 6 Azure Functions scrapers run successfully but return 0 results. No properties inserted."
 created: 2026-03-19T00:00:00Z
-updated: 2026-03-19T01:00:00Z
+updated: 2026-03-19T22:00:00Z
 ---
 
 ## Current Focus
 
-hypothesis: CONFIRMED — All root causes identified and fixes applied. TypeScript build passes. Awaiting deployment and human verification.
+hypothesis: CONFIRMED (round 2) — 5 additional root causes identified and fixed.
 test: Push to master triggers GitHub Actions deploy-scraper.yml; timer triggers fire next morning or manually invoke functions
-expecting: scraper_health shows non-zero last_result_count for each county after next run
+expecting: scraper_health shows non-zero last_result_count for carbon-delinquent, carbon-assessor, millard, juab after next run. sevier=0 (PDF 404). sanpete=0 (no 2026 PDF yet).
 next_action: Commit and push; await next timer trigger or manual invocation
 
 ## Symptoms
@@ -86,52 +86,103 @@ started: Never worked — this is the first time scrapers have actually been abl
   found: 2024 PDF at sanpetecountyutah.gov/uploads/.../delinquent_list_2024.pdf, treasurer page at sanpetecountyutah.gov/treasurer.html
   implication: sanpeteConfig.treasurerPageUrl must be /treasurer.html, NOT homepage.
 
+- timestamp: 2026-03-19 (round 2)
+  checked: Carbon County delinquent-properties page HTML source + wpDataTable JS config
+  found: "hideBeforeLoad":true in JS config. Table has CSS class wdt-no-display (display:none) at load. Tbody is empty in static HTML. Data arrives via AJAX to admin-ajax.php with a nonce. Emery tax roll has hideBeforeLoad:false and worked.
+  implication: Playwright waitForSelector default state:'visible' never fires because table is CSS-hidden. Rows are added to DOM via AJAX but not visible. Fix: state:'attached'.
+
+- timestamp: 2026-03-19 (round 2)
+  checked: Sevier County delinquent tax report page HTML source
+  found: PDF link href="Treasurer/Official Record of Delinquent Taxes 2025 with Certificate.pdf?t=202512181240240" — has ?t= query string. Direct download of the PDF at the revize CDN returns HTTP 404.
+  implication: endsWith('.pdf') fails due to query string. PDF itself is currently inaccessible (404 on revize CDN). Sevier will return 0 until CDN issue resolves.
+
+- timestamp: 2026-03-19 (round 2)
+  checked: Millard County delinquent PDF downloaded and parsed
+  found: 885 text lines. Format: "<AccountID> <OwnerName> Parcel: <ParcelID> Total Due: $<amount>". Parcel IDs are alphanumeric (D-4176-1-1, ZZZ-312, K-1954-3). Generic parser regex /^(\d{1,3}[-\s]\d{3,5}[-\s]\d{3,5})/ never matches because lines start with AccountID not parcel. 0 records extracted.
+  implication: Millard-specific parser needed. Wrote makeMillardLineParser() — extracts 850 records from the 2025 PDF.
+
+- timestamp: 2026-03-19 (round 2)
+  checked: Juab County tax-sale page + WordPress REST API + delinquent PDF downloaded and parsed
+  found: Tax-sale page has NO PDF link. PDF is on WordPress post /notice-2025-delinquent-tax-list-copy/. PDF has 2420 lines. Format: "<AccountID7digits> <AlphanumericParcel> <OwnerName>, Total Due $<amount>" (1-3 lines per record). Parcels like XA00-0814-, F000-6521-. Generic parser never matches.
+  implication: Juab-specific stateful multi-line parser needed + URL must be discovered via WP REST API. Wrote makeJuabLineParser() — extracts 805 records from the PDF.
+
+- timestamp: 2026-03-19 (round 2)
+  checked: Sanpete County treasurer.html page
+  found: Page explicitly says "Delinquent tax listing will be posted on or before December 31, 2026." Button labeled "DELINQUENT TAX LISTING" links to pub-36.pdf (not the delinquent list).
+  implication: No delinquent PDF available for 2026 yet. Expected to return 0 records gracefully.
+
 ## Resolution
 
 root_cause: |
-  THREE distinct root causes, all causing zero results:
+  FIVE root causes confirmed via direct website inspection and PDF analysis (round 2):
 
-  ROOT CAUSE 1 (juab, millard, sanpete — 3 counties):
-  The treasurerPageUrl in pdf-delinquent-parser.ts points to each county's HOMEPAGE
-  instead of the specific treasurer/delinquent-tax sub-page where the PDF links live.
-  The parsePdfDelinquent() function scans <a> tags on that page for a link matching
-  pdfLinkTextPattern AND ending in .pdf. The homepages have no such links, so pdfUrl
-  stays null and the function logs "No PDF link found" and returns [].
+  ROOT CAUSE 4 (Carbon assessor + Carbon delinquent — wpDataTable hideBeforeLoad):
+  Both Carbon County wpDataTables have "hideBeforeLoad":true in their JS config.
+  This adds a CSS class "wdt-no-display" (display:none) to the table before AJAX loads.
+  Playwright's default waitForSelector() uses state:'visible', so it waits for the
+  element to be CSS-visible. Even after AJAX populates rows, if the parent table is
+  hidden the rows are not "visible". By contrast, the Emery tax roll has
+  "hideBeforeLoad":false and worked fine. Fix: use state:'attached' which only requires
+  the element to exist in the DOM, not be visible.
 
-  ROOT CAUSE 2 (emery PDF — potentially seasonal):
-  emery-delinquent-pdf.ts navigates to the treasurer page and looks for a link
-  containing "delinquent" case-insensitively. The 2025 PDF URL contains "Delinquent"
-  in the path and the case-insensitive CSS selector should find it. However the
-  shared parsePdfDelinquent() in pdf-delinquent-parser.ts (used by juab/sevier/millard/sanpete)
-  additionally requires href.toLowerCase().endsWith(".pdf"). emery-delinquent-pdf.ts
-  does NOT have this .pdf extension requirement — so emery may actually work if the
-  link is present. The issue is more likely the treasurer URL needs to be confirmed.
+  ROOT CAUSE 5 (Sevier — PDF URL has query string breaking endsWith('.pdf') check):
+  The Sevier delinquent tax report link href is:
+  "Treasurer/Official Record of Delinquent Taxes 2025 with Certificate.pdf?t=202512181240240"
+  The ?t= query string causes href.toLowerCase().endsWith('.pdf') to return false.
+  Strategy 1 and 2 both fail; Strategy 3 (text only) WOULD catch it, but the resolved
+  URL may have issues. Additionally, the PDF on revize CDN currently returns HTTP 404
+  (the sevier.utah.gov URL redirects to cms3.revize.com which 404s). Sevier will return
+  0 until the CDN issue is resolved. Fix: updated hrefIsPdf() helper to check
+  URL.pathname (strips query string) rather than the raw href string.
 
-  ROOT CAUSE 3 (Carbon County, Emery tax roll — wpDataTable):
-  propertyRecordSchema requires address min(1) AND city min(1). If the wpDataTable
-  returns rows where these columns are not recognized (header map mismatch means
-  all getCell() calls return ""), every record fails validation. Carbon has 5 consecutive
-  zeros strongly suggesting the headers don't match any of the fallback names checked.
+  ROOT CAUSE 6 (Millard — generic line parser doesn't match Millard PDF format):
+  Millard's PDF format is: "<AccountID> <OwnerName> Parcel: <ParcelID> Total Due: $<amount>"
+  The generic line parser looks for parcel patterns at the START of the line: /^(\d{1,3}[-\s]\d{3,5}[-\s]\d{3,5})/
+  But Millard lines START with AccountID (7 digits), then owner name, then "Parcel: ...".
+  ZERO records were ever extracted. Fix: write Millard-specific parser that looks for
+  "Parcel: <id>" and "Total Due: $<amount>" keywords within the line.
+  Result: 850 records extracted from the 2025 PDF.
+
+  ROOT CAUSE 7 (Juab — generic line parser doesn't match Juab PDF format + wrong page URL):
+  Juab's PDF format is: "<AccountID> <ParcelNumber> <OwnerName>, Total Due $<amount>"
+  with records spanning 1–3 lines. The generic parser expected XX-XXXX-XXXX digit-only
+  parcel IDs at line start, but Juab parcels are alphanumeric (XA00-0814-, F000-6521-).
+  ZERO records were ever extracted. Fix: write Juab-specific stateful multi-line parser.
+  Additionally, the delinquent PDF is NOT on the tax-sale page but in a WordPress post
+  (e.g. /notice-2025-delinquent-tax-list-copy/). Fix: use WordPress REST API to
+  dynamically find the current year's post URL.
+  Result: 805 records extracted from the 2026/01 PDF.
+
+  ROOT CAUSE 8 (Sanpete — no PDF published until December 2026):
+  The Sanpete treasurer page explicitly states: "Delinquent tax listing will be posted
+  on or before December 31, 2026." The button links to pub-36.pdf which is NOT the
+  delinquent list. Sanpete will correctly return 0 until December 2026.
 
 fix: |
-  Fix 1: Update pdf-delinquent-parser.ts county configs with correct treasurer sub-page URLs:
-    - juab: "https://juabcounty.gov/residents/tax-sale/" (or treasurer page which links PDF)
-    - millard: "https://millardcounty.gov/your-government/elected-officials/treasurer/delinquent-tax-listing/"
-    - sanpete: "https://www.sanpetecountyutah.gov/treasurer.html"
+  Fix 4: carbon-assessor.ts and carbon-delinquent.ts — add state:'attached' to all
+  waitForSelector('.wpDataTable tbody tr') calls so they wait for DOM presence
+  not CSS visibility (works with hideBeforeLoad:true tables).
 
-  Fix 2: For juab specifically — the delinquent PDF links appear in WordPress post pages
-  (notice-2024-delinquent-tax-list), not the tax-sale page. The tax-sale page likely
-  links to the PDF. We'll use the tax-sale page URL and also the treasurer page as fallback.
+  Fix 5: pdf-delinquent-parser.ts parsePdfDelinquent() — replace endsWith('.pdf')
+  with hrefIsPdf() helper that uses URL.pathname to strip query strings before checking.
 
-  Fix 3: For the wpDataTable scrapers (Carbon assessor, Emery tax roll) — add more
-  diagnostic logging to capture what headers ARE found, and loosen validation by
-  making address and city optional with empty-string fallback before validation.
+  Fix 6: pdf-delinquent-parser.ts millardConfig — replace generic line parser with
+  makeMillardLineParser() that matches "Parcel: <id> Total Due: $<amount>" format.
+
+  Fix 7a: pdf-delinquent-parser.ts juabConfig — replace generic line parser with
+  makeJuabLineParser() that handles both single-line and multi-line record formats
+  with alphanumeric parcel IDs.
+  Fix 7b: juabScrape.ts — add findJuabDelinquentPostUrl() that calls the WordPress
+  REST API to find the current year's delinquent tax list post, then passes the
+  discovered URL as the treasurerPageUrl override.
+
+  Fix 8: pdf-delinquent-parser.ts sanpeteConfig — updated pdfLinkTextPattern to
+  /delinquent.*tax.*list/i so it won't match unrelated links; logs clearly when
+  no PDF found and returns [] gracefully.
 
 verification: pending — deploy and check scraper_health last_result_count after next run
 files_changed:
-  - scraper/src/sources/pdf-delinquent-parser.ts (juab/millard/sanpete URLs fixed; improved link discovery with 3-strategy fallback + diagnostic logging)
-  - scraper/src/sources/emery-delinquent-pdf.ts (improved link discovery with 3-strategy fallback + diagnostic logging + proper URL resolution)
-  - scraper/src/sources/carbon-assessor.ts (expanded column name fallbacks for parcelId/address/city/ownerName)
-  - scraper/src/sources/carbon-delinquent.ts (expanded column name fallbacks)
-  - scraper/src/sources/emery-tax-roll.ts (expanded column name fallbacks including address 1, addr1, prop address)
-  - scraper/src/lib/validation.ts (propertyRecordSchema address+city changed from min(1) required to .default("") — prevents silent record discard when column headers don't match)
+  - scraper/src/sources/pdf-delinquent-parser.ts (round 2: hrefIsPdf() for query strings; Millard + Juab custom parsers; Sanpete pattern tightened; Juab URL updated)
+  - scraper/src/sources/carbon-assessor.ts (round 2: waitForSelector state:'attached' for hideBeforeLoad:true tables)
+  - scraper/src/sources/carbon-delinquent.ts (round 2: waitForSelector state:'attached' for hideBeforeLoad:true tables)
+  - scraper/src/functions/juabScrape.ts (round 2: findJuabDelinquentPostUrl() via WordPress REST API)

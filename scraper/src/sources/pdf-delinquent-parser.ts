@@ -130,13 +130,24 @@ export async function parsePdfDelinquent(
       console.log(`${tag}   ${entry}`);
     }
 
-    // Strategy 1: link text matches pattern AND href ends in .pdf
+    // Helper: check if href pathname ends in .pdf (ignores query strings like ?t=...)
+    const hrefIsPdf = (href: string): boolean => {
+      try {
+        // Handle relative URLs by resolving against current page
+        const url = new URL(href, config.treasurerPageUrl);
+        return url.pathname.toLowerCase().endsWith(".pdf");
+      } catch {
+        return href.toLowerCase().split("?")[0].endsWith(".pdf");
+      }
+    };
+
+    // Strategy 1: link text matches pattern AND href pathname ends in .pdf
     for (const { text, href } of linkData) {
       if (
         text &&
         config.pdfLinkTextPattern.test(text) &&
         href &&
-        href.toLowerCase().endsWith(".pdf")
+        hrefIsPdf(href)
       ) {
         pdfUrl = href;
         console.log(`${tag} Matched by text+pdf-ext: "${text}" -> ${href}`);
@@ -144,10 +155,10 @@ export async function parsePdfDelinquent(
       }
     }
 
-    // Strategy 2: href itself contains the pattern and ends in .pdf (no text match needed)
+    // Strategy 2: href itself contains the pattern and pathname ends in .pdf (no text match needed)
     if (!pdfUrl) {
       for (const { text, href } of linkData) {
-        if (href && config.pdfLinkTextPattern.test(href) && href.toLowerCase().endsWith(".pdf")) {
+        if (href && config.pdfLinkTextPattern.test(href) && hrefIsPdf(href)) {
           pdfUrl = href;
           console.log(`${tag} Matched by href-pattern+pdf-ext: "${text}" -> ${href}`);
           break;
@@ -241,42 +252,200 @@ export async function parsePdfDelinquent(
 
 // ── Per-county configurations ───────────────────────────────────────────────
 
+// ── Sevier County ────────────────────────────────────────────────────────────
+
 export const sevierConfig: PdfCountyConfig = {
   county: "sevier",
   // Sevier County publishes the delinquent tax report on a dedicated PHP page.
   // The PDF link appears on this page after December each year.
+  // The link text is "Delinquent Tax Report" and the href is a relative URL
+  // with a query string like ?t=202512181240240 (cache buster) — does not end
+  // in .pdf when checked naively. Strategy 1 in parsePdfDelinquent uses
+  // URL.pathname to check extension, which handles this correctly.
   treasurerPageUrl:
     "https://www.sevier.utah.gov/departments/county_officials/treasurer/current_year_delinquent_tax_report.php",
   pdfLinkTextPattern: /delinquent.*tax/i,
   lineParser: makeGenericDelinquentLineParser("sevier"),
 };
 
+// ── Juab County ──────────────────────────────────────────────────────────────
+
+/**
+ * Juab County-specific line parser.
+ *
+ * PDF format (2025):
+ *   <AccountID> <ParcelNumber> <OwnerName...>, Total Due $<amount>
+ *   <Year> $<amount>
+ *
+ * Example:
+ *   "0015607 XA00-0814- 90 POINT RIDE LLC, A UTAH LIMITED"
+ *   "LIABILITY COMPANY, Total Due $1,708.23"
+ *   "2025 $1,708.23"
+ *
+ * The parcel format is alphanumeric: XA00-0814-, XE00-5226-, F000-6521-, etc.
+ * We extract the parcel from the "Total Due $..." line which ends the record.
+ * Because records can span multiple lines, we track state within the closure.
+ */
+function makeJuabLineParser(): (line: string) => DelinquentRecord | null {
+  // State carried across lines (for multi-line records)
+  let pendingParcelId: string | null = null;
+  let pendingOwnerParts: string[] = [];
+
+  return (line: string): DelinquentRecord | null => {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    // Skip header line
+    if (/^Account\s+ID\s+Parcel/i.test(trimmed)) return null;
+
+    // Skip year/amount follow-up lines like "2025 $1,708.23"
+    if (/^\d{4}\s+\$?[\d,]+\.?\d*\s*$/.test(trimmed)) return null;
+
+    // Check if line starts a new record: <AccountID> <ParcelNumber> <Name...>
+    // AccountID: 7 digits. ParcelNumber: alphanumeric with dashes (e.g. XA00-0814-, XA00-3400-2112)
+    const startMatch = trimmed.match(/^(\d{7})\s+([A-Z0-9][\w-]*)\s+(.+)$/i);
+
+    // Check if line ends a record: "...Total Due $amount"
+    const totalDueMatch = trimmed.match(/Total Due\s+\$?([\d,]+\.?\d*)\s*$/i);
+
+    if (startMatch && totalDueMatch) {
+      // Single-line record: starts AND ends on same line
+      // e.g. "0070560 XE00-5226- ADAMS, KELLIE, (JT) Total Due $26.17"
+      const rawParcel = startMatch[2].trim();
+      const parcelId = rawParcel.replace(/-$/, "") || rawParcel;
+      const amountDue = totalDueMatch[1].replace(/,/g, "");
+      // Owner name is between parcel and "Total Due"
+      const ownerPart = startMatch[3].slice(0, startMatch[3].lastIndexOf("Total Due")).trim();
+      const ownerName = ownerPart.replace(/,\s*$/, "").trim() || undefined;
+
+      // Reset any pending state from previous incomplete record
+      pendingParcelId = null;
+      pendingOwnerParts = [];
+
+      return { parcelId, ownerName, amountDue, county: "juab" };
+    }
+
+    if (startMatch && !totalDueMatch) {
+      // Start of a multi-line record
+      const rawParcel = startMatch[2].trim();
+      pendingParcelId = rawParcel.replace(/-$/, "") || rawParcel;
+      pendingOwnerParts = [startMatch[3]];
+      return null;
+    }
+
+    if (!startMatch && totalDueMatch) {
+      // End of a multi-line record (continuation line ending with "Total Due $...")
+      const amountDue = totalDueMatch[1].replace(/,/g, "");
+      const ownerRemainder = trimmed.slice(0, trimmed.lastIndexOf("Total Due")).trim();
+      if (ownerRemainder) pendingOwnerParts.push(ownerRemainder);
+
+      const result: DelinquentRecord | null = pendingParcelId
+        ? {
+            parcelId: pendingParcelId,
+            ownerName: pendingOwnerParts.join(" ").replace(/,\s*$/, "").trim() || undefined,
+            amountDue,
+            county: "juab",
+          }
+        : null;
+
+      pendingParcelId = null;
+      pendingOwnerParts = [];
+      return result;
+    }
+
+    // Plain continuation line (owner name spans multiple lines, no "Total Due" yet)
+    if (pendingParcelId && trimmed) {
+      pendingOwnerParts.push(trimmed);
+    }
+
+    return null;
+  };
+}
+
 export const juabConfig: PdfCountyConfig = {
   county: "juab",
-  // Juab County posts the annual delinquent tax list PDF on the tax-sale page.
-  // Previously used the homepage (juabcounty.gov/) which has no PDF links.
-  treasurerPageUrl: "https://juabcounty.gov/residents/tax-sale/",
-  pdfLinkTextPattern: /delinquent/i,
-  lineParser: makeGenericDelinquentLineParser("juab"),
+  // Juab County posts the annual delinquent tax list PDF on a WordPress post
+  // with a URL slug like /notice-2025-delinquent-tax-list-copy/.
+  // We use the WordPress REST API to discover the most recent post containing
+  // "Delinquent Tax List" in the title, then scrape the PDF from that post.
+  // The tax-sale page (juabcounty.gov/residents/tax-sale/) does NOT link the PDF.
+  //
+  // REST API search: juabcounty.gov/wp-json/wp/v2/posts?search=delinquent+tax+list&per_page=1
+  // Returns the most recent matching post with its link, which we navigate to find the PDF.
+  //
+  // Since parsePdfDelinquent() navigates to treasurerPageUrl, we'll use the current
+  // known post URL. A separate findJuabPdfUrl() function handles dynamic discovery.
+  // For robustness, treasurerPageUrl is left as the REST API approach via a wrapper.
+  treasurerPageUrl: "https://juabcounty.gov/notice-2025-delinquent-tax-list-copy/",
+  // The PDF filename is "Account-Balance28.pdf" but the link text is "2025 Delinquent Tax List"
+  pdfLinkTextPattern: /delinquent.*tax/i,
+  lineParser: makeJuabLineParser(),
 };
+
+// ── Millard County ───────────────────────────────────────────────────────────
+
+/**
+ * Millard County-specific line parser.
+ *
+ * PDF format (2025):
+ *   <AccountID> <OwnerName> Parcel: <ParcelID> Total Due: $<amount>
+ *
+ * Examples:
+ *   "0195486 583 W MAIN LLC Parcel: D-4176-1-1 Total Due: $115.12"
+ *   "0184927 A NEW DIG Parcel: ZZZ-312 Total Due: $1,288.40"
+ *   "0154238 ADAMS, DAVID 1/2INT Parcel: 8252-1 Total Due: $1,317.30"
+ *
+ * The parcel format uses letters, digits, and dashes: D-4176-1-1, ZZZ-312, 8252-1, K-1954-3.
+ */
+function makeMillardLineParser(): (line: string) => DelinquentRecord | null {
+  return (line: string): DelinquentRecord | null => {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+
+    // Match: <AccountID> <OwnerName> Parcel: <ParcelID> Total Due: $<amount>
+    // The "Parcel:" keyword separates owner from parcel
+    const match = trimmed.match(
+      /^\d+\s+(.+?)\s+Parcel:\s*([A-Z0-9][\w.-]*(?:-[\w.-]*)*)\s+Total Due:\s*\$?([\d,]+\.?\d*)\s*$/i
+    );
+    if (!match) return null;
+
+    const ownerName = match[1].trim() || undefined;
+    const parcelId = match[2].trim();
+    const amountDue = match[3].replace(/,/g, "");
+
+    if (!parcelId) return null;
+
+    return {
+      parcelId,
+      ownerName,
+      amountDue,
+      county: "millard",
+    };
+  };
+}
 
 export const millardConfig: PdfCountyConfig = {
   county: "millard",
   // Millard County keeps the delinquent tax listing on a specific treasurer sub-page.
-  // Previously used the homepage (millardcounty.gov/) which has no PDF links.
-  // Note: Millard PDFs use filename "Deliquent" (missing n) — pdfLinkTextPattern handles both spellings.
+  // PDF link text: "2025 DELINQUENT TAX LISTING"
+  // PDF href: https://millardcounty.gov/wp-content/uploads/2025/12/2025-Deliquent-List.pdf
+  // Note: filename uses typo "Deliquent" — pdfLinkTextPattern matches the link TEXT not the filename.
   treasurerPageUrl:
     "https://millardcounty.gov/your-government/elected-officials/treasurer/delinquent-tax-listing/",
-  // Match both correct "delinquent" and typo "deliquent" found in research
+  // Match both correct "delinquent" and typo "deliquent" in filenames
   pdfLinkTextPattern: /deli[nq]*uent/i,
-  lineParser: makeGenericDelinquentLineParser("millard"),
+  lineParser: makeMillardLineParser(),
 };
+
+// ── Sanpete County ───────────────────────────────────────────────────────────
 
 export const sanpeteConfig: PdfCountyConfig = {
   county: "sanpete",
-  // Sanpete County links the delinquent PDF from the treasurer page, not the homepage.
-  // Previously used the homepage (sanpetecountyutah.gov/) which has no PDF links.
+  // Sanpete County publishes the delinquent tax listing from the treasurer page.
+  // Per research (March 2026): the page says "Delinquent tax listing will be
+  // posted on or before December 31, 2026." No PDF is available until then.
+  // parsePdfDelinquent() will find no matching link and return [] gracefully.
   treasurerPageUrl: "https://www.sanpetecountyutah.gov/treasurer.html",
-  pdfLinkTextPattern: /delinquent/i,
+  pdfLinkTextPattern: /delinquent.*tax.*list/i,
   lineParser: makeGenericDelinquentLineParser("sanpete"),
 };

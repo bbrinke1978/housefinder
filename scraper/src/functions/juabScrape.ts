@@ -2,6 +2,7 @@ import { app, InvocationContext, Timer } from "@azure/functions";
 import {
   parsePdfDelinquent,
   juabConfig,
+  type PdfCountyConfig,
 } from "../sources/pdf-delinquent-parser.js";
 import { upsertFromDelinquent } from "../lib/upsert.js";
 import { scoreAllProperties } from "../scoring/score.js";
@@ -11,6 +12,52 @@ import { sendAlerts } from "../alerts/index.js";
 import { db } from "../db/client.js";
 import { scraperConfig } from "../db/schema.js";
 import { eq } from "drizzle-orm";
+
+/**
+ * Uses the Juab County WordPress REST API to find the URL of the most recent
+ * post with "Delinquent Tax List" in the title (e.g. "NOTICE: 2025 Delinquent
+ * Tax List"). Returns the post URL to use as the treasurerPageUrl, or falls
+ * back to the hardcoded URL in juabConfig if the API is unavailable.
+ *
+ * This handles the fact that Juab County posts each year's delinquent tax list
+ * as a WordPress post with a new slug each year rather than updating a permanent
+ * treasurer page.
+ */
+async function findJuabDelinquentPostUrl(context: InvocationContext): Promise<string> {
+  const apiUrl =
+    "https://juabcounty.gov/wp-json/wp/v2/posts?search=delinquent+tax+list&per_page=3&orderby=date&order=desc";
+
+  try {
+    const res = await fetch(apiUrl, { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const posts = await res.json() as Array<{ link: string; title: { rendered: string } }>;
+    const currentYear = new Date().getFullYear().toString();
+
+    // Find a post for the current year with "Delinquent Tax List" in the title
+    for (const post of posts) {
+      const title = post.title?.rendered ?? "";
+      if (/delinquent.*tax.*list/i.test(title) && title.includes(currentYear)) {
+        context.log(`[juab] Found delinquent post via REST API: "${title}" -> ${post.link}`);
+        return post.link;
+      }
+    }
+
+    // Fall back: any post with delinquent tax list (most recent)
+    if (posts.length > 0 && /delinquent.*tax.*list/i.test(posts[0].title?.rendered ?? "")) {
+      context.log(
+        `[juab] No ${currentYear} post found; using most recent: "${posts[0].title?.rendered}" -> ${posts[0].link}`
+      );
+      return posts[0].link;
+    }
+
+    context.log("[juab] REST API returned no matching posts; falling back to hardcoded URL");
+  } catch (err) {
+    context.log(`[juab] REST API lookup failed: ${err}; falling back to hardcoded URL`);
+  }
+
+  return juabConfig.treasurerPageUrl;
+}
 
 /**
  * Juab County scrape pipeline orchestrator.
@@ -57,7 +104,10 @@ async function juabScrapeHandler(
         `[juab] PDF already parsed for ${currentYear}, skipping`
       );
     } else {
-      const records = await parsePdfDelinquent(juabConfig);
+      // Dynamically discover the current year's delinquent tax list post URL
+      const postUrl = await findJuabDelinquentPostUrl(context);
+      const dynamicConfig: PdfCountyConfig = { ...juabConfig, treasurerPageUrl: postUrl };
+      const records = await parsePdfDelinquent(dynamicConfig);
       delinquentResult = await upsertFromDelinquent(records, "juab");
 
       if (records.length > 0) {

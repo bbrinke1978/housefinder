@@ -40,12 +40,19 @@ export async function scrapeDelinquent(): Promise<DelinquentRecord[]> {
       { waitUntil: "networkidle", timeout: 60000 }
     );
 
-    // Wait for wpDataTable to render
+    // Wait for wpDataTable to render via server-side AJAX.
+    // Carbon County's delinquent table has hideBeforeLoad:true, so the table
+    // starts with CSS display:none (wdt-no-display class). Using state:'attached'
+    // waits for rows to exist in the DOM regardless of visibility, because even
+    // when the parent is display:none the rows are attached after AJAX completes.
     try {
-      await page.waitForSelector(".wpDataTable tbody tr", { timeout: 30000 });
+      await page.waitForSelector(".wpDataTable tbody tr", {
+        timeout: 30000,
+        state: "attached",
+      });
     } catch {
       console.log(
-        "[delinquent] No table rows found. Page title:",
+        "[delinquent] No table rows found after 30s. Page title:",
         await page.title()
       );
       return [];
@@ -140,7 +147,7 @@ export async function scrapeDelinquent(): Promise<DelinquentRecord[]> {
       if (nextButton) {
         await nextButton.click();
         await delay(rateLimitDelay());
-        await page.waitForSelector(".wpDataTable tbody tr", { timeout: 15000 });
+        await page.waitForSelector(".wpDataTable tbody tr", { timeout: 15000, state: "attached" });
       } else {
         hasNextPage = false;
       }
