@@ -15,6 +15,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DATA-04**: System expands scraping to ~10 similar small Utah towns/counties (Emery, Sanpete, Juab, Millard, Sevier, Grand, San Juan, Wayne, Piute, Duchesne)
 - [x] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
 - [x] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
+- [ ] **DATA-10**: Fix Juab County scraper — dynamically discover delinquent tax PDF URL from WordPress posts and parse alphanumeric parcel format
 - [x] **DATA-07**: System tracks first-seen date per property for new lead detection
 - [x] **DATA-08**: System runs daily automated scraping on a scheduled basis
 - [x] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
@@ -65,10 +66,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Map View
 
-- [ ] **MAP-01**: User can view properties on an interactive map with pins colored by distress score
-- [ ] **MAP-02**: User can filter map by distress type, city, and hot lead status
-- [ ] **MAP-03**: User can click a map pin to see property summary and link to detail page
-- [ ] **MAP-04**: Map is mobile-friendly with touch gestures (pinch-to-zoom, pan)
+- [x] **MAP-01**: User can view properties on an interactive map with pins colored by distress score
+- [x] **MAP-02**: User can filter map by distress type, city, and hot lead status
+- [x] **MAP-03**: User can click a map pin to see property summary and link to detail page
+- [x] **MAP-04**: Map is mobile-friendly with touch gestures (pinch-to-zoom, pan)
 
 ### Authentication
 
@@ -162,10 +163,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-04 | Phase 4 | Complete |
 | DATA-05 | Phase 4 | Complete |
 | DATA-06 | Phase 4 | Complete |
-| MAP-01 | Phase 5 | Pending |
-| MAP-02 | Phase 5 | Pending |
-| MAP-03 | Phase 5 | Pending |
-| MAP-04 | Phase 5 | Pending |
+| MAP-01 | Phase 5 | Complete |
+| MAP-02 | Phase 5 | Complete |
+| MAP-03 | Phase 5 | Complete |
+| MAP-04 | Phase 5 | Complete |
 | ANALYTICS-01 | Phase 6 | Pending |
 | ANALYTICS-02 | Phase 6 | Pending |
 | ANALYTICS-03 | Phase 6 | Pending |

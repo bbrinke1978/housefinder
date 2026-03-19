@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Core Application** - Authenticated dashboard, property detail, and lead management built against real pipeline data (completed 2026-03-18)
 - [x] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts (completed 2026-03-18)
 - [x] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties (completed 2026-03-18)
-- [ ] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins
+- [x] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins (completed 2026-03-19)
 - [ ] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions
 
 ## Phase Details
@@ -125,5 +125,15 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 2. Core Application | 0/5 | Complete    | 2026-03-18 |
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
-| 5. Map View | 0/? | Not started | - |
+| 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 0/? | Not started | - |
+
+### Phase 7: Frontend Design Polish
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 6
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 7 to break down)

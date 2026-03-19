@@ -10,7 +10,7 @@ updated: 2026-03-19T22:15:00Z
 hypothesis: CONFIRMED (round 3) — Juab root cause re-investigated via live Azure App Insights logs. Two failure modes found and fixed.
 test: Push to master triggers GitHub Actions deploy-scraper.yml; Juab timer fires at 5:45 AM MT or manual invocation via Azure portal
 expecting: Juab scraper logs "[juab] Extracted PDF URL from REST API content" and then "Parsed 805 records from PDF"
-next_action: Commit and push; await next timer trigger or manual invocation
+next_action: Deploy in progress (GitHub Actions run 23319465240). Await deploy completion, then invoke juab-scrape manually via Azure portal and confirm 805 records in App Insights logs.
 
 ## Symptoms
 

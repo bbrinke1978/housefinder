@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 4 — County Expansion
+**Current focus:** Phase 5 — Map View
 
 ## Current Position
 
-Phase: 4 of 5 (County Expansion)
+Phase: 5 of 5 (Map View)
 Plan: 3 of 3 in current phase
 Status: Phase Complete
-Last activity: 2026-03-18 — Completed 04-03 (PDF County Scrapers)
+Last activity: 2026-03-18 — Completed 05-03 (Geocoding Script & Address Search)
 
-Progress: [██████████] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 18
 - Average duration: 3min
-- Total execution time: 0.73 hours
+- Total execution time: 0.90 hours
 
 **By Phase:**
 
@@ -31,15 +31,16 @@ Progress: [██████████] 93%
 | 02-core-application | 5/5 | 23min | 5min |
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
 | 04-county-expansion | 3/3 | 9min | 3min |
+| 05-map-view | 3/3 | 10min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 4min, 3min, 3min, 3min
+- Last 5 plans: 3min, 3min, 3min, 5min, 2min
 - Trend: stable
 
 *Updated after each plan completion*
-| Phase 04 P01 | 5min | 2 tasks | 8 files |
-| Phase 04 P02 | 3min | 2 tasks | 3 files |
-| Phase 04 P03 | 3min | 2 tasks | 5 files |
+| Phase 05 P01 | 3min | 2 tasks | 6 files |
+| Phase 05 P02 | 5min | 2 tasks | 8 files |
+| Phase 05 P03 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,16 @@ Recent decisions affecting current work:
 - [Phase 04-03]: Factory pattern for PDF parser -- PdfCountyConfig type with per-county line parser, URL, and text pattern
 - [Phase 04-03]: Generic line parser matches parcel pattern XX-XXXX-XXXX at line start with dollar amount extraction
 - [Phase 04-03]: Inline annual skip logic per handler (simpler than shared helper for 4 small files)
+- [Phase 05-01]: Mapbox GL JS via react-map-gl v8 -- requires /mapbox subpath import
+- [Phase 05-01]: lat/lng as nullable doublePrecision columns -- properties without coords excluded from map
+- [Phase 05-02]: MapWrapper client component for dynamic({ ssr: false }) -- Next.js 15 server component restriction
+- [Phase 05-02]: Satellite-streets-v12 map style per user decision (satellite hybrid)
+- [Phase 05-02]: Client-side GeoJSON filtering -- no server roundtrip for filter changes
+- [Phase 05-03]: Batch geocoding script with 50-property batches and 1s delay for rate limiting
+
+### Roadmap Evolution
+
+- Phase 7 added: Frontend Design Polish
 
 ### Pending Todos
 
@@ -120,5 +131,5 @@ None yet.
 
 
 Last session: 2026-03-18
-Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
-Resume file: .planning/phases/04-county-expansion/04-03-SUMMARY.md
+Stopped at: Completed 05-03-PLAN.md (Phase 5 complete)
+Resume file: .planning/phases/05-map-view/05-03-SUMMARY.md
