@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 3 — Contact & Alerts
+**Current focus:** Phase 4 — County Expansion
 
 ## Current Position
 
-Phase: 3 of 5 (Contact & Alerts)
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-03-18 — Completed 03-03 (Contact Tab UI & Alert Settings)
+Phase: 4 of 5 (County Expansion)
+Plan: 2 of 3 in current phase
+Status: In Progress
+Last activity: 2026-03-18 — Completed 04-02 (Manual Signal Entry UI)
 
-Progress: [████████░░] 76%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 3min
-- Total execution time: 0.63 hours
+- Total execution time: 0.68 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [████████░░] 76%
 | 01-data-foundation | 4/4 | 8min | 2min |
 | 02-core-application | 5/5 | 23min | 5min |
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
+| 04-county-expansion | 1/3 | 3min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 6min, 2min, 2min, 2min, 4min
+- Last 5 plans: 2min, 2min, 2min, 4min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [03-03]: FastPeopleSearch as second people-search link for individuals (not Utah Business Registry which is for entities)
 - [03-03]: Native checkbox inputs for alert toggles (no shadcn Switch component installed)
 - [03-03]: onConflictDoUpdate on (propertyId, source) for manual phone upserts
+- [04-02]: Native checkbox for vacant toggle (consistent with 03-03 pattern)
+- [04-02]: onConflictDoNothing for signal dedup via existing uq_distress_signal_dedup index
+- [04-02]: Duplicate active signal check done client-side from signals prop (no extra query)
 
 ### Pending Todos
 
@@ -107,5 +111,5 @@ None yet.
 
 
 Last session: 2026-03-18
-Stopped at: Completed 03-03-PLAN.md (Phase 03 complete)
-Resume file: .planning/phases/03-contact-and-alerts/03-03-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-county-expansion/04-02-SUMMARY.md

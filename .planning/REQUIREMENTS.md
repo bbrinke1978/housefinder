@@ -13,8 +13,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DATA-02**: System scrapes Carbon County recorder for NOD (Notice of Default) and lis pendens filings
 - [x] **DATA-03**: System scrapes tax delinquency records for properties with unpaid taxes
 - [ ] **DATA-04**: System expands scraping to ~10 similar small Utah towns/counties (Emery, Sanpete, Juab, Millard, Sevier, Grand, San Juan, Wayne, Piute, Duchesne)
-- [ ] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
-- [ ] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
+- [x] **DATA-05**: System detects probate/estate filings from Utah court records and matches to property addresses
+- [x] **DATA-06**: System detects vacant/neglected properties from code violation records and utility shutoff data where available
 - [x] **DATA-07**: System tracks first-seen date per property for new lead detection
 - [x] **DATA-08**: System runs daily automated scraping on a scheduled basis
 - [x] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
@@ -160,8 +160,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ALERT-03 | Phase 3 | Complete |
 | ALERT-04 | Phase 3 | Complete |
 | DATA-04 | Phase 4 | Pending |
-| DATA-05 | Phase 4 | Pending |
-| DATA-06 | Phase 4 | Pending |
+| DATA-05 | Phase 4 | Complete |
+| DATA-06 | Phase 4 | Complete |
 | MAP-01 | Phase 5 | Pending |
 | MAP-02 | Phase 5 | Pending |
 | MAP-03 | Phase 5 | Pending |
