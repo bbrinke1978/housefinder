@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
     paths:
       - "scraper/**"
 
@@ -33,8 +34,10 @@ jobs:
           npm ci
           npm run build
 
-      - name: Install Playwright Chromium
+      - name: Install Playwright Chromium (local to node_modules)
         working-directory: ./scraper
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: "0"
         run: npx playwright install --with-deps chromium
 
       - name: Deploy to Azure Functions
