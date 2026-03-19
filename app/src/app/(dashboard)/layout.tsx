@@ -11,8 +11,10 @@ export default function DashboardLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main className="flex-1 overflow-auto p-4 pb-20 md:pb-4">
-          {children}
+        <main className="flex-1 overflow-auto p-4 pb-20 md:p-8 md:pb-8 min-h-screen bg-warm-50 dark:bg-dark-950">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
         <MobileBottomNav />
       </SidebarInset>

@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Flame, MapPin, User } from "lucide-react";
+import { Flame, MapPin, User, ArrowRight } from "lucide-react";
 import type { PropertyWithLead } from "@/types";
 
 interface PropertyCardProps {
@@ -11,9 +9,17 @@ interface PropertyCardProps {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 5) return "bg-red-500/10 text-red-600";
-  if (score >= 3) return "bg-yellow-500/10 text-yellow-600";
-  return "bg-green-500/10 text-green-600";
+  if (score >= 7) return "bg-red-500 text-white";
+  if (score >= 5) return "bg-brand-500 text-white";
+  if (score >= 3) return "bg-amber-500 text-white";
+  return "bg-emerald-500 text-white";
+}
+
+function scoreBarColor(score: number): string {
+  if (score >= 7) return "bg-red-500";
+  if (score >= 5) return "bg-brand-500";
+  if (score >= 3) return "bg-amber-500";
+  return "bg-emerald-500";
 }
 
 function isNew(property: PropertyWithLead): boolean {
@@ -23,55 +29,88 @@ function isNew(property: PropertyWithLead): boolean {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
+  const hot = property.isHot;
+  const pct = Math.min((property.distressScore / 10) * 100, 100);
+
   return (
-    <Link href={`/properties/${property.id}`} className="block">
-      <Card className="transition-shadow hover:shadow-md">
-        <CardContent className="space-y-2">
-          {/* Header row: address + badges */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{property.address}</p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" />
-                <span>
-                  {property.city}, {property.state}
-                </span>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5">
-              {isNew(property) && (
-                <Badge className="bg-blue-500/10 text-blue-600">New</Badge>
-              )}
-              {property.isHot && (
-                <Badge variant="destructive">
-                  <Flame className="mr-0.5 h-3 w-3" />
-                  Hot
-                </Badge>
-              )}
+    <Link href={`/properties/${property.id}`} className="group block">
+      <div
+        className={`card-warm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+          hot ? "hot-pulse" : ""
+        }`}
+      >
+        {/* Header: address + badges */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-bold text-dark-950 dark:text-dark-100 group-hover:text-brand-500 transition-colors">
+              {property.address}
+            </p>
+            <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mt-0.5">
+              <MapPin className="h-3 w-3" />
+              <span>
+                {property.city}, {property.state}
+              </span>
             </div>
           </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {isNew(property) && (
+              <span className="badge-tag text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+                New
+              </span>
+            )}
+            {hot && (
+              <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
+                <Flame className="h-3 w-3" />
+                Hot
+              </span>
+            )}
+          </div>
+        </div>
 
-          {/* Owner */}
-          {property.ownerName && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <User className="h-3 w-3" />
-              <span className="truncate">{property.ownerName}</span>
-            </div>
-          )}
+        {/* Owner */}
+        {property.ownerName && (
+          <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mb-3">
+            <User className="h-3 w-3" />
+            <span className="truncate">{property.ownerName}</span>
+          </div>
+        )}
 
-          {/* Score + Status row */}
-          <div className="flex items-center justify-between">
+        {/* Score section */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${scoreColor(property.distressScore)}`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${scoreColor(property.distressScore)}`}
             >
-              Score: {property.distressScore}
+              {property.distressScore}
             </span>
-            <Badge variant="outline" className="text-xs capitalize">
-              {property.leadStatus.replace("_", " ")}
-            </Badge>
+            <span className="text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
+              Score
+            </span>
           </div>
-        </CardContent>
-      </Card>
+          <span
+            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-xs uppercase tracking-wider text-dark-400 dark:text-dark-500"
+          >
+            {property.leadStatus.replace("_", " ")}
+          </span>
+        </div>
+
+        {/* Score bar */}
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-warm-200 dark:bg-dark-700">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${scoreBarColor(property.distressScore)}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+
+        {/* Hover CTA */}
+        <div className="flex items-center justify-end mt-3 opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
+          <span className="flex items-center gap-1 text-xs font-bold text-brand-500">
+            View details
+            <ArrowRight className="h-3 w-3" />
+          </span>
+        </div>
+      </div>
     </Link>
   );
 }
