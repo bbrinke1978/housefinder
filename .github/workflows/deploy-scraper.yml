@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - "scraper/**"
+  workflow_dispatch:
 
 env:
   AZURE_FUNCTIONAPP_NAME: "housefinder-scraper"
