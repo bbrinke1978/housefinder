@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 4 of 5 (County Expansion)
-Plan: 2 of 3 in current phase
-Status: In Progress
-Last activity: 2026-03-18 — Completed 04-02 (Manual Signal Entry UI)
+Plan: 3 of 3 in current phase
+Status: Phase Complete
+Last activity: 2026-03-18 — Completed 04-03 (PDF County Scrapers)
 
-Progress: [█████████░] 88%
+Progress: [██████████] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 15
 - Average duration: 3min
-- Total execution time: 0.68 hours
+- Total execution time: 0.73 hours
 
 **By Phase:**
 
@@ -30,14 +30,16 @@ Progress: [█████████░] 88%
 | 01-data-foundation | 4/4 | 8min | 2min |
 | 02-core-application | 5/5 | 23min | 5min |
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
-| 04-county-expansion | 1/3 | 3min | 3min |
+| 04-county-expansion | 3/3 | 9min | 3min |
 
 **Recent Trend:**
-- Last 5 plans: 2min, 2min, 2min, 4min, 3min
+- Last 5 plans: 2min, 4min, 3min, 3min, 3min
 - Trend: stable
 
 *Updated after each plan completion*
 | Phase 04 P01 | 5min | 2 tasks | 8 files |
+| Phase 04 P02 | 3min | 2 tasks | 3 files |
+| Phase 04 P03 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -99,6 +101,9 @@ Recent decisions affecting current work:
 - [Phase 04-01]: pdf-parse v2 class-based API (PDFParse.getText().text) -- @types/pdf-parse incompatible with v2, removed
 - [Phase 04-01]: County param defaults to 'carbon' for backward compatibility -- existing Carbon pipeline unchanged
 - [Phase 04-01]: Annual PDF parse tracked via scraperConfig key emery.delinquent.lastParsedYear
+- [Phase 04-03]: Factory pattern for PDF parser -- PdfCountyConfig type with per-county line parser, URL, and text pattern
+- [Phase 04-03]: Generic line parser matches parcel pattern XX-XXXX-XXXX at line start with dollar amount extraction
+- [Phase 04-03]: Inline annual skip logic per handler (simpler than shared helper for 4 small files)
 
 ### Pending Todos
 
@@ -115,5 +120,5 @@ None yet.
 
 
 Last session: 2026-03-18
-Stopped at: Completed 04-01-PLAN.md (parallel with 04-02)
-Resume file: .planning/phases/04-county-expansion/04-01-SUMMARY.md
+Stopped at: Completed 04-03-PLAN.md (Phase 4 complete)
+Resume file: .planning/phases/04-county-expansion/04-03-SUMMARY.md

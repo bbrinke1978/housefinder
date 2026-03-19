@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Data Foundation** - Scraping pipeline, database schema, and distress scoring for Carbon County (Price, UT) working end-to-end (completed 2026-03-18)
 - [x] **Phase 2: Core Application** - Authenticated dashboard, property detail, and lead management built against real pipeline data (completed 2026-03-18)
 - [x] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts (completed 2026-03-18)
-- [ ] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties
+- [x] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties (completed 2026-03-18)
 - [ ] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins
 - [ ] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions
 
@@ -80,11 +80,11 @@ Plans:
   2. Probate signals can be manually added to any property from the detail page (XChange subscription declined per user decision)
   3. Vacant properties can be flagged from the property detail page with a toggle, creating/resolving a vacant distress signal
   4. Per-county scraper health status is visible — each county shows its last successful scrape timestamp independently so a failing county is immediately identifiable
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
-- [ ] 04-01-PLAN.md — Emery County wpDataTables scraper, county-parameterized upsert, pdf-parse install
-- [ ] 04-02-PLAN.md — Manual vacant/probate signal UI on property detail page, target cities update
-- [ ] 04-03-PLAN.md — PDF delinquent parsers for Sevier/Juab/Millard/Sanpete + staggered Azure Function timers
+- [x] 04-01-PLAN.md — Emery County wpDataTables scraper, county-parameterized upsert, pdf-parse install
+- [x] 04-02-PLAN.md — Manual vacant/probate signal UI on property detail page, target cities update
+- [x] 04-03-PLAN.md — PDF delinquent parsers for Sevier/Juab/Millard/Sanpete + staggered Azure Function timers
 
 ### Phase 5: Map View
 **Goal**: The investor can browse all distressed properties geographically on a mobile-friendly interactive map
@@ -124,6 +124,6 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 1. Data Foundation | 0/4 | Complete    | 2026-03-18 |
 | 2. Core Application | 0/5 | Complete    | 2026-03-18 |
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
-| 4. County Expansion | 0/3 | Planning complete | - |
+| 4. County Expansion | 3/3 | Complete    | 2026-03-18 |
 | 5. Map View | 0/? | Not started | - |
 | 6. Data Analytics & Insights | 0/? | Not started | - |
