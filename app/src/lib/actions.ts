@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
-import { leads, leadNotes, scraperConfig, ownerContacts } from "@/db/schema";
-import { eq, like } from "drizzle-orm";
+import { leads, leadNotes, scraperConfig, ownerContacts, distressSignals } from "@/db/schema";
+import { eq, and, like } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
@@ -128,7 +128,17 @@ export async function updateLeadStatus(
 
 // -- Target Cities --
 
-const DEFAULT_TARGET_CITIES = ["Price"];
+const DEFAULT_TARGET_CITIES = [
+  "Price",
+  "Huntington",
+  "Castle Dale",
+  "Richfield",
+  "Nephi",
+  "Ephraim",
+  "Manti",
+  "Fillmore",
+  "Delta",
+];
 
 /**
  * Read target cities from scraperConfig.
@@ -330,4 +340,107 @@ export async function updateAlertSettings(
   }
 
   revalidatePath("/settings");
+}
+
+// -- Manual Signal Management --
+
+/**
+ * Toggle vacant flag for a property.
+ * Creates an active "vacant" distress signal when true, resolves it when false.
+ */
+export async function setVacantFlag(
+  propertyId: string,
+  isVacant: boolean
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  if (isVacant) {
+    await db
+      .insert(distressSignals)
+      .values({
+        propertyId,
+        signalType: "vacant",
+        status: "active",
+        recordedDate: new Date().toISOString().split("T")[0],
+        rawData: "Manual flag - field observation",
+        sourceUrl: null,
+      })
+      .onConflictDoNothing();
+  } else {
+    await db
+      .update(distressSignals)
+      .set({
+        status: "resolved",
+        resolvedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(distressSignals.propertyId, propertyId),
+          eq(distressSignals.signalType, "vacant"),
+          eq(distressSignals.status, "active")
+        )
+      );
+  }
+
+  revalidatePath(`/properties/${propertyId}`);
+}
+
+const addManualSignalSchema = z.object({
+  propertyId: z.uuid(),
+  signalType: z.enum(["probate", "code_violation"]),
+  rawData: z.string().optional(),
+});
+
+/**
+ * Add a manual distress signal (probate or code_violation) to a property.
+ */
+export async function addManualSignal(
+  propertyId: string,
+  signalType: "probate" | "code_violation",
+  rawData?: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  addManualSignalSchema.parse({ propertyId, signalType, rawData });
+
+  await db
+    .insert(distressSignals)
+    .values({
+      propertyId,
+      signalType,
+      status: "active",
+      recordedDate: new Date().toISOString().split("T")[0],
+      rawData: rawData ?? "Manual entry",
+      sourceUrl: null,
+    })
+    .onConflictDoNothing();
+
+  revalidatePath(`/properties/${propertyId}`);
+}
+
+/**
+ * Check if a property has an active vacant flag.
+ */
+export async function getActiveVacantFlag(
+  propertyId: string
+): Promise<boolean> {
+  const rows = await db
+    .select({ id: distressSignals.id })
+    .from(distressSignals)
+    .where(
+      and(
+        eq(distressSignals.propertyId, propertyId),
+        eq(distressSignals.signalType, "vacant"),
+        eq(distressSignals.status, "active")
+      )
+    )
+    .limit(1);
+
+  return rows.length > 0;
 }
