@@ -37,6 +37,7 @@ Progress: [█████████░] 88%
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 04 P01 | 5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [04-02]: Native checkbox for vacant toggle (consistent with 03-03 pattern)
 - [04-02]: onConflictDoNothing for signal dedup via existing uq_distress_signal_dedup index
 - [04-02]: Duplicate active signal check done client-side from signals prop (no extra query)
+- [Phase 04-01]: pdf-parse v2 class-based API (PDFParse.getText().text) -- @types/pdf-parse incompatible with v2, removed
+- [Phase 04-01]: County param defaults to 'carbon' for backward compatibility -- existing Carbon pipeline unchanged
+- [Phase 04-01]: Annual PDF parse tracked via scraperConfig key emery.delinquent.lastParsedYear
 
 ### Pending Todos
 
@@ -111,5 +115,5 @@ None yet.
 
 
 Last session: 2026-03-18
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-county-expansion/04-02-SUMMARY.md
+Stopped at: Completed 04-01-PLAN.md (parallel with 04-02)
+Resume file: .planning/phases/04-county-expansion/04-01-SUMMARY.md
