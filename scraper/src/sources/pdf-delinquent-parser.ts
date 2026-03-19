@@ -6,7 +6,12 @@ import {
   delinquentRecordSchema,
   type DelinquentRecord,
 } from "../lib/validation.js";
-import { PDFParse } from "pdf-parse";
+// Lazy import to avoid DOMMatrix error from @napi-rs/canvas at module load time
+// pdf-parse v2 depends on @napi-rs/canvas which needs native bindings
+async function getPDFParse() {
+  const mod = await import("pdf-parse");
+  return mod.PDFParse;
+}
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,11 +110,28 @@ export async function parsePdfDelinquent(
       timeout: 60000,
     });
 
-    // Find all <a> elements and filter by text pattern + .pdf href
+    // Collect all links for diagnostics and matching
     const allLinks = await page.$$("a");
+    const linkSummary: string[] = [];
+    const linkData: Array<{ text: string; href: string }> = [];
+
     for (const a of allLinks) {
-      const text = await a.textContent();
-      const href = await a.getAttribute("href");
+      const text = (await a.textContent() ?? "").trim();
+      const href = (await a.getAttribute("href") ?? "").trim();
+      if (text || href) {
+        linkData.push({ text, href });
+        linkSummary.push(`"${text}" -> ${href}`);
+      }
+    }
+
+    console.log(`${tag} Found ${linkData.length} links on treasurer page:`);
+    // Log first 30 links so we can diagnose mismatches without flooding logs
+    for (const entry of linkSummary.slice(0, 30)) {
+      console.log(`${tag}   ${entry}`);
+    }
+
+    // Strategy 1: link text matches pattern AND href ends in .pdf
+    for (const { text, href } of linkData) {
       if (
         text &&
         config.pdfLinkTextPattern.test(text) &&
@@ -117,17 +139,29 @@ export async function parsePdfDelinquent(
         href.toLowerCase().endsWith(".pdf")
       ) {
         pdfUrl = href;
+        console.log(`${tag} Matched by text+pdf-ext: "${text}" -> ${href}`);
         break;
       }
     }
 
-    // Fallback: match by text pattern alone (PDF might not have .pdf extension in href)
+    // Strategy 2: href itself contains the pattern and ends in .pdf (no text match needed)
     if (!pdfUrl) {
-      for (const a of allLinks) {
-        const text = await a.textContent();
-        if (text && config.pdfLinkTextPattern.test(text)) {
-          pdfUrl = await a.getAttribute("href");
-          if (pdfUrl) break;
+      for (const { text, href } of linkData) {
+        if (href && config.pdfLinkTextPattern.test(href) && href.toLowerCase().endsWith(".pdf")) {
+          pdfUrl = href;
+          console.log(`${tag} Matched by href-pattern+pdf-ext: "${text}" -> ${href}`);
+          break;
+        }
+      }
+    }
+
+    // Strategy 3: link text matches pattern, any href (PDF might serve without .pdf extension)
+    if (!pdfUrl) {
+      for (const { text, href } of linkData) {
+        if (text && config.pdfLinkTextPattern.test(text) && href) {
+          pdfUrl = href;
+          console.log(`${tag} Matched by text-only (no .pdf ext required): "${text}" -> ${href}`);
+          break;
         }
       }
     }
@@ -138,7 +172,7 @@ export async function parsePdfDelinquent(
   }
 
   if (!pdfUrl) {
-    console.log(`${tag} No PDF link found on treasurer page`);
+    console.log(`${tag} No PDF link found on treasurer page. Check link log above for available links.`);
     return [];
   }
 
@@ -167,6 +201,7 @@ export async function parsePdfDelinquent(
       return [];
     }
     const buffer = Buffer.from(await response.arrayBuffer());
+    const PDFParse = await getPDFParse();
     const parser = new PDFParse({ data: buffer });
     const textResult = await parser.getText();
     pdfText = textResult.text;
@@ -208,6 +243,8 @@ export async function parsePdfDelinquent(
 
 export const sevierConfig: PdfCountyConfig = {
   county: "sevier",
+  // Sevier County publishes the delinquent tax report on a dedicated PHP page.
+  // The PDF link appears on this page after December each year.
   treasurerPageUrl:
     "https://www.sevier.utah.gov/departments/county_officials/treasurer/current_year_delinquent_tax_report.php",
   pdfLinkTextPattern: /delinquent.*tax/i,
@@ -216,14 +253,20 @@ export const sevierConfig: PdfCountyConfig = {
 
 export const juabConfig: PdfCountyConfig = {
   county: "juab",
-  treasurerPageUrl: "https://juabcounty.gov/",
+  // Juab County posts the annual delinquent tax list PDF on the tax-sale page.
+  // Previously used the homepage (juabcounty.gov/) which has no PDF links.
+  treasurerPageUrl: "https://juabcounty.gov/residents/tax-sale/",
   pdfLinkTextPattern: /delinquent/i,
   lineParser: makeGenericDelinquentLineParser("juab"),
 };
 
 export const millardConfig: PdfCountyConfig = {
   county: "millard",
-  treasurerPageUrl: "https://millardcounty.gov/",
+  // Millard County keeps the delinquent tax listing on a specific treasurer sub-page.
+  // Previously used the homepage (millardcounty.gov/) which has no PDF links.
+  // Note: Millard PDFs use filename "Deliquent" (missing n) — pdfLinkTextPattern handles both spellings.
+  treasurerPageUrl:
+    "https://millardcounty.gov/your-government/elected-officials/treasurer/delinquent-tax-listing/",
   // Match both correct "delinquent" and typo "deliquent" found in research
   pdfLinkTextPattern: /deli[nq]*uent/i,
   lineParser: makeGenericDelinquentLineParser("millard"),
@@ -231,7 +274,9 @@ export const millardConfig: PdfCountyConfig = {
 
 export const sanpeteConfig: PdfCountyConfig = {
   county: "sanpete",
-  treasurerPageUrl: "https://sanpetecountyutah.gov/",
+  // Sanpete County links the delinquent PDF from the treasurer page, not the homepage.
+  // Previously used the homepage (sanpetecountyutah.gov/) which has no PDF links.
+  treasurerPageUrl: "https://www.sanpetecountyutah.gov/treasurer.html",
   pdfLinkTextPattern: /delinquent/i,
   lineParser: makeGenericDelinquentLineParser("sanpete"),
 };

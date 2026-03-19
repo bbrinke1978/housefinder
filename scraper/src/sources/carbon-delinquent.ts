@@ -77,23 +77,39 @@ export async function scrapeDelinquent(): Promise<DelinquentRecord[]> {
               parcelId:
                 getCell("parcel") ||
                 getCell("parcel id") ||
-                getCell("parcelnumber"),
+                getCell("parcelnumber") ||
+                getCell("parcel number") ||
+                getCell("parcel #") ||
+                getCell("parcel no"),
               ownerName:
                 getCell("name") ||
                 getCell("owner") ||
-                getCell("owner name"),
+                getCell("owner name") ||
+                getCell("ownername") ||
+                getCell("name2") ||
+                getCell("primary name") ||
+                getCell("taxpayer"),
               year:
-                getCell("year"),
+                getCell("year") ||
+                getCell("tax year") ||
+                getCell("taxyear"),
               amountDue:
                 getCell("due") ||
                 getCell("amount due") ||
-                getCell("amountdue"),
+                getCell("amountdue") ||
+                getCell("balance") ||
+                getCell("balance due") ||
+                getCell("total due"),
               propertyAddress:
                 getCell("propertyaddress") ||
-                getCell("property address"),
+                getCell("property address") ||
+                getCell("add1") ||
+                getCell("address") ||
+                getCell("situs address"),
               propertyCity:
                 getCell("propertycity") ||
-                getCell("property city"),
+                getCell("property city") ||
+                getCell("city"),
             };
           });
         },

@@ -6,7 +6,11 @@ import {
   delinquentRecordSchema,
   type DelinquentRecord,
 } from "../lib/validation.js";
-import { PDFParse } from "pdf-parse";
+// Lazy import to avoid DOMMatrix error from @napi-rs/canvas at module load time
+async function getPDFParse() {
+  const mod = await import("pdf-parse");
+  return mod.PDFParse;
+}
 
 /**
  * Parses Emery County annual delinquent tax PDF.
@@ -30,6 +34,7 @@ export async function parseEmeryDelinquentPdf(): Promise<DelinquentRecord[]> {
   // Step 1: Discover the delinquent PDF URL dynamically
   const browser = await launchBrowser();
   let pdfUrl: string | null = null;
+  let pageUrl = "https://emery.utah.gov/home/offices/treasurer/";
 
   try {
     const page = await createPage(browser);
@@ -39,37 +44,72 @@ export async function parseEmeryDelinquentPdf(): Promise<DelinquentRecord[]> {
       { waitUntil: "networkidle", timeout: 60000 }
     );
 
-    // Find a link containing "delinquent" (case-insensitive)
-    const link = await page.$('a[href*="delinquent" i], a[href*="Delinquent"]');
-    if (link) {
-      pdfUrl = await link.getAttribute("href");
+    // Collect all links for diagnostics
+    const allLinks = await page.$$("a");
+    const linkData: Array<{ text: string; href: string }> = [];
+    for (const a of allLinks) {
+      const text = (await a.textContent() ?? "").trim();
+      const href = (await a.getAttribute("href") ?? "").trim();
+      if (text || href) linkData.push({ text, href });
     }
 
-    // Also try finding by link text
+    console.log(`[emery-delinquent-pdf] Found ${linkData.length} links on treasurer page:`);
+    for (const entry of linkData.slice(0, 30)) {
+      console.log(`[emery-delinquent-pdf]   "${entry.text}" -> ${entry.href}`);
+    }
+
+    // Strategy 1: href contains "delinquent" (case-insensitive) and ends in .pdf
+    for (const { text, href } of linkData) {
+      if (href && /delinquent/i.test(href) && href.toLowerCase().endsWith(".pdf")) {
+        pdfUrl = href;
+        console.log(`[emery-delinquent-pdf] Matched by href-delinquent+pdf-ext: "${text}" -> ${href}`);
+        break;
+      }
+    }
+
+    // Strategy 2: link text contains "delinquent" and href ends in .pdf
     if (!pdfUrl) {
-      const allLinks = await page.$$("a");
-      for (const a of allLinks) {
-        const text = await a.textContent();
-        if (text && /delinquent/i.test(text)) {
-          pdfUrl = await a.getAttribute("href");
-          if (pdfUrl) break;
+      for (const { text, href } of linkData) {
+        if (text && /delinquent/i.test(text) && href && href.toLowerCase().endsWith(".pdf")) {
+          pdfUrl = href;
+          console.log(`[emery-delinquent-pdf] Matched by text-delinquent+pdf-ext: "${text}" -> ${href}`);
+          break;
         }
       }
     }
+
+    // Strategy 3: link text contains "delinquent", any href (no .pdf extension required)
+    if (!pdfUrl) {
+      for (const { text, href } of linkData) {
+        if (text && /delinquent/i.test(text) && href) {
+          pdfUrl = href;
+          console.log(`[emery-delinquent-pdf] Matched by text-delinquent (no ext): "${text}" -> ${href}`);
+          break;
+        }
+      }
+    }
+
+    pageUrl = page.url(); // capture actual URL for relative URL resolution
   } finally {
     await browser.close();
   }
 
   if (!pdfUrl) {
-    console.log("[emery-delinquent-pdf] No delinquent PDF link found on treasurer page. Returning empty.");
+    console.log("[emery-delinquent-pdf] No delinquent PDF link found on treasurer page. Check link log above.");
     return [];
   }
 
-  // Resolve relative URLs
-  if (pdfUrl.startsWith("/")) {
-    pdfUrl = `https://emery.utah.gov${pdfUrl}`;
-  } else if (!pdfUrl.startsWith("http")) {
-    pdfUrl = `https://emery.utah.gov/home/offices/treasurer/${pdfUrl}`;
+  // Resolve relative URLs against the actual page URL
+  try {
+    const resolved = new URL(pdfUrl, pageUrl);
+    pdfUrl = resolved.href;
+  } catch {
+    // If URL construction fails, try basic resolution
+    if (pdfUrl.startsWith("/")) {
+      pdfUrl = `https://emery.utah.gov${pdfUrl}`;
+    } else if (!pdfUrl.startsWith("http")) {
+      pdfUrl = `https://emery.utah.gov/home/offices/treasurer/${pdfUrl}`;
+    }
   }
 
   console.log(`[emery-delinquent-pdf] Found PDF URL: ${pdfUrl}`);
@@ -83,6 +123,7 @@ export async function parseEmeryDelinquentPdf(): Promise<DelinquentRecord[]> {
       return [];
     }
     const buffer = Buffer.from(await response.arrayBuffer());
+    const PDFParse = await getPDFParse();
     const parser = new PDFParse({ data: buffer });
     const textResult = await parser.getText();
     pdfText = textResult.text;

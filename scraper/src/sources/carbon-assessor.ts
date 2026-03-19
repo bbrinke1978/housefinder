@@ -92,25 +92,36 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
                 getCell("parcel") ||
                 getCell("parcel id") ||
                 getCell("parcel number") ||
-                getCell("parcelnumber"),
+                getCell("parcelnumber") ||
+                getCell("parcel #") ||
+                getCell("parcel no"),
               address:
                 getCell("address") ||
                 getCell("property address") ||
                 getCell("propertyaddress") ||
-                getCell("situs address"),
+                getCell("situs address") ||
+                getCell("address 1") ||
+                getCell("addr1") ||
+                getCell("prop address"),
               city:
                 getCell("city") ||
                 getCell("propertycity") ||
-                getCell("property city"),
+                getCell("property city") ||
+                getCell("prop city"),
               ownerName:
                 getCell("owner") ||
                 getCell("name") ||
                 getCell("owner name") ||
-                getCell("ownername"),
+                getCell("ownername") ||
+                getCell("primary name") ||
+                getCell("taxpayer") ||
+                getCell("owner/taxpayer"),
               taxStatus:
                 getCell("tax status") ||
                 getCell("taxstatus") ||
-                getCell("status"),
+                getCell("status") ||
+                getCell("tax 2025") ||
+                getCell("tax 2024"),
               mortgageInfo:
                 getCell("mortgage") ||
                 getCell("mortgageinfo") ||
