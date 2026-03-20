@@ -105,6 +105,7 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+  // Only count properties that have at least one distress signal
   const result = await db
     .select({
       total: sql<number>`count(*)::int`,
@@ -117,7 +118,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       ) and ${properties.ownerType} in ('individual', 'unknown'))::int`,
     })
     .from(leads)
-    .innerJoin(properties, eq(leads.propertyId, properties.id));
+    .innerJoin(properties, eq(leads.propertyId, properties.id))
+    .where(
+      exists(
+        db
+          .select({ one: sql`1` })
+          .from(distressSignals)
+          .where(eq(distressSignals.propertyId, properties.id))
+      )
+    );
 
   const row = result[0];
   return {
@@ -161,12 +170,23 @@ export interface GetPropertiesParams {
   hot?: string;
   status?: string;
   sort?: string;
+  skipTrace?: string;
 }
 
 export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
   const conditions = [];
+
+  // Only show properties with at least one distress signal
+  conditions.push(
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(distressSignals)
+        .where(eq(distressSignals.propertyId, properties.id))
+    )
+  );
 
   if (params.city) {
     conditions.push(ilike(properties.city, params.city));
@@ -194,6 +214,15 @@ export async function getProperties(
 
   if (params.status) {
     conditions.push(eq(leads.status, params.status));
+  }
+
+  if (params.skipTrace === "true") {
+    conditions.push(
+      sql`NOT EXISTS (
+        SELECT 1 FROM owner_contacts oc
+        WHERE oc.property_id = ${properties.id} AND oc.phone IS NOT NULL
+      ) AND ${properties.ownerType} IN ('individual', 'unknown')`
+    );
   }
 
   // Sort

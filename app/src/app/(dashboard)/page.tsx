@@ -35,6 +35,7 @@ export default async function DashboardPage({
     hot: typeof params.hot === "string" ? params.hot : undefined,
     status: typeof params.status === "string" ? params.status : undefined,
     sort: typeof params.sort === "string" ? params.sort : undefined,
+    skipTrace: typeof params.skipTrace === "string" ? params.skipTrace : undefined,
   };
 
   const [stats, properties, cities] = await Promise.all([
