@@ -8,14 +8,14 @@ interface PropertyCardProps {
   property: PropertyWithLead;
 }
 
-function ownerTypeBadge(type: string | null): { label: string; badgeClass: string; borderClass: string } | null {
+function ownerTypeBadge(type: string | null): { label: string; badgeClass: string; accentClass: string } | null {
   switch (type) {
     case "llc":
-      return { label: "LLC", badgeClass: "bg-purple-500 text-white", borderClass: "border-l-4 border-l-purple-500" };
+      return { label: "LLC", badgeClass: "bg-purple-500 text-white", accentClass: "ring-2 ring-purple-400/50 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-[#3d3d3d]" };
     case "trust":
-      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", borderClass: "border-l-4 border-l-indigo-500" };
+      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", accentClass: "ring-2 ring-indigo-400/50 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-[#3d3d3d]" };
     case "estate":
-      return { label: "Estate", badgeClass: "bg-slate-500 text-white", borderClass: "border-l-4 border-l-slate-500" };
+      return { label: "Estate", badgeClass: "bg-slate-500 text-white", accentClass: "ring-2 ring-slate-400/50 bg-gradient-to-br from-slate-100 to-white dark:from-slate-900/20 dark:to-[#3d3d3d]" };
     default:
       return null;
   }
@@ -52,7 +52,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
       <div
         className={`card-warm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
           hot ? "hot-pulse" : ""
-        } ${badge?.borderClass ?? ""}`}
+        } ${badge?.accentClass ?? ""}`}
       >
         {/* Header: address + badges */}
         <div className="flex items-start justify-between gap-2 mb-3">
