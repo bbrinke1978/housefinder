@@ -66,13 +66,18 @@ export async function upsertSignal(
     raw?: unknown;
   }
 ): Promise<void> {
+  // Use sentinel date '1970-01-01' when recordedDate is null to match
+  // the COALESCE unique index (uq_distress_signal_dedup) — PostgreSQL
+  // treats NULLs as never equal, so ON CONFLICT needs a real value.
+  const recordedDate = signal.recordedDate || "1970-01-01";
+
   await db
     .insert(distressSignals)
     .values({
       propertyId,
       signalType: signal.type as "nod" | "tax_lien" | "lis_pendens" | "probate" | "code_violation" | "vacant",
       status: "active",
-      recordedDate: signal.recordedDate ?? null,
+      recordedDate,
       sourceUrl: signal.sourceUrl ?? null,
       rawData: signal.raw ? JSON.stringify(signal.raw) : null,
     })
