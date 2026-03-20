@@ -36,7 +36,7 @@ export default async function DashboardPage({
     status: typeof params.status === "string" ? params.status : undefined,
     sort: typeof params.sort === "string" ? params.sort : undefined,
     skipTrace: typeof params.skipTrace === "string" ? params.skipTrace : undefined,
-    minSignals: typeof params.minSignals === "string" ? params.minSignals : undefined,
+    minScore: typeof params.minScore === "string" ? params.minScore : undefined,
   };
 
   const [stats, properties, cities] = await Promise.all([

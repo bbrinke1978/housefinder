@@ -171,7 +171,7 @@ export interface GetPropertiesParams {
   status?: string;
   sort?: string;
   skipTrace?: string;
-  minSignals?: string;
+  minScore?: string;
 }
 
 export async function getProperties(
@@ -179,21 +179,20 @@ export async function getProperties(
 ): Promise<PropertyWithLead[]> {
   const conditions = [];
 
-  // Only show properties with at least N distress signals (default: 1)
-  const minSignals = params.minSignals ? parseInt(params.minSignals, 10) : 1;
-  if (minSignals <= 1) {
-    conditions.push(
-      exists(
-        db
-          .select({ one: sql`1` })
-          .from(distressSignals)
-          .where(eq(distressSignals.propertyId, properties.id))
-      )
-    );
-  } else {
-    conditions.push(
-      sql`(SELECT count(*) FROM distress_signals ds WHERE ds.property_id = ${properties.id}) >= ${minSignals}`
-    );
+  // Only show properties with at least one distress signal
+  conditions.push(
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(distressSignals)
+        .where(eq(distressSignals.propertyId, properties.id))
+    )
+  );
+
+  // Filter by minimum distress score
+  const minScore = params.minScore ? parseInt(params.minScore, 10) : 0;
+  if (minScore > 0) {
+    conditions.push(sql`${leads.distressScore} >= ${minScore}`);
   }
 
   if (params.city) {

@@ -25,12 +25,11 @@ const DISTRESS_TYPES = [
   { value: "vacant", label: "Vacant" },
 ];
 
-const MIN_SIGNALS_OPTIONS = [
-  { value: "", label: "Any Signals" },
-  { value: "1", label: "1+ Signals" },
-  { value: "2", label: "2+ Signals" },
-  { value: "3", label: "3+ Signals" },
-  { value: "4", label: "4+ Signals" },
+const MIN_SCORE_OPTIONS = [
+  { value: "", label: "Any Score" },
+  { value: "2", label: "Score 2+" },
+  { value: "3", label: "Score 3+" },
+  { value: "4", label: "Score 4+ (Hot)" },
 ];
 
 const SORT_OPTIONS = [
@@ -46,7 +45,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const currentCity = searchParams.get("city") ?? "";
   const currentDistressType = searchParams.get("distressType") ?? "";
   const currentHot = searchParams.get("hot") ?? "";
-  const currentMinSignals = searchParams.get("minSignals") ?? "";
+  const currentMinScore = searchParams.get("minScore") ?? "";
   const currentSort = searchParams.get("sort") ?? "score";
 
   const updateParams = useCallback(
@@ -67,7 +66,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   }, [router]);
 
   const hasFilters =
-    currentCity || currentDistressType || currentHot || currentMinSignals || currentSort !== "score";
+    currentCity || currentDistressType || currentHot || currentMinScore || currentSort !== "score";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -107,16 +106,16 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
         </SelectContent>
       </Select>
 
-      {/* Min signals filter */}
+      {/* Min score filter */}
       <Select
-        value={currentMinSignals}
-        onValueChange={(val) => updateParams("minSignals", val ?? "")}
+        value={currentMinScore}
+        onValueChange={(val) => updateParams("minScore", val ?? "")}
       >
         <SelectTrigger className="w-full sm:w-[150px]">
-          <SelectValue placeholder="Any Signals" />
+          <SelectValue placeholder="Any Score" />
         </SelectTrigger>
         <SelectContent>
-          {MIN_SIGNALS_OPTIONS.map((opt) => (
+          {MIN_SCORE_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
             </SelectItem>
