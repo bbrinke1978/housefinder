@@ -25,6 +25,14 @@ const DISTRESS_TYPES = [
   { value: "vacant", label: "Vacant" },
 ];
 
+const MIN_SIGNALS_OPTIONS = [
+  { value: "", label: "Any Signals" },
+  { value: "1", label: "1+ Signals" },
+  { value: "2", label: "2+ Signals" },
+  { value: "3", label: "3+ Signals" },
+  { value: "4", label: "4+ Signals" },
+];
+
 const SORT_OPTIONS = [
   { value: "score", label: "Score" },
   { value: "date", label: "Date Added" },
@@ -38,6 +46,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const currentCity = searchParams.get("city") ?? "";
   const currentDistressType = searchParams.get("distressType") ?? "";
   const currentHot = searchParams.get("hot") ?? "";
+  const currentMinSignals = searchParams.get("minSignals") ?? "";
   const currentSort = searchParams.get("sort") ?? "score";
 
   const updateParams = useCallback(
@@ -58,7 +67,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   }, [router]);
 
   const hasFilters =
-    currentCity || currentDistressType || currentHot || currentSort !== "score";
+    currentCity || currentDistressType || currentHot || currentMinSignals || currentSort !== "score";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -93,6 +102,23 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
           {DISTRESS_TYPES.map((type) => (
             <SelectItem key={type.value} value={type.value}>
               {type.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Min signals filter */}
+      <Select
+        value={currentMinSignals}
+        onValueChange={(val) => updateParams("minSignals", val ?? "")}
+      >
+        <SelectTrigger className="w-full sm:w-[150px]">
+          <SelectValue placeholder="Any Signals" />
+        </SelectTrigger>
+        <SelectContent>
+          {MIN_SIGNALS_OPTIONS.map((opt) => (
+            <SelectItem key={opt.value} value={opt.value}>
+              {opt.label}
             </SelectItem>
           ))}
         </SelectContent>
