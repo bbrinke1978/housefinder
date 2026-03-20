@@ -8,14 +8,14 @@ interface PropertyCardProps {
   property: PropertyWithLead;
 }
 
-function ownerTypeBadge(type: string | null): { label: string; className: string } | null {
+function ownerTypeBadge(type: string | null): { label: string; badgeClass: string; borderClass: string } | null {
   switch (type) {
     case "llc":
-      return { label: "LLC", className: "bg-purple-100 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400" };
+      return { label: "LLC", badgeClass: "bg-purple-500 text-white", borderClass: "border-l-4 border-l-purple-500" };
     case "trust":
-      return { label: "Trust", className: "bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" };
+      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", borderClass: "border-l-4 border-l-indigo-500" };
     case "estate":
-      return { label: "Estate", className: "bg-slate-100 text-slate-600 dark:bg-slate-800/40 dark:text-slate-400" };
+      return { label: "Estate", badgeClass: "bg-slate-500 text-white", borderClass: "border-l-4 border-l-slate-500" };
     default:
       return null;
   }
@@ -52,7 +52,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
       <div
         className={`card-warm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
           hot ? "hot-pulse" : ""
-        }`}
+        } ${badge?.borderClass ?? ""}`}
       >
         {/* Header: address + badges */}
         <div className="flex items-start justify-between gap-2 mb-3">
@@ -69,7 +69,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
             {badge && (
-              <span className={`badge-tag text-[10px] ${badge.className}`}>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${badge.badgeClass}`}>
                 {badge.label}
               </span>
             )}
