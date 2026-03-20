@@ -14,6 +14,41 @@ import type {
   SignalConfig,
 } from "./types.js";
 
+// ── Tax lien amount tiering ──────────────────────────────────────────────────
+
+/**
+ * Compute an effective weight for a tax_lien signal based on amountDue from raw_data.
+ *
+ * Tiers:
+ *   $1000+   -> weight 4
+ *   $500-999 -> weight 3
+ *   $100-499 -> weight 2
+ *   $50-99   -> weight 1.5 (rounds to 1 in integer scoring)
+ *   under $50 / no amount -> weight 1
+ *
+ * The base weight from config is used as the floor and is overridden when
+ * a valid amount is present.
+ */
+function taxLienAmountWeight(rawData: string | null | undefined): number {
+  if (!rawData) return 1;
+  try {
+    const parsed = JSON.parse(rawData) as Record<string, unknown>;
+    const amountStr = parsed.amountDue;
+    if (!amountStr || typeof amountStr !== "string" || amountStr === "") {
+      return 1;
+    }
+    const amount = parseFloat(amountStr.replace(/,/g, ""));
+    if (isNaN(amount)) return 1;
+
+    if (amount >= 1000) return 4;
+    if (amount >= 500) return 3;
+    if (amount >= 100) return 2;
+    return 1;
+  } catch {
+    return 1;
+  }
+}
+
 // ── Pure scoring function (no DB dependency) ────────────────────────────────
 
 /**
@@ -23,6 +58,9 @@ import type {
  * - Stale signals (older than freshness_days) are excluded
  * - Signals with no recorded_date are assumed recent and included
  * - Unknown signal types (no matching config) are skipped
+ * - tax_lien signals: weight is determined by amountDue tier (1-4)
+ * - Multi-year delinquency: each tax_lien signal beyond the first adds +1 bonus
+ *   (enabled when multiple signals exist because each year is stored as a distinct row)
  */
 export function scoreProperty(
   signals: SignalInput[],
@@ -38,6 +76,9 @@ export function scoreProperty(
   let score = 0;
   let scoredCount = 0;
 
+  // Track tax_lien signals separately for multi-year bonus calculation
+  const scoredTaxLiens: SignalInput[] = [];
+
   for (const signal of activeSignals) {
     const signalCfg = configMap.get(signal.signal_type);
     if (!signalCfg) continue; // unknown signal type -- skip
@@ -49,8 +90,22 @@ export function scoreProperty(
     }
     // null recorded_date => assume recent, include
 
-    score += signalCfg.weight;
+    if (signal.signal_type === "tax_lien") {
+      // Use tiered amount weight instead of flat config weight
+      const effectiveWeight = taxLienAmountWeight(signal.raw_data);
+      score += effectiveWeight;
+      scoredTaxLiens.push(signal);
+    } else {
+      score += signalCfg.weight;
+    }
     scoredCount++;
+  }
+
+  // Multi-year delinquency bonus: each additional tax_lien signal (beyond the first)
+  // represents an additional year of delinquency, worth +1 each.
+  // This only applies when data has been stored with per-year recorded_dates.
+  if (scoredTaxLiens.length > 1) {
+    score += scoredTaxLiens.length - 1;
   }
 
   return {
@@ -93,6 +148,9 @@ async function loadScoringConfig(): Promise<ScoringConfig> {
  * Score all properties that have at least one active distress signal.
  * Reads config from scraperConfig table, computes scores via the pure
  * scoreProperty function, and upserts results into the leads table.
+ *
+ * Now includes raw_data in the signal fetch so tiered tax_lien weights
+ * (by amountDue) and multi-year delinquency bonuses can be applied.
  */
 export async function scoreAllProperties(): Promise<{
   scored: number;
@@ -100,13 +158,14 @@ export async function scoreAllProperties(): Promise<{
 }> {
   const config = await loadScoringConfig();
 
-  // Fetch all properties with their active distress signals
+  // Fetch all properties with their active distress signals (includes raw_data for tiering)
   const rows = await db
     .select({
       propertyId: properties.id,
       signalType: distressSignals.signalType,
       status: distressSignals.status,
       recordedDate: distressSignals.recordedDate,
+      rawData: distressSignals.rawData,
     })
     .from(properties)
     .innerJoin(distressSignals, eq(distressSignals.propertyId, properties.id))
@@ -120,6 +179,7 @@ export async function scoreAllProperties(): Promise<{
       signal_type: row.signalType,
       recorded_date: row.recordedDate ? new Date(row.recordedDate) : null,
       status: row.status,
+      raw_data: row.rawData ?? null,
     });
     propertySignals.set(row.propertyId, existing);
   }

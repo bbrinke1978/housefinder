@@ -6,4 +6,5 @@ export * from "./functions/juabScrape.js";
 export * from "./functions/millardScrape.js";
 export * from "./functions/sanpeteScrape.js";
 export * from "./functions/sevierScrape.js";
+export * from "./functions/utahLegalsScrape.js";
 export * from "./functions/installBrowsers.js";

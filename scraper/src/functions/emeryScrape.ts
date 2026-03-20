@@ -1,9 +1,11 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
 import { scrapeEmeryTaxRoll } from "../sources/emery-tax-roll.js";
 import { parseEmeryDelinquentPdf } from "../sources/emery-delinquent-pdf.js";
+import { scrapeEmery5YearBackTax } from "../sources/emery-5year-backtax.js";
 import {
   upsertFromAssessor,
   upsertFromDelinquent,
+  upsertFromEmery5Year,
 } from "../lib/upsert.js";
 import { scoreAllProperties } from "../scoring/score.js";
 import { updateScrapeHealth, checkHealthAlert } from "../lib/health.js";
@@ -46,9 +48,11 @@ async function emeryScrapeHandler(
   const results: {
     taxRoll: { upserted: number } | null;
     delinquent: { upserted: number; signals: number } | null;
+    backTax5Year: { upserted: number; signals: number } | null;
   } = {
     taxRoll: null,
     delinquent: null,
+    backTax5Year: null,
   };
 
   // Tax roll scraper (wpDataTables)
@@ -133,6 +137,63 @@ async function emeryScrapeHandler(
     });
   }
 
+  // 5-year back tax table (runs annually -- skip if already scraped this year)
+  try {
+    const currentYear = new Date().getFullYear().toString();
+    const configKey = "emery.5year-backtax.lastParsedYear";
+
+    const existing = await db
+      .select({ value: scraperConfig.value })
+      .from(scraperConfig)
+      .where(eq(scraperConfig.key, configKey));
+
+    const lastParsedYear = existing.length > 0 ? existing[0].value : null;
+
+    if (lastParsedYear === currentYear) {
+      context.log(
+        `Emery 5-year back tax: already scraped for ${currentYear}, skipping`
+      );
+    } else {
+      const backTaxRecords = await scrapeEmery5YearBackTax();
+      results.backTax5Year = await upsertFromEmery5Year(backTaxRecords);
+
+      if (backTaxRecords.length > 0) {
+        await db
+          .insert(scraperConfig)
+          .values({
+            key: configKey,
+            value: currentYear,
+            description: "Last year the Emery County 5-year back tax table was scraped",
+          })
+          .onConflictDoUpdate({
+            target: scraperConfig.key,
+            set: {
+              value: currentYear,
+              updatedAt: new Date(),
+            },
+          });
+      }
+
+      await updateScrapeHealth({
+        county: "emery",
+        source: "5year-backtax",
+        resultCount: backTaxRecords.length,
+        success: true,
+      });
+      context.log(
+        `Emery 5-year back tax: scraped ${backTaxRecords.length} records, upserted ${results.backTax5Year.upserted}, signals ${results.backTax5Year.signals}`
+      );
+    }
+  } catch (err) {
+    context.error("Emery 5-year back tax scraper failed", err);
+    await updateScrapeHealth({
+      county: "emery",
+      source: "5year-backtax",
+      resultCount: 0,
+      success: false,
+    });
+  }
+
   // Step 3: Score all properties (runs even if some scrapers failed)
   let scoreResults: { scored: number; hot: number } = { scored: 0, hot: 0 };
   try {
@@ -167,6 +228,7 @@ async function emeryScrapeHandler(
   context.log("Emery County scrape complete", {
     taxRoll: results.taxRoll,
     delinquent: results.delinquent,
+    backTax5Year: results.backTax5Year,
     scoring: scoreResults,
     alerts: alertResults,
     isPastDue: myTimer.isPastDue,

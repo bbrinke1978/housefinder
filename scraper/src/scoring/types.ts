@@ -20,4 +20,5 @@ export interface SignalInput {
   signal_type: string;
   recorded_date: Date | null;
   status: string;
+  raw_data?: string | null;
 }
