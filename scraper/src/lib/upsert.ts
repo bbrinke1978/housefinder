@@ -3,6 +3,16 @@ import { properties, distressSignals } from "../db/schema.js";
 import { classifyOwnerType } from "./scraper-utils.js";
 import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validation.js";
 
+/** Default city for each county when the scraper doesn't extract one */
+const COUNTY_DEFAULT_CITY: Record<string, string> = {
+  carbon: "Price",
+  emery: "Castle Dale",
+  juab: "Nephi",
+  millard: "Delta",
+  sanpete: "Manti",
+  sevier: "Richfield",
+};
+
 /**
  * Upsert a property record using parcelId as the deduplication key.
  * On conflict, updates address, ownerName, ownerType, and updatedAt.
@@ -13,14 +23,16 @@ import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validat
 export async function upsertProperty(record: PropertyRecord, county?: string): Promise<string> {
   const now = new Date();
   const ownerType = classifyOwnerType(record.ownerName);
+  const resolvedCounty = county ?? record.county ?? "carbon";
+  const city = record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "";
 
   const result = await db
     .insert(properties)
     .values({
       parcelId: record.parcelId,
       address: record.address,
-      city: record.city,
-      county: county ?? record.county ?? "carbon",
+      city,
+      county: resolvedCounty,
       state: "UT",
       ownerName: record.ownerName ?? null,
       ownerType,
@@ -30,6 +42,7 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
       target: properties.parcelId,
       set: {
         address: record.address,
+        city,
         ownerName: record.ownerName ?? null,
         ownerType,
         updatedAt: now,
