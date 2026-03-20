@@ -201,7 +201,7 @@ export async function getProperties(
   }
 
   if (params.ownerType) {
-    conditions.push(eq(properties.ownerType, params.ownerType));
+    conditions.push(sql`${properties.ownerType} = ${params.ownerType}`);
   }
 
   if (params.distressType) {
