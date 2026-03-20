@@ -172,6 +172,7 @@ export interface GetPropertiesParams {
   sort?: string;
   skipTrace?: string;
   minScore?: string;
+  ownerType?: string;
 }
 
 export async function getProperties(
@@ -197,6 +198,10 @@ export async function getProperties(
 
   if (params.city) {
     conditions.push(ilike(properties.city, params.city));
+  }
+
+  if (params.ownerType) {
+    conditions.push(eq(properties.ownerType, params.ownerType));
   }
 
   if (params.distressType) {

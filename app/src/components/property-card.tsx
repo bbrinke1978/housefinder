@@ -1,11 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, MapPin, User, ArrowRight } from "lucide-react";
+import { Flame, MapPin, User, Building2, ArrowRight } from "lucide-react";
 import type { PropertyWithLead } from "@/types";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
+}
+
+function ownerTypeBadge(type: string | null): { label: string; className: string } | null {
+  switch (type) {
+    case "llc":
+      return { label: "LLC", className: "bg-purple-100 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400" };
+    case "trust":
+      return { label: "Trust", className: "bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" };
+    case "estate":
+      return { label: "Estate", className: "bg-slate-100 text-slate-600 dark:bg-slate-800/40 dark:text-slate-400" };
+    default:
+      return null;
+  }
 }
 
 function scoreColor(score: number): string {
@@ -31,6 +44,8 @@ function isNew(property: PropertyWithLead): boolean {
 export function PropertyCard({ property }: PropertyCardProps) {
   const hot = property.isHot;
   const pct = Math.min((property.distressScore / 10) * 100, 100);
+  const badge = ownerTypeBadge(property.ownerType);
+  const isEntity = property.ownerType === "llc" || property.ownerType === "trust" || property.ownerType === "estate";
 
   return (
     <Link href={`/properties/${property.id}`} className="group block">
@@ -43,7 +58,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="min-w-0 flex-1">
             <p className="truncate font-bold text-dark-950 dark:text-dark-100 group-hover:text-brand-500 transition-colors">
-              {property.address}
+              {property.address || property.parcelId}
             </p>
             <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mt-0.5">
               <MapPin className="h-3 w-3" />
@@ -53,6 +68,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
+            {badge && (
+              <span className={`badge-tag text-[10px] ${badge.className}`}>
+                {badge.label}
+              </span>
+            )}
             {isNew(property) && (
               <span className="badge-tag text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
                 New
@@ -70,7 +90,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         {/* Owner */}
         {property.ownerName && (
           <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mb-3">
-            <User className="h-3 w-3" />
+            {isEntity ? <Building2 className="h-3 w-3" /> : <User className="h-3 w-3" />}
             <span className="truncate">{property.ownerName}</span>
           </div>
         )}

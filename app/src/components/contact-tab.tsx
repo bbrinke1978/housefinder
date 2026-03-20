@@ -112,18 +112,30 @@ export function ContactTab({
             </span>
           </div>
           <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-            This property is owned by an entity. Search the{" "}
-            <a
-              href="https://secure.utah.gov/bes/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-0.5 underline hover:text-blue-800 dark:hover:text-blue-300"
-            >
-              Utah Business Registry
-              <ExternalLink className="h-3 w-3" />
-            </a>{" "}
-            for registered agent contact info.
+            This property is owned by an entity. Look up the registered agent:
           </p>
+          {ownerName && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a
+                href={`https://secure.utah.gov/bes/index.html?searchType=ENTITY&entity=${encodeURIComponent(ownerName)}&action=SEARCH`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-blue-700 underline hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Utah Business Registry
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              <a
+                href={`https://opencorporates.com/companies?q=${encodeURIComponent(ownerName)}&jurisdiction_code=us_ut`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-blue-700 underline hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                OpenCorporates
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
         </div>
       )}
 

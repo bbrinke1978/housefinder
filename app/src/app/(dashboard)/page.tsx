@@ -36,6 +36,7 @@ export default async function DashboardPage({
     status: typeof params.status === "string" ? params.status : undefined,
     sort: typeof params.sort === "string" ? params.sort : undefined,
     skipTrace: typeof params.skipTrace === "string" ? params.skipTrace : undefined,
+    ownerType: typeof params.ownerType === "string" ? params.ownerType : undefined,
     minScore: typeof params.minScore === "string" ? params.minScore : undefined,
   };
 

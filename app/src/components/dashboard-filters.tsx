@@ -25,6 +25,13 @@ const DISTRESS_TYPES = [
   { value: "vacant", label: "Vacant" },
 ];
 
+const OWNER_TYPES = [
+  { value: "individual", label: "Individual" },
+  { value: "llc", label: "LLC / Corp" },
+  { value: "trust", label: "Trust" },
+  { value: "estate", label: "Estate" },
+];
+
 const MIN_SCORE_OPTIONS = [
   { value: "", label: "Any Score" },
   { value: "2", label: "Score 2+" },
@@ -45,6 +52,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const currentCity = searchParams.get("city") ?? "";
   const currentDistressType = searchParams.get("distressType") ?? "";
   const currentHot = searchParams.get("hot") ?? "";
+  const currentOwnerType = searchParams.get("ownerType") ?? "";
   const currentMinScore = searchParams.get("minScore") ?? "";
   const currentSort = searchParams.get("sort") ?? "score";
 
@@ -66,7 +74,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   }, [router]);
 
   const hasFilters =
-    currentCity || currentDistressType || currentHot || currentMinScore || currentSort !== "score";
+    currentCity || currentDistressType || currentHot || currentOwnerType || currentMinScore || currentSort !== "score";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -83,6 +91,24 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
           {cities.map((city) => (
             <SelectItem key={city} value={city}>
               {city}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Owner type filter */}
+      <Select
+        value={currentOwnerType}
+        onValueChange={(val) => updateParams("ownerType", val ?? "")}
+      >
+        <SelectTrigger className="w-full sm:w-[160px]">
+          <SelectValue placeholder="All Owners" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All Owners</SelectItem>
+          {OWNER_TYPES.map((type) => (
+            <SelectItem key={type.value} value={type.value}>
+              {type.label}
             </SelectItem>
           ))}
         </SelectContent>
