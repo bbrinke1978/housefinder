@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTheme } from "next-themes";
-import { X, Plus, Save, Sun, Moon, Monitor, Check, Bell } from "lucide-react";
+import { X, Plus, Save, Sun, Moon, Monitor, Check, Bell, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,8 +13,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { updateTargetCities, updateAlertSettings } from "@/lib/actions";
-import type { AlertSettings } from "@/lib/actions";
+import { updateTargetCities, updateAlertSettings, updateDashboardSettings } from "@/lib/actions";
+import type { AlertSettings, DashboardSettings } from "@/lib/actions";
 
 const ALERT_DEFAULTS: AlertSettings = {
   emailEnabled: true,
@@ -23,12 +23,17 @@ const ALERT_DEFAULTS: AlertSettings = {
   smsThreshold: 3,
 };
 
+const DASHBOARD_DEFAULTS: DashboardSettings = {
+  hideBigOperators: true,
+};
+
 interface SettingsFormProps {
   initialCities: string[];
   initialAlertSettings?: AlertSettings;
+  initialDashboardSettings?: DashboardSettings;
 }
 
-export function SettingsForm({ initialCities, initialAlertSettings }: SettingsFormProps) {
+export function SettingsForm({ initialCities, initialAlertSettings, initialDashboardSettings }: SettingsFormProps) {
   const [cities, setCities] = useState<string[]>(initialCities);
   const [newCity, setNewCity] = useState("");
   const [message, setMessage] = useState<{
@@ -37,12 +42,21 @@ export function SettingsForm({ initialCities, initialAlertSettings }: SettingsFo
   } | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isAlertPending, startAlertTransition] = useTransition();
+  const [isDashboardPending, startDashboardTransition] = useTransition();
   const { theme, setTheme } = useTheme();
 
   // Alert settings state
   const defaults = initialAlertSettings ?? ALERT_DEFAULTS;
   const [alertSettings, setAlertSettings] = useState<AlertSettings>(defaults);
   const [alertMessage, setAlertMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  // Dashboard settings state
+  const dashboardDefaults = initialDashboardSettings ?? DASHBOARD_DEFAULTS;
+  const [dashboardSettings, setDashboardSettings] = useState<DashboardSettings>(dashboardDefaults);
+  const [dashboardMessage, setDashboardMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
@@ -93,6 +107,21 @@ export function SettingsForm({ initialCities, initialAlertSettings }: SettingsFo
         setAlertMessage({
           type: "error",
           text: err instanceof Error ? err.message : "Failed to save alert settings",
+        });
+      }
+    });
+  }
+
+  function handleSaveDashboard() {
+    setDashboardMessage(null);
+    startDashboardTransition(async () => {
+      try {
+        await updateDashboardSettings(dashboardSettings);
+        setDashboardMessage({ type: "success", text: "Dashboard settings saved successfully" });
+      } catch (err) {
+        setDashboardMessage({
+          type: "error",
+          text: err instanceof Error ? err.message : "Failed to save dashboard settings",
         });
       }
     });
@@ -322,6 +351,71 @@ export function SettingsForm({ initialCities, initialAlertSettings }: SettingsFo
                     <Check className="inline h-3.5 w-3.5 mr-1" />
                   )}
                   {alertMessage.text}
+                </span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dashboard Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            Dashboard Filters
+          </CardTitle>
+          <CardDescription>
+            Control what appears on the property dashboard and in statistics.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="hideBigOperators" className="text-sm font-medium">
+                  Hide big operators (10+ parcels)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Exclude owners with 10 or more distressed properties (ranches, mineral
+                  companies, large LLCs). Focus on individual distressed sellers.
+                </p>
+              </div>
+              <input
+                id="hideBigOperators"
+                type="checkbox"
+                checked={dashboardSettings.hideBigOperators}
+                onChange={(e) =>
+                  setDashboardSettings((prev) => ({
+                    ...prev,
+                    hideBigOperators: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                onClick={handleSaveDashboard}
+                disabled={isDashboardPending}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                {isDashboardPending ? "Saving..." : "Save Dashboard Settings"}
+              </Button>
+              {dashboardMessage && (
+                <span
+                  className={`text-sm ${
+                    dashboardMessage.type === "success"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-destructive"
+                  }`}
+                >
+                  {dashboardMessage.type === "success" && (
+                    <Check className="inline h-3.5 w-3.5 mr-1" />
+                  )}
+                  {dashboardMessage.text}
                 </span>
               )}
             </div>

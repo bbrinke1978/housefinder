@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
-import { properties, leads, distressSignals, leadNotes, ownerContacts } from "@/db/schema";
-import { eq, and, sql, desc, asc, ilike, exists, isNotNull, or } from "drizzle-orm";
+import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig } from "@/db/schema";
+import { eq, and, sql, desc, asc, ilike, exists, isNotNull, notInArray } from "drizzle-orm";
 import type {
   PropertyWithLead,
   MapProperty,
@@ -10,6 +10,41 @@ import type {
   SignalType,
   OwnerContact,
 } from "@/types";
+
+// -- Big Operator Filter --
+
+/**
+ * Returns owner names that appear on 10 or more properties that have at least
+ * one distress signal. Used to exclude big operators from the dashboard.
+ *
+ * Result is an array of owner_name strings (may be empty).
+ */
+export async function getBigOperatorNames(): Promise<string[]> {
+  const rows = await db.execute<{ owner_name: string }>(sql`
+    SELECT p.owner_name
+    FROM properties p
+    JOIN distress_signals ds ON ds.property_id = p.id
+    WHERE p.owner_name IS NOT NULL
+    GROUP BY p.owner_name
+    HAVING count(DISTINCT p.id) >= 10
+  `);
+  return (rows.rows ?? []).map((r) => r.owner_name).filter(Boolean);
+}
+
+/**
+ * Returns true when the dashboard.hideBigOperators setting is enabled (or absent,
+ * since the default is ON).
+ */
+export async function shouldHideBigOperators(): Promise<boolean> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "dashboard.hideBigOperators"))
+    .limit(1);
+
+  if (rows.length === 0) return true; // default ON
+  return rows[0].value !== "false";
+}
 
 /**
  * Get full property + lead data by property ID.
@@ -108,6 +143,25 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+  // Precompute big-operator exclusion list once
+  const [hideBigOps, bigOpNames] = await Promise.all([
+    shouldHideBigOperators(),
+    getBigOperatorNames(),
+  ]);
+
+  const statsConditions = [
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(distressSignals)
+        .where(eq(distressSignals.propertyId, properties.id))
+    ),
+  ];
+
+  if (hideBigOps && bigOpNames.length > 0) {
+    statsConditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+  }
+
   // Only count properties that have at least one distress signal
   const result = await db
     .select({
@@ -125,14 +179,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     })
     .from(leads)
     .innerJoin(properties, eq(leads.propertyId, properties.id))
-    .where(
-      exists(
-        db
-          .select({ one: sql`1` })
-          .from(distressSignals)
-          .where(eq(distressSignals.propertyId, properties.id))
-      )
-    );
+    .where(and(...statsConditions));
 
   const row = result[0];
   return {
@@ -189,6 +236,12 @@ export interface GetPropertiesParams {
 export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
+  // Precompute big-operator exclusion list once (parallel with query building)
+  const [hideBigOps, bigOpNames] = await Promise.all([
+    shouldHideBigOperators(),
+    getBigOperatorNames(),
+  ]);
+
   const conditions = [];
 
   // Only show properties with at least one distress signal
@@ -200,6 +253,11 @@ export async function getProperties(
         .where(eq(distressSignals.propertyId, properties.id))
     )
   );
+
+  // Exclude big operators when setting is enabled
+  if (hideBigOps && bigOpNames.length > 0) {
+    conditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+  }
 
   // Filter by tier (overrides minScore when present)
   if (params.tier) {

@@ -49,6 +49,46 @@ function taxLienAmountWeight(rawData: string | null | undefined): number {
   }
 }
 
+// ── Years-delinquent bonus ───────────────────────────────────────────────────
+
+/**
+ * Compute the multi-year delinquency bonus from a set of scored tax_lien signals.
+ *
+ * Counts distinct calendar years represented by recorded_dates (signals without a
+ * recorded_date are treated as contributing one unnamed year).
+ *
+ * Bonus tiers:
+ *   1 distinct year  -> +0 (base score only)
+ *   2 distinct years -> +1
+ *   3 distinct years -> +2
+ *   4 distinct years -> +3
+ *   5+ distinct years -> +4 (imminent tax sale risk)
+ */
+function yearsDelinquentBonus(taxLienSignals: SignalInput[]): number {
+  if (taxLienSignals.length === 0) return 0;
+
+  const years = new Set<string>();
+  let undatedCount = 0;
+
+  for (const signal of taxLienSignals) {
+    if (signal.recorded_date !== null) {
+      years.add(signal.recorded_date.getFullYear().toString());
+    } else {
+      undatedCount++;
+    }
+  }
+
+  // Each undated signal contributes a synthetic unique key so it still counts
+  // as a separate year entry when no dated signals exist.
+  const distinctYears = years.size + (years.size === 0 ? undatedCount : 0);
+
+  if (distinctYears >= 5) return 4;
+  if (distinctYears === 4) return 3;
+  if (distinctYears === 3) return 2;
+  if (distinctYears === 2) return 1;
+  return 0; // 1 year or fewer — no bonus
+}
+
 // ── Pure scoring function (no DB dependency) ────────────────────────────────
 
 /**
@@ -59,8 +99,8 @@ function taxLienAmountWeight(rawData: string | null | undefined): number {
  * - Signals with no recorded_date are assumed recent and included
  * - Unknown signal types (no matching config) are skipped
  * - tax_lien signals: weight is determined by amountDue tier (1-4)
- * - Multi-year delinquency: each tax_lien signal beyond the first adds +1 bonus
- *   (enabled when multiple signals exist because each year is stored as a distinct row)
+ * - Multi-year delinquency bonus applied based on distinct years represented:
+ *     1 yr = +0, 2 yr = +1, 3 yr = +2, 4 yr = +3, 5+ yr = +4
  */
 export function scoreProperty(
   signals: SignalInput[],
@@ -76,7 +116,7 @@ export function scoreProperty(
   let score = 0;
   let scoredCount = 0;
 
-  // Track tax_lien signals separately for multi-year bonus calculation
+  // Track tax_lien signals that pass freshness check for multi-year bonus
   const scoredTaxLiens: SignalInput[] = [];
 
   for (const signal of activeSignals) {
@@ -101,12 +141,8 @@ export function scoreProperty(
     scoredCount++;
   }
 
-  // Multi-year delinquency bonus: each additional tax_lien signal (beyond the first)
-  // represents an additional year of delinquency, worth +1 each.
-  // This only applies when data has been stored with per-year recorded_dates.
-  if (scoredTaxLiens.length > 1) {
-    score += scoredTaxLiens.length - 1;
-  }
+  // Multi-year delinquency bonus: tiered by number of distinct calendar years
+  score += yearsDelinquentBonus(scoredTaxLiens);
 
   return {
     score,

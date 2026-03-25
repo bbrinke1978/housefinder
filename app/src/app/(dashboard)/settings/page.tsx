@@ -1,13 +1,14 @@
 import { SettingsForm } from "@/components/settings-form";
-import { getTargetCities, getAlertSettings } from "@/lib/actions";
+import { getTargetCities, getAlertSettings, getDashboardSettings } from "@/lib/actions";
 import { Settings } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const [cities, alertSettings] = await Promise.all([
+  const [cities, alertSettings, dashboardSettings] = await Promise.all([
     getTargetCities(),
     getAlertSettings(),
+    getDashboardSettings(),
   ]);
 
   return (
@@ -40,7 +41,11 @@ export default async function SettingsPage() {
       </div>
 
       <div className="animate-fade-in-up stagger-1">
-        <SettingsForm initialCities={cities} initialAlertSettings={alertSettings} />
+        <SettingsForm
+          initialCities={cities}
+          initialAlertSettings={alertSettings}
+          initialDashboardSettings={dashboardSettings}
+        />
       </div>
     </div>
   );

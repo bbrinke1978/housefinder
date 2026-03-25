@@ -424,6 +424,79 @@ export async function addManualSignal(
   revalidatePath(`/properties/${propertyId}`);
 }
 
+// -- Dashboard Settings --
+
+export interface DashboardSettings {
+  hideBigOperators: boolean;
+}
+
+const DASHBOARD_DEFAULTS: DashboardSettings = {
+  hideBigOperators: true,
+};
+
+/**
+ * Read dashboard settings from scraperConfig.
+ * Returns defaults (hideBigOperators: true) if keys not found.
+ */
+export async function getDashboardSettings(): Promise<DashboardSettings> {
+  const rows = await db
+    .select({ key: scraperConfig.key, value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(like(scraperConfig.key, "dashboard.%"));
+
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+
+  return {
+    hideBigOperators:
+      map.get("dashboard.hideBigOperators") === "false"
+        ? false
+        : DASHBOARD_DEFAULTS.hideBigOperators,
+  };
+}
+
+const updateDashboardSettingsSchema = z.object({
+  hideBigOperators: z.boolean(),
+});
+
+/**
+ * Upsert dashboard settings in scraperConfig.
+ */
+export async function updateDashboardSettings(
+  settings: DashboardSettings
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = updateDashboardSettingsSchema.parse(settings);
+
+  const key = "dashboard.hideBigOperators";
+  const value = String(parsed.hideBigOperators);
+
+  const existing = await db
+    .select({ id: scraperConfig.id })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, key))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db
+      .update(scraperConfig)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(scraperConfig.key, key));
+  } else {
+    await db.insert(scraperConfig).values({
+      key,
+      value,
+      description: "Hide owners with 10+ distress-signal properties from dashboard",
+    });
+  }
+
+  revalidatePath("/settings");
+  revalidatePath("/");
+}
+
 /**
  * Check if a property has an active vacant flag.
  */
