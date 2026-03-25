@@ -155,7 +155,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   ];
 
   if (hideBigOps && bigOpNames.length > 0) {
-    statsConditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+    statsConditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
   }
 
   // Filter to target cities only
@@ -249,9 +249,9 @@ export async function getProperties(
   // Only show properties with a distress score > 0
   conditions.push(sql`${leads.distressScore} > 0`);
 
-  // Exclude big operators when setting is enabled
+  // Exclude big operators when setting is enabled (handle NULL owner names)
   if (hideBigOps && bigOpNames.length > 0) {
-    conditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+    conditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
   }
 
   // Filter to target cities only (unless a specific city filter is set)
