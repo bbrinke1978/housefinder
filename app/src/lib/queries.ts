@@ -143,10 +143,11 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  // Precompute big-operator exclusion list once
-  const [hideBigOps, bigOpNames] = await Promise.all([
+  // Precompute exclusion lists once
+  const [hideBigOps, bigOpNames, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
+    getTargetCitiesList(),
   ]);
 
   const statsConditions = [
@@ -160,6 +161,11 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   if (hideBigOps && bigOpNames.length > 0) {
     statsConditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+  }
+
+  // Filter to target cities only
+  if (targetCities.length > 0) {
+    statsConditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
   }
 
   // Only count properties that have at least one distress signal
@@ -236,10 +242,11 @@ export interface GetPropertiesParams {
 export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
-  // Precompute big-operator exclusion list once (parallel with query building)
-  const [hideBigOps, bigOpNames] = await Promise.all([
+  // Precompute exclusion lists once (parallel with query building)
+  const [hideBigOps, bigOpNames, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
+    getTargetCitiesList(),
   ]);
 
   const conditions = [];
@@ -257,6 +264,11 @@ export async function getProperties(
   // Exclude big operators when setting is enabled
   if (hideBigOps && bigOpNames.length > 0) {
     conditions.push(notInArray(properties.ownerName, bigOpNames) as ReturnType<typeof notInArray>);
+  }
+
+  // Filter to target cities only (unless a specific city filter is set)
+  if (!params.city && targetCities.length > 0) {
+    conditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
   }
 
   // Filter by tier (overrides minScore when present)
@@ -363,15 +375,26 @@ export async function getProperties(
   return rows as PropertyWithLead[];
 }
 
-// -- Distinct cities for filter dropdown --
+// -- Target cities from settings (for filter dropdown + dashboard filtering) --
+
+export async function getTargetCitiesList(): Promise<string[]> {
+  const configRows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "target_cities"))
+    .limit(1);
+
+  if (configRows.length > 0 && configRows[0].value) {
+    try {
+      const cities = JSON.parse(configRows[0].value) as string[];
+      if (cities.length > 0) return cities.sort();
+    } catch { /* fall through */ }
+  }
+  return [];
+}
 
 export async function getDistinctCities(): Promise<string[]> {
-  const rows = await db
-    .selectDistinct({ city: properties.city })
-    .from(properties)
-    .orderBy(asc(properties.city));
-
-  return rows.map((r) => r.city);
+  return getTargetCitiesList();
 }
 
 // -- Pipeline leads --
