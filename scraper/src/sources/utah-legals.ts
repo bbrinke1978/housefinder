@@ -3,26 +3,28 @@ import {
   createPage,
 } from "../lib/scraper-utils.js";
 
-// County indexes in the Utah Legals county checkbox list (0-based)
-// Verified from the HTML: Beaver=0, Box Elder=1, Cache=2, Carbon=3, Daggett=4,
-// Davis=5, Duchesne=6, Emery=7, Garfield=8, Grand=9, Iron=10, Juab=11,
-// Kane=12, Millard=13, Morgan=14, Piute=15, Rich=16, Salt Lake=17,
-// Salt Lake/ Utah=18, San Juan=19, Sanpete=20, Sevier=21, Summit=22,
-// temp=23, Tooele=24, Uintah=25, Utah=26, Wasatch=27, Washington=28,
-// Wayne=29, Weber=30
-const TARGET_COUNTY_INDEXES = [3, 7, 11, 13]; // Carbon, Emery, Juab, Millard
+// County checkbox indexes in the Utah Legals checkbox list (0-based, verified from HTML)
+// Beaver=0, Box Elder=1, Cache=2, Carbon=3, Daggett=4, Davis=5, Duchesne=6,
+// Emery=7, Garfield=8, Grand=9, Iron=10, Juab=11, Kane=12, Millard=13, ...
+const TARGET_COUNTIES: Array<{ index: number; name: string }> = [
+  { index: 3, name: "carbon" },
+  { index: 7, name: "emery" },
+  { index: 11, name: "juab" },
+  { index: 13, name: "millard" },
+];
 
 export interface UtahLegalsNotice {
   title: string;
   county: string;
+  city: string;
   noticeDate?: string;
   bodyText: string;
   detailUrl?: string;
-  /** Extracted address from notice text, if found */
+  /** Extracted property address from notice snippet, if found */
   propertyAddress?: string;
-  /** Extracted owner/grantor name from notice text, if found */
+  /** Extracted owner/grantor name from notice snippet, if found */
   ownerName?: string;
-  /** Extracted parcel/serial number from notice text, if found */
+  /** Extracted parcel/serial number from notice snippet, if found */
   parcelId?: string;
 }
 
@@ -32,7 +34,7 @@ export interface UtahLegalsNotice {
  * or "property located at ..." or street address patterns.
  */
 function extractAddress(text: string): string | undefined {
-  // Pattern: "commonly known as <address>" or "known as <address>"
+  // Pattern: "commonly known as <address>"
   const knownAs = text.match(/commonly known as\s+([^,\n]+(?:,[^,\n]+)?)/i);
   if (knownAs) return knownAs[1].trim();
 
@@ -40,8 +42,7 @@ function extractAddress(text: string): string | undefined {
   const locatedAt = text.match(/property (?:located|situate[d]?) at\s+([^,\n]+(?:,[^,\n]+)?)/i);
   if (locatedAt) return locatedAt[1].trim();
 
-  // Pattern: street address at end of sentence (e.g., "2024 East 100 North, Price, UT")
-  // Look for number + direction + street name before a city/state
+  // Pattern: street address (number + direction/street name)
   const streetAddr = text.match(/\b(\d+\s+(?:[A-Z]\w+\s+){1,4}(?:St(?:reet)?|Ave(?:nue)?|Rd|Road|Dr(?:ive)?|Blvd|Ln|Lane|Ct|Court|Way|Cir|Pl(?:ace)?)[.,\s][^,\n]{1,40})/i);
   if (streetAddr) return streetAddr[1].trim();
 
@@ -50,14 +51,11 @@ function extractAddress(text: string): string | undefined {
 
 /**
  * Extract owner/grantor name from trustee sale notice text.
- * Looks for "Trustor: NAME" or "Grantor: NAME" or "made by NAME" patterns.
  */
 function extractOwnerName(text: string): string | undefined {
-  // Pattern: "Trustor: NAME" or "Grantor(s): NAME"
   const trustor = text.match(/(?:Trustor|Grantor)[s]?:?\s+([A-Z][A-Za-z\s,.']+?)(?:\n|,|\band\b|$)/i);
   if (trustor) return trustor[1].trim().replace(/,\s*$/, "");
 
-  // Pattern: "made by NAME and NAME"
   const madeBy = text.match(/(?:deed of trust|trust deed) made by\s+([A-Z][A-Za-z\s,.']+?)(?:\s+to\s+|\n|$)/i);
   if (madeBy) return madeBy[1].trim();
 
@@ -66,9 +64,13 @@ function extractOwnerName(text: string): string | undefined {
 
 /**
  * Extract parcel / serial number from notice text.
- * Utah parcel formats vary by county: XX-XXXX-XXXX, alphanumeric, etc.
+ * Supports A.P.N., Parcel No., Serial No., Tax ID formats.
  */
 function extractParcelId(text: string): string | undefined {
+  // Pattern: "A.P.N.: XX-XXX-XXXX" (common in Utah trustee sale notices)
+  const apn = text.match(/A\.P\.N\.?:?\s*([A-Z0-9][\w\-./]{3,})/i);
+  if (apn) return apn[1].trim();
+
   // Pattern: "Parcel No." or "Serial No." or "Tax ID"
   const parcelNo = text.match(/(?:Parcel|Serial|Tax ID|Parcel No\.?|Serial No\.?)[:\s#]+([A-Z0-9][\w-]{3,})/i);
   if (parcelNo) return parcelNo[1].trim();
@@ -84,15 +86,16 @@ function extractParcelId(text: string): string | undefined {
  * Scrapes Utah Legals (utahlegals.com) for trustee sale / foreclosure notices
  * in Carbon, Emery, Juab, and Millard counties.
  *
- * Uses Playwright because the site is ASP.NET WebForms with VIEWSTATE.
+ * Uses Playwright with the correct interaction sequence for the ASP.NET WebForms site:
+ * 1. Select "Foreclosures" from the quick-search dropdown (triggers __doPostBack redirect)
+ * 2. Expand the County filter panel (click label.header to show div#countyDiv)
+ * 3. For each target county: set checkbox.checked=true, then call __doPostBack via JS
+ * 4. Click the search button (id="ctl00_ContentPlaceHolder1_as1_btnGo")
+ * 5. Parse results from the WSExtendedGridNP1 grid (input.viewButton + td.info cells)
  *
- * Process:
- * 1. Navigate to the search page
- * 2. Select "Foreclosures" category
- * 3. Check target county checkboxes
- * 4. Submit the search form
- * 5. Collect all notice titles, dates, and links from the results
- * 6. Visit each notice detail page to extract property address / owner name
+ * NOTE: Does NOT visit individual detail pages because Details.aspx requires
+ * reCAPTCHA completion. All usable data (parcel, county, city, snippet) is
+ * extracted from the search results list.
  *
  * @returns Array of UtahLegalsNotice objects
  */
@@ -105,195 +108,252 @@ export async function scrapeUtahLegalsForeclosures(): Promise<UtahLegalsNotice[]
 
   try {
     const page = await createPage(browser);
+    // Use a wide viewport so the footer doesn't overlay the county checkboxes
+    await page.setViewportSize({ width: 1280, height: 900 });
 
-    // Navigate to search page
-    await page.goto("https://www.utahlegals.com/search.aspx", {
+    // Navigate to search page — ASP.NET will redirect to a session URL
+    await page.goto("https://www.utahlegals.com/Search.aspx", {
       waitUntil: "networkidle",
       timeout: 60000,
     });
 
-    console.log(`${tag} Page loaded: ${await page.title()}`);
+    console.log(`${tag} Page loaded: ${page.url()}`);
 
-    // Select "Foreclosures" from the category quick-search dropdown
-    // The select has ID ctl00_ContentPlaceHolder1_as1_ddlQuickSearch (or similar)
-    // Value "3" corresponds to Foreclosures based on the dropdown options
+    // Step 1: Select "Foreclosures" (value "3") from the quick-search dropdown.
+    // This triggers a __doPostBack which redirects and sets the category filter.
+    const ddl = await page.$(
+      "#ctl00_ContentPlaceHolder1_as1_ddlPopularSearches"
+    );
+    if (!ddl) {
+      console.log(`${tag} Quick search dropdown not found — aborting`);
+      return notices;
+    }
+    await ddl.selectOption("3");
+    await page.waitForLoadState("networkidle", { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    console.log(`${tag} Foreclosures category selected, URL: ${page.url()}`);
+
+    // Step 2: Expand the County filter panel (div#countyDiv starts collapsed).
     try {
-      const categorySelect = await page.$(
-        'select[id*="ddlQuickSearch"], select[id*="QuickSearch"]'
+      await page.click(
+        "#ctl00_ContentPlaceHolder1_as1_divCounty label.header"
       );
-      if (categorySelect) {
-        await categorySelect.selectOption({ label: "Foreclosures" });
-        console.log(`${tag} Selected Foreclosures from quick search`);
-        // Wait for the page to partially reload / update county options
-        await page.waitForTimeout(1500);
-      }
+      await page.waitForTimeout(500);
+      console.log(`${tag} County panel expanded`);
     } catch (err) {
-      console.log(`${tag} Quick search dropdown not found, trying advanced search`);
+      console.log(`${tag} Could not expand county panel:`, err);
     }
 
-    // Check target county checkboxes (Carbon=3, Emery=7, Juab=11, Millard=13)
-    const countyNames = ["Carbon", "Emery", "Juab", "Millard"];
-    for (const countyName of countyNames) {
+    // Step 3: Check each target county checkbox.
+    // Standard Playwright .check() fails because the footer element overlaps the checkboxes
+    // and because the ASP.NET __doPostBack requires the checkbox to already be in the
+    // checked state when the form is serialized.
+    // Solution: set checked=true in the DOM, then trigger __doPostBack via page.evaluate().
+    for (const county of TARGET_COUNTIES) {
       try {
-        // Find checkbox by its associated label text
-        const label = await page.$(
-          `label:has-text("${countyName}"), label:text-is("${countyName}")`
-        );
-        if (label) {
-          const forAttr = await label.getAttribute("for");
-          if (forAttr) {
-            const checkbox = await page.$(`#${forAttr}`);
-            if (checkbox) {
-              const checked = await checkbox.isChecked();
-              if (!checked) {
-                await checkbox.check();
-                console.log(`${tag} Checked county: ${countyName}`);
-              }
-            }
+        const checked = await page.evaluate((idx) => {
+          const cb = document.getElementById(
+            `ctl00_ContentPlaceHolder1_as1_lstCounty_${idx}`
+          ) as HTMLInputElement | null;
+          if (!cb) return false;
+          if (cb.checked) return true; // already checked
+          cb.checked = true;
+          // Trigger the async UpdatePanel postback that the onclick attribute would fire.
+          // __doPostBack is an ASP.NET WebForms global injected at runtime by ScriptManager.
+          // We cast to any to avoid TS2304 ("Cannot find name '__doPostBack'").
+          const doPostBack = (window as unknown as Record<string, unknown>)["__doPostBack"] as
+            | ((target: string, argument: string) => void)
+            | undefined;
+          if (typeof doPostBack === "function") {
+            doPostBack(
+              `ctl00$ContentPlaceHolder1$as1$lstCounty$${idx}`,
+              ""
+            );
           }
+          return true;
+        }, county.index);
+
+        if (checked) {
+          await page.waitForTimeout(500);
+          await page.waitForLoadState("networkidle", { timeout: 15000 });
+          await page.waitForTimeout(800);
+          console.log(`${tag} Checked county: ${county.name} (index ${county.index})`);
         } else {
-          // Fallback: look for checkbox near text
-          const checkboxes = await page.$$('input[type="checkbox"]');
-          for (const cb of checkboxes) {
-            const name = await cb.getAttribute("name") ?? "";
-            if (name.toLowerCase().includes(countyName.toLowerCase())) {
-              await cb.check();
-              console.log(`${tag} Checked county by name attr: ${countyName}`);
-              break;
-            }
-          }
+          console.log(`${tag} County checkbox not found: ${county.name} (index ${county.index})`);
         }
       } catch (err) {
-        console.log(`${tag} Could not check county ${countyName}:`, err);
+        console.log(`${tag} Error checking county ${county.name}:`, err);
       }
     }
 
-    // Also select "Foreclosures" from the category checkboxes in the advanced section
+    // Step 4: Click the search button.
+    // The button has value="" and class="goButton" - NOT value="Search".
+    // Use page.evaluate to avoid footer overlay interception.
     try {
-      const foreclosureLabel = await page.$(
-        'label:has-text("Foreclosure"), label:text-is("Foreclosures")'
-      );
-      if (foreclosureLabel) {
-        const forAttr = await foreclosureLabel.getAttribute("for");
-        if (forAttr) {
-          const cb = await page.$(`#${forAttr}`);
-          if (cb && !(await cb.isChecked())) {
-            await cb.check();
-            console.log(`${tag} Checked Foreclosures category`);
-          }
-        }
-      }
-    } catch {
-      // Category might be set via dropdown already
-    }
-
-    // Submit the search form
-    try {
-      const searchBtn = await page.$(
-        'input[type="submit"][value*="Search"], button:has-text("Search"), input[id*="btnSearch"]'
-      );
-      if (searchBtn) {
-        await searchBtn.click();
-        console.log(`${tag} Clicked search button`);
-      } else {
-        // Try form submit
-        await page.keyboard.press("Enter");
-      }
+      await page.evaluate(() => {
+        const btn = document.getElementById(
+          "ctl00_ContentPlaceHolder1_as1_btnGo"
+        ) as HTMLInputElement | null;
+        if (btn) (btn as HTMLElement).click();
+      });
       await page.waitForLoadState("networkidle", { timeout: 30000 });
+      await page.waitForTimeout(3000);
+      console.log(`${tag} Search submitted`);
     } catch (err) {
-      console.log(`${tag} Search submit issue:`, err);
+      console.log(`${tag} Error clicking search button:`, err);
     }
 
-    console.log(`${tag} Search submitted, collecting results...`);
-
-    // Collect all notice links from results
-    // Results are typically in a table or list with links to individual notice pages
+    // Step 5: Parse results and paginate.
     let hasNextPage = true;
     let pageNum = 0;
-    const noticeLinks: Array<{ href: string; title: string; date: string; county: string }> = [];
 
     while (hasNextPage && pageNum < 20) {
       pageNum++;
 
-      // Extract notice links from current page
-      const pageLinks = await page.$$eval(
-        'a[href*="notice"], a[href*="Notice"], table.search-results a, #searchResults a, .notice-result a',
-        (anchors: Element[]) => {
-          return anchors.map((a) => {
-            const href = (a as HTMLAnchorElement).href;
-            const text = a.textContent?.trim() ?? "";
-            // Look for date in parent row
-            const row = a.closest("tr");
-            const dateCell = row?.querySelector("td:nth-child(1)")?.textContent?.trim() ?? "";
-            const countyCell = row?.querySelector("td:nth-child(3)")?.textContent?.trim() ?? "";
-            return { href, title: text, date: dateCell, county: countyCell };
-          }).filter((l) => l.href && l.title);
+      // Extract all notice rows from the WSExtendedGridNP1 grid.
+      // Each row is a table.nested inside the wsResultsGrid.
+      // - viewButton input has onclick="location.href='Details.aspx?SID=...&ID=...'"
+      // - td.info .left: publication name and date
+      // - td.info .right: City/County (hidden in CSS but still in DOM)
+      // - td[colspan="3"]: snippet text (~300 chars) including A.P.N. / trustee info
+      const pageResults = await page.$$eval(
+        "table.wsResultsGrid table.nested",
+        (tables: Element[]) => {
+          return tables
+            .map((t) => {
+              const viewBtn = t.querySelector(
+                'input.viewButton[onclick*="Details.aspx"]'
+              ) as HTMLInputElement | null;
+              if (!viewBtn) return null;
+
+              const onclick = viewBtn.getAttribute("onclick") ?? "";
+              const idMatch = onclick.match(/ID=(\d+)/);
+              const sidMatch = onclick.match(/SID=([^&']+)/);
+              if (!idMatch) return null;
+
+              const infoCell = t.querySelector("td.info");
+              const pubEl = infoCell?.querySelector("strong");
+              const publication = pubEl?.textContent?.trim() ?? "";
+              const leftText =
+                infoCell
+                  ?.querySelector(".left")
+                  ?.textContent?.replace(publication, "")
+                  .trim() ?? "";
+              const rightText =
+                infoCell?.querySelector(".right")?.textContent?.trim() ?? "";
+
+              // Extract city and county from the hidden .right cell text
+              // Format: "City: <city>\n                                    County: <county>"
+              const cityMatch = rightText.match(/City:\s*([^\n]+)/);
+              const countyMatch = rightText.match(/County:\s*([^\n]+)/);
+              const city = cityMatch?.[1]?.trim() ?? "";
+              const county = countyMatch?.[1]?.trim() ?? "";
+
+              const snippet =
+                t
+                  .querySelector("td[colspan='3']")
+                  ?.textContent?.trim() ?? "";
+
+              return {
+                noticeId: idMatch[1],
+                sid: sidMatch?.[1] ?? "",
+                publication,
+                dateText: leftText,
+                city,
+                county,
+                snippet: snippet.substring(0, 2000),
+              };
+            })
+            .filter((r): r is NonNullable<typeof r> => r !== null);
         }
       );
 
-      noticeLinks.push(...pageLinks);
       console.log(
-        `${tag} Page ${pageNum}: found ${pageLinks.length} notice links (total: ${noticeLinks.length})`
+        `${tag} Page ${pageNum}: found ${pageResults.length} notices`
       );
 
-      // Check for pagination
-      const nextBtn = await page.$(
-        '.pagination a:has-text("Next"), a.next-page, input[value="Next >"]'
-      );
-      if (nextBtn && pageLinks.length > 0) {
-        await nextBtn.click();
-        await page.waitForLoadState("networkidle", { timeout: 20000 });
-      } else {
-        hasNextPage = false;
-      }
-    }
+      for (const result of pageResults) {
+        const snippet = result.snippet;
+        const countyLower = result.county.toLowerCase();
 
-    console.log(`${tag} Total notice links collected: ${noticeLinks.length}`);
+        // Filter: only keep notices from our target counties
+        const isTargetCounty = TARGET_COUNTIES.some(
+          (c) => c.name === countyLower
+        );
+        if (!isTargetCounty) {
+          console.log(
+            `${tag} Skipping non-target county: ${result.county} (ID: ${result.noticeId})`
+          );
+          continue;
+        }
 
-    // Visit each notice detail page to extract property info
-    // Limit to 100 notices to avoid excessive scraping
-    const linksToProcess = noticeLinks.slice(0, 100);
+        // Filter: only keep trustee sale / foreclosure notices
+        // (results may include summons, ordinances, etc. because Foreclosures
+        //  category can include all notice types from the selected publications)
+        const isForeclosure =
+          snippet.toLowerCase().includes("trustee") ||
+          snippet.toLowerCase().includes("foreclos") ||
+          snippet.toLowerCase().includes("notice of default") ||
+          snippet.toLowerCase().includes("nod");
+        if (!isForeclosure) {
+          console.log(
+            `${tag} Skipping non-foreclosure notice in ${result.county} (ID: ${result.noticeId}): ${snippet.substring(0, 80)}`
+          );
+          continue;
+        }
 
-    for (const link of linksToProcess) {
-      try {
-        await page.goto(link.href, { waitUntil: "networkidle", timeout: 30000 });
-        await page.waitForTimeout(800);
-
-        const bodyText = await page.$eval(
-          "#notice-body, .notice-content, .notice-text, #noticeBody, article, .content-area",
-          (el: Element) => el.textContent?.trim() ?? ""
-        ).catch(() => "");
-
-        const fullText = bodyText || (await page.textContent("body") ?? "");
-
-        // Determine which county this is for
-        let county = link.county;
-        for (const c of countyNames) {
-          if (fullText.toLowerCase().includes(c.toLowerCase() + " county")) {
-            county = c.toLowerCase();
-            break;
+        // Parse notice date from dateText (e.g., "Friday, March 20, 2026" or "Wednesday, Mar 18, 2026")
+        let noticeDate: string | undefined;
+        if (result.dateText) {
+          const d = new Date(result.dateText.replace(/\s+/g, " ").trim());
+          if (!isNaN(d.getTime())) {
+            noticeDate = d.toISOString().split("T")[0];
           }
         }
 
+        const detailUrl = result.sid
+          ? `https://www.utahlegals.com/Details.aspx?SID=${result.sid}&ID=${result.noticeId}`
+          : `https://www.utahlegals.com/Details.aspx?ID=${result.noticeId}`;
+
         const notice: UtahLegalsNotice = {
-          title: link.title,
-          county: county.toLowerCase() || "unknown",
-          noticeDate: link.date || undefined,
-          bodyText: fullText.slice(0, 2000), // limit stored text
-          detailUrl: link.href,
-          propertyAddress: extractAddress(fullText),
-          ownerName: extractOwnerName(fullText),
-          parcelId: extractParcelId(fullText),
+          title: `NOTICE OF TRUSTEE'S SALE - ${result.county} County`,
+          county: countyLower,
+          city: result.city,
+          noticeDate,
+          bodyText: snippet,
+          detailUrl,
+          propertyAddress: extractAddress(snippet),
+          ownerName: extractOwnerName(snippet),
+          parcelId: extractParcelId(snippet),
         };
 
         notices.push(notice);
         console.log(
-          `${tag} Processed notice: "${link.title.slice(0, 60)}" | address: ${notice.propertyAddress ?? "none"} | parcel: ${notice.parcelId ?? "none"}`
+          `${tag} Notice ID:${result.noticeId} county:${notice.county} city:${notice.city} parcel:${notice.parcelId ?? "none"} addr:${notice.propertyAddress ?? "none"}`
         );
+      }
 
-        await page.waitForTimeout(1000); // polite delay between detail pages
-      } catch (err) {
-        console.log(`${tag} Error processing notice ${link.href}:`, err);
+      // Check for next page
+      const nextBtn = await page.$(
+        "#ctl00_ContentPlaceHolder1_WSExtendedGridNP1_GridView1_ctl01_btnNext:not([disabled])"
+      );
+      if (nextBtn && pageResults.length > 0) {
+        try {
+          await page.evaluate(() => {
+            const btn = document.getElementById(
+              "ctl00_ContentPlaceHolder1_WSExtendedGridNP1_GridView1_ctl01_btnNext"
+            ) as HTMLInputElement | null;
+            if (btn) btn.click();
+          });
+          await page.waitForLoadState("networkidle", { timeout: 20000 });
+          await page.waitForTimeout(1500);
+          console.log(`${tag} Navigated to page ${pageNum + 1}`);
+        } catch (err) {
+          console.log(`${tag} Pagination error:`, err);
+          hasNextPage = false;
+        }
+      } else {
+        hasNextPage = false;
       }
     }
   } finally {

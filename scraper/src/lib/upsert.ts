@@ -272,14 +272,12 @@ export async function upsertFromUtahLegals(
   let signals = 0;
 
   for (const notice of notices) {
-    // Skip notices with no useful property identifier
-    if (!notice.parcelId && !notice.propertyAddress) {
-      console.log(`[upsert-utah-legals] Skipping notice with no parcel or address: "${notice.title.slice(0, 60)}"`);
-      continue;
-    }
-
-    // Generate a synthetic parcel ID if we only have address
+    // Generate a parcel ID in order of preference:
+    // 1. Extracted parcel/A.P.N. from notice text (best dedup key)
+    // 2. Normalized property address (still unique per property)
+    // 3. Notice detail URL ID (guaranteed unique, used as fallback)
     let parcelId = notice.parcelId;
+
     if (!parcelId && notice.propertyAddress) {
       // Normalize address to create a consistent synthetic ID
       const normalized = notice.propertyAddress
@@ -290,7 +288,18 @@ export async function upsertFromUtahLegals(
       parcelId = `ul-${notice.county}-${normalized}`;
     }
 
-    if (!parcelId) continue;
+    if (!parcelId && notice.detailUrl) {
+      // Fall back to URL-based synthetic ID so we never lose a valid NOD signal
+      const urlId = notice.detailUrl.match(/ID=(\d+)/)?.[1];
+      if (urlId) {
+        parcelId = `ul-${notice.county}-id${urlId}`;
+      }
+    }
+
+    if (!parcelId) {
+      console.log(`[upsert-utah-legals] Skipping notice with no identifier: "${notice.title.slice(0, 60)}"`);
+      continue;
+    }
 
     const county = notice.county.toLowerCase();
     const COUNTY_CITY: Record<string, string> = {
@@ -300,10 +309,13 @@ export async function upsertFromUtahLegals(
       millard: "Delta",
     };
 
+    // Prefer the city extracted from the notice; fall back to county default
+    const city = (notice as UtahLegalsNotice & { city?: string }).city || COUNTY_CITY[county] || "";
+
     const propertyId = await upsertProperty({
       parcelId,
       address: notice.propertyAddress ?? "",
-      city: COUNTY_CITY[county] ?? "",
+      city,
       ownerName: notice.ownerName,
     }, county);
     upserted++;
