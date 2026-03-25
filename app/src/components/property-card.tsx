@@ -21,6 +21,19 @@ function ownerTypeBadge(type: string | null): { label: string; badgeClass: strin
   }
 }
 
+/** Normalize raw distress score (1-24+) to a display score (1-10) */
+function normalizeScore(raw: number): number {
+  if (raw <= 0) return 0;
+  if (raw <= 3) return raw;        // 1→1, 2→2, 3→3
+  if (raw <= 5) return 4;          // 4-5→4
+  if (raw <= 7) return 5;          // 6-7→5
+  if (raw <= 9) return 6;          // 8-9→6
+  if (raw <= 12) return 7;         // 10-12→7
+  if (raw <= 16) return 8;         // 13-16→8
+  if (raw <= 20) return 9;         // 17-20→9
+  return 10;                       // 21+→10
+}
+
 interface TierInfo {
   label: string;
   badgeClass: string;
@@ -77,7 +90,8 @@ function isNew(property: PropertyWithLead): boolean {
 
 export function PropertyCard({ property }: PropertyCardProps) {
   const hot = property.isHot;
-  const pct = Math.min((property.distressScore / 10) * 100, 100);
+  const displayScore = normalizeScore(property.distressScore);
+  const pct = Math.min((displayScore / 10) * 100, 100);
   const badge = ownerTypeBadge(property.ownerType);
   const isEntity = property.ownerType === "llc" || property.ownerType === "trust" || property.ownerType === "estate";
   const tier = getTier(property.distressScore);
@@ -135,10 +149,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <span
               className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${tier.scoreCircleClass}`}
             >
-              {property.distressScore}
+              {displayScore}
             </span>
             <span className="text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
-              Score
+              / 10
             </span>
           </div>
           <span
