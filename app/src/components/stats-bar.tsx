@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, Flame, Sparkles, Clock, Search } from "lucide-react";
+import { Activity, Flame, Sparkles, AlertTriangle, ThermometerSun } from "lucide-react";
 import type { DashboardStats } from "@/lib/queries";
 
 interface StatsBarProps {
@@ -16,12 +16,28 @@ const statCards = [
     iconColor: "text-dark-600 dark:text-dark-300",
   },
   {
+    label: "Critical",
+    key: "critical" as const,
+    icon: AlertTriangle,
+    href: "/?tier=critical",
+    iconBg: "bg-red-100 dark:bg-red-950/40",
+    iconColor: "text-red-700",
+  },
+  {
     label: "Hot Leads",
     key: "hot" as const,
     icon: Flame,
     href: "/?hot=true",
-    iconBg: "bg-red-100 dark:bg-red-950/40",
-    iconColor: "text-red-500",
+    iconBg: "bg-orange-100 dark:bg-orange-950/40",
+    iconColor: "text-brand-500",
+  },
+  {
+    label: "Warm Leads",
+    key: "warm" as const,
+    icon: ThermometerSun,
+    href: "/?tier=warm",
+    iconBg: "bg-amber-100 dark:bg-amber-950/40",
+    iconColor: "text-amber-500",
   },
   {
     label: "New Today",
@@ -30,22 +46,6 @@ const statCards = [
     href: "/?sort=date",
     iconBg: "bg-blue-100 dark:bg-blue-950/40",
     iconColor: "text-blue-500",
-  },
-  {
-    label: "Needs Follow-up",
-    key: "needsFollowUp" as const,
-    icon: Clock,
-    href: "/?status=follow_up",
-    iconBg: "bg-amber-100 dark:bg-amber-950/40",
-    iconColor: "text-amber-500",
-  },
-  {
-    label: "Skip Trace",
-    key: "needsSkipTrace" as const,
-    icon: Search,
-    href: "/?skipTrace=true",
-    iconBg: "bg-orange-100 dark:bg-orange-950/40",
-    iconColor: "text-orange-500",
   },
 ];
 

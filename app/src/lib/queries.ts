@@ -102,6 +102,9 @@ export interface DashboardStats {
   newToday: number;
   needsFollowUp: number;
   needsSkipTrace: number;
+  critical: number;
+  warm: number;
+  cool: number;
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
@@ -116,6 +119,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         select 1 from owner_contacts oc
         where oc.property_id = ${properties.id} and oc.phone is not null
       ) and ${properties.ownerType} in ('individual', 'unknown'))::int`,
+      critical: sql<number>`count(*) filter (where ${leads.distressScore} >= 7)::int`,
+      warm: sql<number>`count(*) filter (where ${leads.distressScore} >= 2 and ${leads.distressScore} < 4)::int`,
+      cool: sql<number>`count(*) filter (where ${leads.distressScore} >= 1 and ${leads.distressScore} < 2)::int`,
     })
     .from(leads)
     .innerJoin(properties, eq(leads.propertyId, properties.id))
@@ -135,6 +141,9 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     newToday: row?.newToday ?? 0,
     needsFollowUp: row?.needsFollowUp ?? 0,
     needsSkipTrace: row?.needsSkipTrace ?? 0,
+    critical: row?.critical ?? 0,
+    warm: row?.warm ?? 0,
+    cool: row?.cool ?? 0,
   };
 }
 
@@ -173,6 +182,8 @@ export interface GetPropertiesParams {
   skipTrace?: string;
   minScore?: string;
   ownerType?: string;
+  /** Tier filter: "critical" (7+), "hot" (4+), "warm" (2+) */
+  tier?: string;
 }
 
 export async function getProperties(
@@ -190,10 +201,23 @@ export async function getProperties(
     )
   );
 
-  // Filter by minimum distress score
-  const minScore = params.minScore ? parseInt(params.minScore, 10) : 0;
-  if (minScore > 0) {
-    conditions.push(sql`${leads.distressScore} >= ${minScore}`);
+  // Filter by tier (overrides minScore when present)
+  if (params.tier) {
+    const tierScoreMap: Record<string, number> = {
+      critical: 7,
+      hot: 4,
+      warm: 2,
+    };
+    const tierMin = tierScoreMap[params.tier];
+    if (tierMin !== undefined) {
+      conditions.push(sql`${leads.distressScore} >= ${tierMin}`);
+    }
+  } else {
+    // Filter by minimum distress score (legacy)
+    const minScore = params.minScore ? parseInt(params.minScore, 10) : 0;
+    if (minScore > 0) {
+      conditions.push(sql`${leads.distressScore} >= ${minScore}`);
+    }
   }
 
   if (params.city) {

@@ -21,18 +21,52 @@ function ownerTypeBadge(type: string | null): { label: string; badgeClass: strin
   }
 }
 
-function scoreColor(score: number): string {
-  if (score >= 7) return "bg-red-500 text-white";
-  if (score >= 5) return "bg-brand-500 text-white";
-  if (score >= 3) return "bg-amber-500 text-white";
-  return "bg-emerald-500 text-white";
+interface TierInfo {
+  label: string;
+  badgeClass: string;
+  barColor: string;
+  scoreCircleClass: string;
 }
 
-function scoreBarColor(score: number): string {
-  if (score >= 7) return "bg-red-500";
-  if (score >= 5) return "bg-brand-500";
-  if (score >= 3) return "bg-amber-500";
-  return "bg-emerald-500";
+function getTier(score: number): TierInfo {
+  if (score >= 7) {
+    return {
+      label: "Critical",
+      badgeClass: "bg-red-700 text-white",
+      barColor: "bg-red-600",
+      scoreCircleClass: "bg-red-600 text-white",
+    };
+  }
+  if (score >= 4) {
+    return {
+      label: "Hot",
+      badgeClass: "bg-brand-500 text-white",
+      barColor: "bg-brand-500",
+      scoreCircleClass: "bg-brand-500 text-white",
+    };
+  }
+  if (score >= 2) {
+    return {
+      label: "Warm",
+      badgeClass: "bg-amber-500 text-white",
+      barColor: "bg-amber-500",
+      scoreCircleClass: "bg-amber-500 text-white",
+    };
+  }
+  if (score >= 1) {
+    return {
+      label: "Cool",
+      badgeClass: "bg-emerald-600 text-white",
+      barColor: "bg-emerald-500",
+      scoreCircleClass: "bg-emerald-500 text-white",
+    };
+  }
+  return {
+    label: "No Signal",
+    badgeClass: "bg-dark-400 text-white",
+    barColor: "bg-dark-400",
+    scoreCircleClass: "bg-dark-400 text-white",
+  };
 }
 
 function isNew(property: PropertyWithLead): boolean {
@@ -46,6 +80,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const pct = Math.min((property.distressScore / 10) * 100, 100);
   const badge = ownerTypeBadge(property.ownerType);
   const isEntity = property.ownerType === "llc" || property.ownerType === "trust" || property.ownerType === "estate";
+  const tier = getTier(property.distressScore);
 
   return (
     <Link href={`/properties/${property.id}`} className="group block">
@@ -78,12 +113,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
                 New
               </span>
             )}
-            {hot && (
-              <span className="inline-flex items-center gap-0.5 bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
-                <Flame className="h-3 w-3" />
-                Hot
-              </span>
-            )}
+            {/* Tier label — replaces standalone Hot badge; Hot gets the flame icon */}
+            <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${tier.badgeClass}`}>
+              {hot && <Flame className="h-3 w-3" />}
+              {tier.label}
+            </span>
           </div>
         </div>
 
@@ -99,7 +133,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${scoreColor(property.distressScore)}`}
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${tier.scoreCircleClass}`}
             >
               {property.distressScore}
             </span>
@@ -118,7 +152,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         {/* Score bar */}
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-warm-200 dark:bg-dark-700">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${scoreBarColor(property.distressScore)}`}
+            className={`h-full rounded-full transition-all duration-500 ${tier.barColor}`}
             style={{ width: `${pct}%` }}
           />
         </div>

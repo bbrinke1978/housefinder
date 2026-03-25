@@ -32,11 +32,11 @@ const OWNER_TYPES = [
   { value: "estate", label: "Estate" },
 ];
 
-const MIN_SCORE_OPTIONS = [
-  { value: "", label: "Any Score" },
-  { value: "2", label: "Score 2+" },
-  { value: "3", label: "Score 3+" },
-  { value: "4", label: "Score 4+ (Hot)" },
+const TIER_OPTIONS = [
+  { value: "", label: "All Leads" },
+  { value: "critical", label: "Critical Only (7+)" },
+  { value: "hot", label: "Hot & Above (4+)" },
+  { value: "warm", label: "Warm & Above (2+)" },
 ];
 
 const SORT_OPTIONS = [
@@ -53,7 +53,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const currentDistressType = searchParams.get("distressType") ?? "";
   const currentHot = searchParams.get("hot") ?? "";
   const currentOwnerType = searchParams.get("ownerType") ?? "";
-  const currentMinScore = searchParams.get("minScore") ?? "";
+  const currentTier = searchParams.get("tier") ?? "";
   const currentSort = searchParams.get("sort") ?? "score";
 
   const updateParams = useCallback(
@@ -74,7 +74,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   }, [router]);
 
   const hasFilters =
-    currentCity || currentDistressType || currentHot || currentOwnerType || currentMinScore || currentSort !== "score";
+    currentCity || currentDistressType || currentHot || currentOwnerType || currentTier || currentSort !== "score";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -132,16 +132,16 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
         </SelectContent>
       </Select>
 
-      {/* Min score filter */}
+      {/* Tier filter */}
       <Select
-        value={currentMinScore}
-        onValueChange={(val) => updateParams("minScore", val ?? "")}
+        value={currentTier}
+        onValueChange={(val) => updateParams("tier", val ?? "")}
       >
-        <SelectTrigger className="w-full sm:w-[150px]">
-          <SelectValue placeholder="Any Score" />
+        <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectValue placeholder="All Leads" />
         </SelectTrigger>
         <SelectContent>
-          {MIN_SCORE_OPTIONS.map((opt) => (
+          {TIER_OPTIONS.map((opt) => (
             <SelectItem key={opt.value} value={opt.value}>
               {opt.label}
             </SelectItem>

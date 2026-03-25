@@ -1,5 +1,6 @@
 import { db } from "../db/client.js";
 import { properties, distressSignals } from "../db/schema.js";
+import { eq, and } from "drizzle-orm";
 import { classifyOwnerType } from "./scraper-utils.js";
 import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validation.js";
 import type { EmeryBackTaxRecord } from "../sources/emery-5year-backtax.js";
@@ -264,6 +265,12 @@ export async function upsertFromRecorder(
  * 3. If neither, use a synthetic parcel ID based on notice URL hash
  *
  * Creates/updates properties and inserts "nod" distress signals (weight 3).
+ *
+ * Deduplication: Only ONE NOD signal is kept per property. Utah Legals
+ * publishes the same trustee sale notice every week until the sale date,
+ * creating multiple notices for the same foreclosure. We skip inserting a
+ * new NOD if one already exists for the property — the existing record
+ * (earliest publication) is the canonical signal.
  */
 export async function upsertFromUtahLegals(
   notices: UtahLegalsNotice[]
@@ -271,11 +278,15 @@ export async function upsertFromUtahLegals(
   let upserted = 0;
   let signals = 0;
 
+  // Track which propertyIds already got an NOD this run to avoid double-inserts
+  // when the same property appears in multiple pages of results.
+  const nodInsertedThisRun = new Set<string>();
+
   for (const notice of notices) {
     // Generate a parcel ID in order of preference:
     // 1. Extracted parcel/A.P.N. from notice text (best dedup key)
     // 2. Normalized property address (still unique per property)
-    // 3. Notice detail URL ID (guaranteed unique, used as fallback)
+    // 3. Notice detail URL ID (guaranteed unique per notice, used as fallback)
     let parcelId = notice.parcelId;
 
     if (!parcelId && notice.propertyAddress) {
@@ -289,7 +300,12 @@ export async function upsertFromUtahLegals(
     }
 
     if (!parcelId && notice.detailUrl) {
-      // Fall back to URL-based synthetic ID so we never lose a valid NOD signal
+      // Fall back to URL-based synthetic ID so we never lose a valid NOD signal.
+      // NOTE: URL-based IDs are notice-unique (each weekly publication has a
+      // different ID), so we strip the numeric suffix and treat all notices for
+      // the same publication run as distinct properties. This is intentional —
+      // if we can't identify the property by parcel or address we create a new
+      // property row per-notice, which is the safer fallback.
       const urlId = notice.detailUrl.match(/ID=(\d+)/)?.[1];
       if (urlId) {
         parcelId = `ul-${notice.county}-id${urlId}`;
@@ -320,10 +336,35 @@ export async function upsertFromUtahLegals(
     }, county);
     upserted++;
 
+    // Skip if we already inserted an NOD for this property this run
+    if (nodInsertedThisRun.has(propertyId)) {
+      console.log(`[upsert-utah-legals] Skipping duplicate NOD for property ${propertyId} (parcel: ${parcelId})`);
+      continue;
+    }
+
+    // Check if the property already has an NOD signal in the database.
+    // Utah Legals re-publishes trustee sale notices weekly — we only need
+    // one NOD record per property.
+    const existingNod = await db
+      .select({ id: distressSignals.id })
+      .from(distressSignals)
+      .where(
+        and(
+          eq(distressSignals.propertyId, propertyId),
+          eq(distressSignals.signalType, "nod")
+        )
+      )
+      .limit(1);
+
+    if (existingNod.length > 0) {
+      console.log(`[upsert-utah-legals] NOD already exists for property ${propertyId} (parcel: ${parcelId}) — skipping`);
+      nodInsertedThisRun.add(propertyId);
+      continue;
+    }
+
     // Parse notice date (various formats)
     let recordedDate: string | undefined;
     if (notice.noticeDate) {
-      // Try to parse the date
       const d = new Date(notice.noticeDate);
       if (!isNaN(d.getTime())) {
         recordedDate = d.toISOString().split("T")[0];
@@ -341,6 +382,7 @@ export async function upsertFromUtahLegals(
         source: "utah-legals",
       },
     });
+    nodInsertedThisRun.add(propertyId);
     signals++;
   }
 
