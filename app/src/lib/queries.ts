@@ -151,12 +151,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   ]);
 
   const statsConditions = [
-    exists(
-      db
-        .select({ one: sql`1` })
-        .from(distressSignals)
-        .where(eq(distressSignals.propertyId, properties.id))
-    ),
+    sql`${leads.distressScore} > 0`,
   ];
 
   if (hideBigOps && bigOpNames.length > 0) {
@@ -251,15 +246,8 @@ export async function getProperties(
 
   const conditions = [];
 
-  // Only show properties with at least one distress signal
-  conditions.push(
-    exists(
-      db
-        .select({ one: sql`1` })
-        .from(distressSignals)
-        .where(eq(distressSignals.propertyId, properties.id))
-    )
-  );
+  // Only show properties with a distress score > 0
+  conditions.push(sql`${leads.distressScore} > 0`);
 
   // Exclude big operators when setting is enabled
   if (hideBigOps && bigOpNames.length > 0) {

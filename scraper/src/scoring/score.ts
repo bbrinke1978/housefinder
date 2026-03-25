@@ -123,10 +123,14 @@ export function scoreProperty(
     const signalCfg = configMap.get(signal.signal_type);
     if (!signalCfg) continue; // unknown signal type -- skip
 
-    // Freshness check
+    // Freshness check — skip sentinel dates (1970-01-01 used for dedup)
     if (signal.recorded_date !== null) {
-      const ageDays = differenceInDays(now, signal.recorded_date);
-      if (ageDays > signalCfg.freshness_days) continue; // stale -- exclude
+      const year = signal.recorded_date.getFullYear();
+      if (year > 1970) {
+        const ageDays = differenceInDays(now, signal.recorded_date);
+        if (ageDays > signalCfg.freshness_days) continue; // stale -- exclude
+      }
+      // 1970 = sentinel date, treat as undated (assume recent)
     }
     // null recorded_date => assume recent, include
 
