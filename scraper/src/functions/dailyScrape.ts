@@ -1,5 +1,5 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
-import { scrapeAssessor } from "../sources/carbon-assessor.js";
+import { scrapeAssessor, storeAssessorMailingAddresses } from "../sources/carbon-assessor.js";
 import { scrapeDelinquent } from "../sources/carbon-delinquent.js";
 import { scrapeRecorder } from "../sources/carbon-recorder.js";
 import {
@@ -66,6 +66,17 @@ async function dailyScrape(
     context.log(
       `Assessor: scraped ${assessorRecords.length} records, upserted ${results.assessor.upserted}`
     );
+
+    // Store mailing addresses from assessor data into owner_contacts
+    try {
+      const mailingStats = await storeAssessorMailingAddresses(assessorRecords);
+      context.log(
+        `Assessor mailing addresses: ${mailingStats.stored} stored, ${mailingStats.skipped} skipped, ${mailingStats.errors} errors`
+      );
+    } catch (mailingErr) {
+      context.error("Assessor mailing address storage failed", mailingErr);
+      // Non-fatal: property data is already upserted
+    }
   } catch (err) {
     context.error("Assessor scraper failed", err);
     await updateScrapeHealth({

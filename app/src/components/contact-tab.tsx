@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Building2,
   Plus,
+  MapPin,
 } from "lucide-react";
 import { saveOwnerPhone } from "@/lib/actions";
 import type { OwnerContact } from "@/types";
@@ -46,7 +47,19 @@ export function ContactTab({
     !hasPhone && (ownerType === "individual" || ownerType === "unknown" || ownerType === null);
 
   const phonesContacts = contacts.filter((c) => c.phone !== null);
-  const emailContacts = contacts.filter((c) => c.email !== null);
+
+  // Separate mailing address contacts from real email contacts
+  const mailingContacts = contacts.filter(
+    (c) => c.email !== null && c.email.startsWith("MAILING:")
+  );
+  const emailContacts = contacts.filter(
+    (c) => c.email !== null && !c.email.startsWith("MAILING:")
+  );
+
+  // Extract the first mailing address for display
+  const mailingAddress = mailingContacts[0]?.email
+    ? mailingContacts[0].email.replace(/^MAILING:\s*/, "")
+    : null;
 
   function handleSavePhone() {
     const trimmed = phone.trim();
@@ -85,7 +98,7 @@ export function ContactTab({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-orange-700 underline hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
               >
-                Search TruePeopleSearch
+                TruePeopleSearch
                 <ExternalLink className="h-3 w-3" />
               </a>
               <a
@@ -94,7 +107,25 @@ export function ContactTab({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-orange-700 underline hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
               >
-                Search FastPeopleSearch
+                FastPeopleSearch
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              <a
+                href={`https://thatsthem.com/name/${encodeURIComponent(ownerName)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-orange-700 underline hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
+              >
+                ThatsThem
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              <a
+                href={`https://www.familytreenow.com/search/genealogy/results?first=${encodeURIComponent(ownerName.split(/[\s,]+/)[0] ?? "")}&last=${encodeURIComponent(ownerName.split(/[\s,]+/).slice(-1)[0] ?? "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-orange-700 underline hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300"
+              >
+                FamilyTreeNow
                 <ExternalLink className="h-3 w-3" />
               </a>
             </div>
@@ -151,6 +182,35 @@ export function ContactTab({
           <p className="font-medium">{ownerName ?? "Unknown Owner"}</p>
         </CardContent>
       </Card>
+
+      {/* Mailing address card — shown when different from property address */}
+      {mailingAddress && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              Mailing Address
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm font-medium">{mailingAddress}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Owner mails to this address (differs from property)
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(mailingAddress)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                View on Map
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Phone cards */}
       <Card>

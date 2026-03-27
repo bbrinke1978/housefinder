@@ -18,6 +18,11 @@ export const propertyRecordSchema = z.object({
   ownerName: z.string().optional(),
   taxStatus: z.string().optional(),
   mortgageInfo: z.string().optional(),
+  // Mailing address fields — only populated by carbon-assessor (separate from property address)
+  mailingAddress: z.string().optional(),
+  mailingCity: z.string().optional(),
+  mailingState: z.string().optional(),
+  mailingZip: z.string().optional(),
 });
 
 export type PropertyRecord = z.infer<typeof propertyRecordSchema>;
