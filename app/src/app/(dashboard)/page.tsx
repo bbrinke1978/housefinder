@@ -39,6 +39,7 @@ export default async function DashboardPage({
     ownerType: typeof params.ownerType === "string" ? params.ownerType : undefined,
     minScore: typeof params.minScore === "string" ? params.minScore : undefined,
     tier: typeof params.tier === "string" ? params.tier : undefined,
+    search: typeof params.search === "string" ? params.search : undefined,
   };
 
   const [stats, properties, cities] = await Promise.all([

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 
 interface DashboardFiltersProps {
   cities: string[];
@@ -49,12 +50,14 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const currentSearch = searchParams.get("search") ?? "";
   const currentCity = searchParams.get("city") ?? "";
   const currentDistressType = searchParams.get("distressType") ?? "";
   const currentHot = searchParams.get("hot") ?? "";
   const currentOwnerType = searchParams.get("ownerType") ?? "";
   const currentTier = searchParams.get("tier") ?? "";
   const currentSort = searchParams.get("sort") ?? "score";
+  const [searchInput, setSearchInput] = useState(currentSearch);
 
   const updateParams = useCallback(
     (key: string, value: string) => {
@@ -73,11 +76,32 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
     router.push("/");
   }, [router]);
 
+  const handleSearch = useCallback(() => {
+    updateParams("search", searchInput.trim());
+  }, [searchInput, updateParams]);
+
   const hasFilters =
-    currentCity || currentDistressType || currentHot || currentOwnerType || currentTier || currentSort !== "score";
+    currentSearch || currentCity || currentDistressType || currentHot || currentOwnerType || currentTier || currentSort !== "score";
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      {/* Search */}
+      <div className="relative w-full sm:w-[220px]">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search name or address..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSearch();
+            }
+          }}
+          className="pl-9"
+        />
+      </div>
+
       {/* City filter */}
       <Select
         value={currentCity}

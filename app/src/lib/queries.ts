@@ -232,6 +232,8 @@ export interface GetPropertiesParams {
   ownerType?: string;
   /** Tier filter: "critical" (7+), "hot" (4+), "warm" (2+) */
   tier?: string;
+  /** Search by owner name or address */
+  search?: string;
 }
 
 export async function getProperties(
@@ -276,6 +278,14 @@ export async function getProperties(
     if (minScore > 0) {
       conditions.push(sql`${leads.distressScore} >= ${minScore}`);
     }
+  }
+
+  // Search by owner name or address
+  if (params.search) {
+    const term = `%${params.search}%`;
+    conditions.push(
+      sql`(${properties.ownerName} ILIKE ${term} OR ${properties.address} ILIKE ${term} OR ${properties.parcelId} ILIKE ${term})`
+    );
   }
 
   if (params.city) {
