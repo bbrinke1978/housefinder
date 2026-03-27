@@ -449,6 +449,19 @@ export async function getDistinctCounties(): Promise<string[]> {
  * No limit — returns all for map display.
  */
 export async function getMapProperties(): Promise<MapProperty[]> {
+  const targetCities = await getTargetCitiesList();
+
+  const conditions = [
+    isNotNull(properties.latitude),
+    isNotNull(properties.longitude),
+    sql`${leads.distressScore} > 0`,
+  ];
+
+  // Filter to target cities only
+  if (targetCities.length > 0) {
+    conditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
+  }
+
   const rows = await db
     .select({
       id: properties.id,
@@ -474,7 +487,7 @@ export async function getMapProperties(): Promise<MapProperty[]> {
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))
-    .where(and(isNotNull(properties.latitude), isNotNull(properties.longitude)))
+    .where(and(...conditions))
     .orderBy(desc(leads.distressScore));
 
   // Fetch active signal types for all properties
