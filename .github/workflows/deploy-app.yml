@@ -33,6 +33,8 @@ jobs:
 
       - name: Build Next.js app
         working-directory: ./app
+        env:
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN }}
         run: npm run build
 
       - name: Copy static assets to standalone output
