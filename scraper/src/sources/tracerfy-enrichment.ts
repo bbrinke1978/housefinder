@@ -348,6 +348,7 @@ function parseOwnerName(ownerName: string): {
 
 /**
  * Get properties that need Tracerfy skip tracing, ordered by distress score.
+ * Only enriches critical leads (score >= 7) to control costs.
  */
 async function getPropertiesForTracerfy(
   batchSize: number,
@@ -371,6 +372,7 @@ async function getPropertiesForTracerfy(
       p.owner_name IS NOT NULL
       AND p.owner_name != ''
       AND p.owner_type IN ('individual', 'unknown')
+      AND COALESCE(l.distress_score, 0) >= 7
       AND NOT EXISTS (
         SELECT 1 FROM owner_contacts oc
         WHERE oc.property_id = p.id
