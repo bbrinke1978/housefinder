@@ -425,6 +425,7 @@ export async function getPipelineLeads(): Promise<PipelineLead[]> {
     })
     .from(leads)
     .innerJoin(properties, eq(leads.propertyId, properties.id))
+    .where(sql`${leads.distressScore} >= 7`)
     .orderBy(desc(leads.distressScore));
 
   return rows as unknown as PipelineLead[];
