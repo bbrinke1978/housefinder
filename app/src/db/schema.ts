@@ -264,6 +264,8 @@ export const deals = pgTable(
     earnestMoney: integer("earnest_money").default(100),
     inspectionDeadline: date("inspection_deadline"),
     earnestMoneyRefundable: boolean("earnest_money_refundable").default(true),
+    comps: text("comps"), // JSON array of comparable sales
+    arvNotes: text("arv_notes"), // free-text ARV research notes
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

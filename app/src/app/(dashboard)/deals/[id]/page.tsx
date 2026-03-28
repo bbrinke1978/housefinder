@@ -10,6 +10,7 @@ import { DealContractTracker } from '@/components/deal-contract-tracker';
 import { DealNotes } from '@/components/deal-notes';
 import { DealBlastGenerator } from '@/components/deal-blast-generator';
 import { DealGuidePanel } from '@/components/deal-guide-panel';
+import { DealCompEntry } from '@/components/deal-comp-entry';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,9 +82,10 @@ export default async function DealDetailPage({
       <DealGuidePanel status={deal.status} />
 
       <Tabs defaultValue={activeTab}>
-        <TabsList>
+        <TabsList className='flex-wrap'>
           <TabsTrigger value='overview'>Overview</TabsTrigger>
           <TabsTrigger value='calculator'>Calculator</TabsTrigger>
+          <TabsTrigger value='comps'>Comps</TabsTrigger>
           <TabsTrigger value='contract'>Contract</TabsTrigger>
           <TabsTrigger value='notes'>Notes ({notes.length})</TabsTrigger>
         </TabsList>
@@ -97,6 +99,10 @@ export default async function DealDetailPage({
 
         <TabsContent value='calculator' className='mt-4'>
           <DealMaoCalculator deal={deal} />
+        </TabsContent>
+
+        <TabsContent value='comps' className='mt-4'>
+          <DealCompEntry deal={deal} />
         </TabsContent>
 
         <TabsContent value='contract' className='mt-4'>

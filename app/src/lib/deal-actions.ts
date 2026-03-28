@@ -322,6 +322,30 @@ export async function updateDeal(
   revalidatePath(`/deals/${dealId}`);
 }
 
+// -- Update Deal Comps --
+
+/**
+ * updateDealComps — save JSON array of comparable sales and optional ARV notes.
+ */
+export async function updateDealComps(
+  dealId: string,
+  comps: string,
+  arvNotes: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  await db
+    .update(deals)
+    .set({ comps, arvNotes, updatedAt: new Date() })
+    .where(eq(deals.id, dealId));
+
+  revalidatePath("/deals");
+  revalidatePath(`/deals/${dealId}`);
+}
+
 // -- Add Deal Note --
 
 const addDealNoteSchema = z.object({

@@ -140,6 +140,14 @@ export interface Buyer {
   updatedAt: Date;
 }
 
+export interface DealComp {
+  address: string;
+  salePrice: number;
+  details?: string; // e.g. "3bd/2ba 1400sqft"
+  dom?: number; // days on market
+  notes?: string;
+}
+
 export interface DealWithBuyer {
   id: string;
   propertyId: string | null;
@@ -165,6 +173,8 @@ export interface DealWithBuyer {
   earnestMoney: number | null;
   inspectionDeadline: string | null;
   earnestMoneyRefundable: boolean | null;
+  comps: string | null; // JSON: DealComp[]
+  arvNotes: string | null;
   createdAt: Date;
   updatedAt: Date;
   // from join
