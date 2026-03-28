@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
+import type { InferSelectModel } from "drizzle-orm";
 
 // -- Enums --
 
@@ -208,6 +209,97 @@ export const ownerContacts = pgTable(
     ),
   ]
 );
+
+// -- Buyers --
+
+export const buyers = pgTable("buyers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  email: text("email"),
+  buyBox: text("buy_box"),
+  minPrice: integer("min_price"),
+  maxPrice: integer("max_price"),
+  fundingType: text("funding_type"), // "cash" | "hard_money" | "both"
+  targetAreas: text("target_areas"),
+  rehabTolerance: text("rehab_tolerance"), // "light" | "medium" | "heavy" | "any"
+  notes: text("notes"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// -- Deals --
+
+export const deals = pgTable(
+  "deals",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    propertyId: uuid("property_id").references(() => properties.id), // nullable FK, no cascade
+    address: text("address").notNull(),
+    city: text("city").notNull(),
+    state: text("state").notNull().default("UT"),
+    sellerName: text("seller_name"),
+    sellerPhone: text("seller_phone"),
+    condition: text("condition"), // "light" | "medium" | "heavy" | "tear_down"
+    timeline: text("timeline"), // "asap" | "1_month" | "3_months" | "flexible"
+    motivation: text("motivation"), // "inherited" | "financial_distress" | "vacant" | "divorce" | "other"
+    askingPrice: integer("asking_price"),
+    arv: integer("arv"),
+    repairEstimate: integer("repair_estimate"),
+    wholesaleFee: integer("wholesale_fee").default(15000),
+    mao: integer("mao"),
+    offerPrice: integer("offer_price"),
+    status: text("status").notNull().default("lead"),
+    // status values: lead | qualified | analyzed | offered | under_contract | marketing | assigned | closing | closed | dead
+    assignedBuyerId: uuid("assigned_buyer_id").references(() => buyers.id),
+    assignmentFee: integer("assignment_fee"),
+    closingDate: date("closing_date"),
+    contractStatus: text("contract_status"),
+    // contractStatus values: null | sent | signed | in_escrow | title_clear | closing_scheduled
+    earnestMoney: integer("earnest_money").default(100),
+    inspectionDeadline: date("inspection_deadline"),
+    earnestMoneyRefundable: boolean("earnest_money_refundable").default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_deals_status").on(table.status),
+    index("idx_deals_property_id").on(table.propertyId),
+  ]
+);
+
+// -- Deal Notes --
+
+export const dealNotes = pgTable(
+  "deal_notes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    noteText: text("note_text").notNull(),
+    noteType: text("note_type").notNull().default("user"), // "user" | "status_change"
+    previousStatus: text("previous_status"),
+    newStatus: text("new_status"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("idx_deal_notes_deal_id").on(table.dealId)]
+);
+
+export type BuyerRow = InferSelectModel<typeof buyers>;
+export type DealRow = InferSelectModel<typeof deals>;
+export type DealNoteRow = InferSelectModel<typeof dealNotes>;
 
 // -- Alert History --
 

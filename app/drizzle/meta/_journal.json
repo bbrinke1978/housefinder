@@ -15,6 +15,13 @@
       "when": 1773886408182,
       "tag": "0001_thick_puppet_master",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774718068250,
+      "tag": "0002_perfect_jack_murdock",
+      "breakpoints": true
     }
   ]
 }
