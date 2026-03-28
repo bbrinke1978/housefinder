@@ -7,7 +7,6 @@
 import "dotenv/config";
 import { db } from "./client.js";
 import { deals } from "./schema.js";
-import { sql } from "drizzle-orm";
 
 const preloadedDeals = [
   {
@@ -69,7 +68,7 @@ async function seedDeals() {
     const result = await db
       .insert(deals)
       .values(deal)
-      .onConflictDoNothing({ target: sql`(address)` })
+      .onConflictDoNothing()
       .returning({ id: deals.id, address: deals.address, city: deals.city });
 
     if (result.length > 0) {
