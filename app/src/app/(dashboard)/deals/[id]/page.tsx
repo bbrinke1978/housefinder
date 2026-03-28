@@ -8,6 +8,7 @@ import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
 import { DealContractTracker } from '@/components/deal-contract-tracker';
 import { DealNotes } from '@/components/deal-notes';
+import { DealBlastGenerator } from '@/components/deal-blast-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,10 @@ export default async function DealDetailPage({
         </TabsList>
 
         <TabsContent value='overview' className='mt-4'>
-          <DealOverview deal={deal} />
+          <div className='space-y-4'>
+            <DealOverview deal={deal} />
+            <DealBlastGenerator deal={deal} />
+          </div>
         </TabsContent>
 
         <TabsContent value='calculator' className='mt-4'>

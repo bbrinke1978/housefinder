@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -5,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, MapPin, User, Home, BarChart3 } from "lucide-react";
+import { Flame, MapPin, User, Home, BarChart3, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { DollarSign } from "lucide-react";
 import type { PropertyWithLead, DistressSignalRow } from "@/types";
@@ -48,6 +49,7 @@ export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
   const { taxStatus, hasLien, hasNod, hasLisPendens } = deriveTaxStatus(signals);
 
   return (
+    <div className="space-y-4">
     <div className="grid gap-4 md:grid-cols-2">
       {/* Address Section */}
       <Card>
@@ -180,6 +182,18 @@ export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
           )}
         </CardContent>
       </Card>
+    </div>
+
+    {/* Start Deal CTA */}
+    <div>
+      <Link
+        href={`/deals/new?propertyId=${property.id}`}
+        className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+      >
+        <Briefcase className="h-4 w-4" />
+        Start Deal
+      </Link>
+    </div>
     </div>
   );
 }
