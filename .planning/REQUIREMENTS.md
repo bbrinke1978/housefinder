@@ -19,6 +19,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DATA-07**: System tracks first-seen date per property for new lead detection
 - [x] **DATA-08**: System runs daily automated scraping on a scheduled basis
 - [x] **DATA-09**: System stores all scraped data in a persistent database with property as canonical entity
+- [ ] **DATA-11**: System identifies vacant land vs improved properties using assessor property type or improvement value, and filters out vacant land (no structure) from the dashboard
 
 ### Distress Scoring
 
@@ -92,7 +93,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DEAL-01**: User can manage deals in a kanban pipeline with 10 statuses (Lead, Qualified, Analyzed, Offered, Under Contract, Marketing, Assigned, Closing, Closed, Dead) and drag-and-drop status updates
 - [ ] **DEAL-02**: MAO calculator computes MAO = ARV x 0.70 - Repairs - Wholesale Fee with auto-calculated profit, ROI, deal score, and sensitivity analysis (ARV -10%, repairs +20%)
-- [ ] **DEAL-03**: Seller qualification captures 4 pillars (condition, timeline, price, motivation) with hot seller indicator for high-urgency combinations
+- [x] **DEAL-03**: Seller qualification captures 4 pillars (condition, timeline, price, motivation) with hot seller indicator for high-urgency combinations
 - [ ] **DEAL-04**: Buyer database stores cash buyers with name, phone, email, buy box, price range, funding type, target areas, and rehab tolerance — with buyer-to-deal matching by price range
 - [ ] **DEAL-05**: Deal blast generates formatted marketing text (address, price, ARV, repairs, assignment fee, closing date, photo URL) with one-click copy to clipboard
 - [ ] **DEAL-06**: Contract tracking shows status progression (sent, signed, in escrow, title clear, closing scheduled) with earnest money tracking and inspection deadline countdown
@@ -192,7 +193,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANALYTICS-08 | Phase 6 | Pending |
 | DEAL-01 | Phase 8 | Complete |
 | DEAL-02 | Phase 8 | Pending |
-| DEAL-03 | Phase 8 | Pending |
+| DEAL-03 | Phase 8 | Complete |
 | DEAL-04 | Phase 8 | Pending |
 | DEAL-05 | Phase 8 | Pending |
 | DEAL-06 | Phase 8 | Pending |
