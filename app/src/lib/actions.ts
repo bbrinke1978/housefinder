@@ -429,11 +429,13 @@ export async function addManualSignal(
 export interface DashboardSettings {
   hideBigOperators: boolean;
   hideVacantLand: boolean;
+  hideEntities: boolean;
 }
 
 const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
   hideVacantLand: true,
+  hideEntities: true,
 };
 
 /**
@@ -457,12 +459,17 @@ export async function getDashboardSettings(): Promise<DashboardSettings> {
       map.get("dashboard.hideVacantLand") === "false"
         ? false
         : DASHBOARD_DEFAULTS.hideVacantLand,
+    hideEntities:
+      map.get("dashboard.hideEntities") === "false"
+        ? false
+        : DASHBOARD_DEFAULTS.hideEntities,
   };
 }
 
 const updateDashboardSettingsSchema = z.object({
   hideBigOperators: z.boolean(),
   hideVacantLand: z.boolean(),
+  hideEntities: z.boolean(),
 });
 
 /**
@@ -488,6 +495,11 @@ export async function updateDashboardSettings(
       key: "dashboard.hideVacantLand",
       value: String(parsed.hideVacantLand),
       description: "Hide vacant land / unimproved lots from dashboard (property_type contains 'vacant' or 'land', or owner name indicates land use)",
+    },
+    {
+      key: "dashboard.hideEntities",
+      value: String(parsed.hideEntities),
+      description: "Hide LLC, Trust, and Estate-owned properties from dashboard — focus on individual owners only",
     },
   ];
 

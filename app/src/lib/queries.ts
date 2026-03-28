@@ -62,6 +62,21 @@ export async function shouldHideVacantLand(): Promise<boolean> {
 }
 
 /**
+ * Returns true when the dashboard.hideEntities setting is enabled (or absent,
+ * since the default is ON). Hides LLC, Trust, and Estate-owned properties.
+ */
+export async function shouldHideEntities(): Promise<boolean> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "dashboard.hideEntities"))
+    .limit(1);
+
+  if (rows.length === 0) return true; // default ON
+  return rows[0].value !== "false";
+}
+
+/**
  * Get full property + lead data by property ID.
  * Returns null if the property or its lead is not found.
  */
@@ -159,10 +174,11 @@ export interface DashboardStats {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   // Precompute exclusion lists once
-  const [hideBigOps, bigOpNames, hideVacantLand, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
     shouldHideVacantLand(),
+    shouldHideEntities(),
     getTargetCitiesList(),
   ]);
 
@@ -174,8 +190,12 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     statsConditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
   }
 
-  // Exclude vacant land: properties explicitly typed as vacant/land, or owner names
-  // matching common land-use keywords (MINING, MINERAL, RANCH, LAND, CATTLE, etc.)
+  // Exclude LLC, Trust, Estate owners
+  if (hideEntities) {
+    statsConditions.push(sql`(${properties.ownerType} IS NULL OR ${properties.ownerType} NOT IN ('llc', 'trust', 'estate'))`);
+  }
+
+  // Exclude vacant land
   if (hideVacantLand) {
     statsConditions.push(sql`(
       ${properties.propertyType} IS NULL
@@ -293,10 +313,11 @@ export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
   // Precompute exclusion lists once (parallel with query building)
-  const [hideBigOps, bigOpNames, hideVacantLand, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
     shouldHideVacantLand(),
+    shouldHideEntities(),
     getTargetCitiesList(),
   ]);
 
@@ -308,6 +329,11 @@ export async function getProperties(
   // Exclude big operators when setting is enabled (handle NULL owner names)
   if (hideBigOps && bigOpNames.length > 0) {
     conditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
+  }
+
+  // Exclude LLC, Trust, Estate owners
+  if (hideEntities) {
+    conditions.push(sql`(${properties.ownerType} IS NULL OR ${properties.ownerType} NOT IN ('llc', 'trust', 'estate'))`);
   }
 
   // Exclude vacant land / unimproved parcels when setting is enabled

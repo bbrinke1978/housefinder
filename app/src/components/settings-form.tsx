@@ -26,6 +26,7 @@ const ALERT_DEFAULTS: AlertSettings = {
 const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
   hideVacantLand: true,
+  hideEntities: true,
 };
 
 interface SettingsFormProps {
@@ -414,6 +415,30 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                   setDashboardSettings((prev) => ({
                     ...prev,
                     hideVacantLand: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="hideEntities" className="text-sm font-medium">
+                  Hide LLC, Trust, and Estate owners
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Focus on individual property owners only. Entity-owned properties
+                  require additional steps to identify and contact the actual person.
+                </p>
+              </div>
+              <input
+                id="hideEntities"
+                type="checkbox"
+                checked={dashboardSettings.hideEntities}
+                onChange={(e) =>
+                  setDashboardSettings((prev) => ({
+                    ...prev,
+                    hideEntities: e.target.checked,
                   }))
                 }
                 className="h-4 w-4 rounded border-gray-300"
