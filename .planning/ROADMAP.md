@@ -137,3 +137,25 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 7 to break down)
+
+### Phase 8: Wholesaling Deal Flow
+
+**Goal:** The investor can manage the full wholesaling deal lifecycle — from promoting a lead into a deal, through seller qualification, MAO analysis, contract tracking, buyer matching, and deal blast marketing — all within HouseFinder
+**Depends on:** Phase 5
+**Requirements**: DEAL-01, DEAL-02, DEAL-03, DEAL-04, DEAL-05, DEAL-06, DEAL-07, DEAL-08
+**Success Criteria** (what must be TRUE):
+  1. A "Deals" section with kanban pipeline shows all deals across 10 statuses (Lead through Closed/Dead) with drag-and-drop status updates
+  2. The MAO calculator computes MAO = ARV x 0.70 - Repairs - Fee with sensitivity analysis showing impact of ARV -10% and repairs +20%
+  3. Seller qualification captures the 4 pillars (condition, timeline, price, motivation) and highlights hot sellers
+  4. A buyer database stores cash buyers with buy box criteria, and buyers can be matched to deals by price range
+  5. Deal blast generates formatted marketing text with one-click copy to clipboard
+  6. Contract tracking shows status progression, earnest money, inspection deadline countdown, and closing date
+  7. "Start Deal" button on property detail pre-fills a new deal with existing property data
+  8. Two preloaded deals (Sullivan Rd Ogden and Delta 496 W 300 N) seed the pipeline
+**Plans:** 4 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Schema (deals, buyers, deal_notes), types, navigation, seed data
+- [ ] 08-02-PLAN.md — Deal pipeline page with kanban/list views, deal CRUD, new deal form
+- [ ] 08-03-PLAN.md — Deal detail page with MAO calculator, contract tracker, notes
+- [ ] 08-04-PLAN.md — Buyer management, deal blast generator, "Start Deal" integration

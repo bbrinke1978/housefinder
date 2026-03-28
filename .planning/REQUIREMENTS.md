@@ -88,6 +88,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **ANALYTICS-07**: System captures all user actions (calls, notes, status changes) with timestamps in an activity log for personal productivity review
 - [ ] **ANALYTICS-08**: User can export all analytics data to CSV for external analysis
 
+### Wholesaling Deal Flow
+
+- [ ] **DEAL-01**: User can manage deals in a kanban pipeline with 10 statuses (Lead, Qualified, Analyzed, Offered, Under Contract, Marketing, Assigned, Closing, Closed, Dead) and drag-and-drop status updates
+- [ ] **DEAL-02**: MAO calculator computes MAO = ARV x 0.70 - Repairs - Wholesale Fee with auto-calculated profit, ROI, deal score, and sensitivity analysis (ARV -10%, repairs +20%)
+- [ ] **DEAL-03**: Seller qualification captures 4 pillars (condition, timeline, price, motivation) with hot seller indicator for high-urgency combinations
+- [ ] **DEAL-04**: Buyer database stores cash buyers with name, phone, email, buy box, price range, funding type, target areas, and rehab tolerance — with buyer-to-deal matching by price range
+- [ ] **DEAL-05**: Deal blast generates formatted marketing text (address, price, ARV, repairs, assignment fee, closing date, photo URL) with one-click copy to clipboard
+- [ ] **DEAL-06**: Contract tracking shows status progression (sent, signed, in escrow, title clear, closing scheduled) with earnest money tracking and inspection deadline countdown
+- [ ] **DEAL-07**: "Start Deal" button on property detail page creates a new deal pre-filled with existing property data (address, owner name, contact info)
+- [ ] **DEAL-08**: Two preloaded seed deals (Sullivan Rd Ogden and Delta 496 W 300 N) populate the pipeline for immediate use
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -97,6 +108,7 @@ Deferred to future release. Tracked but not in current roadmap.
 - **EXP-01**: System extends to Utah towns beyond initial ~10 based on lead conversion results
 - **EXP-02**: PWA home screen installability with app-like experience
 - **EXP-03**: Export leads to CSV for manual mail campaigns
+- **EXP-04**: Scrape code violation signals (weed tickets, abandoned autos, cleanup orders) from Utah Courts XChange ($40/mo subscription) — covers all 6 target counties via justice court ordinance violation records
 
 ### Advanced Contact
 
@@ -115,9 +127,12 @@ Explicitly excluded. Documented to prevent scope creep.
 | MLS / on-market listing data | Requires REALTOR membership or paid API; not needed for off-market leads |
 | Native iOS/Android app | Responsive web + PWA achieves 90% of value without App Store complexity |
 | Multi-user / team management | Single user tool; team features are v2+ if product finds multi-investor use |
-| Deal analyzer / ROI calculator | Substantial complexity; use free external tools (BiggerPockets, DealCheck) |
 | Markets outside Utah | Start small, expand later based on results |
 | Real-time push notifications | Email + SMS is sufficient; push adds service worker complexity |
+| Hard money calculator | Deferred — not in Phase 8 scope |
+| Partner split model | Deferred — not in Phase 8 scope |
+| Rehab budget template | Deferred — not in Phase 8 scope |
+| Deal blast email/SMS automation | Manual copy-paste first; automation deferred |
 
 ## Traceability
 
@@ -175,12 +190,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANALYTICS-06 | Phase 6 | Pending |
 | ANALYTICS-07 | Phase 6 | Pending |
 | ANALYTICS-08 | Phase 6 | Pending |
+| DEAL-01 | Phase 8 | Pending |
+| DEAL-02 | Phase 8 | Pending |
+| DEAL-03 | Phase 8 | Pending |
+| DEAL-04 | Phase 8 | Pending |
+| DEAL-05 | Phase 8 | Pending |
+| DEAL-06 | Phase 8 | Pending |
+| DEAL-07 | Phase 8 | Pending |
+| DEAL-08 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 40 total
-- Mapped to phases: 40
+- v1 requirements: 48 total
+- Mapped to phases: 48
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-18 — added Phase 6 analytics requirements*
+*Last updated: 2026-03-26 — added Phase 8 wholesaling deal flow requirements (DEAL-01 through DEAL-08)*
