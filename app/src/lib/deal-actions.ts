@@ -321,3 +321,33 @@ export async function updateDeal(
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);
 }
+
+// -- Add Deal Note --
+
+const addDealNoteSchema = z.object({
+  dealId: z.uuid(),
+  noteText: z.string().min(1).max(2000),
+});
+
+/**
+ * addDealNote — insert a user note for a deal.
+ */
+export async function addDealNote(
+  dealId: string,
+  noteText: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = addDealNoteSchema.parse({ dealId, noteText });
+
+  await db.insert(dealNotes).values({
+    dealId: parsed.dealId,
+    noteText: parsed.noteText,
+    noteType: "user",
+  });
+
+  revalidatePath(`/deals/${parsed.dealId}`);
+}
