@@ -9,6 +9,7 @@ import { DealMaoCalculator } from '@/components/deal-mao-calculator';
 import { DealContractTracker } from '@/components/deal-contract-tracker';
 import { DealNotes } from '@/components/deal-notes';
 import { DealBlastGenerator } from '@/components/deal-blast-generator';
+import { DealGuidePanel } from '@/components/deal-guide-panel';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +77,8 @@ export default async function DealDetailPage({
       <p className='text-sm text-muted-foreground'>
         {deal.city}, {deal.state}
       </p>
+
+      <DealGuidePanel status={deal.status} />
 
       <Tabs defaultValue={activeTab}>
         <TabsList>

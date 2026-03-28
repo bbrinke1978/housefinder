@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   DragDropContext,
   Droppable,
@@ -9,6 +9,7 @@ import {
 } from "@hello-pangea/dnd";
 import { DealCard } from "@/components/deal-card";
 import { updateDealStatus } from "@/lib/deal-actions";
+import { getStageGuide } from "@/lib/wholesaling-guide";
 import type { DealWithBuyer, DealStatus } from "@/types";
 
 const DEAL_STATUS_COLUMNS: {
@@ -60,12 +61,130 @@ const DEAL_STATUS_COLUMNS: {
   { key: "dead", label: "Dead", color: "bg-gray-50 dark:bg-gray-900/50" },
 ];
 
+interface ColumnGuideProps {
+  colKey: DealStatus;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}
+
+function ColumnGuide({ colKey, open, onToggle, onClose }: ColumnGuideProps) {
+  const guide = getStageGuide(colKey);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        onClose();
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open, onClose]);
+
+  if (!guide) return null;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        className="ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-muted-foreground hover:bg-background hover:text-foreground transition-colors leading-none"
+        title={`${guide.title} stage guide`}
+        aria-label={`Show guide for ${guide.title} stage`}
+      >
+        i
+      </button>
+
+      {open && (
+        <div
+          className="absolute left-0 top-6 z-50 w-72 rounded-lg border bg-popover text-popover-foreground shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-3 space-y-3">
+            <div>
+              <p className="text-xs font-semibold mb-1">{guide.title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {guide.description}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                Criteria
+              </p>
+              <ul className="space-y-0.5">
+                {guide.criteria.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs">
+                    <span className="text-green-500 flex-shrink-0 mt-px">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                Next steps
+              </p>
+              <ol className="space-y-0.5">
+                {guide.nextSteps.map((item, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs">
+                    <span className="flex-shrink-0 font-medium text-muted-foreground">
+                      {i + 1}.
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            {guide.script && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                  Script
+                </p>
+                <div className="rounded border-l-2 border-blue-400 bg-blue-50 dark:bg-blue-950/30 px-2 py-1.5">
+                  <pre className="whitespace-pre-wrap text-[10px] font-mono text-blue-900 dark:text-blue-200 leading-relaxed">
+                    {guide.script}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {guide.tips && guide.tips.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                  Tips
+                </p>
+                <ul className="space-y-0.5">
+                  {guide.tips.map((tip, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-xs">
+                      <span className="flex-shrink-0 text-amber-500">★</span>
+                      <span className="text-muted-foreground">{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface DealKanbanProps {
   deals: DealWithBuyer[];
 }
 
 export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
   const [deals, setDeals] = useState(initialDeals);
+  const [openGuide, setOpenGuide] = useState<DealStatus | null>(null);
 
   const getColumnDeals = useCallback(
     (status: DealStatus) => deals.filter((d) => d.status === status),
@@ -112,7 +231,19 @@ export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
               className={`flex-shrink-0 min-w-[180px] w-[200px] rounded-lg ${col.color} p-2.5`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-semibold">{col.label}</h3>
+                <div className="flex items-center gap-0.5">
+                  <h3 className="text-xs font-semibold">{col.label}</h3>
+                  <ColumnGuide
+                    colKey={col.key}
+                    open={openGuide === col.key}
+                    onToggle={() =>
+                      setOpenGuide((prev) =>
+                        prev === col.key ? null : col.key
+                      )
+                    }
+                    onClose={() => setOpenGuide(null)}
+                  />
+                </div>
                 <span className="text-xs text-muted-foreground rounded-full bg-background px-1.5 py-0.5">
                   {columnDeals.length}
                 </span>
