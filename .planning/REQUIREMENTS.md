@@ -90,14 +90,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Wholesaling Deal Flow
 
-- [ ] **DEAL-01**: User can manage deals in a kanban pipeline with 10 statuses (Lead, Qualified, Analyzed, Offered, Under Contract, Marketing, Assigned, Closing, Closed, Dead) and drag-and-drop status updates
+- [x] **DEAL-01**: User can manage deals in a kanban pipeline with 10 statuses (Lead, Qualified, Analyzed, Offered, Under Contract, Marketing, Assigned, Closing, Closed, Dead) and drag-and-drop status updates
 - [ ] **DEAL-02**: MAO calculator computes MAO = ARV x 0.70 - Repairs - Wholesale Fee with auto-calculated profit, ROI, deal score, and sensitivity analysis (ARV -10%, repairs +20%)
 - [ ] **DEAL-03**: Seller qualification captures 4 pillars (condition, timeline, price, motivation) with hot seller indicator for high-urgency combinations
 - [ ] **DEAL-04**: Buyer database stores cash buyers with name, phone, email, buy box, price range, funding type, target areas, and rehab tolerance — with buyer-to-deal matching by price range
 - [ ] **DEAL-05**: Deal blast generates formatted marketing text (address, price, ARV, repairs, assignment fee, closing date, photo URL) with one-click copy to clipboard
 - [ ] **DEAL-06**: Contract tracking shows status progression (sent, signed, in escrow, title clear, closing scheduled) with earnest money tracking and inspection deadline countdown
 - [ ] **DEAL-07**: "Start Deal" button on property detail page creates a new deal pre-filled with existing property data (address, owner name, contact info)
-- [ ] **DEAL-08**: Two preloaded seed deals (Sullivan Rd Ogden and Delta 496 W 300 N) populate the pipeline for immediate use
+- [x] **DEAL-08**: Two preloaded seed deals (Sullivan Rd Ogden and Delta 496 W 300 N) populate the pipeline for immediate use
 
 ## v2 Requirements
 
@@ -190,14 +190,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANALYTICS-06 | Phase 6 | Pending |
 | ANALYTICS-07 | Phase 6 | Pending |
 | ANALYTICS-08 | Phase 6 | Pending |
-| DEAL-01 | Phase 8 | Pending |
+| DEAL-01 | Phase 8 | Complete |
 | DEAL-02 | Phase 8 | Pending |
 | DEAL-03 | Phase 8 | Pending |
 | DEAL-04 | Phase 8 | Pending |
 | DEAL-05 | Phase 8 | Pending |
 | DEAL-06 | Phase 8 | Pending |
 | DEAL-07 | Phase 8 | Pending |
-| DEAL-08 | Phase 8 | Pending |
+| DEAL-08 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 48 total

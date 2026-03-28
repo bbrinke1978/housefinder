@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 5 of 5 (Map View)
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-03-18 — Completed 05-03 (Geocoding Script & Address Search)
+Phase: 8 of 8 (Wholesaling Deal Flow)
+Plan: 1 of 5 in current phase
+Status: In Progress
+Last activity: 2026-03-28 — Completed 08-01 (Deal Flow Foundation: Schema + Types + Navigation)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -32,6 +32,7 @@ Progress: [██████████] 100%
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
 | 04-county-expansion | 3/3 | 9min | 3min |
 | 05-map-view | 3/3 | 10min | 3min |
+| 08-wholesaling-deal-flow | 1/5 | 3min | 3min |
 
 **Recent Trend:**
 - Last 5 plans: 3min, 3min, 3min, 5min, 2min
@@ -41,6 +42,7 @@ Progress: [██████████] 100%
 | Phase 05 P01 | 3min | 2 tasks | 6 files |
 | Phase 05 P02 | 5min | 2 tasks | 8 files |
 | Phase 05 P03 | 2min | 2 tasks | 2 files |
+| Phase 08 P01 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -111,10 +113,14 @@ Recent decisions affecting current work:
 - [Phase 05-02]: Satellite-streets-v12 map style per user decision (satellite hybrid)
 - [Phase 05-02]: Client-side GeoJSON filtering -- no server roundtrip for filter changes
 - [Phase 05-03]: Batch geocoding script with 50-property batches and 1s delay for rate limiting
+- [Phase 08-01]: text for deal status field (not pgEnum) — 10 statuses unwieldy as Postgres enum; zod/v4 validation in server actions
+- [Phase 08-01]: nullable propertyId FK on deals with no onDelete cascade — standalone deals not linked to scraped properties
+- [Phase 08-01]: no drizzle relations() on deal tables — consistent with existing direct join pattern
 
 ### Roadmap Evolution
 
 - Phase 7 added: Frontend Design Polish
+- Phase 8 added: Wholesaling Deal Flow
 
 ### Pending Todos
 
@@ -130,6 +136,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-18
-Stopped at: Completed 05-03-PLAN.md (Phase 5 complete)
-Resume file: .planning/phases/05-map-view/05-03-SUMMARY.md
+Last session: 2026-03-28
+Stopped at: Completed 08-01-PLAN.md (Phase 8 Plan 1 — Deal Flow Foundation)
+Resume file: .planning/phases/08-wholesaling-deal-flow/08-01-SUMMARY.md
