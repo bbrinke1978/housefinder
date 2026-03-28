@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 8 of 8 (Wholesaling Deal Flow)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In Progress
-Last activity: 2026-03-28 — Completed 08-03 (Deal Detail Page: MAO Calculator + Contract Tracker + Notes)
+Last activity: 2026-03-28 — Completed 08-04 (Buyer Management + Deal Blast + Start Deal)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 84%
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [████████░░] 80%
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
 | 04-county-expansion | 3/3 | 9min | 3min |
 | 05-map-view | 3/3 | 10min | 3min |
-| 08-wholesaling-deal-flow | 1/5 | 3min | 3min |
+| 08-wholesaling-deal-flow | 4/5 | 20min | 5min |
 
 **Recent Trend:**
 - Last 5 plans: 3min, 3min, 3min, 5min, 2min
@@ -44,6 +44,7 @@ Progress: [████████░░] 80%
 | Phase 05 P03 | 2min | 2 tasks | 2 files |
 | Phase 08 P01 | 3min | 2 tasks | 7 files |
 | Phase 08-wholesaling-deal-flow P03 | 7min | 2 tasks | 7 files |
+| Phase 08-wholesaling-deal-flow P04 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,10 @@ Recent decisions affecting current work:
 - [Phase 08-03]: updateDeal called from client components via FormData — consistent with existing updateDeal signature
 - [Phase 08-03]: Contract stepper: clicking any step sets contractStatus directly — wholesaler may need to jump steps
 - [Phase 08-03]: MAO formula: ARV * 0.70 - repairs - wholesaleFee pure client-side, no DB roundtrip for computation
+- [Phase 08-04]: Buyer soft-delete only (isActive = false) — preserves deal assignment history
+- [Phase 08-04]: getMatchingBuyers: null min/max treated as open (no restriction) — buyers without price set match all deals
+- [Phase 08-04]: Deal blast disabled state (not hidden) pre-under_contract — communicates next step to user
+- [Phase 08-04]: Start Deal as styled link not Button — secondary role doesn't compete with existing lead management CTAs
 
 ### Roadmap Evolution
 
@@ -141,5 +146,5 @@ None yet.
 
 
 Last session: 2026-03-28
-Stopped at: Completed 08-03-PLAN.md (Phase 8 Plan 3 — Deal Detail Page: MAO Calculator + Contract Tracker + Notes)
-Resume file: .planning/phases/08-wholesaling-deal-flow/08-02-SUMMARY.md
+Stopped at: Completed 08-04-PLAN.md (Phase 8 Plan 4 — Buyer Management + Deal Blast + Start Deal)
+Resume file: .planning/phases/08-wholesaling-deal-flow/08-04-SUMMARY.md
