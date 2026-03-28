@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes } from "@/db/schema";
+import { deals, dealNotes, buyers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -350,4 +350,175 @@ export async function addDealNote(
   });
 
   revalidatePath(`/deals/${parsed.dealId}`);
+}
+
+// -- Buyer Actions --
+
+const buyerSchema = z.object({
+  name: z.string().min(1).max(255),
+  phone: z.string().max(50).optional(),
+  email: z.string().email().max(255).optional(),
+  buyBox: z.string().max(2000).optional(),
+  minPrice: z.number().int().nonnegative().optional(),
+  maxPrice: z.number().int().nonnegative().optional(),
+  fundingType: z.enum(["cash", "hard_money", "both"]).optional(),
+  targetAreas: z.string().max(1000).optional(),
+  rehabTolerance: z.enum(["light", "medium", "heavy", "any"]).optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+function parseBuyerFormData(data: FormData) {
+  const parseOptionalInt = (key: string) => {
+    const val = data.get(key) as string | null;
+    if (!val || val.trim() === "") return undefined;
+    const n = parseInt(val, 10);
+    return isNaN(n) ? undefined : n;
+  };
+  const parseOptionalStr = (key: string) => {
+    const val = data.get(key) as string | null;
+    return val && val.trim().length > 0 ? val.trim() : undefined;
+  };
+  return {
+    name: (data.get("name") as string) ?? "",
+    phone: parseOptionalStr("phone"),
+    email: parseOptionalStr("email"),
+    buyBox: parseOptionalStr("buyBox"),
+    minPrice: parseOptionalInt("minPrice"),
+    maxPrice: parseOptionalInt("maxPrice"),
+    fundingType: parseOptionalStr("fundingType"),
+    targetAreas: parseOptionalStr("targetAreas"),
+    rehabTolerance: parseOptionalStr("rehabTolerance"),
+    notes: parseOptionalStr("notes"),
+  };
+}
+
+/**
+ * createBuyer — insert a new buyer record.
+ */
+export async function createBuyer(formData: FormData): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const raw = parseBuyerFormData(formData);
+  const parsed = buyerSchema.parse(raw);
+
+  await db.insert(buyers).values({
+    name: parsed.name,
+    phone: parsed.phone ?? null,
+    email: parsed.email ?? null,
+    buyBox: parsed.buyBox ?? null,
+    minPrice: parsed.minPrice ?? null,
+    maxPrice: parsed.maxPrice ?? null,
+    fundingType: parsed.fundingType ?? null,
+    targetAreas: parsed.targetAreas ?? null,
+    rehabTolerance: parsed.rehabTolerance ?? null,
+    notes: parsed.notes ?? null,
+  });
+
+  revalidatePath("/deals/buyers");
+}
+
+/**
+ * updateBuyer — update an existing buyer's fields.
+ */
+export async function updateBuyer(
+  buyerId: string,
+  formData: FormData
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const raw = parseBuyerFormData(formData);
+  const parsed = buyerSchema.parse(raw);
+
+  await db
+    .update(buyers)
+    .set({
+      name: parsed.name,
+      phone: parsed.phone ?? null,
+      email: parsed.email ?? null,
+      buyBox: parsed.buyBox ?? null,
+      minPrice: parsed.minPrice ?? null,
+      maxPrice: parsed.maxPrice ?? null,
+      fundingType: parsed.fundingType ?? null,
+      targetAreas: parsed.targetAreas ?? null,
+      rehabTolerance: parsed.rehabTolerance ?? null,
+      notes: parsed.notes ?? null,
+      updatedAt: new Date(),
+    })
+    .where(eq(buyers.id, buyerId));
+
+  revalidatePath("/deals/buyers");
+}
+
+/**
+ * deactivateBuyer — soft-delete a buyer (set isActive = false).
+ */
+export async function deactivateBuyer(buyerId: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  await db
+    .update(buyers)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(eq(buyers.id, buyerId));
+
+  revalidatePath("/deals/buyers");
+}
+
+/**
+ * assignBuyerToDeal — assign a buyer to a deal and set assignment fee.
+ * Auto-advances deal status to "assigned" if currently "marketing".
+ */
+export async function assignBuyerToDeal(
+  dealId: string,
+  buyerId: string,
+  assignmentFee: number
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const [existing] = await db
+    .select({ status: deals.status })
+    .from(deals)
+    .where(eq(deals.id, dealId))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Deal not found");
+  }
+
+  const newStatus =
+    existing.status === "marketing" ? "assigned" : existing.status;
+
+  await db
+    .update(deals)
+    .set({
+      assignedBuyerId: buyerId,
+      assignmentFee,
+      status: newStatus,
+      updatedAt: new Date(),
+    })
+    .where(eq(deals.id, dealId));
+
+  if (newStatus !== existing.status) {
+    await db.insert(dealNotes).values({
+      dealId,
+      noteText: `Status changed from ${existing.status} to ${newStatus}`,
+      noteType: "status_change",
+      previousStatus: existing.status,
+      newStatus,
+    });
+  }
+
+  revalidatePath("/deals");
+  revalidatePath(`/deals/${dealId}`);
 }

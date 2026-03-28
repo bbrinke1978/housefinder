@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { deals, buyers, dealNotes } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import type { DealWithBuyer, DealNote } from "@/types";
+import { eq, desc, gte, lte, or, isNull, and } from "drizzle-orm";
+import type { DealWithBuyer, DealNote, Buyer } from "@/types";
 
 /**
  * getDeals — returns all deals joined with buyer name, newest-updated first.
@@ -86,6 +86,69 @@ export async function getDeal(id: string): Promise<DealWithBuyer | null> {
 
   if (rows.length === 0) return null;
   return rows[0] as unknown as DealWithBuyer;
+}
+
+/**
+ * getBuyers — returns all active buyers ordered by name ascending.
+ */
+export async function getBuyers(): Promise<Buyer[]> {
+  const rows = await db
+    .select()
+    .from(buyers)
+    .where(eq(buyers.isActive, true))
+    .orderBy(buyers.name);
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    email: r.email,
+    buyBox: r.buyBox,
+    minPrice: r.minPrice,
+    maxPrice: r.maxPrice,
+    fundingType: r.fundingType,
+    targetAreas: r.targetAreas,
+    rehabTolerance: r.rehabTolerance,
+    notes: r.notes,
+    isActive: r.isActive,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }));
+}
+
+/**
+ * getMatchingBuyers — returns active buyers whose price range includes dealPrice.
+ * Buyers with no min/max are considered a match (open to any price).
+ */
+export async function getMatchingBuyers(dealPrice: number): Promise<Buyer[]> {
+  const rows = await db
+    .select()
+    .from(buyers)
+    .where(
+      and(
+        eq(buyers.isActive, true),
+        or(isNull(buyers.maxPrice), gte(buyers.maxPrice, dealPrice)),
+        or(isNull(buyers.minPrice), lte(buyers.minPrice, dealPrice))
+      )
+    )
+    .orderBy(buyers.name);
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    phone: r.phone,
+    email: r.email,
+    buyBox: r.buyBox,
+    minPrice: r.minPrice,
+    maxPrice: r.maxPrice,
+    fundingType: r.fundingType,
+    targetAreas: r.targetAreas,
+    rehabTolerance: r.rehabTolerance,
+    notes: r.notes,
+    isActive: r.isActive,
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }));
 }
 
 /**
