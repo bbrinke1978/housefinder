@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 8 of 8 (Wholesaling Deal Flow)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In Progress
-Last activity: 2026-03-28 — Completed 08-02 (Deal Pipeline Page: Kanban + List Views + New Deal Form)
+Last activity: 2026-03-28 — Completed 08-03 (Deal Detail Page: MAO Calculator + Contract Tracker + Notes)
 
 Progress: [████████░░] 80%
 
@@ -43,6 +43,7 @@ Progress: [████████░░] 80%
 | Phase 05 P02 | 5min | 2 tasks | 8 files |
 | Phase 05 P03 | 2min | 2 tasks | 2 files |
 | Phase 08 P01 | 3min | 2 tasks | 7 files |
+| Phase 08-wholesaling-deal-flow P03 | 7min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,9 @@ Recent decisions affecting current work:
 - [Phase 08-01]: text for deal status field (not pgEnum) — 10 statuses unwieldy as Postgres enum; zod/v4 validation in server actions
 - [Phase 08-01]: nullable propertyId FK on deals with no onDelete cascade — standalone deals not linked to scraped properties
 - [Phase 08-01]: no drizzle relations() on deal tables — consistent with existing direct join pattern
+- [Phase 08-03]: updateDeal called from client components via FormData — consistent with existing updateDeal signature
+- [Phase 08-03]: Contract stepper: clicking any step sets contractStatus directly — wholesaler may need to jump steps
+- [Phase 08-03]: MAO formula: ARV * 0.70 - repairs - wholesaleFee pure client-side, no DB roundtrip for computation
 
 ### Roadmap Evolution
 
@@ -137,5 +141,5 @@ None yet.
 
 
 Last session: 2026-03-28
-Stopped at: Completed 08-02-PLAN.md (Phase 8 Plan 2 — Deal Pipeline Page: Kanban + List Views + New Deal Form)
+Stopped at: Completed 08-03-PLAN.md (Phase 8 Plan 3 — Deal Detail Page: MAO Calculator + Contract Tracker + Notes)
 Resume file: .planning/phases/08-wholesaling-deal-flow/08-02-SUMMARY.md
