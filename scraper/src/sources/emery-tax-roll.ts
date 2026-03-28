@@ -87,6 +87,19 @@ export async function scrapeEmeryTaxRoll(): Promise<PropertyRecord[]> {
               return cells[idx]?.textContent?.trim() ?? "";
             };
 
+            const propertyType =
+              getCell("property type") ||
+              getCell("propertytype") ||
+              getCell("prop type") ||
+              getCell("use") ||
+              getCell("use code") ||
+              getCell("usecode") ||
+              getCell("class") ||
+              getCell("property class") ||
+              getCell("land use") ||
+              getCell("landuse") ||
+              getCell("type");
+
             return {
               parcelId:
                 getCell("parcel") ||
@@ -128,6 +141,7 @@ export async function scrapeEmeryTaxRoll(): Promise<PropertyRecord[]> {
                 getCell("mortgage") ||
                 getCell("mortgageinfo") ||
                 getCell("mortgage info"),
+              propertyType: propertyType || undefined,
             };
           });
         },

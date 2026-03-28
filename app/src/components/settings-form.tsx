@@ -25,6 +25,7 @@ const ALERT_DEFAULTS: AlertSettings = {
 
 const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
+  hideVacantLand: true,
 };
 
 interface SettingsFormProps {
@@ -389,6 +390,30 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                   setDashboardSettings((prev) => ({
                     ...prev,
                     hideBigOperators: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="hideVacantLand" className="text-sm font-medium">
+                  Hide vacant land and unimproved lots
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Exclude empty lots, ranch land, mineral rights parcels, and agricultural
+                  land with no structures. Focus on houses and buildings to flip.
+                </p>
+              </div>
+              <input
+                id="hideVacantLand"
+                type="checkbox"
+                checked={dashboardSettings.hideVacantLand}
+                onChange={(e) =>
+                  setDashboardSettings((prev) => ({
+                    ...prev,
+                    hideVacantLand: e.target.checked,
                   }))
                 }
                 className="h-4 w-4 rounded border-gray-300"

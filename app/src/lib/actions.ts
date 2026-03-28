@@ -428,10 +428,12 @@ export async function addManualSignal(
 
 export interface DashboardSettings {
   hideBigOperators: boolean;
+  hideVacantLand: boolean;
 }
 
 const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
+  hideVacantLand: true,
 };
 
 /**
@@ -451,11 +453,16 @@ export async function getDashboardSettings(): Promise<DashboardSettings> {
       map.get("dashboard.hideBigOperators") === "false"
         ? false
         : DASHBOARD_DEFAULTS.hideBigOperators,
+    hideVacantLand:
+      map.get("dashboard.hideVacantLand") === "false"
+        ? false
+        : DASHBOARD_DEFAULTS.hideVacantLand,
   };
 }
 
 const updateDashboardSettingsSchema = z.object({
   hideBigOperators: z.boolean(),
+  hideVacantLand: z.boolean(),
 });
 
 /**
@@ -471,26 +478,38 @@ export async function updateDashboardSettings(
 
   const parsed = updateDashboardSettingsSchema.parse(settings);
 
-  const key = "dashboard.hideBigOperators";
-  const value = String(parsed.hideBigOperators);
-
-  const existing = await db
-    .select({ id: scraperConfig.id })
-    .from(scraperConfig)
-    .where(eq(scraperConfig.key, key))
-    .limit(1);
-
-  if (existing.length > 0) {
-    await db
-      .update(scraperConfig)
-      .set({ value, updatedAt: new Date() })
-      .where(eq(scraperConfig.key, key));
-  } else {
-    await db.insert(scraperConfig).values({
-      key,
-      value,
+  const entries: Array<{ key: string; value: string; description: string }> = [
+    {
+      key: "dashboard.hideBigOperators",
+      value: String(parsed.hideBigOperators),
       description: "Hide owners with 10+ distress-signal properties from dashboard",
-    });
+    },
+    {
+      key: "dashboard.hideVacantLand",
+      value: String(parsed.hideVacantLand),
+      description: "Hide vacant land / unimproved lots from dashboard (property_type contains 'vacant' or 'land', or owner name indicates land use)",
+    },
+  ];
+
+  for (const entry of entries) {
+    const existing = await db
+      .select({ id: scraperConfig.id })
+      .from(scraperConfig)
+      .where(eq(scraperConfig.key, entry.key))
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(scraperConfig)
+        .set({ value: entry.value, updatedAt: new Date() })
+        .where(eq(scraperConfig.key, entry.key));
+    } else {
+      await db.insert(scraperConfig).values({
+        key: entry.key,
+        value: entry.value,
+        description: entry.description,
+      });
+    }
   }
 
   revalidatePath("/settings");

@@ -47,6 +47,21 @@ export async function shouldHideBigOperators(): Promise<boolean> {
 }
 
 /**
+ * Returns true when the dashboard.hideVacantLand setting is enabled (or absent,
+ * since the default is ON).
+ */
+export async function shouldHideVacantLand(): Promise<boolean> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "dashboard.hideVacantLand"))
+    .limit(1);
+
+  if (rows.length === 0) return true; // default ON
+  return rows[0].value !== "false";
+}
+
+/**
  * Get full property + lead data by property ID.
  * Returns null if the property or its lead is not found.
  */
@@ -144,9 +159,10 @@ export interface DashboardStats {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   // Precompute exclusion lists once
-  const [hideBigOps, bigOpNames, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
+    shouldHideVacantLand(),
     getTargetCitiesList(),
   ]);
 
@@ -156,6 +172,43 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   if (hideBigOps && bigOpNames.length > 0) {
     statsConditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
+  }
+
+  // Exclude vacant land: properties explicitly typed as vacant/land, or owner names
+  // matching common land-use keywords (MINING, MINERAL, RANCH, LAND, CATTLE, etc.)
+  if (hideVacantLand) {
+    statsConditions.push(sql`(
+      ${properties.propertyType} IS NULL
+      OR (
+        lower(${properties.propertyType}) NOT LIKE '%vacant%'
+        AND lower(${properties.propertyType}) NOT LIKE '%land%'
+        AND lower(${properties.propertyType}) NOT LIKE '%agricultural%'
+        AND lower(${properties.propertyType}) NOT LIKE '%farm%'
+        AND lower(${properties.propertyType}) NOT LIKE '%range%'
+        AND lower(${properties.propertyType}) NOT LIKE '%mineral%'
+      )
+    )`);
+    statsConditions.push(sql`(
+      ${properties.ownerName} IS NULL
+      OR (
+        upper(${properties.ownerName}) NOT LIKE '%MINING%'
+        AND upper(${properties.ownerName}) NOT LIKE '%MINERAL%'
+        AND upper(${properties.ownerName}) NOT LIKE '%RANCH%'
+        AND upper(${properties.ownerName}) NOT LIKE '% LAND %'
+        AND upper(${properties.ownerName}) NOT LIKE '% LAND&%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LAND LLC%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LAND CO%'
+        AND upper(${properties.ownerName}) NOT LIKE '%CATTLE%'
+        AND upper(${properties.ownerName}) NOT LIKE '%GRAZING%'
+        AND upper(${properties.ownerName}) NOT LIKE '%PETROLEUM%'
+        AND upper(${properties.ownerName}) NOT LIKE '% OIL %'
+        AND upper(${properties.ownerName}) NOT LIKE '%COAL%'
+        AND upper(${properties.ownerName}) NOT LIKE '%WATER DISTRICT%'
+        AND upper(${properties.ownerName}) NOT LIKE '%IRRIGAT%'
+        AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LIVESTOCK%'
+      )
+    )`);
   }
 
   // Filter to target cities only
@@ -240,9 +293,10 @@ export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
   // Precompute exclusion lists once (parallel with query building)
-  const [hideBigOps, bigOpNames, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
+    shouldHideVacantLand(),
     getTargetCitiesList(),
   ]);
 
@@ -254,6 +308,42 @@ export async function getProperties(
   // Exclude big operators when setting is enabled (handle NULL owner names)
   if (hideBigOps && bigOpNames.length > 0) {
     conditions.push(sql`(${properties.ownerName} IS NULL OR ${properties.ownerName} NOT IN (${sql.join(bigOpNames.map(n => sql`${n}`), sql`, `)}))`);
+  }
+
+  // Exclude vacant land / unimproved parcels when setting is enabled
+  if (hideVacantLand) {
+    conditions.push(sql`(
+      ${properties.propertyType} IS NULL
+      OR (
+        lower(${properties.propertyType}) NOT LIKE '%vacant%'
+        AND lower(${properties.propertyType}) NOT LIKE '%land%'
+        AND lower(${properties.propertyType}) NOT LIKE '%agricultural%'
+        AND lower(${properties.propertyType}) NOT LIKE '%farm%'
+        AND lower(${properties.propertyType}) NOT LIKE '%range%'
+        AND lower(${properties.propertyType}) NOT LIKE '%mineral%'
+      )
+    )`);
+    conditions.push(sql`(
+      ${properties.ownerName} IS NULL
+      OR (
+        upper(${properties.ownerName}) NOT LIKE '%MINING%'
+        AND upper(${properties.ownerName}) NOT LIKE '%MINERAL%'
+        AND upper(${properties.ownerName}) NOT LIKE '%RANCH%'
+        AND upper(${properties.ownerName}) NOT LIKE '% LAND %'
+        AND upper(${properties.ownerName}) NOT LIKE '% LAND&%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LAND LLC%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LAND CO%'
+        AND upper(${properties.ownerName}) NOT LIKE '%CATTLE%'
+        AND upper(${properties.ownerName}) NOT LIKE '%GRAZING%'
+        AND upper(${properties.ownerName}) NOT LIKE '%PETROLEUM%'
+        AND upper(${properties.ownerName}) NOT LIKE '% OIL %'
+        AND upper(${properties.ownerName}) NOT LIKE '%COAL%'
+        AND upper(${properties.ownerName}) NOT LIKE '%WATER DISTRICT%'
+        AND upper(${properties.ownerName}) NOT LIKE '%IRRIGAT%'
+        AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
+        AND upper(${properties.ownerName}) NOT LIKE '%LIVESTOCK%'
+      )
+    )`);
   }
 
   // Filter to target cities only (unless a specific city filter is set)

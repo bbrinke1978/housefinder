@@ -100,8 +100,26 @@ export async function seedDefaultConfig(): Promise<void> {
     ])
     .onConflictDoNothing();
 
+  // ── Dashboard filter settings ────────────────────────────────────────────
+  await db
+    .insert(scraperConfig)
+    .values([
+      {
+        key: "dashboard.hideBigOperators",
+        value: "true",
+        description: "Hide owners with 10+ distress-signal properties from dashboard",
+      },
+      {
+        key: "dashboard.hideVacantLand",
+        value: "true",
+        description: "Hide vacant land / unimproved lots from dashboard (property_type contains land/vacant, or owner name indicates land use)",
+      },
+    ])
+    .onConflictDoNothing();
+
   console.log("Default scoring config seeded successfully.");
   console.log("Alert config keys seeded successfully.");
+  console.log("Dashboard filter settings seeded successfully.");
 }
 
 // ── CLI entry point ─────────────────────────────────────────────────────────

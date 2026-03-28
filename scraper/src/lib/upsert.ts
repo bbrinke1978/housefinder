@@ -29,6 +29,10 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
   const resolvedCounty = county ?? record.county ?? "carbon";
   const city = record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "";
 
+  // Carry propertyType through when the scraper extracted one.
+  // Null means "not available from this source" — preserved in the DB as-is on conflict.
+  const propertyTypeValue = record.propertyType ?? null;
+
   const result = await db
     .insert(properties)
     .values({
@@ -39,6 +43,7 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
       state: "UT",
       ownerName: record.ownerName ?? null,
       ownerType,
+      propertyType: propertyTypeValue,
       updatedAt: now,
     })
     .onConflictDoUpdate({
@@ -48,6 +53,8 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
         city,
         ownerName: record.ownerName ?? null,
         ownerType,
+        // Only overwrite propertyType if a new value was scraped
+        ...(propertyTypeValue !== null ? { propertyType: propertyTypeValue } : {}),
         updatedAt: now,
       },
     })

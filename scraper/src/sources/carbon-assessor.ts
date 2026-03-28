@@ -86,6 +86,8 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
             //
             // NOTE: "Name/Add1/City/State/Zip" are MAILING address fields.
             //       "PropertyAddress/PropertyCity/PropertyZip" are the property address.
+            //
+            // Property type columns vary by county — try common variants.
 
             const ownerName =
               getCell("name") ||
@@ -121,6 +123,19 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
               ? `${mailingLine1} ${mailingLine2}`.trim()
               : mailingLine1;
 
+            const propertyType =
+              getCell("property type") ||
+              getCell("propertytype") ||
+              getCell("prop type") ||
+              getCell("use") ||
+              getCell("use code") ||
+              getCell("usecode") ||
+              getCell("class") ||
+              getCell("property class") ||
+              getCell("land use") ||
+              getCell("landuse") ||
+              getCell("type");
+
             return {
               parcelId:
                 getCell("parcel") ||
@@ -142,6 +157,7 @@ export async function scrapeAssessor(): Promise<PropertyRecord[]> {
                 getCell("mortgage") ||
                 getCell("mortgageinfo") ||
                 getCell("mortgage info"),
+              propertyType: propertyType || undefined,
               mailingAddress,
               mailingCity,
               mailingState,
