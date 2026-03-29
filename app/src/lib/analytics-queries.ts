@@ -364,6 +364,28 @@ export async function getRecentActivityLog(limit = 50): Promise<ActivityEntry[]>
   }));
 }
 
+/**
+ * Simplified lead list for the call log form dropdown.
+ * Returns id + address for up to 500 leads, ordered by address.
+ */
+export async function getLeadsForCallLog(): Promise<{ id: string; address: string }[]> {
+  const rows = await db.execute<{
+    id: string;
+    address: string;
+  }>(sql`
+    SELECT l.id::text, p.address
+    FROM leads l
+    JOIN properties p ON p.id = l.property_id
+    ORDER BY p.address
+    LIMIT 500
+  `);
+
+  return (rows.rows ?? []).map((r) => ({
+    id: r.id,
+    address: r.address,
+  }));
+}
+
 // -- Export queries --
 
 /**
