@@ -110,7 +110,13 @@ Plans:
   6. Lead source attribution tracks which distress signal type (NOD, tax lien, etc.) produces the most conversions
   7. Activity log captures all user actions (calls, notes, status changes) with timestamps for personal productivity review
   8. Export capability for all analytics data (CSV) for external analysis
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Schema (call_logs), recharts install, analytics queries, nav update, page shell
+- [ ] 06-02-PLAN.md — Pipeline funnel, market comparison, trends, attribution chart components
+- [ ] 06-03-PLAN.md — Scraper health table, outreach tracking, call log form
+- [ ] 06-04-PLAN.md — Activity log timeline, CSV export route handler
 
 ## Progress
 
@@ -126,7 +132,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
-| 6. Data Analytics & Insights | 0/? | Not started | - |
+| 6. Data Analytics & Insights | 0/4 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
@@ -159,3 +165,23 @@ Plans:
 - [ ] 08-02-PLAN.md — Deal pipeline page with kanban/list views, deal CRUD, new deal form
 - [ ] 08-03-PLAN.md — Deal detail page with MAO calculator, contract tracker, notes
 - [ ] 08-04-PLAN.md — Buyer management, deal blast generator, "Start Deal" integration
+
+### Phase 9: Admin Budgeting & Cost Analysis
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 8
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 9 to break down)
+
+### Phase 10: Public Marketing Website
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 10 to break down)
