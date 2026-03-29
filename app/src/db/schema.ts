@@ -303,6 +303,41 @@ export type BuyerRow = InferSelectModel<typeof buyers>;
 export type DealRow = InferSelectModel<typeof deals>;
 export type DealNoteRow = InferSelectModel<typeof dealNotes>;
 
+// -- Call Logs --
+
+export const callOutcomeEnum = pgEnum("call_outcome", [
+  "answered",
+  "voicemail",
+  "no_answer",
+  "wrong_number",
+]);
+
+export const callLogs = pgTable(
+  "call_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    outcome: callOutcomeEnum("outcome").notNull(),
+    source: text("source"), // "manual" | "tracerfy" | etc — nullable
+    durationSeconds: integer("duration_seconds"), // nullable
+    notes: text("notes"), // nullable
+    calledAt: timestamp("called_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_call_logs_lead_id").on(table.leadId),
+    index("idx_call_logs_called_at").on(table.calledAt),
+  ]
+);
+
+export type CallLogRow = InferSelectModel<typeof callLogs>;
+
 // -- Alert History --
 
 export const alertHistory = pgTable(
