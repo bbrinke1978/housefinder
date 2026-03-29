@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, KanbanSquare, Briefcase, Settings } from "lucide-react";
+import { LayoutDashboard, MapPin, KanbanSquare, Briefcase, BarChart2 } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
 const navItems = [
@@ -10,7 +10,7 @@ const navItems = [
   { label: "Map", href: "/map", icon: MapPin },
   { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { label: "Deals", href: "/deals", icon: Briefcase },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Analytics", href: "/analytics", icon: BarChart2 },
 ];
 
 export function MobileBottomNav() {

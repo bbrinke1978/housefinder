@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, KanbanSquare, Briefcase, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, MapPin, KanbanSquare, Briefcase, Settings, LogOut, BarChart2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +21,7 @@ const navItems = [
   { label: "Map", href: "/map", icon: MapPin },
   { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { label: "Deals", href: "/deals", icon: Briefcase },
+  { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
