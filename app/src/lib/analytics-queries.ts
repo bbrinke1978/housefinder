@@ -1,5 +1,28 @@
 import { db } from "@/db/client";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { scraperConfig } from "@/db/schema";
+
+/** Load target cities from settings for filtering analytics to relevant areas */
+async function getTargetCities(): Promise<string[]> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "target_cities"))
+    .limit(1);
+  if (rows.length > 0 && rows[0].value) {
+    try {
+      const cities = JSON.parse(rows[0].value) as string[];
+      if (cities.length > 0) return cities;
+    } catch { /* fall through */ }
+  }
+  return [];
+}
+
+/** Build a SQL IN clause for target cities (case-insensitive) */
+function targetCityFilter(cities: string[], alias: string = "p"): ReturnType<typeof sql> {
+  if (cities.length === 0) return sql`TRUE`;
+  return sql`lower(${sql.raw(alias)}.city) IN (${sql.join(cities.map(c => sql`lower(${c})`), sql`, `)})`;
+}
 
 // -- Types --
 
@@ -118,18 +141,23 @@ export interface BuyerExportRow {
  * Pipeline funnel: count + avg days in stage per lead status.
  */
 export async function getPipelineFunnelData(): Promise<FunnelStage[]> {
+  const cities = await getTargetCities();
+  const cityFilter = targetCityFilter(cities);
+
   const rows = await db.execute<{
     status: string;
     count: number;
     avg_days: string | null;
   }>(sql`
     SELECT
-      status,
+      l.status,
       COUNT(*)::int AS count,
-      AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 86400)::numeric(10,1) AS avg_days
-    FROM leads
-    GROUP BY status
-    ORDER BY CASE status
+      AVG(EXTRACT(EPOCH FROM (l.updated_at - l.created_at)) / 86400)::numeric(10,1) AS avg_days
+    FROM leads l
+    JOIN properties p ON p.id = l.property_id
+    WHERE l.distress_score > 0 AND ${cityFilter}
+    GROUP BY l.status
+    ORDER BY CASE l.status
       WHEN 'new'        THEN 1
       WHEN 'contacted'  THEN 2
       WHEN 'follow_up'  THEN 3
@@ -150,6 +178,9 @@ export async function getPipelineFunnelData(): Promise<FunnelStage[]> {
  * Market comparison: leads, hot leads, and conversions per city.
  */
 export async function getMarketComparisonData(): Promise<MarketStat[]> {
+  const cities = await getTargetCities();
+  const cityFilter = targetCityFilter(cities);
+
   const rows = await db.execute<{
     city: string;
     total_leads: number;
@@ -163,6 +194,7 @@ export async function getMarketComparisonData(): Promise<MarketStat[]> {
       COUNT(*) FILTER (WHERE l.status = 'closed')::int AS converted
     FROM leads l
     JOIN properties p ON p.id = l.property_id
+    WHERE l.distress_score > 0 AND ${cityFilter}
     GROUP BY p.city
     ORDER BY total_leads DESC
   `);
@@ -183,6 +215,9 @@ export async function getMarketComparisonData(): Promise<MarketStat[]> {
  * Property trend: new leads per week per city over the last 6 months.
  */
 export async function getPropertyTrendData(): Promise<TrendPoint[]> {
+  const cities = await getTargetCities();
+  const cityFilter = targetCityFilter(cities);
+
   const rows = await db.execute<{
     week: string;
     city: string;
@@ -195,6 +230,8 @@ export async function getPropertyTrendData(): Promise<TrendPoint[]> {
     FROM leads l
     JOIN properties p ON p.id = l.property_id
     WHERE l.first_seen_at > NOW() - INTERVAL '6 months'
+      AND l.distress_score > 0
+      AND ${cityFilter}
     GROUP BY 1, 2
     ORDER BY 1, 2
   `);
