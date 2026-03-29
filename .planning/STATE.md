@@ -49,6 +49,7 @@ Progress: [██████░░░░] 60%
 | Phase 06-data-analytics-insights P01 | 4min | 2 tasks | 7 files |
 | Phase 06-data-analytics-insights P04 | 2min | 2 tasks | 5 files |
 | Phase 06-data-analytics-insights P02 | 7 | 2 tasks | 5 files |
+| Phase 06-data-analytics-insights P03 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,8 @@ Recent decisions affecting current work:
 - [Phase 06-02]: Custom Tooltip components used for all charts to show domain-specific context (avgDaysInStage, conversionRate, deal counts)
 - [Phase 06-02]: Attribution chart uses horizontal BarChart (layout=vertical) for readability of signal type labels
 - [Phase 06-02]: Trends chart transforms flat TrendPoint[] to week-keyed rows with one key per city for recharts multi-line
+- [Phase 06-data-analytics-insights]: useActionState<LogCallResult|null,FormData> for call log form — consistent with React 19 form action pattern
+- [Phase 06-data-analytics-insights]: logCall returns union {success:true}|{error:string} not throw — graceful client-side feedback
 
 ### Roadmap Evolution
 

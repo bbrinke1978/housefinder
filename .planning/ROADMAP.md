@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Contact and Alerts** - Owner contact lookup from free sources and hot lead email/SMS alerts (completed 2026-03-18)
 - [x] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties (completed 2026-03-18)
 - [x] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins (completed 2026-03-19)
-- [ ] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions
+- [x] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions (completed 2026-03-29)
 
 ## Phase Details
 
@@ -110,7 +110,7 @@ Plans:
   6. Lead source attribution tracks which distress signal type (NOD, tax lien, etc.) produces the most conversions
   7. Activity log captures all user actions (calls, notes, status changes) with timestamps for personal productivity review
   8. Export capability for all analytics data (CSV) for external analysis
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — Schema (call_logs), recharts install, analytics queries, nav update, page shell
@@ -132,7 +132,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
-| 6. Data Analytics & Insights | 3/4 | In Progress|  |
+| 6. Data Analytics & Insights | 4/4 | Complete   | 2026-03-29 |
 
 ### Phase 7: Frontend Design Polish
 
