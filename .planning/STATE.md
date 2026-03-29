@@ -48,6 +48,7 @@ Progress: [██████░░░░] 60%
 | Phase 08-wholesaling-deal-flow P04 | 3min | 2 tasks | 8 files |
 | Phase 06-data-analytics-insights P01 | 4min | 2 tasks | 7 files |
 | Phase 06-data-analytics-insights P04 | 2min | 2 tasks | 5 files |
+| Phase 06-data-analytics-insights P02 | 7 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,9 @@ Recent decisions affecting current work:
 - [Phase 06-04]: Export buttons use <a href download> anchor tags — native browser download, no JS required
 - [Phase 06-04]: buildCsv uses JSON.stringify per cell to safely handle commas, quotes, and newlines in CSV values
 - [Phase 06-04]: ActivityLog "use client" for date-fns format — data passed from server page as prop
+- [Phase 06-02]: Custom Tooltip components used for all charts to show domain-specific context (avgDaysInStage, conversionRate, deal counts)
+- [Phase 06-02]: Attribution chart uses horizontal BarChart (layout=vertical) for readability of signal type labels
+- [Phase 06-02]: Trends chart transforms flat TrendPoint[] to week-keyed rows with one key per city for recharts multi-line
 
 ### Roadmap Evolution
 
