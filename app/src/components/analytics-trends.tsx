@@ -63,11 +63,13 @@ function transformData(raw: TrendPoint[]): {
 export function AnalyticsTrends({ data }: Props) {
   const [hoveredCity, setHoveredCity] = useState<string | null>(null);
 
-  const handleLegendEnter = useCallback((o: { dataKey?: string; value?: string }) => {
-    setHoveredCity(String(o.dataKey ?? o.value ?? ""));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLegendEnter = useCallback((o: any) => {
+    setHoveredCity(String(o?.dataKey ?? o?.value ?? ""));
   }, []);
 
-  const handleLegendLeave = useCallback(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleLegendLeave = useCallback((_o: any) => {
     setHoveredCity(null);
   }, []);
 
