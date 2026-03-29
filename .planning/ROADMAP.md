@@ -113,7 +113,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Schema (call_logs), recharts install, analytics queries, nav update, page shell
+- [x] 06-01-PLAN.md — Schema (call_logs), recharts install, analytics queries, nav update, page shell
 - [ ] 06-02-PLAN.md — Pipeline funnel, market comparison, trends, attribution chart components
 - [ ] 06-03-PLAN.md — Scraper health table, outreach tracking, call log form
 - [ ] 06-04-PLAN.md — Activity log timeline, CSV export route handler
@@ -132,7 +132,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 3. Contact and Alerts | 0/3 | Complete    | 2026-03-18 |
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
-| 6. Data Analytics & Insights | 0/4 | Not started | - |
+| 6. Data Analytics & Insights | 1/4 | In Progress | - |
 
 ### Phase 7: Frontend Design Polish
 

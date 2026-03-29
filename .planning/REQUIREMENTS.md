@@ -80,13 +80,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Analytics
 
-- [ ] **ANALYTICS-01**: User can view pipeline conversion funnel showing lead progression rates (New → Contacted → Follow-Up → Closed/Dead) with average time at each stage
-- [ ] **ANALYTICS-02**: User can compare markets showing which cities/counties produce the most hot leads, highest conversion rates, and fastest deal timelines
-- [ ] **ANALYTICS-03**: User can track outreach activity per lead — call attempts, outcomes (answered/voicemail/no-answer/wrong-number), and contact rates by source
-- [ ] **ANALYTICS-04**: User can view trend charts showing distressed property volume over time per city/county to spot markets heating up or cooling down
-- [ ] **ANALYTICS-05**: User can view scraper health dashboard showing per-county success rates, data freshness, and degrading source alerts
-- [ ] **ANALYTICS-06**: User can see which distress signal types (NOD, tax lien, etc.) produce the most conversions — lead source attribution
-- [ ] **ANALYTICS-07**: System captures all user actions (calls, notes, status changes) with timestamps in an activity log for personal productivity review
+- [x] **ANALYTICS-01**: User can view pipeline conversion funnel showing lead progression rates (New → Contacted → Follow-Up → Closed/Dead) with average time at each stage
+- [x] **ANALYTICS-02**: User can compare markets showing which cities/counties produce the most hot leads, highest conversion rates, and fastest deal timelines
+- [x] **ANALYTICS-03**: User can track outreach activity per lead — call attempts, outcomes (answered/voicemail/no-answer/wrong-number), and contact rates by source
+- [x] **ANALYTICS-04**: User can view trend charts showing distressed property volume over time per city/county to spot markets heating up or cooling down
+- [x] **ANALYTICS-05**: User can view scraper health dashboard showing per-county success rates, data freshness, and degrading source alerts
+- [x] **ANALYTICS-06**: User can see which distress signal types (NOD, tax lien, etc.) produce the most conversions — lead source attribution
+- [x] **ANALYTICS-07**: System captures all user actions (calls, notes, status changes) with timestamps in an activity log for personal productivity review
 - [ ] **ANALYTICS-08**: User can export all analytics data to CSV for external analysis
 
 ### Wholesaling Deal Flow
@@ -183,13 +183,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-02 | Phase 5 | Complete |
 | MAP-03 | Phase 5 | Complete |
 | MAP-04 | Phase 5 | Complete |
-| ANALYTICS-01 | Phase 6 | Pending |
-| ANALYTICS-02 | Phase 6 | Pending |
-| ANALYTICS-03 | Phase 6 | Pending |
-| ANALYTICS-04 | Phase 6 | Pending |
-| ANALYTICS-05 | Phase 6 | Pending |
-| ANALYTICS-06 | Phase 6 | Pending |
-| ANALYTICS-07 | Phase 6 | Pending |
+| ANALYTICS-01 | Phase 6 | Complete (06-01) |
+| ANALYTICS-02 | Phase 6 | Complete (06-01) |
+| ANALYTICS-03 | Phase 6 | Complete (06-01) |
+| ANALYTICS-04 | Phase 6 | Complete (06-01) |
+| ANALYTICS-05 | Phase 6 | Complete (06-01) |
+| ANALYTICS-06 | Phase 6 | Complete (06-01) |
+| ANALYTICS-07 | Phase 6 | Complete (06-01) |
 | ANALYTICS-08 | Phase 6 | Pending |
 | DEAL-01 | Phase 8 | Complete |
 | DEAL-02 | Phase 8 | Complete |
