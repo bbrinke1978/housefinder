@@ -18,6 +18,7 @@ import { AnalyticsAttribution } from "@/components/analytics-attribution";
 import { ScraperHealthTable } from "@/components/analytics-scraper-health";
 import { AnalyticsOutreach } from "@/components/analytics-outreach";
 import { CallLogForm } from "@/components/call-log-form";
+import { AnalyticsInfoPanel } from "@/components/analytics-info-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -106,6 +107,7 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       {/* Tab content */}
       {activeTab === "pipeline" && (
         <div className="space-y-6">
+          <AnalyticsInfoPanel tab="pipeline" />
           <div className="rounded-xl border bg-card p-4 md:p-6">
             <h2 className="text-base font-semibold mb-4">Pipeline Conversion</h2>
             <AnalyticsFunnel
@@ -128,23 +130,32 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       )}
 
       {activeTab === "markets" && (
-        <div className="rounded-xl border bg-card p-4 md:p-6">
-          <h2 className="text-base font-semibold mb-4">Market Comparison</h2>
-          <AnalyticsMarket data={data as Awaited<ReturnType<typeof getMarketComparisonData>>} />
+        <div className="space-y-6">
+          <AnalyticsInfoPanel tab="markets" />
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h2 className="text-base font-semibold mb-4">Market Comparison</h2>
+            <AnalyticsMarket data={data as Awaited<ReturnType<typeof getMarketComparisonData>>} />
+          </div>
         </div>
       )}
 
       {activeTab === "trends" && (
-        <div className="rounded-xl border bg-card p-4 md:p-6">
-          <h2 className="text-base font-semibold mb-4">Weekly Property Volume by City</h2>
-          <AnalyticsTrends data={data as Awaited<ReturnType<typeof getPropertyTrendData>>} />
+        <div className="space-y-6">
+          <AnalyticsInfoPanel tab="trends" />
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h2 className="text-base font-semibold mb-4">Weekly Property Volume by City</h2>
+            <AnalyticsTrends data={data as Awaited<ReturnType<typeof getPropertyTrendData>>} />
+          </div>
         </div>
       )}
 
       {activeTab === "health" && (
-        <div className="rounded-xl border bg-card p-4 md:p-6">
-          <h2 className="text-base font-semibold mb-4">Scraper Health</h2>
-          <ScraperHealthTable data={data as Awaited<ReturnType<typeof getScraperHealthData>>} />
+        <div className="space-y-6">
+          <AnalyticsInfoPanel tab="health" />
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h2 className="text-base font-semibold mb-4">Scraper Health</h2>
+            <ScraperHealthTable data={data as Awaited<ReturnType<typeof getScraperHealthData>>} />
+          </div>
         </div>
       )}
 
@@ -155,6 +166,7 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
         };
         return (
           <div className="space-y-6">
+            <AnalyticsInfoPanel tab="outreach" />
             <div className="rounded-xl border bg-card p-4 md:p-6">
               <h2 className="text-base font-semibold mb-4">Outreach Stats</h2>
               <AnalyticsOutreach data={outreachStats} />
@@ -168,9 +180,12 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       })()}
 
       {activeTab === "activity" && (
-        <div className="rounded-xl border bg-card p-4 md:p-6">
-          <h2 className="text-base font-semibold mb-4">Recent Activity</h2>
-          <ActivityLog data={data as Awaited<ReturnType<typeof getRecentActivityLog>>} />
+        <div className="space-y-6">
+          <AnalyticsInfoPanel tab="activity" />
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h2 className="text-base font-semibold mb-4">Recent Activity</h2>
+            <ActivityLog data={data as Awaited<ReturnType<typeof getRecentActivityLog>>} />
+          </div>
         </div>
       )}
 
