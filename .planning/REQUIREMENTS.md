@@ -87,7 +87,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ANALYTICS-05**: User can view scraper health dashboard showing per-county success rates, data freshness, and degrading source alerts
 - [x] **ANALYTICS-06**: User can see which distress signal types (NOD, tax lien, etc.) produce the most conversions — lead source attribution
 - [x] **ANALYTICS-07**: System captures all user actions (calls, notes, status changes) with timestamps in an activity log for personal productivity review
-- [ ] **ANALYTICS-08**: User can export all analytics data to CSV for external analysis
+- [x] **ANALYTICS-08**: User can export all analytics data to CSV for external analysis
 
 ### Wholesaling Deal Flow
 
@@ -190,7 +190,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANALYTICS-05 | Phase 6 | Complete (06-01) |
 | ANALYTICS-06 | Phase 6 | Complete (06-01) |
 | ANALYTICS-07 | Phase 6 | Complete (06-01) |
-| ANALYTICS-08 | Phase 6 | Pending |
+| ANALYTICS-08 | Phase 6 | Complete |
 | DEAL-01 | Phase 8 | Complete |
 | DEAL-02 | Phase 8 | Complete |
 | DEAL-03 | Phase 8 | Complete |

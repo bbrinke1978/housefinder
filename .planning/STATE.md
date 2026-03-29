@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 6 of 10 (Data Analytics & Insights)
-Plan: 1 of 4 in current phase
-Status: In Progress
-Last activity: 2026-03-26 — Completed 06-01 (Schema + recharts + analytics queries + /analytics page shell)
+Plan: 4 of 4 in current phase
+Status: Complete
+Last activity: 2026-03-29 — Completed 06-04 (Activity log timeline + CSV export route, all 6 analytics tabs complete)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [█████░░░░░] 50%
 | 03-contact-and-alerts | 3/3 | 8min | 3min |
 | 04-county-expansion | 3/3 | 9min | 3min |
 | 05-map-view | 3/3 | 10min | 3min |
-| 06-data-analytics-insights | 1/4 | 4min | 4min |
+| 06-data-analytics-insights | 4/4 | 6min | 1.5min |
 | 08-wholesaling-deal-flow | 4/5 | 20min | 5min |
 
 **Recent Trend:**
@@ -47,6 +47,7 @@ Progress: [█████░░░░░] 50%
 | Phase 08-wholesaling-deal-flow P03 | 7min | 2 tasks | 7 files |
 | Phase 08-wholesaling-deal-flow P04 | 3min | 2 tasks | 8 files |
 | Phase 06-data-analytics-insights P01 | 4min | 2 tasks | 7 files |
+| Phase 06-data-analytics-insights P04 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Recent decisions affecting current work:
 - [Phase 06-01]: Analytics replaces Settings in mobile bottom-nav — Settings still accessible from desktop sidebar
 - [Phase 06-01]: Per-tab data fetching on /analytics — only active tab queries run, not all tabs on every load
 - [Phase 06-01]: HealthStatus (green/yellow/red) computed in TypeScript from scraper_health rows
+- [Phase 06-04]: Export buttons use <a href download> anchor tags — native browser download, no JS required
+- [Phase 06-04]: buildCsv uses JSON.stringify per cell to safely handle commas, quotes, and newlines in CSV values
+- [Phase 06-04]: ActivityLog "use client" for date-fns format — data passed from server page as prop
 
 ### Roadmap Evolution
 
@@ -152,6 +156,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-26
-Stopped at: Completed 06-01-PLAN.md (Phase 6 Plan 1 — Schema + recharts + analytics queries + /analytics page shell)
-Resume file: .planning/phases/06-data-analytics-insights/06-01-SUMMARY.md
+Last session: 2026-03-29
+Stopped at: Completed 06-04-PLAN.md (Phase 6 Plan 4 — Activity log timeline + CSV export, all 6 analytics tabs complete)
+Resume file: .planning/phases/06-data-analytics-insights/06-04-SUMMARY.md
