@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -60,6 +61,16 @@ function transformData(raw: TrendPoint[]): {
 }
 
 export function AnalyticsTrends({ data }: Props) {
+  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+
+  const handleLegendEnter = useCallback((o: { dataKey?: string; value?: string }) => {
+    setHoveredCity(String(o.dataKey ?? o.value ?? ""));
+  }, []);
+
+  const handleLegendLeave = useCallback(() => {
+    setHoveredCity(null);
+  }, []);
+
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[350px] text-sm text-muted-foreground text-center px-4">
@@ -71,7 +82,7 @@ export function AnalyticsTrends({ data }: Props) {
   const { rows, cities } = transformData(data);
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={400}>
       <LineChart data={rows} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
         <XAxis
@@ -95,7 +106,11 @@ export function AnalyticsTrends({ data }: Props) {
             }
           }}
         />
-        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Legend
+          wrapperStyle={{ fontSize: 13, cursor: "pointer", paddingTop: 8 }}
+          onMouseEnter={handleLegendEnter}
+          onMouseLeave={handleLegendLeave}
+        />
         {cities.map((city, i) => (
           <Line
             key={city}
@@ -103,7 +118,8 @@ export function AnalyticsTrends({ data }: Props) {
             dataKey={city}
             stroke={CITY_COLORS[i % CITY_COLORS.length]}
             dot={false}
-            strokeWidth={2}
+            strokeWidth={hoveredCity === city ? 4 : hoveredCity ? 1 : 2}
+            strokeOpacity={hoveredCity === null ? 1 : hoveredCity === city ? 1 : 0.15}
           />
         ))}
       </LineChart>
