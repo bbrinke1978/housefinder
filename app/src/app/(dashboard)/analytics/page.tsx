@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Download } from "lucide-react";
 import {
   getPipelineFunnelData,
   getLeadSourceAttribution,
@@ -7,7 +8,16 @@ import {
   getScraperHealthData,
   getOutreachStats,
   getRecentActivityLog,
+  getLeadsForCallLog,
 } from "@/lib/analytics-queries";
+import { ActivityLog } from "@/components/analytics-activity-log";
+import { AnalyticsFunnel } from "@/components/analytics-funnel";
+import { AnalyticsMarket } from "@/components/analytics-market";
+import { AnalyticsTrends } from "@/components/analytics-trends";
+import { AnalyticsAttribution } from "@/components/analytics-attribution";
+import { ScraperHealthTable } from "@/components/analytics-scraper-health";
+import { AnalyticsOutreach } from "@/components/analytics-outreach";
+import { CallLogForm } from "@/components/call-log-form";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +64,11 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       break;
     }
     case "outreach": {
-      data = await getOutreachStats();
+      const [outreachStats, leadsForForm] = await Promise.all([
+        getOutreachStats(),
+        getLeadsForCallLog(),
+      ]);
+      data = { outreachStats, leadsForForm };
       break;
     }
     case "activity": {
@@ -89,125 +103,115 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
         ))}
       </div>
 
-      {/* Tab content — placeholder data display until Plans 02–03 add chart components */}
-      <div className="rounded-lg border p-4 bg-muted/20">
-        <p className="text-xs text-muted-foreground mb-3 font-mono uppercase tracking-wide">
-          {activeTab} data (raw — chart components added in Plans 02–03)
+      {/* Tab content */}
+      {activeTab === "pipeline" && (
+        <div className="space-y-6">
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h2 className="text-base font-semibold mb-4">Pipeline Conversion</h2>
+            <AnalyticsFunnel
+              data={
+                (data as { funnelData: Awaited<ReturnType<typeof getPipelineFunnelData>> })
+                  .funnelData
+              }
+            />
+          </div>
+          <div className="rounded-xl border bg-card p-4 md:p-6">
+            <h3 className="text-base font-semibold mb-4">Lead Source Attribution</h3>
+            <AnalyticsAttribution
+              data={
+                (data as { attributionData: Awaited<ReturnType<typeof getLeadSourceAttribution>> })
+                  .attributionData
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === "markets" && (
+        <div className="rounded-xl border bg-card p-4 md:p-6">
+          <h2 className="text-base font-semibold mb-4">Market Comparison</h2>
+          <AnalyticsMarket data={data as Awaited<ReturnType<typeof getMarketComparisonData>>} />
+        </div>
+      )}
+
+      {activeTab === "trends" && (
+        <div className="rounded-xl border bg-card p-4 md:p-6">
+          <h2 className="text-base font-semibold mb-4">Weekly Property Volume by City</h2>
+          <AnalyticsTrends data={data as Awaited<ReturnType<typeof getPropertyTrendData>>} />
+        </div>
+      )}
+
+      {activeTab === "health" && (
+        <div className="rounded-xl border bg-card p-4 md:p-6">
+          <h2 className="text-base font-semibold mb-4">Scraper Health</h2>
+          <ScraperHealthTable data={data as Awaited<ReturnType<typeof getScraperHealthData>>} />
+        </div>
+      )}
+
+      {activeTab === "outreach" && (() => {
+        const { outreachStats, leadsForForm } = data as {
+          outreachStats: Awaited<ReturnType<typeof getOutreachStats>>;
+          leadsForForm: { id: string; address: string }[];
+        };
+        return (
+          <div className="space-y-6">
+            <div className="rounded-xl border bg-card p-4 md:p-6">
+              <h2 className="text-base font-semibold mb-4">Outreach Stats</h2>
+              <AnalyticsOutreach data={outreachStats} />
+            </div>
+            <div className="rounded-xl border bg-card p-4 md:p-6">
+              <h2 className="text-base font-semibold mb-4">Log a Call</h2>
+              <CallLogForm leads={leadsForForm} />
+            </div>
+          </div>
+        );
+      })()}
+
+      {activeTab === "activity" && (
+        <div className="rounded-xl border bg-card p-4 md:p-6">
+          <h2 className="text-base font-semibold mb-4">Recent Activity</h2>
+          <ActivityLog data={data as Awaited<ReturnType<typeof getRecentActivityLog>>} />
+        </div>
+      )}
+
+      {/* Export section */}
+      <div className="rounded-xl border bg-card p-4 md:p-6 mt-6">
+        <h2 className="text-base font-semibold">Export Data</h2>
+        <p className="text-sm text-muted-foreground mt-1 mb-4">
+          Download your data as CSV for external analysis.
         </p>
-
-        {activeTab === "pipeline" && (
-          <>
-            {/* TODO: Replace with <AnalyticsFunnel data={funnelData} /> in Plan 02 */}
-            <PipelinePlaceholder data={data as { funnelData: Awaited<ReturnType<typeof getPipelineFunnelData>>; attributionData: Awaited<ReturnType<typeof getLeadSourceAttribution>> }} />
-          </>
-        )}
-
-        {activeTab === "markets" && (
-          <>
-            {/* TODO: Replace with <MarketComparisonChart data={data} /> in Plan 02 */}
-            <SimpleTable data={data as Record<string, unknown>[]} />
-          </>
-        )}
-
-        {activeTab === "trends" && (
-          <>
-            {/* TODO: Replace with <PropertyTrendChart data={data} /> in Plan 02 */}
-            <SimpleTable data={data as Record<string, unknown>[]} />
-          </>
-        )}
-
-        {activeTab === "health" && (
-          <>
-            {/* TODO: Replace with <ScraperHealthGrid data={data} /> in Plan 03 */}
-            <HealthTable data={data as Awaited<ReturnType<typeof getScraperHealthData>>} />
-          </>
-        )}
-
-        {activeTab === "outreach" && (
-          <>
-            {/* TODO: Replace with <OutreachChart data={data} /> in Plan 03 */}
-            <SimpleTable data={data as Record<string, unknown>[]} />
-          </>
-        )}
-
-        {activeTab === "activity" && (
-          <>
-            {/* TODO: Replace with <ActivityFeed data={data} /> in Plan 03 */}
-            <ActivityList data={data as Awaited<ReturnType<typeof getRecentActivityLog>>} />
-          </>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <a
+            href="/api/export?type=leads"
+            download
+            className="inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm hover:bg-muted/50 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export Leads CSV
+          </a>
+          <a
+            href="/api/export?type=deals"
+            download
+            className="inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm hover:bg-muted/50 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export Deals CSV
+          </a>
+          <a
+            href="/api/export?type=buyers"
+            download
+            className="inline-flex items-center gap-1.5 rounded-xl border px-4 py-2 text-sm hover:bg-muted/50 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export Buyers CSV
+          </a>
+        </div>
       </div>
     </div>
   );
 }
 
-// -- Placeholder sub-components --
-
-function PipelinePlaceholder({
-  data,
-}: {
-  data: {
-    funnelData: Awaited<ReturnType<typeof getPipelineFunnelData>>;
-    attributionData: Awaited<ReturnType<typeof getLeadSourceAttribution>>;
-  };
-}) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Funnel Stages</h3>
-        {data.funnelData.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No data yet.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-muted-foreground">
-                <th className="pb-1 pr-4">Status</th>
-                <th className="pb-1 pr-4">Count</th>
-                <th className="pb-1">Avg Days</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.funnelData.map((row) => (
-                <tr key={row.status} className="border-b last:border-0">
-                  <td className="py-1 pr-4 font-medium capitalize">{row.status.replace("_", " ")}</td>
-                  <td className="py-1 pr-4">{row.count}</td>
-                  <td className="py-1">{row.avgDaysInStage ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Lead Source Attribution</h3>
-        {data.attributionData.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No data yet.</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-muted-foreground">
-                <th className="pb-1 pr-4">Signal Type</th>
-                <th className="pb-1 pr-4">Total</th>
-                <th className="pb-1 pr-4">Hot</th>
-                <th className="pb-1">Deals</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.attributionData.map((row) => (
-                <tr key={row.signalType} className="border-b last:border-0">
-                  <td className="py-1 pr-4 font-medium">{row.signalType}</td>
-                  <td className="py-1 pr-4">{row.totalLeads}</td>
-                  <td className="py-1 pr-4">{row.hotLeads}</td>
-                  <td className="py-1">{row.convertedDeals}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
+// -- Non-chart sub-components --
 
 function SimpleTable({ data }: { data: Record<string, unknown>[] }) {
   if (!data || data.length === 0) {
@@ -285,38 +289,3 @@ function HealthTable({
   );
 }
 
-function ActivityList({
-  data,
-}: {
-  data: Awaited<ReturnType<typeof getRecentActivityLog>>;
-}) {
-  if (data.length === 0) {
-    return <p className="text-muted-foreground text-sm">No activity yet.</p>;
-  }
-  return (
-    <ul className="space-y-2 text-sm">
-      {data.map((entry) => (
-        <li key={entry.id} className="flex gap-3 border-b last:border-0 pb-2">
-          <span
-            className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold ${
-              entry.type === "call"
-                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-            }`}
-          >
-            {entry.type}
-          </span>
-          <div className="min-w-0">
-            <p className="font-medium truncate">
-              {entry.address}, {entry.city}
-            </p>
-            <p className="text-muted-foreground truncate">{entry.text}</p>
-          </div>
-          <span className="shrink-0 text-xs text-muted-foreground ml-auto">
-            {entry.createdAt.toLocaleDateString()}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
