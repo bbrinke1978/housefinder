@@ -59,6 +59,13 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
         </div>
       </div>
 
+      {/* Mobile kanban hint */}
+      {view !== "list" && (
+        <p className="text-xs text-muted-foreground mb-2 md:hidden">
+          Scroll horizontally to see all columns
+        </p>
+      )}
+
       {/* Content */}
       {view === "list" ? (
         <DealList deals={deals} />

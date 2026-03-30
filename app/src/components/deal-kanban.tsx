@@ -15,50 +15,17 @@ import type { DealWithBuyer, DealStatus } from "@/types";
 const DEAL_STATUS_COLUMNS: {
   key: DealStatus;
   label: string;
-  color: string;
 }[] = [
-  { key: "lead", label: "Lead", color: "bg-slate-50 dark:bg-slate-900/50" },
-  {
-    key: "qualified",
-    label: "Qualified",
-    color: "bg-blue-50 dark:bg-blue-900/20",
-  },
-  {
-    key: "analyzed",
-    label: "Analyzed",
-    color: "bg-indigo-50 dark:bg-indigo-900/20",
-  },
-  {
-    key: "offered",
-    label: "Offered",
-    color: "bg-purple-50 dark:bg-purple-900/20",
-  },
-  {
-    key: "under_contract",
-    label: "Under Contract",
-    color: "bg-yellow-50 dark:bg-yellow-900/20",
-  },
-  {
-    key: "marketing",
-    label: "Marketing",
-    color: "bg-orange-50 dark:bg-orange-900/20",
-  },
-  {
-    key: "assigned",
-    label: "Assigned",
-    color: "bg-amber-50 dark:bg-amber-900/20",
-  },
-  {
-    key: "closing",
-    label: "Closing",
-    color: "bg-teal-50 dark:bg-teal-900/20",
-  },
-  {
-    key: "closed",
-    label: "Closed",
-    color: "bg-green-50 dark:bg-green-900/20",
-  },
-  { key: "dead", label: "Dead", color: "bg-gray-50 dark:bg-gray-900/50" },
+  { key: "lead", label: "Lead" },
+  { key: "qualified", label: "Qualified" },
+  { key: "analyzed", label: "Analyzed" },
+  { key: "offered", label: "Offered" },
+  { key: "under_contract", label: "Under Contract" },
+  { key: "marketing", label: "Marketing" },
+  { key: "assigned", label: "Assigned" },
+  { key: "closing", label: "Closing" },
+  { key: "closed", label: "Closed" },
+  { key: "dead", label: "Dead" },
 ];
 
 interface ColumnGuideProps {
@@ -222,13 +189,14 @@ export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-4 min-h-[400px]">
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 pb-4 overscroll-x-contain">
+        <div className="flex gap-3 min-h-[400px]" style={{ minWidth: "max-content" }}>
         {DEAL_STATUS_COLUMNS.map((col) => {
           const columnDeals = getColumnDeals(col.key);
           return (
             <div
               key={col.key}
-              className={`flex-shrink-0 min-w-[180px] w-[200px] rounded-lg ${col.color} p-2.5`}
+              className="flex-shrink-0 min-w-[260px] max-w-[300px] rounded-lg bg-muted/50 border border-border p-2.5"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-0.5">
@@ -244,7 +212,7 @@ export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
                     onClose={() => setOpenGuide(null)}
                   />
                 </div>
-                <span className="text-xs text-muted-foreground rounded-full bg-background px-1.5 py-0.5">
+                <span className="text-xs text-muted-foreground rounded-full bg-muted px-1.5 py-0.5">
                   {columnDeals.length}
                 </span>
               </div>
@@ -281,6 +249,7 @@ export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
             </div>
           );
         })}
+        </div>
       </div>
     </DragDropContext>
   );

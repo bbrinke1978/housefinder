@@ -4,16 +4,16 @@ import Link from "next/link";
 import type { DealWithBuyer, DealStatus } from "@/types";
 
 const STATUS_BADGE: Record<DealStatus, string> = {
-  lead: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  qualified: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  analyzed: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
-  offered: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  under_contract: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
-  marketing: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  assigned: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  closing: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
-  closed: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
-  dead: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+  lead: "bg-muted text-muted-foreground",
+  qualified: "bg-primary/10 text-primary",
+  analyzed: "bg-primary/10 text-primary",
+  offered: "bg-primary/15 text-primary",
+  under_contract: "bg-amber-500/10 text-amber-500",
+  marketing: "bg-orange-500/10 text-orange-500",
+  assigned: "bg-amber-500/10 text-amber-500",
+  closing: "bg-emerald-500/10 text-emerald-500",
+  closed: "bg-emerald-500/15 text-emerald-600",
+  dead: "bg-muted text-muted-foreground",
 };
 
 const STATUS_LABELS: Record<DealStatus, string> = {
@@ -67,7 +67,7 @@ export function DealList({ deals }: DealListProps) {
         </thead>
         <tbody className="divide-y">
           {deals.map((deal) => (
-            <tr key={deal.id} className="hover:bg-muted/30 transition-colors">
+            <tr key={deal.id} className="hover:bg-accent transition-colors min-h-[44px]">
               <td className="py-2.5 pr-4">
                 <Link
                   href={`/deals/${deal.id}`}
