@@ -8,14 +8,14 @@ interface PropertyCardProps {
   property: PropertyWithLead;
 }
 
-function ownerTypeBadge(type: string | null): { label: string; badgeClass: string; accentClass: string } | null {
+function ownerTypeBadge(type: string | null): { label: string; badgeClass: string } | null {
   switch (type) {
     case "llc":
-      return { label: "LLC", badgeClass: "bg-purple-500 text-white", accentClass: "ring-2 ring-purple-400/50 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-[#18181b]" };
+      return { label: "LLC", badgeClass: "bg-purple-500/10 text-purple-400 border border-purple-500/20" };
     case "trust":
-      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", accentClass: "ring-2 ring-indigo-400/50 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-[#18181b]" };
+      return { label: "Trust", badgeClass: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" };
     case "estate":
-      return { label: "Estate", badgeClass: "bg-slate-500 text-white", accentClass: "ring-2 ring-slate-400/50 bg-gradient-to-br from-slate-100 to-white dark:from-slate-900/20 dark:to-[#18181b]" };
+      return { label: "Estate", badgeClass: "bg-muted text-muted-foreground border border-border" };
     default:
       return null;
   }
@@ -45,15 +45,15 @@ function getTier(score: number): TierInfo {
   if (score >= 7) {
     return {
       label: "Critical",
-      badgeClass: "bg-red-700 text-white",
-      barColor: "bg-red-600",
+      badgeClass: "bg-red-500/10 text-red-400 border border-red-500/20",
+      barColor: "bg-red-500",
       scoreCircleClass: "bg-red-600 text-white",
     };
   }
   if (score >= 4) {
     return {
       label: "Hot",
-      badgeClass: "bg-violet-500 text-white",
+      badgeClass: "bg-violet-500/10 text-violet-400 border border-violet-500/20",
       barColor: "bg-violet-500",
       scoreCircleClass: "bg-violet-500 text-white",
     };
@@ -61,7 +61,7 @@ function getTier(score: number): TierInfo {
   if (score >= 2) {
     return {
       label: "Warm",
-      badgeClass: "bg-amber-500 text-white",
+      badgeClass: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
       barColor: "bg-amber-500",
       scoreCircleClass: "bg-amber-500 text-white",
     };
@@ -69,14 +69,14 @@ function getTier(score: number): TierInfo {
   if (score >= 1) {
     return {
       label: "Cool",
-      badgeClass: "bg-emerald-600 text-white",
+      badgeClass: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
       barColor: "bg-emerald-500",
       scoreCircleClass: "bg-emerald-500 text-white",
     };
   }
   return {
     label: "No Signal",
-    badgeClass: "bg-zinc-500 text-white",
+    badgeClass: "bg-muted text-muted-foreground border border-border",
     barColor: "bg-zinc-500",
     scoreCircleClass: "bg-zinc-500 text-white",
   };
@@ -99,18 +99,19 @@ export function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Link href={`/properties/${property.id}`} className="group block">
       <div
-        className={`card-elevated transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+        className={`relative bg-card rounded-xl p-3 md:p-4 border border-border transition-all duration-200 hover:border-primary/30 ${
           hot ? "hot-pulse" : ""
-        } ${badge?.accentClass ?? ""}`}
+        }`}
+        style={{ boxShadow: "var(--shadow-card)" }}
       >
         {/* Header: address + badges */}
-        <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-start justify-between gap-2 mb-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate font-bold text-foreground group-hover:text-primary transition-colors">
               {property.address || property.parcelId}
             </p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-              <MapPin className="h-3 w-3" />
+              <MapPin className="h-3 w-3 flex-shrink-0" />
               <span>
                 {property.city}, {property.state}
               </span>
@@ -118,61 +119,53 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
             {badge && (
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${badge.badgeClass}`}>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.badgeClass}`}>
                 {badge.label}
               </span>
             )}
             {isNew(property) && (
-              <span className="inline-block text-[10px] tracking-wider uppercase px-3 py-1 rounded-full font-semibold bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+              <span className="inline-block text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">
                 New
               </span>
             )}
-            {/* Tier label — replaces standalone Hot badge; Hot gets the flame icon */}
-            <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${tier.badgeClass}`}>
-              {hot && <Flame className="h-3 w-3" />}
-              {tier.label}
-            </span>
           </div>
         </div>
 
         {/* Owner */}
         {property.ownerName && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-            {isEntity ? <Building2 className="h-3 w-3" /> : <User className="h-3 w-3" />}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2.5">
+            {isEntity ? <Building2 className="h-3 w-3 flex-shrink-0" /> : <User className="h-3 w-3 flex-shrink-0" />}
             <span className="truncate">{property.ownerName}</span>
           </div>
         )}
 
-        {/* Score section */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${tier.scoreCircleClass}`}
-            >
-              {displayScore}
-            </span>
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              / 10
-            </span>
+        {/* Compact score row: [circle] [bar] [tier badge] */}
+        <div className="flex items-center gap-2 mt-2">
+          <span
+            className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold flex-shrink-0 ${tier.scoreCircleClass}`}
+          >
+            {displayScore}
+          </span>
+          <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${tier.barColor}`}
+              style={{ width: `${pct}%` }}
+            />
           </div>
           <span
-            className="text-xs uppercase tracking-wider text-muted-foreground"
+            className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex-shrink-0 ${tier.badgeClass}`}
           >
-            {property.leadStatus.replace("_", " ")}
+            {hot && <Flame className="h-3 w-3" />}
+            {tier.label}
           </span>
         </div>
 
-        {/* Score bar */}
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${tier.barColor}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-
-        {/* Hover CTA */}
-        <div className="flex items-center justify-end mt-3 opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
-          <span className="flex items-center gap-1 text-xs font-bold text-primary">
+        {/* Lead status + hover CTA */}
+        <div className="flex items-center justify-between mt-2.5">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            {property.leadStatus.replace("_", " ")}
+          </span>
+          <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0">
             View details
             <ArrowRight className="h-3 w-3" />
           </span>
