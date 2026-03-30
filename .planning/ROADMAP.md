@@ -202,3 +202,26 @@ Delivered:
 - [x] Netlify Forms integration
 - [x] Deployed to nobshomes.netlify.app
 - [ ] Custom domain, logo, photos, analytics (see TODO.md)
+
+### Phase 11: HouseFinder UI Revamp
+
+**Goal:** The HouseFinder dashboard is visually transformed into a premium, mobile-first, dark-mode-primary SaaS tool with a zinc/violet palette, Inter font, decluttered dashboard, intuitive navigation, and command palette — while preserving all existing functionality
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08
+**Depends on:** Phase 9
+**Success Criteria** (what must be TRUE):
+  1. Dark mode renders with zinc neutrals and violet accent — no terracotta/desert colors visible anywhere
+  2. All pages work on a 360px Android phone screen with 44px minimum touch targets
+  3. Dashboard stats are compact (single row), filters hidden in a bottom drawer on mobile, search always visible
+  4. Inter variable font renders on all text — no Bebas Neue, Oswald, or Nunito Sans
+  5. Login page has a premium dark aesthetic as the first visual impression
+  6. Deals kanban scrolls horizontally on mobile; list view works as fallback
+  7. Command palette (Ctrl+K) navigates to all major pages
+  8. All existing features preserved — zero functionality removed
+**Plans:** 5 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Design foundation: violet/zinc palette, Inter font, nav shell refresh, login page
+- [ ] 11-02-PLAN.md — Dashboard: compact stats bar, mobile filter drawer, property card refresh
+- [ ] 11-03-PLAN.md — Inner pages: deals kanban mobile scroll, analytics chart refresh, map styling
+- [ ] 11-04-PLAN.md — Detail pages: property detail, deal detail, pipeline, settings palette sweep
+- [ ] 11-05-PLAN.md — Command palette (Ctrl+K) and final visual verification checkpoint

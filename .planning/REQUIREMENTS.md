@@ -111,6 +111,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **BUDGET-07**: Budget summary (category/planned/actual/variance) and detailed expenses exportable to CSV
 - [x] **BUDGET-08**: Alert banners at 80% budget usage (yellow warning) and 100%+ (red over-budget), displayed on budget tab
 
+### UI Revamp
+
+- [ ] **UI-01**: App uses a premium dark-first color palette (zinc neutrals + violet accent) replacing the terracotta/desert theme — dark mode as primary with light mode option
+- [ ] **UI-02**: App uses Inter variable font via next/font/google replacing Bebas Neue, Oswald, and Nunito Sans — single font system matching Linear/Notion aesthetic
+- [ ] **UI-03**: Navigation uses polished sidebar on desktop and bottom nav on mobile with violet active states, 44px minimum touch targets, and active indicator dot
+- [ ] **UI-04**: Dashboard stats bar is a compact horizontal scroll row (~56px) instead of 5 large cards, and hero banner replaced with compact text header
+- [ ] **UI-05**: Dashboard filters are hidden behind a Sheet drawer on mobile with active filter count badge, search always visible — desktop keeps inline filters
+- [ ] **UI-06**: Login page has premium dark aesthetic with centered card, violet accent line, and polished form inputs
+- [ ] **UI-07**: All pages (deals, analytics, property detail, deal detail, pipeline, settings, map) use semantic color tokens with zero remnants of old palette — including responsive chart colors and mobile kanban horizontal scroll
+- [ ] **UI-08**: Command palette (Ctrl+K / Cmd+K) provides keyboard navigation to all major pages via shadcn Command + Dialog components
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -149,6 +160,9 @@ Explicitly excluded. Documented to prevent scope creep.
 | QuickBooks/accounting integration | Out of scope for Phase 9 |
 | Historical budget templates | Deferred — use last project's actuals as next project's estimate |
 | Deal blast email/SMS automation | Manual copy-paste first; automation deferred |
+| Customizable dashboard layouts | Deferred — drag-and-drop widgets are v2+ |
+| User card density preferences | Deferred — compact/comfortable/spacious is v2+ |
+| Custom themes/skins | Deferred — not in Phase 11 scope |
 
 ## Traceability
 
@@ -222,12 +236,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BUDGET-06 | Phase 9 | Planned |
 | BUDGET-07 | Phase 9 | Planned |
 | BUDGET-08 | Phase 9 | Planned |
+| UI-01 | Phase 11 | Planned |
+| UI-02 | Phase 11 | Planned |
+| UI-03 | Phase 11 | Planned |
+| UI-04 | Phase 11 | Planned |
+| UI-05 | Phase 11 | Planned |
+| UI-06 | Phase 11 | Planned |
+| UI-07 | Phase 11 | Planned |
+| UI-08 | Phase 11 | Planned |
 
 **Coverage:**
-- v1 requirements: 56 total
-- Mapped to phases: 56
+- v1 requirements: 64 total
+- Mapped to phases: 64
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-26 — added Phase 9 rehab budgeting requirements (BUDGET-01 through BUDGET-08)*
+*Last updated: 2026-03-26 — added Phase 11 UI revamp requirements (UI-01 through UI-08)*
