@@ -73,7 +73,7 @@ export function FieldObservations({
             checked={vacant}
             onChange={(e) => handleVacantToggle(e.target.checked)}
             disabled={isPendingVacant}
-            className="rounded border-gray-300"
+            className="rounded border-input"
           />
           <span>Mark as Vacant</span>
           {isPendingVacant && (

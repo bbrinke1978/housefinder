@@ -12,23 +12,11 @@ import { updateLeadStatus } from "@/lib/actions";
 import type { PipelineLead, LeadStatus } from "@/types";
 
 const STATUS_COLUMNS: { key: LeadStatus; label: string; color: string }[] = [
-  { key: "new", label: "New", color: "bg-slate-50 dark:bg-slate-900/50" },
-  {
-    key: "contacted",
-    label: "Contacted",
-    color: "bg-blue-50 dark:bg-blue-900/20",
-  },
-  {
-    key: "follow_up",
-    label: "Follow-Up",
-    color: "bg-yellow-50 dark:bg-yellow-900/20",
-  },
-  {
-    key: "closed",
-    label: "Closed",
-    color: "bg-green-50 dark:bg-green-900/20",
-  },
-  { key: "dead", label: "Dead", color: "bg-gray-50 dark:bg-gray-900/50" },
+  { key: "new", label: "New", color: "bg-muted/50" },
+  { key: "contacted", label: "Contacted", color: "bg-primary/5" },
+  { key: "follow_up", label: "Follow-Up", color: "bg-amber-500/5" },
+  { key: "closed", label: "Closed", color: "bg-emerald-500/5" },
+  { key: "dead", label: "Dead", color: "bg-muted/30" },
 ];
 
 interface LeadKanbanProps {

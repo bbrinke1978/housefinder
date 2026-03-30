@@ -80,7 +80,7 @@ export function SignalTimeline({ signals }: SignalTimelineProps) {
                 href={signal.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                className="text-xs text-primary hover:underline"
               >
                 Source
               </a>

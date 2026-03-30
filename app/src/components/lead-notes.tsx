@@ -83,13 +83,13 @@ export function LeadNotes({ leadId, initialNotes }: LeadNotesProps) {
               key={note.id}
               className={`rounded-lg border p-3 ${
                 note.noteType === "status_change"
-                  ? "border-blue-200 bg-blue-50/50 dark:border-blue-900/50 dark:bg-blue-950/20"
+                  ? "border-primary/20 bg-primary/5"
                   : "bg-card"
               }`}
             >
               {note.noteType === "status_change" ? (
                 <div className="flex items-center gap-2">
-                  <ArrowUpDown className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                  <ArrowUpDown className="h-3.5 w-3.5 text-primary" />
                   <span className="text-sm">
                     Status changed from{" "}
                     <Badge variant="outline" className="mx-0.5">

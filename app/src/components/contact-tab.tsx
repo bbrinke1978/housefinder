@@ -135,14 +135,14 @@ export function ContactTab({
 
       {/* Entity Owner badge */}
       {isEntity && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
           <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+            <Building2 className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">
               Entity Owner - {ownerType === "llc" ? "LLC" : ownerType === "trust" ? "Trust" : "Estate"}
             </span>
           </div>
-          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
+          <p className="mt-1 text-xs text-muted-foreground">
             This property is owned by an entity. Look up the registered agent:
           </p>
           {ownerName && (
@@ -151,7 +151,7 @@ export function ContactTab({
                 href={`https://secure.utah.gov/bes/index.html?searchType=ENTITY&entity=${encodeURIComponent(ownerName)}&action=SEARCH`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-blue-700 underline hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-1 text-xs text-primary underline hover:text-primary/80"
               >
                 Utah Business Registry
                 <ExternalLink className="h-3 w-3" />
@@ -160,7 +160,7 @@ export function ContactTab({
                 href={`https://opencorporates.com/companies?q=${encodeURIComponent(ownerName)}&jurisdiction_code=us_ut`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-blue-700 underline hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-1 text-xs text-primary underline hover:text-primary/80"
               >
                 OpenCorporates
                 <ExternalLink className="h-3 w-3" />
@@ -202,7 +202,7 @@ export function ContactTab({
                 href={`https://maps.google.com/?q=${encodeURIComponent(mailingAddress)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="inline-flex items-center gap-1 text-xs text-primary underline hover:text-primary/80"
               >
                 View on Map
                 <ExternalLink className="h-3 w-3" />
@@ -229,7 +229,7 @@ export function ContactTab({
               >
                 <a
                   href={`tel:${contact.phone}`}
-                  className="text-sm font-medium text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  className="text-sm font-medium text-primary underline hover:text-primary/80"
                 >
                   {contact.phone}
                 </a>
@@ -302,7 +302,7 @@ export function ContactTab({
                 >
                   <a
                     href={`mailto:${contact.email}`}
-                    className="text-sm font-medium text-blue-600 underline hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm font-medium text-primary underline hover:text-primary/80"
                   >
                     {contact.email}
                   </a>
