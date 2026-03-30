@@ -56,6 +56,7 @@ Progress: [██████████] 95%
 | Phase 09-admin-budgeting-cost-analysis P04 | 2min | 2 tasks | 4 files |
 | Phase 11-housefinder-ui-revamp P01 | 5min | 2 tasks | 11 files |
 | Phase 11-housefinder-ui-revamp P04 | 8min | 2 tasks | 11 files |
+| Phase 11-housefinder-ui-revamp P02 | 5min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,7 @@ Recent decisions affecting current work:
 - [Phase 11-housefinder-ui-revamp]: Login hero replaced with CSS gradient panel — no Unsplash network request, cleaner mobile
 - [Phase 11-housefinder-ui-revamp]: text-primary replaces all text-blue-* link colors in detail pages — violet matches new brand accent
 - [Phase 11-housefinder-ui-revamp]: bg-primary/5 + border-primary/20 replaces blue tinted info boxes — works in both modes without dark: variants
+- [Phase 11-housefinder-ui-revamp]: Mobile filter drawer uses controlled state with plain button (not SheetTrigger) to avoid base-ui asChild composition pitfall
 
 ### Roadmap Evolution
 
@@ -184,6 +186,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-30
-Stopped at: Completed 11-04-PLAN.md (Phase 11 Plan 4 — Detail pages palette sweep: property, deal, pipeline, settings)
-Resume file: .planning/phases/11-housefinder-ui-revamp/11-04-SUMMARY.md
+Last session: 2026-03-26
+Stopped at: Completed 11-02-PLAN.md (Phase 11 Plan 2 — Dashboard mobile-first: compact stats pills, filter drawer, property card refresh)
+Resume file: .planning/phases/11-housefinder-ui-revamp/11-02-SUMMARY.md
