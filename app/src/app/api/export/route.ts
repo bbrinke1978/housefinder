@@ -5,6 +5,8 @@ import {
   getDealsForExport,
   getBuyersForExport,
 } from "@/lib/analytics-queries";
+import { getBudgetByDealId, getExpenses } from "@/lib/budget-queries";
+import { getDeal } from "@/lib/deal-queries";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +59,91 @@ export async function GET(request: Request) {
       const data = await getBuyersForExport();
       rows = data as unknown as Record<string, unknown>[];
       filename = `buyers-${today}.csv`;
+      break;
+    }
+    case "budget": {
+      const dealId = searchParams.get("dealId");
+      if (!dealId) {
+        return new NextResponse("Missing dealId", { status: 400 });
+      }
+      const [deal, budgetSummary] = await Promise.all([
+        getDeal(dealId),
+        getBudgetByDealId(dealId),
+      ]);
+      if (!budgetSummary) {
+        return new NextResponse("No budget found for this deal", { status: 404 });
+      }
+      const dealAddress = deal?.address ?? dealId;
+      const safeAddress = dealAddress.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "-").toLowerCase();
+
+      const totalActual = budgetSummary.categories.reduce((sum, c) => sum + c.actualCents, 0);
+      const totalPlanned = budgetSummary.totalPlannedCents;
+      const totalVariance = totalActual - totalPlanned;
+      const totalVariancePct = totalPlanned > 0
+        ? ((totalVariance / totalPlanned) * 100).toFixed(1) + "%"
+        : "N/A";
+
+      const categoryRows: Record<string, unknown>[] = budgetSummary.categories.map((c) => {
+        const variance = c.actualCents - c.plannedCents;
+        const variancePct = c.plannedCents > 0
+          ? ((variance / c.plannedCents) * 100).toFixed(1) + "%"
+          : "N/A";
+        return {
+          Category: c.name,
+          Planned: (c.plannedCents / 100).toFixed(2),
+          Actual: (c.actualCents / 100).toFixed(2),
+          Variance: (variance / 100).toFixed(2),
+          "Variance %": variancePct,
+        };
+      });
+
+      // Contingency row
+      categoryRows.push({
+        Category: "Contingency (10%)",
+        Planned: (budgetSummary.contingencyCents / 100).toFixed(2),
+        Actual: "",
+        Variance: "",
+        "Variance %": "",
+      });
+
+      // Total row
+      categoryRows.push({
+        Category: "TOTAL",
+        Planned: (totalPlanned / 100).toFixed(2),
+        Actual: (totalActual / 100).toFixed(2),
+        Variance: (totalVariance / 100).toFixed(2),
+        "Variance %": totalVariancePct,
+      });
+
+      rows = categoryRows;
+      filename = `budget-summary-${safeAddress}.csv`;
+      break;
+    }
+    case "expenses": {
+      const dealId = searchParams.get("dealId");
+      if (!dealId) {
+        return new NextResponse("Missing dealId", { status: 400 });
+      }
+      const [deal, budgetSummary] = await Promise.all([
+        getDeal(dealId),
+        getBudgetByDealId(dealId),
+      ]);
+      if (!budgetSummary) {
+        return new NextResponse("No budget found for this deal", { status: 404 });
+      }
+      const dealAddress = deal?.address ?? dealId;
+      const safeAddress = dealAddress.replace(/[^a-zA-Z0-9\s-]/g, "").replace(/\s+/g, "-").toLowerCase();
+
+      const expenseList = await getExpenses(budgetSummary.id);
+      rows = expenseList.map((e) => ({
+        Date: e.expenseDate,
+        Category: e.categoryName,
+        Vendor: e.vendor ?? "",
+        Description: e.description ?? "",
+        Amount: (e.amountCents / 100).toFixed(2),
+        Notes: e.notes ?? "",
+      }));
+      filename = `expenses-${safeAddress}.csv`;
       break;
     }
     default:
