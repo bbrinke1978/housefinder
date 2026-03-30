@@ -37,7 +37,8 @@ export async function createBudget(
     throw new Error("Deal not found");
   }
 
-  const totalPlannedCents = deal.repairEstimate ?? 0;
+  // Deal stores whole dollars, budget stores cents — multiply by 100
+  const totalPlannedCents = (deal.repairEstimate ?? 0) * 100;
   const contingencyCents = Math.round(totalPlannedCents * 0.1);
 
   const [inserted] = await db

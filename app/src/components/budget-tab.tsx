@@ -38,7 +38,7 @@ export function BudgetTab({ deal, budget, expenses }: BudgetTabProps) {
   if (!budget) {
     const repairDisplay =
       deal.repairEstimate != null
-        ? `$${(deal.repairEstimate / 100).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
+        ? `$${deal.repairEstimate.toLocaleString("en-US", { minimumFractionDigits: 0 })}`
         : "$0";
 
     return (
