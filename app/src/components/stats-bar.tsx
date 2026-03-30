@@ -12,7 +12,6 @@ const statCards = [
     key: "total" as const,
     icon: Activity,
     href: "/",
-    iconBg: "bg-muted",
     iconColor: "text-muted-foreground",
   },
   {
@@ -20,15 +19,13 @@ const statCards = [
     key: "critical" as const,
     icon: AlertTriangle,
     href: "/?tier=critical",
-    iconBg: "bg-red-100 dark:bg-red-950/40",
-    iconColor: "text-red-700",
+    iconColor: "text-red-500",
   },
   {
     label: "Hot Leads",
     key: "hot" as const,
     icon: Flame,
     href: "/?hot=true",
-    iconBg: "bg-orange-100 dark:bg-orange-950/40",
     iconColor: "text-orange-500",
   },
   {
@@ -36,7 +33,6 @@ const statCards = [
     key: "warm" as const,
     icon: ThermometerSun,
     href: "/?tier=warm",
-    iconBg: "bg-amber-100 dark:bg-amber-950/40",
     iconColor: "text-amber-500",
   },
   {
@@ -44,33 +40,28 @@ const statCards = [
     key: "newToday" as const,
     icon: Sparkles,
     href: "/?sort=date",
-    iconBg: "bg-blue-100 dark:bg-blue-950/40",
-    iconColor: "text-blue-500",
+    iconColor: "text-violet-400",
   },
 ];
 
 export function StatsBar({ stats }: StatsBarProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+    <div className="flex gap-3 overflow-x-auto overscroll-x-contain pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap scrollbar-hide">
       {statCards.map((card) => {
         const Icon = card.icon;
         return (
           <Link
             key={card.key}
             href={card.href}
-            className="card-elevated flex flex-col items-center text-center py-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer no-underline"
+            className="flex-shrink-0 flex items-center gap-2.5 rounded-xl bg-card border border-border px-4 py-3 hover:bg-accent hover:border-primary/30 transition-colors group no-underline"
           >
-            <div className={`w-14 h-14 rounded-full ${card.iconBg} flex items-center justify-center mb-3 shadow-sm`}>
-              <Icon className={`h-6 w-6 ${card.iconColor}`} />
-            </div>
-            <p
-              className="text-4xl font-bold tabular-nums text-foreground"
-            >
+            <Icon className={`h-4 w-4 ${card.iconColor} group-hover:scale-110 transition-transform`} />
+            <span className="text-2xl font-bold tabular-nums text-foreground">
               {stats[card.key]}
-            </p>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">
+            </span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
               {card.label}
-            </p>
+            </span>
           </Link>
         );
       })}

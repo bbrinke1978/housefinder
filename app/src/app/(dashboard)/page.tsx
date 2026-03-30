@@ -49,31 +49,13 @@ export default async function DashboardPage({
   ]);
 
   return (
-    <div className="space-y-8">
-      {/* Hero banner */}
-      <div className="relative overflow-hidden rounded-2xl h-48 md:h-56 animate-fade-in">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=75')`,
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/30 to-zinc-950/70" />
-        <div className="relative z-10 flex flex-col justify-end h-full p-6 md:p-8 text-white">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 shadow-lg">
-              <MapPin className="h-5 w-5 text-white" />
-            </div>
-            <span
-              className="text-2xl font-bold tracking-wide"
-            >
-              DASHBOARD
-            </span>
-          </div>
-          <p className="text-white/70 text-sm md:text-base">
-            Tracking {stats.total} properties across {cities.length} cities in Utah
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* Compact page header */}
+      <div className="mb-2 animate-fade-in">
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {stats.total} properties across {cities.length} cities
+        </p>
       </div>
 
       {/* Stats */}
