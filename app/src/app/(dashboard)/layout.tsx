@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileBottomNav } from "@/components/bottom-nav";
+import { CommandMenu } from "@/components/command-menu";
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
         </main>
         <MobileBottomNav />
       </SidebarInset>
+      <CommandMenu />
     </SidebarProvider>
   );
 }

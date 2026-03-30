@@ -68,6 +68,12 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="px-2">
         <SidebarSeparator />
+        <div className="px-3 py-2 text-[10px] text-muted-foreground">
+          <kbd className="rounded border border-border px-1 py-0.5 text-[10px]">Ctrl</kbd>
+          {" + "}
+          <kbd className="rounded border border-border px-1 py-0.5 text-[10px]">K</kbd>
+          <span className="ml-1">Quick navigation</span>
+        </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
