@@ -100,6 +100,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DEAL-07**: "Start Deal" button on property detail page creates a new deal pre-filled with existing property data (address, owner name, contact info)
 - [x] **DEAL-08**: Two preloaded seed deals (Sullivan Rd Ogden and Delta 496 W 300 N) populate the pipeline for immediate use
 
+### Rehab Budgeting & Cost Analysis
+
+- [ ] **BUDGET-01**: User can create a rehab budget per deal with 19 default categories (Demo, Foundation, Framing, Roofing, Exterior, Windows/Doors, Plumbing, Electrical, HVAC, Insulation, Drywall, Paint, Flooring, Kitchen, Bathrooms, Interior Trim, Landscaping, Permits, Miscellaneous), auto-populated from the deal's repair_estimate
+- [ ] **BUDGET-02**: User can add expenses manually against budget categories with vendor, amount, date, description, and notes — with running totals per category
+- [ ] **BUDGET-03**: User can upload receipt photos from phone camera or file picker, with Azure Document Intelligence OCR auto-scanning to extract vendor, date, and total for expense pre-fill
+- [ ] **BUDGET-04**: Visual budget health via category progress bars (green/yellow/red), Recharts pie chart (spending by category), and grouped bar chart (planned vs actual per category)
+- [ ] **BUDGET-05**: Profit/break-even/loss indicators show whether actual costs stay under (profitable), match (break-even), or exceed (loss) the deal's repair_estimate — using MAO math
+- [ ] **BUDGET-06**: 10% contingency reserve auto-added on top of planned total, with warning when spending eats into contingency
+- [ ] **BUDGET-07**: Budget summary (category/planned/actual/variance) and detailed expenses exportable to CSV
+- [ ] **BUDGET-08**: Alert banners at 80% budget usage (yellow warning) and 100%+ (red over-budget), displayed on budget tab
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -132,7 +143,11 @@ Explicitly excluded. Documented to prevent scope creep.
 | Real-time push notifications | Email + SMS is sufficient; push adds service worker complexity |
 | Hard money calculator | Deferred — not in Phase 8 scope |
 | Partner split model | Deferred — not in Phase 8 scope |
-| Rehab budget template | Deferred — not in Phase 8 scope |
+| Multi-user expense approval workflow | Single user tool; team approval is v2+ |
+| Contractor payment tracking | Out of scope for Phase 9 |
+| Invoice generation | Out of scope for Phase 9 |
+| QuickBooks/accounting integration | Out of scope for Phase 9 |
+| Historical budget templates | Deferred — use last project's actuals as next project's estimate |
 | Deal blast email/SMS automation | Manual copy-paste first; automation deferred |
 
 ## Traceability
@@ -199,12 +214,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEAL-06 | Phase 8 | Complete |
 | DEAL-07 | Phase 8 | Complete |
 | DEAL-08 | Phase 8 | Complete |
+| BUDGET-01 | Phase 9 | Planned |
+| BUDGET-02 | Phase 9 | Planned |
+| BUDGET-03 | Phase 9 | Planned |
+| BUDGET-04 | Phase 9 | Planned |
+| BUDGET-05 | Phase 9 | Planned |
+| BUDGET-06 | Phase 9 | Planned |
+| BUDGET-07 | Phase 9 | Planned |
+| BUDGET-08 | Phase 9 | Planned |
 
 **Coverage:**
-- v1 requirements: 48 total
-- Mapped to phases: 48
+- v1 requirements: 56 total
+- Mapped to phases: 56
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-26 — added Phase 8 wholesaling deal flow requirements (DEAL-01 through DEAL-08)*
+*Last updated: 2026-03-26 — added Phase 9 rehab budgeting requirements (BUDGET-01 through BUDGET-08)*

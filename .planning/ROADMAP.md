@@ -168,20 +168,37 @@ Plans:
 
 ### Phase 9: Admin Budgeting & Cost Analysis
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can create rehab budgets per deal, track expenses against categories with receipt OCR scanning, and see visual budget health indicators with profit/loss analysis tied to MAO math
 **Depends on:** Phase 8
-**Plans:** 0 plans
+**Requirements**: BUDGET-01, BUDGET-02, BUDGET-03, BUDGET-04, BUDGET-05, BUDGET-06, BUDGET-07, BUDGET-08
+**Success Criteria** (what must be TRUE):
+  1. Each deal has a "Budget" tab where the investor can create a rehab budget with 19 default categories, auto-populated from the deal's repair_estimate
+  2. Expenses can be added manually or via receipt photo upload with OCR auto-scanning (Azure Document Intelligence) that pre-fills vendor, date, and amount
+  3. Category progress bars show green/yellow/red based on spending percentage, with alert banners at 80% and over-budget thresholds
+  4. A 10% contingency reserve is auto-added on top of the planned total with a warning when spending eats into it
+  5. Profit/break-even/loss indicators show whether actual costs stay under, match, or exceed the deal's repair_estimate
+  6. Budget summary and detailed expenses can be exported to CSV
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 9 to break down)
+- [ ] 09-01-PLAN.md — Schema (budgets, budget_categories, receipts, expenses), types, queries, server actions
+- [ ] 09-02-PLAN.md — Budget tab on deal detail, KPI header, category editor, expense form/list
+- [ ] 09-03-PLAN.md — Receipt upload (Azure Blob Storage), OCR scanning (Azure Document Intelligence), receipt gallery
+- [ ] 09-04-PLAN.md — Budget visualizations (progress bars, pie/bar charts), alert banners, CSV export
 
 ### Phase 10: Public Marketing Website
 
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 9
-**Plans:** 0 plans
+**Goal:** Public-facing website for No BS Homes — professional marketing site for distressed property sellers
+**Requirements**: Separate repo (nobshomes), Netlify hosting
+**Depends on:** Independent
+**Status:** Complete (2026-03-29)
+**Plans:** Built directly (not via GSD plans — separate project)
 
-Plans:
-- [ ] TBD (run /gsd:plan-phase 10 to break down)
+Delivered:
+- [x] Home page with hero, trust points, situations, how-it-works preview, contact form
+- [x] About Us page (Brian & Shawn's story)
+- [x] How It Works page (4-step process)
+- [x] FAQ page (10 expandable Q&As)
+- [x] Netlify Forms integration
+- [x] Deployed to nobshomes.netlify.app
+- [ ] Custom domain, logo, photos, analytics (see TODO.md)
