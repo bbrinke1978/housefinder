@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 6 — Data Analytics & Insights
+**Current focus:** Phase 9 — Admin Budgeting & Cost Analysis
 
 ## Current Position
 
-Phase: 6 of 10 (Data Analytics & Insights)
-Plan: 4 of 4 in current phase
-Status: Complete
-Last activity: 2026-03-29 — Completed 06-04 (Activity log timeline + CSV export route, all 6 analytics tabs complete)
+Phase: 9 of 10 (Admin Budgeting & Cost Analysis)
+Plan: 1 of 4 in current phase
+Status: In Progress
+Last activity: 2026-03-26 — Completed 09-01 (Schema tables, types, queries, and server actions for rehab budgeting)
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [██████░░░░] 60%
 | Phase 06-data-analytics-insights P04 | 2min | 2 tasks | 5 files |
 | Phase 06-data-analytics-insights P02 | 7 | 2 tasks | 5 files |
 | Phase 06-data-analytics-insights P03 | 4min | 2 tasks | 6 files |
+| Phase 09-admin-budgeting-cost-analysis P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,9 @@ Recent decisions affecting current work:
 - [Phase 06-02]: Trends chart transforms flat TrendPoint[] to week-keyed rows with one key per city for recharts multi-line
 - [Phase 06-data-analytics-insights]: useActionState<LogCallResult|null,FormData> for call log form — consistent with React 19 form action pattern
 - [Phase 06-data-analytics-insights]: logCall returns union {success:true}|{error:string} not throw — graceful client-side feedback
+- [Phase 09-admin-budgeting-cost-analysis]: ExpenseLine interface in types/index.ts (not ExpenseRow) to avoid collision with schema InferSelectModel export
+- [Phase 09-admin-budgeting-cost-analysis]: createBudget seeds 19 DEFAULT_BUDGET_CATEGORIES, auto-populates from deal.repairEstimate, computes 10% contingencyCents
+- [Phase 09-admin-budgeting-cost-analysis]: actualCents computed via COALESCE(SUM(expenses.amount_cents), 0) on read — no denormalized column in budget_categories
 
 ### Roadmap Evolution
 
@@ -163,6 +167,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-29
-Stopped at: Completed 06-04-PLAN.md (Phase 6 Plan 4 — Activity log timeline + CSV export, all 6 analytics tabs complete)
+Last session: 2026-03-26
+Stopped at: Completed 09-01-PLAN.md (Phase 9 Plan 1 — Schema tables, types, queries, server actions for rehab budgeting)
 Resume file: .planning/phases/06-data-analytics-insights/06-04-SUMMARY.md
