@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getDeal, getDealNotes } from '@/lib/deal-queries';
+import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
 import { DealContractTracker } from '@/components/deal-contract-tracker';
@@ -11,6 +12,7 @@ import { DealNotes } from '@/components/deal-notes';
 import { DealBlastGenerator } from '@/components/deal-blast-generator';
 import { DealGuidePanel } from '@/components/deal-guide-panel';
 import { DealCompEntry } from '@/components/deal-comp-entry';
+import { BudgetTab } from '@/components/budget-tab';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +52,12 @@ export default async function DealDetailPage({
   const { tab } = await searchParams;
   const activeTab = tab ?? 'overview';
 
-  const [deal, notes] = await Promise.all([getDeal(id), getDealNotes(id)]);
+  const [deal, notes, budget] = await Promise.all([
+    getDeal(id),
+    getDealNotes(id),
+    getBudgetByDealId(id),
+  ]);
+  const expenses = budget ? await getExpenses(budget.id) : [];
 
   if (!deal) {
     notFound();
@@ -88,6 +95,7 @@ export default async function DealDetailPage({
           <TabsTrigger value='comps'>Comps</TabsTrigger>
           <TabsTrigger value='contract'>Contract</TabsTrigger>
           <TabsTrigger value='notes'>Notes ({notes.length})</TabsTrigger>
+          <TabsTrigger value='budget'>Budget</TabsTrigger>
         </TabsList>
 
         <TabsContent value='overview' className='mt-4'>
@@ -111,6 +119,10 @@ export default async function DealDetailPage({
 
         <TabsContent value='notes' className='mt-4'>
           <DealNotes dealId={deal.id} initialNotes={notes} />
+        </TabsContent>
+
+        <TabsContent value='budget' className='mt-4'>
+          <BudgetTab deal={deal} budget={budget} expenses={expenses} />
         </TabsContent>
       </Tabs>
     </div>
