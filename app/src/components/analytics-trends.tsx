@@ -18,16 +18,16 @@ interface Props {
   data: TrendPoint[];
 }
 
-// Palette for up to 8 cities
+// Palette for up to 8 cities — violet primary series, semantic semantic colors for others
 const CITY_COLORS = [
-  "hsl(var(--primary))",
-  "#22c55e",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#84cc16",
+  "#8b5cf6", // violet-500 — primary series
+  "#a78bfa", // violet-400
+  "#6d28d9", // violet-700
+  "#c4b5fd", // violet-300
+  "#10b981", // emerald-500 — positive
+  "#f59e0b", // amber-500 — caution
+  "#ef4444", // red-500 — alert
+  "#06b6d4", // cyan-500 — extra
 ];
 
 type WeekMap = Record<string, Record<string, number>>;

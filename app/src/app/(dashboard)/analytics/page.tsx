@@ -86,17 +86,15 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       </div>
 
       {/* Tab navigation */}
-      <div className="flex rounded-lg border overflow-x-auto text-sm mb-6 w-fit">
-        {tabs.map((t, i) => (
+      <div className="flex overflow-x-auto text-sm mb-6 border-b border-border gap-1">
+        {tabs.map((t) => (
           <Link
             key={t.id}
             href={`/analytics?tab=${t.id}`}
-            className={`px-3 py-1.5 whitespace-nowrap transition-colors ${
-              i > 0 ? "border-l" : ""
-            } ${
+            className={`px-3 py-2 whitespace-nowrap transition-colors border-b-2 -mb-px ${
               activeTab === t.id
-                ? "bg-muted font-medium"
-                : "hover:bg-muted/50"
+                ? "border-primary text-primary font-medium"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             }`}
           >
             {t.label}

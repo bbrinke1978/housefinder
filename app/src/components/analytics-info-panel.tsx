@@ -120,7 +120,7 @@ export function AnalyticsInfoPanel({ tab }: AnalyticsInfoPanelProps) {
             <ul className="space-y-1">
               {info.lookFor.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
-                  <span className="mt-0.5 text-blue-500 flex-shrink-0">→</span>
+                  <span className="mt-0.5 text-primary flex-shrink-0">→</span>
                   <span>{item}</span>
                 </li>
               ))}
