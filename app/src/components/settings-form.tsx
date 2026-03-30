@@ -259,7 +259,7 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     emailEnabled: e.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-input"
               />
             </div>
 
@@ -305,7 +305,7 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     smsEnabled: e.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-input"
               />
             </div>
 
@@ -393,7 +393,7 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     hideBigOperators: e.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-input"
               />
             </div>
 
@@ -417,7 +417,7 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     hideVacantLand: e.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-input"
               />
             </div>
 
@@ -441,7 +441,7 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     hideEntities: e.target.checked,
                   }))
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-input"
               />
             </div>
 

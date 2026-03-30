@@ -286,10 +286,10 @@ export function DealCompEntry({ deal }: DealCompEntryProps) {
               </div>
             )}
 
-            <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/30 p-3 flex items-center justify-between gap-3">
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs text-muted-foreground">Suggested ARV</p>
-                <p className="text-xl font-bold text-green-700 dark:text-green-300">
+                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                   {fmtDollar(avgPrice)}
                 </p>
                 {deal.arv != null && deal.arv !== avgPrice && (

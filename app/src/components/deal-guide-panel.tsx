@@ -80,8 +80,8 @@ export function DealGuidePanel({ status }: DealGuidePanelProps) {
               <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                 Script
               </h4>
-              <div className="rounded-md border-l-4 border-blue-400 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-600 px-4 py-3">
-                <pre className="whitespace-pre-wrap text-sm font-mono text-blue-900 dark:text-blue-200 leading-relaxed">
+              <div className="rounded-md border-l-4 border-primary/60 bg-primary/5 px-4 py-3">
+                <pre className="whitespace-pre-wrap text-sm font-mono text-foreground leading-relaxed">
                   {guide.script}
                 </pre>
               </div>
@@ -99,7 +99,7 @@ export function DealGuidePanel({ status }: DealGuidePanelProps) {
                   <li key={i} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-input"
                       readOnly
                       tabIndex={-1}
                     />

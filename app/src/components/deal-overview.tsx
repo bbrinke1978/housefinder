@@ -307,7 +307,7 @@ export function DealOverview({ deal }: DealOverviewProps) {
             {deal.propertyId && (
               <Link
                 href={`/properties/${deal.propertyId}`}
-                className="mt-2 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
+                className="mt-2 inline-block text-sm text-primary hover:underline"
               >
                 View source property
               </Link>
@@ -328,7 +328,7 @@ export function DealOverview({ deal }: DealOverviewProps) {
             {deal.sellerPhone && (
               <a
                 href={`tel:${deal.sellerPhone}`}
-                className="text-sm text-blue-600 hover:underline dark:text-blue-400"
+                className="text-sm text-primary hover:underline"
               >
                 {deal.sellerPhone}
               </a>
