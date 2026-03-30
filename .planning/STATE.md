@@ -52,6 +52,7 @@ Progress: [████████░░] 80%
 | Phase 06-data-analytics-insights P03 | 4min | 2 tasks | 6 files |
 | Phase 09-admin-budgeting-cost-analysis P01 | 2min | 2 tasks | 4 files |
 | Phase 09-admin-budgeting-cost-analysis P02 | 2 | 2 tasks | 5 files |
+| Phase 09-admin-budgeting-cost-analysis P03 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -148,6 +149,9 @@ Recent decisions affecting current work:
 - [Phase 09-admin-budgeting-cost-analysis]: ExpenseLine interface in types/index.ts (not ExpenseRow) to avoid collision with schema InferSelectModel export
 - [Phase 09-admin-budgeting-cost-analysis]: createBudget seeds 19 DEFAULT_BUDGET_CATEGORIES, auto-populates from deal.repairEstimate, computes 10% contingencyCents
 - [Phase 09-admin-budgeting-cost-analysis]: actualCents computed via COALESCE(SUM(expenses.amount_cents), 0) on read — no denormalized column in budget_categories
+- [Phase 09-admin-budgeting-cost-analysis]: analyzeReceipt wraps OCR in try/catch, returns all nulls on error — never blocks expense creation
+- [Phase 09-admin-budgeting-cost-analysis]: SAS URL parsed from single AZURE_STORAGE_CONNECTION_STRING (AccountName + AccountKey) — no extra credential env vars
+- [Phase 09-admin-budgeting-cost-analysis]: resizeImage client-side canvas resize before upload: max 1920px, JPEG 0.8 — reduces 5MB phone photo to ~400KB
 - [Phase 09-02]: Budget data fetched at page level and passed as props — no client-side fetching, consistent with deal detail pattern
 - [Phase 09-02]: Contingency warning triggers when totalSpentCents > totalPlannedCents (excl contingency) — visually distinguishes planned overage from contingency use
 
