@@ -103,10 +103,10 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Rehab Budgeting & Cost Analysis
 
 - [x] **BUDGET-01**: User can create a rehab budget per deal with 19 default categories (Demo, Foundation, Framing, Roofing, Exterior, Windows/Doors, Plumbing, Electrical, HVAC, Insulation, Drywall, Paint, Flooring, Kitchen, Bathrooms, Interior Trim, Landscaping, Permits, Miscellaneous), auto-populated from the deal's repair_estimate
-- [ ] **BUDGET-02**: User can add expenses manually against budget categories with vendor, amount, date, description, and notes — with running totals per category
+- [x] **BUDGET-02**: User can add expenses manually against budget categories with vendor, amount, date, description, and notes — with running totals per category
 - [ ] **BUDGET-03**: User can upload receipt photos from phone camera or file picker, with Azure Document Intelligence OCR auto-scanning to extract vendor, date, and total for expense pre-fill
 - [ ] **BUDGET-04**: Visual budget health via category progress bars (green/yellow/red), Recharts pie chart (spending by category), and grouped bar chart (planned vs actual per category)
-- [ ] **BUDGET-05**: Profit/break-even/loss indicators show whether actual costs stay under (profitable), match (break-even), or exceed (loss) the deal's repair_estimate — using MAO math
+- [x] **BUDGET-05**: Profit/break-even/loss indicators show whether actual costs stay under (profitable), match (break-even), or exceed (loss) the deal's repair_estimate — using MAO math
 - [x] **BUDGET-06**: 10% contingency reserve auto-added on top of planned total, with warning when spending eats into contingency
 - [ ] **BUDGET-07**: Budget summary (category/planned/actual/variance) and detailed expenses exportable to CSV
 - [ ] **BUDGET-08**: Alert banners at 80% budget usage (yellow warning) and 100%+ (red over-budget), displayed on budget tab

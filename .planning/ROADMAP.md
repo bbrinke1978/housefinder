@@ -178,7 +178,7 @@ Plans:
   4. A 10% contingency reserve is auto-added on top of the planned total with a warning when spending eats into it
   5. Profit/break-even/loss indicators show whether actual costs stay under, match, or exceed the deal's repair_estimate
   6. Budget summary and detailed expenses can be exported to CSV
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [ ] 09-01-PLAN.md — Schema (budgets, budget_categories, receipts, expenses), types, queries, server actions

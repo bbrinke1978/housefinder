@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 9 of 10 (Admin Budgeting & Cost Analysis)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-03-26 — Completed 09-01 (Schema tables, types, queries, and server actions for rehab budgeting)
+Last activity: 2026-03-30 — Completed 09-03 (Receipt upload component, Azure Blob Storage, OCR via Document Intelligence)
 
 Progress: [████████░░] 80%
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 80%
 | Phase 06-data-analytics-insights P02 | 7 | 2 tasks | 5 files |
 | Phase 06-data-analytics-insights P03 | 4min | 2 tasks | 6 files |
 | Phase 09-admin-budgeting-cost-analysis P01 | 2min | 2 tasks | 4 files |
+| Phase 09-admin-budgeting-cost-analysis P02 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -147,6 +148,8 @@ Recent decisions affecting current work:
 - [Phase 09-admin-budgeting-cost-analysis]: ExpenseLine interface in types/index.ts (not ExpenseRow) to avoid collision with schema InferSelectModel export
 - [Phase 09-admin-budgeting-cost-analysis]: createBudget seeds 19 DEFAULT_BUDGET_CATEGORIES, auto-populates from deal.repairEstimate, computes 10% contingencyCents
 - [Phase 09-admin-budgeting-cost-analysis]: actualCents computed via COALESCE(SUM(expenses.amount_cents), 0) on read — no denormalized column in budget_categories
+- [Phase 09-02]: Budget data fetched at page level and passed as props — no client-side fetching, consistent with deal detail pattern
+- [Phase 09-02]: Contingency warning triggers when totalSpentCents > totalPlannedCents (excl contingency) — visually distinguishes planned overage from contingency use
 
 ### Roadmap Evolution
 
@@ -167,6 +170,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-26
-Stopped at: Completed 09-01-PLAN.md (Phase 9 Plan 1 — Schema tables, types, queries, server actions for rehab budgeting)
-Resume file: .planning/phases/06-data-analytics-insights/06-04-SUMMARY.md
+Last session: 2026-03-30
+Stopped at: Completed 09-03-PLAN.md (Phase 9 Plan 3 — Receipt upload, Blob Storage, and OCR integration)
+Resume file: .planning/phases/09-admin-budgeting-cost-analysis/09-02-SUMMARY.md
