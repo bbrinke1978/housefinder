@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 11 of 11 (HouseFinder UI Revamp)
-Plan: 4 of 5 in current phase (In Progress)
-Status: Phase 11 Active — Plans 1-4 Complete
-Last activity: 2026-03-30 — Completed 11-04 (Detail pages palette sweep: property, deal, pipeline, settings)
+Plan: 5 of 5 in current phase (Complete — awaiting human-verify checkpoint)
+Status: Phase 11 Active — Plans 1-5 Complete (pending visual sign-off)
+Last activity: 2026-03-30 — Completed 11-05 (Command palette Ctrl+K, final visual checkpoint pending)
 
-Progress: [██████████] 95%
+Progress: [██████████] 99%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████████] 95%
 | Phase 11-housefinder-ui-revamp P01 | 5min | 2 tasks | 11 files |
 | Phase 11-housefinder-ui-revamp P04 | 8min | 2 tasks | 11 files |
 | Phase 11-housefinder-ui-revamp P02 | 5min | 2 tasks | 5 files |
+| Phase 11-housefinder-ui-revamp P05 | 5min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -166,6 +167,7 @@ Recent decisions affecting current work:
 - [Phase 11-housefinder-ui-revamp]: text-primary replaces all text-blue-* link colors in detail pages — violet matches new brand accent
 - [Phase 11-housefinder-ui-revamp]: bg-primary/5 + border-primary/20 replaces blue tinted info boxes — works in both modes without dark: variants
 - [Phase 11-housefinder-ui-revamp]: Mobile filter drawer uses controlled state with plain button (not SheetTrigger) to avoid base-ui asChild composition pitfall
+- [Phase 11-05]: CommandMenu built on @base-ui/react/dialog directly (no cmdk/Radix) — project uses @base-ui/react exclusively; custom activeIndex state provides identical keyboard UX
 
 ### Roadmap Evolution
 
@@ -186,6 +188,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-26
-Stopped at: Completed 11-02-PLAN.md (Phase 11 Plan 2 — Dashboard mobile-first: compact stats pills, filter drawer, property card refresh)
+Last session: 2026-03-30
+Stopped at: Completed 11-05-PLAN.md Task 1 (Command palette Ctrl+K) — waiting at human-verify checkpoint for visual sign-off on complete UI revamp
 Resume file: .planning/phases/11-housefinder-ui-revamp/11-02-SUMMARY.md

@@ -120,7 +120,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **UI-05**: Dashboard filters are hidden behind a Sheet drawer on mobile with active filter count badge, search always visible — desktop keeps inline filters
 - [x] **UI-06**: Login page has premium dark aesthetic with centered card, violet accent line, and polished form inputs
 - [x] **UI-07**: All pages (deals, analytics, property detail, deal detail, pipeline, settings, map) use semantic color tokens with zero remnants of old palette — including responsive chart colors and mobile kanban horizontal scroll
-- [ ] **UI-08**: Command palette (Ctrl+K / Cmd+K) provides keyboard navigation to all major pages via shadcn Command + Dialog components
+- [x] **UI-08**: Command palette (Ctrl+K / Cmd+K) provides keyboard navigation to all major pages via shadcn Command + Dialog components
 
 ## v2 Requirements
 

@@ -217,7 +217,7 @@ Delivered:
   6. Deals kanban scrolls horizontally on mobile; list view works as fallback
   7. Command palette (Ctrl+K) navigates to all major pages
   8. All existing features preserved — zero functionality removed
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — Design foundation: violet/zinc palette, Inter font, nav shell refresh, login page
