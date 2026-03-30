@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BudgetCategoryEditor } from "@/components/budget-category-editor";
 import { ExpenseForm } from "@/components/expense-form";
 import { ExpenseList } from "@/components/expense-list";
+import { BudgetAlertBanner } from "@/components/budget-alerts";
+import { BudgetCharts } from "@/components/budget-charts";
+import { ReceiptUpload } from "@/components/receipt-upload";
 import { createBudget } from "@/lib/budget-actions";
 import type { DealWithBuyer } from "@/types";
 import type { BudgetSummary, ExpenseLine } from "@/types";
@@ -97,6 +101,15 @@ export function BudgetTab({ deal, budget, expenses }: BudgetTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Alert banner (shown above KPI header when approaching/over budget) */}
+      <BudgetAlertBanner
+        percentUsed={budget.percentUsed}
+        remainingCents={budget.remainingCents}
+        contingencyCents={budget.contingencyCents}
+        totalPlannedCents={budget.totalPlannedCents}
+        totalSpentCents={budget.totalSpentCents}
+      />
+
       {/* KPI Header */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-lg border p-3 space-y-1">
@@ -133,9 +146,21 @@ export function BudgetTab({ deal, budget, expenses }: BudgetTabProps) {
 
       {/* Category editor */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Budget Categories
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Budget Categories
+          </h3>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/export?type=budget&dealId=${deal.id}`}
+              download
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <Download className="h-3 w-3" />
+              Export CSV
+            </a>
+          </div>
+        </div>
         <div className="rounded-lg border divide-y">
           {/* Header row */}
           <div className="grid grid-cols-4 gap-2 px-3 py-2 text-xs font-medium text-muted-foreground">
@@ -153,19 +178,32 @@ export function BudgetTab({ deal, budget, expenses }: BudgetTabProps) {
         </div>
       </div>
 
+      {/* Budget charts: progress bars + collapsible pie/bar charts */}
+      <BudgetCharts categories={budget.categories} />
+
       {/* Expense section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Expenses
           </h3>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowExpenseForm((v) => !v)}
-          >
-            {showExpenseForm ? "Cancel" : "Add Expense"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/export?type=expenses&dealId=${deal.id}`}
+              download
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <Download className="h-3 w-3" />
+              Export
+            </a>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExpenseForm((v) => !v)}
+            >
+              {showExpenseForm ? "Cancel" : "Add Expense"}
+            </Button>
+          </div>
         </div>
 
         {showExpenseForm && (
@@ -176,6 +214,13 @@ export function BudgetTab({ deal, budget, expenses }: BudgetTabProps) {
             onSuccess={() => setShowExpenseForm(false)}
           />
         )}
+
+        {/* Receipt upload — scan receipt and auto-fill expense form */}
+        <ReceiptUpload
+          budgetId={budget.id}
+          categories={budget.categories}
+          dealId={deal.id}
+        />
 
         <ExpenseList expenses={expenses} dealId={deal.id} />
       </div>
