@@ -20,7 +20,7 @@ export function MobileBottomNav() {
   if (!isMobile) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-warm-200/60 dark:border-dark-700/60 bg-white/90 dark:bg-dark-950/90 backdrop-blur-xl h-16 flex items-center justify-around px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/90 backdrop-blur-xl h-16 flex items-center justify-around px-2">
       {navItems.map((item) => {
         const isActive =
           item.href === "/"
@@ -30,14 +30,15 @@ export function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs transition-all duration-200 ${
+            className={`relative flex min-h-[44px] flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-xs transition-all duration-200 ${
               isActive
-                ? "text-brand-500 font-bold"
-                : "text-dark-400 hover:text-dark-600 dark:hover:text-dark-200"
+                ? "text-primary font-bold"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <item.icon className={`h-5 w-5 transition-transform duration-200 ${isActive ? "scale-110" : ""}`} />
             <span>{item.label}</span>
+            {isActive && <span className="absolute bottom-1 h-1 w-1 rounded-full bg-primary" />}
           </Link>
         );
       })}

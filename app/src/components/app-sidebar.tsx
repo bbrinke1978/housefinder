@@ -29,17 +29,16 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar>
+    <Sidebar className="border-r border-sidebar-border">
       <SidebarHeader className="flex flex-row items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 shadow-md">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md">
             <MapPin className="h-4 w-4 text-white" />
           </div>
           <span
-            style={{ fontFamily: "var(--font-display)" }}
-            className="text-xl tracking-wide text-sidebar-foreground"
+            className="text-xl font-bold tracking-wide text-sidebar-foreground"
           >
-            HOUSEFINDER
+            HouseFinder
           </span>
         </div>
         <ThemeToggle />
