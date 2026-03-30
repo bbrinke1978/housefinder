@@ -1,16 +1,16 @@
 "use server";
 
-import { db } from "@/db/client.js";
+import { db } from "@/db/client";
 import {
   budgets,
   budgetCategories,
   expenses,
   deals,
-} from "@/db/schema.js";
+} from "@/db/schema";
 import { eq, sum } from "drizzle-orm";
-import { auth } from "@/auth.js";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { DEFAULT_BUDGET_CATEGORIES } from "@/types/index.js";
+import { DEFAULT_BUDGET_CATEGORIES } from "@/types";
 
 /**
  * createBudget — create a budget for a deal.

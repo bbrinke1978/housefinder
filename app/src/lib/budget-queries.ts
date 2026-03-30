@@ -1,7 +1,7 @@
-import { db } from "@/db/client.js";
-import { budgets, budgetCategories, expenses, receipts } from "@/db/schema.js";
+import { db } from "@/db/client";
+import { budgets, budgetCategories, expenses, receipts } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import type { BudgetSummary, BudgetCategory, ExpenseLine } from "@/types/index.js";
+import type { BudgetSummary, BudgetCategory, ExpenseLine } from "@/types";
 
 /**
  * getBudgetByDealId — fetch a budget with categories and computed actuals.

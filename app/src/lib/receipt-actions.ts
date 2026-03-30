@@ -1,11 +1,11 @@
 "use server";
 
-import { db } from "@/db/client.js";
-import { receipts } from "@/db/schema.js";
-import { auth } from "@/auth.js";
+import { db } from "@/db/client";
+import { receipts } from "@/db/schema";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { uploadBlob } from "@/lib/blob-storage.js";
-import { analyzeReceipt } from "@/lib/ocr.js";
+import { uploadBlob } from "@/lib/blob-storage";
+import { analyzeReceipt } from "@/lib/ocr";
 
 export interface UploadReceiptResult {
   receiptId: string;
