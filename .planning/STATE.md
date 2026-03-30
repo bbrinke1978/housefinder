@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 9 — Admin Budgeting & Cost Analysis
+**Current focus:** Phase 11 — HouseFinder UI Revamp
 
 ## Current Position
 
-Phase: 9 of 10 (Admin Budgeting & Cost Analysis)
-Plan: 4 of 4 in current phase (Phase Complete)
-Status: Phase 9 Complete — Ready for Phase 10
-Last activity: 2026-03-30 — Completed 09-04 (Budget visualizations, Recharts charts, alert banners, CSV export)
+Phase: 11 of 11 (HouseFinder UI Revamp)
+Plan: 1 of 5 in current phase (In Progress)
+Status: Phase 11 Active — Plan 1 Complete
+Last activity: 2026-03-26 — Completed 11-01 (Design foundation: zinc+violet palette, Inter font, nav shell, login page)
 
-Progress: [█████████░] 90%
+Progress: [██████████] 95%
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [█████████░] 90%
 | Phase 09-admin-budgeting-cost-analysis P02 | 2 | 2 tasks | 5 files |
 | Phase 09-admin-budgeting-cost-analysis P03 | 5min | 2 tasks | 6 files |
 | Phase 09-admin-budgeting-cost-analysis P04 | 2min | 2 tasks | 4 files |
+| Phase 11-housefinder-ui-revamp P01 | 5min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -157,6 +158,9 @@ Recent decisions affecting current work:
 - [Phase 09-02]: Contingency warning triggers when totalSpentCents > totalPlannedCents (excl contingency) — visually distinguishes planned overage from contingency use
 - [Phase 09-admin-budgeting-cost-analysis]: BudgetAlertBanner returns null below 80%; orange at over planned, red at over planned+contingency
 - [Phase 09-admin-budgeting-cost-analysis]: Budget CSV export includes Contingency and TOTAL rows; filename uses deal address slug
+- [Phase 11-housefinder-ui-revamp]: Violet accent selected over terracotta — matches Linear/Raycast tool aesthetic
+- [Phase 11-housefinder-ui-revamp]: Inter via next/font replaces Bebas Neue+Oswald+Nunito Sans — single variable font, dark defaultTheme
+- [Phase 11-housefinder-ui-revamp]: Login hero replaced with CSS gradient panel — no Unsplash network request, cleaner mobile
 
 ### Roadmap Evolution
 
@@ -177,7 +181,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-30
-Stopped at: Completed 09-04-PLAN.md (Phase 9 Plan 4 — Budget visualizations, charts, alert banners, CSV export)
-Resume file: .planning/phases/09-admin-budgeting-cost-analysis/09-04-SUMMARY.md
-Resume file: .planning/phases/09-admin-budgeting-cost-analysis/09-02-SUMMARY.md
+Last session: 2026-03-26
+Stopped at: Completed 11-01-PLAN.md (Phase 11 Plan 1 — Design foundation: zinc+violet palette, Inter font, nav shell, login page)
+Resume file: .planning/phases/11-housefinder-ui-revamp/11-01-SUMMARY.md

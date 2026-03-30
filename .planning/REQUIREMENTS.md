@@ -113,12 +113,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### UI Revamp
 
-- [ ] **UI-01**: App uses a premium dark-first color palette (zinc neutrals + violet accent) replacing the terracotta/desert theme — dark mode as primary with light mode option
-- [ ] **UI-02**: App uses Inter variable font via next/font/google replacing Bebas Neue, Oswald, and Nunito Sans — single font system matching Linear/Notion aesthetic
-- [ ] **UI-03**: Navigation uses polished sidebar on desktop and bottom nav on mobile with violet active states, 44px minimum touch targets, and active indicator dot
+- [x] **UI-01**: App uses a premium dark-first color palette (zinc neutrals + violet accent) replacing the terracotta/desert theme — dark mode as primary with light mode option
+- [x] **UI-02**: App uses Inter variable font via next/font/google replacing Bebas Neue, Oswald, and Nunito Sans — single font system matching Linear/Notion aesthetic
+- [x] **UI-03**: Navigation uses polished sidebar on desktop and bottom nav on mobile with violet active states, 44px minimum touch targets, and active indicator dot
 - [ ] **UI-04**: Dashboard stats bar is a compact horizontal scroll row (~56px) instead of 5 large cards, and hero banner replaced with compact text header
 - [ ] **UI-05**: Dashboard filters are hidden behind a Sheet drawer on mobile with active filter count badge, search always visible — desktop keeps inline filters
-- [ ] **UI-06**: Login page has premium dark aesthetic with centered card, violet accent line, and polished form inputs
+- [x] **UI-06**: Login page has premium dark aesthetic with centered card, violet accent line, and polished form inputs
 - [ ] **UI-07**: All pages (deals, analytics, property detail, deal detail, pipeline, settings, map) use semantic color tokens with zero remnants of old palette — including responsive chart colors and mobile kanban horizontal scroll
 - [ ] **UI-08**: Command palette (Ctrl+K / Cmd+K) provides keyboard navigation to all major pages via shadcn Command + Dialog components
 
