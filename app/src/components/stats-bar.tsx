@@ -12,8 +12,8 @@ const statCards = [
     key: "total" as const,
     icon: Activity,
     href: "/",
-    iconBg: "bg-warm-200 dark:bg-dark-700",
-    iconColor: "text-dark-600 dark:text-dark-300",
+    iconBg: "bg-muted",
+    iconColor: "text-muted-foreground",
   },
   {
     label: "Critical",
@@ -29,7 +29,7 @@ const statCards = [
     icon: Flame,
     href: "/?hot=true",
     iconBg: "bg-orange-100 dark:bg-orange-950/40",
-    iconColor: "text-brand-500",
+    iconColor: "text-orange-500",
   },
   {
     label: "Warm Leads",
@@ -58,18 +58,17 @@ export function StatsBar({ stats }: StatsBarProps) {
           <Link
             key={card.key}
             href={card.href}
-            className="card-warm flex flex-col items-center text-center py-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer no-underline"
+            className="card-elevated flex flex-col items-center text-center py-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer no-underline"
           >
             <div className={`w-14 h-14 rounded-full ${card.iconBg} flex items-center justify-center mb-3 shadow-sm`}>
               <Icon className={`h-6 w-6 ${card.iconColor}`} />
             </div>
             <p
-              style={{ fontFamily: "var(--font-display)" }}
-              className="text-4xl text-dark-950 dark:text-dark-100"
+              className="text-4xl font-bold tabular-nums text-foreground"
             >
               {stats[card.key]}
             </p>
-            <p className="text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider mt-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-1">
               {card.label}
             </p>
           </Link>

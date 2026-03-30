@@ -27,17 +27,16 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
             backgroundImage: `url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&q=75')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-dark-950/60 via-dark-950/30 to-dark-950/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/30 to-zinc-950/70" />
         <div className="relative z-10 flex flex-col justify-end h-full p-6 md:p-8 text-white">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 shadow-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 shadow-lg">
                   <KanbanSquare className="h-5 w-5 text-white" />
                 </div>
                 <span
-                  style={{ fontFamily: "var(--font-display)" }}
-                  className="text-2xl tracking-wide"
+                  className="text-2xl font-bold tracking-wide"
                 >
                   PIPELINE
                 </span>
@@ -51,7 +50,7 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
                 href="/pipeline?view=kanban"
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${
                   view === "kanban"
-                    ? "bg-white text-dark-950 shadow-sm"
+                    ? "bg-white text-zinc-950 shadow-sm"
                     : "text-white/70 hover:text-white"
                 }`}
               >
@@ -62,7 +61,7 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
                 href="/pipeline?view=list"
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${
                   view === "list"
-                    ? "bg-white text-dark-950 shadow-sm"
+                    ? "bg-white text-zinc-950 shadow-sm"
                     : "text-white/70 hover:text-white"
                 }`}
               >
@@ -77,20 +76,17 @@ export default async function PipelinePage({ searchParams }: PipelinePageProps) 
       {/* Content */}
       <div className="animate-fade-in-up stagger-1">
         {leads.length === 0 ? (
-          <div className="card-warm text-center py-16">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-warm-200 dark:bg-dark-700">
-              <KanbanSquare className="h-7 w-7 text-warm-500" />
+          <div className="card-elevated text-center py-16">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <KanbanSquare className="h-7 w-7 text-muted-foreground" />
             </div>
-            <p
-              style={{ fontFamily: "var(--font-heading)" }}
-              className="text-xl font-semibold text-dark-950 dark:text-dark-100"
-            >
+            <p className="text-xl font-semibold text-foreground">
               No leads in pipeline yet
             </p>
-            <p className="mt-2 text-sm text-dark-500 dark:text-dark-400 mb-4">
+            <p className="mt-2 text-sm text-muted-foreground mb-4">
               Properties will appear here once they have a lead status.
             </p>
-            <Link href="/" className="btn-brand inline-flex items-center gap-2">
+            <Link href="/" className="btn-primary inline-flex items-center gap-2">
               Go to Dashboard
             </Link>
           </div>

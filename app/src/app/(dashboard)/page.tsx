@@ -58,15 +58,14 @@ export default async function DashboardPage({
             backgroundImage: `url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=75')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-dark-950/60 via-dark-950/30 to-dark-950/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/30 to-zinc-950/70" />
         <div className="relative z-10 flex flex-col justify-end h-full p-6 md:p-8 text-white">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 shadow-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 shadow-lg">
               <MapPin className="h-5 w-5 text-white" />
             </div>
             <span
-              style={{ fontFamily: "var(--font-display)" }}
-              className="text-2xl tracking-wide"
+              className="text-2xl font-bold tracking-wide"
             >
               DASHBOARD
             </span>
@@ -91,17 +90,14 @@ export default async function DashboardPage({
 
       {/* Property grid */}
       {properties.length === 0 ? (
-        <div className="card-warm text-center py-16 animate-fade-in">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-warm-200 dark:bg-dark-700">
-            <MapPin className="h-7 w-7 text-warm-500" />
+        <div className="card-elevated text-center py-16 animate-fade-in">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <MapPin className="h-7 w-7 text-muted-foreground" />
           </div>
-          <p
-            style={{ fontFamily: "var(--font-heading)" }}
-            className="text-xl font-semibold text-dark-950 dark:text-dark-100"
-          >
+          <p className="text-xl font-semibold text-foreground">
             No properties found
           </p>
-          <p className="mt-2 text-sm text-dark-500 dark:text-dark-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Try adjusting your filters or check back later for new leads.
           </p>
         </div>

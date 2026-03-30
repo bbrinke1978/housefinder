@@ -11,11 +11,11 @@ interface PropertyCardProps {
 function ownerTypeBadge(type: string | null): { label: string; badgeClass: string; accentClass: string } | null {
   switch (type) {
     case "llc":
-      return { label: "LLC", badgeClass: "bg-purple-500 text-white", accentClass: "ring-2 ring-purple-400/50 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-[#3d3d3d]" };
+      return { label: "LLC", badgeClass: "bg-purple-500 text-white", accentClass: "ring-2 ring-purple-400/50 bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-[#18181b]" };
     case "trust":
-      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", accentClass: "ring-2 ring-indigo-400/50 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-[#3d3d3d]" };
+      return { label: "Trust", badgeClass: "bg-indigo-500 text-white", accentClass: "ring-2 ring-indigo-400/50 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-[#18181b]" };
     case "estate":
-      return { label: "Estate", badgeClass: "bg-slate-500 text-white", accentClass: "ring-2 ring-slate-400/50 bg-gradient-to-br from-slate-100 to-white dark:from-slate-900/20 dark:to-[#3d3d3d]" };
+      return { label: "Estate", badgeClass: "bg-slate-500 text-white", accentClass: "ring-2 ring-slate-400/50 bg-gradient-to-br from-slate-100 to-white dark:from-slate-900/20 dark:to-[#18181b]" };
     default:
       return null;
   }
@@ -53,9 +53,9 @@ function getTier(score: number): TierInfo {
   if (score >= 4) {
     return {
       label: "Hot",
-      badgeClass: "bg-brand-500 text-white",
-      barColor: "bg-brand-500",
-      scoreCircleClass: "bg-brand-500 text-white",
+      badgeClass: "bg-violet-500 text-white",
+      barColor: "bg-violet-500",
+      scoreCircleClass: "bg-violet-500 text-white",
     };
   }
   if (score >= 2) {
@@ -76,9 +76,9 @@ function getTier(score: number): TierInfo {
   }
   return {
     label: "No Signal",
-    badgeClass: "bg-dark-400 text-white",
-    barColor: "bg-dark-400",
-    scoreCircleClass: "bg-dark-400 text-white",
+    badgeClass: "bg-zinc-500 text-white",
+    barColor: "bg-zinc-500",
+    scoreCircleClass: "bg-zinc-500 text-white",
   };
 }
 
@@ -99,17 +99,17 @@ export function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Link href={`/properties/${property.id}`} className="group block">
       <div
-        className={`card-warm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+        className={`card-elevated transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
           hot ? "hot-pulse" : ""
         } ${badge?.accentClass ?? ""}`}
       >
         {/* Header: address + badges */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate font-bold text-dark-950 dark:text-dark-100 group-hover:text-brand-500 transition-colors">
+            <p className="truncate font-bold text-foreground group-hover:text-primary transition-colors">
               {property.address || property.parcelId}
             </p>
-            <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mt-0.5">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
               <MapPin className="h-3 w-3" />
               <span>
                 {property.city}, {property.state}
@@ -123,7 +123,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               </span>
             )}
             {isNew(property) && (
-              <span className="badge-tag text-[10px] bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
+              <span className="inline-block text-[10px] tracking-wider uppercase px-3 py-1 rounded-full font-semibold bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
                 New
               </span>
             )}
@@ -137,7 +137,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
         {/* Owner */}
         {property.ownerName && (
-          <div className="flex items-center gap-1.5 text-xs text-dark-500 dark:text-dark-400 mb-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
             {isEntity ? <Building2 className="h-3 w-3" /> : <User className="h-3 w-3" />}
             <span className="truncate">{property.ownerName}</span>
           </div>
@@ -151,20 +151,19 @@ export function PropertyCard({ property }: PropertyCardProps) {
             >
               {displayScore}
             </span>
-            <span className="text-xs font-semibold text-dark-500 dark:text-dark-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               / 10
             </span>
           </div>
           <span
-            style={{ fontFamily: "var(--font-heading)" }}
-            className="text-xs uppercase tracking-wider text-dark-400 dark:text-dark-500"
+            className="text-xs uppercase tracking-wider text-muted-foreground"
           >
             {property.leadStatus.replace("_", " ")}
           </span>
         </div>
 
         {/* Score bar */}
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-warm-200 dark:bg-dark-700">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
             className={`h-full rounded-full transition-all duration-500 ${tier.barColor}`}
             style={{ width: `${pct}%` }}
@@ -173,7 +172,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
 
         {/* Hover CTA */}
         <div className="flex items-center justify-end mt-3 opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
-          <span className="flex items-center gap-1 text-xs font-bold text-brand-500">
+          <span className="flex items-center gap-1 text-xs font-bold text-primary">
             View details
             <ArrowRight className="h-3 w-3" />
           </span>
