@@ -303,6 +303,97 @@ export type BuyerRow = InferSelectModel<typeof buyers>;
 export type DealRow = InferSelectModel<typeof deals>;
 export type DealNoteRow = InferSelectModel<typeof dealNotes>;
 
+// -- Budgets --
+
+export const budgets = pgTable("budgets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  dealId: uuid("deal_id")
+    .notNull()
+    .unique()
+    .references(() => deals.id),
+  totalPlannedCents: integer("total_planned_cents").notNull().default(0),
+  contingencyCents: integer("contingency_cents").notNull().default(0),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const budgetCategories = pgTable(
+  "budget_categories",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    budgetId: uuid("budget_id")
+      .notNull()
+      .references(() => budgets.id),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    plannedCents: integer("planned_cents").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_budget_categories_budget_id").on(table.budgetId),
+    uniqueIndex("uq_budget_category_name").on(table.budgetId, table.name),
+  ]
+);
+
+export const receipts = pgTable("receipts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  budgetId: uuid("budget_id")
+    .notNull()
+    .references(() => budgets.id),
+  blobUrl: text("blob_url").notNull(),
+  blobName: text("blob_name").notNull(),
+  ocrRawJson: text("ocr_raw_json"),
+  vendor: text("vendor"),
+  receiptDate: date("receipt_date"),
+  totalCents: integer("total_cents"),
+  isDeleted: boolean("is_deleted").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    budgetId: uuid("budget_id")
+      .notNull()
+      .references(() => budgets.id),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => budgetCategories.id),
+    receiptId: uuid("receipt_id").references(() => receipts.id),
+    vendor: text("vendor"),
+    description: text("description"),
+    amountCents: integer("amount_cents").notNull(),
+    expenseDate: date("expense_date").notNull(),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_expenses_budget_id").on(table.budgetId),
+    index("idx_expenses_category_id").on(table.categoryId),
+    index("idx_expenses_receipt_id").on(table.receiptId),
+  ]
+);
+
+export type BudgetRow = InferSelectModel<typeof budgets>;
+export type BudgetCategoryRow = InferSelectModel<typeof budgetCategories>;
+export type ReceiptRow = InferSelectModel<typeof receipts>;
+export type ExpenseRow = InferSelectModel<typeof expenses>;
+
 // -- Call Logs --
 
 export const callOutcomeEnum = pgEnum("call_outcome", [

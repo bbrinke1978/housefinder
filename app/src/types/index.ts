@@ -190,3 +190,67 @@ export interface DealNote {
   newStatus: string | null;
   createdAt: Date;
 }
+
+// -- Budget Types --
+
+export const DEFAULT_BUDGET_CATEGORIES = [
+  "Demo / Site Prep",
+  "Foundation / Structural",
+  "Framing / Carpentry",
+  "Roofing",
+  "Exterior / Siding",
+  "Windows / Doors",
+  "Plumbing",
+  "Electrical",
+  "HVAC",
+  "Insulation",
+  "Drywall",
+  "Paint / Finish Work",
+  "Flooring",
+  "Kitchen",
+  "Bathrooms",
+  "Interior Trim",
+  "Landscaping",
+  "Permits / Fees",
+  "Miscellaneous",
+] as const;
+// Note: "Contingency" is NOT a category — it's a separate 10% reserve on the budget level
+
+export interface BudgetCategory {
+  id: string;
+  name: string;
+  sortOrder: number;
+  plannedCents: number;
+  actualCents: number; // computed from expenses SUM
+}
+
+export interface BudgetSummary {
+  id: string;
+  dealId: string;
+  totalPlannedCents: number;
+  contingencyCents: number; // 10% of totalPlannedCents, auto-calculated
+  totalSpentCents: number; // SUM of all expenses
+  remainingCents: number; // totalPlannedCents + contingencyCents - totalSpentCents
+  percentUsed: number; // totalSpentCents / (totalPlannedCents + contingencyCents) * 100
+  categories: BudgetCategory[];
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ExpenseLine {
+  id: string;
+  budgetId: string;
+  categoryId: string;
+  categoryName: string; // from join
+  receiptId: string | null;
+  vendor: string | null;
+  description: string | null;
+  amountCents: number;
+  expenseDate: string;
+  notes: string | null;
+  createdAt: Date;
+}
+
+// Budget health status for MAO profit indicators (per user decision)
+export type BudgetHealth = "profitable" | "break_even" | "loss";
