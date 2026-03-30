@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 11 of 11 (HouseFinder UI Revamp)
-Plan: 1 of 5 in current phase (In Progress)
-Status: Phase 11 Active — Plan 1 Complete
-Last activity: 2026-03-26 — Completed 11-01 (Design foundation: zinc+violet palette, Inter font, nav shell, login page)
+Plan: 4 of 5 in current phase (In Progress)
+Status: Phase 11 Active — Plans 1-4 Complete
+Last activity: 2026-03-30 — Completed 11-04 (Detail pages palette sweep: property, deal, pipeline, settings)
 
 Progress: [██████████] 95%
 
@@ -55,6 +55,7 @@ Progress: [██████████] 95%
 | Phase 09-admin-budgeting-cost-analysis P03 | 5min | 2 tasks | 6 files |
 | Phase 09-admin-budgeting-cost-analysis P04 | 2min | 2 tasks | 4 files |
 | Phase 11-housefinder-ui-revamp P01 | 5min | 2 tasks | 11 files |
+| Phase 11-housefinder-ui-revamp P04 | 8min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,8 @@ Recent decisions affecting current work:
 - [Phase 11-housefinder-ui-revamp]: Violet accent selected over terracotta — matches Linear/Raycast tool aesthetic
 - [Phase 11-housefinder-ui-revamp]: Inter via next/font replaces Bebas Neue+Oswald+Nunito Sans — single variable font, dark defaultTheme
 - [Phase 11-housefinder-ui-revamp]: Login hero replaced with CSS gradient panel — no Unsplash network request, cleaner mobile
+- [Phase 11-housefinder-ui-revamp]: text-primary replaces all text-blue-* link colors in detail pages — violet matches new brand accent
+- [Phase 11-housefinder-ui-revamp]: bg-primary/5 + border-primary/20 replaces blue tinted info boxes — works in both modes without dark: variants
 
 ### Roadmap Evolution
 
@@ -181,6 +184,6 @@ None yet.
 ## Session Continuity
 
 
-Last session: 2026-03-26
-Stopped at: Completed 11-01-PLAN.md (Phase 11 Plan 1 — Design foundation: zinc+violet palette, Inter font, nav shell, login page)
-Resume file: .planning/phases/11-housefinder-ui-revamp/11-01-SUMMARY.md
+Last session: 2026-03-30
+Stopped at: Completed 11-04-PLAN.md (Phase 11 Plan 4 — Detail pages palette sweep: property, deal, pipeline, settings)
+Resume file: .planning/phases/11-housefinder-ui-revamp/11-04-SUMMARY.md
