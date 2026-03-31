@@ -463,6 +463,7 @@ export async function getProperties(
   const rows = await db
     .select({
       id: properties.id,
+      leadId: leads.id,
       parcelId: properties.parcelId,
       address: properties.address,
       city: properties.city,
