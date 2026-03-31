@@ -70,6 +70,20 @@ export default async function DashboardPage({
         </Suspense>
       </div>
 
+      {/* Filtered count */}
+      <div className="text-sm text-muted-foreground animate-fade-in-up stagger-3">
+        {Object.values(filterParams).some(Boolean) ? (
+          <span>
+            Showing <span className="font-semibold text-foreground">{properties.length}</span> of{" "}
+            <span className="font-semibold text-foreground">{stats.total}</span> properties
+          </span>
+        ) : (
+          <span>
+            <span className="font-semibold text-foreground">{stats.total}</span> properties
+          </span>
+        )}
+      </div>
+
       {/* Property grid */}
       {properties.length === 0 ? (
         <div className="card-elevated text-center py-16 animate-fade-in">
