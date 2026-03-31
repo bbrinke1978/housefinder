@@ -64,7 +64,7 @@ export default async function DashboardPage({
       </div>
 
       {/* Filters */}
-      <div className="animate-fade-in-up stagger-2">
+      <div className="animate-fade-in-up stagger-2 relative z-40">
         <Suspense fallback={null}>
           <DashboardFilters cities={cities} />
         </Suspense>
@@ -98,7 +98,7 @@ export default async function DashboardPage({
           </p>
         </div>
       ) : (
-        <div className="stagger-children grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="stagger-children grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 relative z-0">
           {properties.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
