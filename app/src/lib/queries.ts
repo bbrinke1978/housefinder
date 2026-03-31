@@ -377,16 +377,19 @@ export async function getProperties(
     conditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
   }
 
-  // Filter by tier (overrides minScore when present)
+  // Filter by tier (handles comma-separated multi-select)
   if (params.tier) {
     const tierScoreMap: Record<string, number> = {
       critical: 7,
       hot: 4,
       warm: 2,
     };
-    const tierMin = tierScoreMap[params.tier];
-    if (tierMin !== undefined) {
-      conditions.push(sql`${leads.distressScore} >= ${tierMin}`);
+    const tiers = params.tier.split(",").map((t) => t.trim()).filter(Boolean);
+    const tierMins = tiers.map((t) => tierScoreMap[t]).filter((v): v is number => v !== undefined);
+    if (tierMins.length > 0) {
+      // Use the lowest threshold so all selected tiers are shown
+      const minThreshold = Math.min(...tierMins);
+      conditions.push(sql`${leads.distressScore} >= ${minThreshold}`);
     }
   } else {
     // Filter by minimum distress score (legacy)
@@ -405,27 +408,40 @@ export async function getProperties(
   }
 
   if (params.city) {
-    conditions.push(ilike(properties.city, params.city));
+    const cities = params.city.split(",").map((c) => c.trim()).filter(Boolean);
+    if (cities.length === 1) {
+      conditions.push(ilike(properties.city, cities[0]));
+    } else if (cities.length > 1) {
+      conditions.push(sql`lower(${properties.city}) IN (${sql.join(cities.map(c => sql`lower(${c})`), sql`, `)})`);
+    }
   }
 
   if (params.ownerType) {
-    conditions.push(sql`${properties.ownerType} = ${params.ownerType}`);
+    const ownerTypes = params.ownerType.split(",").map((t) => t.trim()).filter(Boolean);
+    if (ownerTypes.length === 1) {
+      conditions.push(sql`${properties.ownerType} = ${ownerTypes[0]}`);
+    } else if (ownerTypes.length > 1) {
+      conditions.push(sql`${properties.ownerType} IN (${sql.join(ownerTypes.map(t => sql`${t}`), sql`, `)})`);
+    }
   }
 
   if (params.distressType) {
-    conditions.push(
-      exists(
-        db
-          .select({ one: sql`1` })
-          .from(distressSignals)
-          .where(
-            and(
-              eq(distressSignals.propertyId, properties.id),
-              eq(distressSignals.signalType, params.distressType as SignalType)
+    const distressTypes = params.distressType.split(",").map((t) => t.trim()).filter(Boolean);
+    if (distressTypes.length > 0) {
+      conditions.push(
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(distressSignals)
+            .where(
+              and(
+                eq(distressSignals.propertyId, properties.id),
+                sql`${distressSignals.signalType} IN (${sql.join(distressTypes.map(t => sql`${t}`), sql`, `)})`
+              )
             )
-          )
-      )
-    );
+        )
+      );
+    }
   }
 
   if (params.hot === "true") {
