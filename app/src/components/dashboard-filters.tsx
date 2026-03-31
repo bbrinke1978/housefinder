@@ -417,7 +417,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
       </div>
 
       {/* Desktop layout */}
-      <div className="hidden md:flex md:flex-wrap gap-2 items-center">
+      <div className="hidden md:flex md:flex-wrap gap-2 items-center relative z-30">
         {/* Search */}
         <div className="relative w-[220px]">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
