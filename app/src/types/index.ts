@@ -1,4 +1,16 @@
 export type LeadStatus = "new" | "contacted" | "follow_up" | "closed" | "dead";
+
+export const LEAD_SOURCES = [
+  { value: "scraping", label: "Scraping Data", color: "bg-zinc-500" },
+  { value: "website", label: "Website", color: "bg-blue-500" },
+  { value: "flyer", label: "Flyer", color: "bg-green-500" },
+  { value: "signage", label: "Signage", color: "bg-amber-500" },
+  { value: "driving", label: "Driving for $", color: "bg-orange-500" },
+  { value: "word_of_mouth", label: "Word of Mouth", color: "bg-purple-500" },
+  { value: "other", label: "Other", color: "bg-rose-500" },
+] as const;
+
+export type LeadSourceValue = (typeof LEAD_SOURCES)[number]["value"];
 export type NewLeadStatus = "new" | "unreviewed";
 export type SignalType =
   | "nod"
@@ -25,6 +37,7 @@ export interface PropertyWithLead {
   isHot: boolean;
   leadStatus: LeadStatus;
   newLeadStatus: NewLeadStatus;
+  leadSource: string | null;
   firstSeenAt: Date | null;
   lastViewedAt: Date | null;
   lastContactedAt: Date | null;

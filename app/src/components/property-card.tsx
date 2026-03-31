@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, MapPin, User, Building2, ArrowRight } from "lucide-react";
+import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect, useTransition } from "react";
 import type { PropertyWithLead } from "@/types";
+import { LEAD_SOURCES } from "@/types";
+import { updateLeadSource } from "@/lib/actions";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
@@ -88,6 +91,138 @@ function isNew(property: PropertyWithLead): boolean {
   return new Date(property.firstSeenAt) > new Date(property.lastViewedAt);
 }
 
+/** Parse leadSource — handles "other:custom text" format */
+function parseLeadSource(raw: string | null): { value: string; otherText?: string } {
+  if (!raw) return { value: "scraping" };
+  if (raw.startsWith("other:")) {
+    return { value: "other", otherText: raw.slice(6) };
+  }
+  return { value: raw };
+}
+
+function getLeadSourceInfo(raw: string | null) {
+  const { value } = parseLeadSource(raw);
+  return LEAD_SOURCES.find((s) => s.value === value) ?? LEAD_SOURCES[0];
+}
+
+// -- Lead Source Selector (inline on card) --
+
+interface LeadSourceSelectorProps {
+  leadId: string;
+  currentSource: string | null;
+  propertyId: string;
+}
+
+function LeadSourceSelector({ leadId, currentSource, propertyId }: LeadSourceSelectorProps) {
+  const [open, setOpen] = useState(false);
+  const [source, setSource] = useState(parseLeadSource(currentSource).value);
+  const [otherText, setOtherText] = useState(parseLeadSource(currentSource).otherText ?? "");
+  const [isPending, startTransition] = useTransition();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const sourceInfo = getLeadSourceInfo(currentSource);
+
+  function handleSelect(value: string) {
+    if (value !== "other") {
+      setSource(value);
+      setOpen(false);
+      startTransition(async () => {
+        await updateLeadSource(leadId, value);
+      });
+    } else {
+      setSource("other");
+    }
+  }
+
+  function handleOtherSave() {
+    setOpen(false);
+    startTransition(async () => {
+      await updateLeadSource(leadId, "other", otherText);
+    });
+  }
+
+  return (
+    <div ref={ref} className="relative" onClick={(e) => e.preventDefault()}>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white transition-opacity ${isPending ? "opacity-60" : ""} ${sourceInfo.color}`}
+        title="Change lead source"
+      >
+        <span>{sourceInfo.label}</span>
+        <ChevronDown className="h-2.5 w-2.5" />
+      </button>
+
+      {open && (
+        <div
+          className="absolute bottom-full mb-1 left-0 z-50 rounded-md border border-border bg-popover shadow-lg w-[160px]"
+          onClick={(e) => e.preventDefault()}
+        >
+          <div className="p-1">
+            {LEAD_SOURCES.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSelect(s.value);
+                }}
+                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs hover:bg-accent transition-colors"
+              >
+                <span className={`h-2 w-2 rounded-full flex-shrink-0 ${s.color}`} />
+                {s.label}
+              </button>
+            ))}
+          </div>
+          {source === "other" && (
+            <div className="border-t border-border p-2 space-y-1" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="text"
+                value={otherText}
+                onChange={(e) => setOtherText(e.target.value)}
+                placeholder="Describe source..."
+                className="w-full rounded border border-input bg-background px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleOtherSave();
+                  e.stopPropagation();
+                }}
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOtherSave();
+                }}
+                className="w-full rounded bg-primary text-primary-foreground text-xs py-1 hover:bg-primary/90 transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PropertyCard({ property }: PropertyCardProps) {
   const hot = property.isHot;
   const displayScore = normalizeScore(property.distressScore);
@@ -160,12 +295,19 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </span>
         </div>
 
-        {/* Lead status + hover CTA */}
-        <div className="flex items-center justify-between mt-2.5">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            {property.leadStatus.replace("_", " ")}
-          </span>
-          <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0">
+        {/* Bottom row: lead status + source badge + hover CTA */}
+        <div className="flex items-center justify-between mt-2.5 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+              {property.leadStatus.replace("_", " ")}
+            </span>
+            <LeadSourceSelector
+              leadId={property.leadId}
+              currentSource={property.leadSource ?? null}
+              propertyId={property.id}
+            />
+          </div>
+          <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0 shrink-0">
             View details
             <ArrowRight className="h-3 w-3" />
           </span>

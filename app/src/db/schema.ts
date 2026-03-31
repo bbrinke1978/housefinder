@@ -116,6 +116,7 @@ export const leads = pgTable(
     distressScore: integer("distress_score").notNull().default(0),
     isHot: boolean("is_hot").notNull().default(false),
     alertSent: boolean("alert_sent").notNull().default(false),
+    leadSource: text("lead_source").default("scraping"),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }),
     lastViewedAt: timestamp("last_viewed_at", { withTimezone: true }),
     lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),

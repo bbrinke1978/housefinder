@@ -540,6 +540,53 @@ export async function updateDashboardSettings(
   revalidatePath("/");
 }
 
+// -- Lead Source --
+
+const VALID_LEAD_SOURCES = [
+  "scraping",
+  "website",
+  "flyer",
+  "signage",
+  "driving",
+  "word_of_mouth",
+  "other",
+] as const;
+
+const updateLeadSourceSchema = z.object({
+  leadId: z.uuid(),
+  source: z.enum(VALID_LEAD_SOURCES),
+  otherText: z.string().max(100).optional(),
+});
+
+/**
+ * Update the lead source for a property lead.
+ * When source is "other", optionally store custom text in a note.
+ */
+export async function updateLeadSource(
+  leadId: string,
+  source: string,
+  otherText?: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsed = updateLeadSourceSchema.parse({ leadId, source, otherText });
+
+  await db
+    .update(leads)
+    .set({
+      leadSource: parsed.source === "other" && parsed.otherText
+        ? `other:${parsed.otherText}`
+        : parsed.source,
+      updatedAt: new Date(),
+    })
+    .where(eq(leads.id, parsed.leadId));
+
+  revalidatePath("/");
+}
+
 /**
  * Check if a property has an active vacant flag.
  */
