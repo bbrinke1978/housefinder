@@ -62,6 +62,21 @@ export async function shouldHideVacantLand(): Promise<boolean> {
 }
 
 /**
+ * Returns true when the dashboard.hideParcelOnly setting is enabled (or absent,
+ * since the default is ON). Hides properties with no real street address.
+ */
+export async function shouldHideParcelOnly(): Promise<boolean> {
+  const rows = await db
+    .select({ value: scraperConfig.value })
+    .from(scraperConfig)
+    .where(eq(scraperConfig.key, "dashboard.hideParcelOnly"))
+    .limit(1);
+
+  if (rows.length === 0) return true; // default ON
+  return rows[0].value !== "false";
+}
+
+/**
  * Returns true when the dashboard.hideEntities setting is enabled (or absent,
  * since the default is ON). Hides LLC, Trust, and Estate-owned properties.
  */
@@ -174,11 +189,12 @@ export interface DashboardStats {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   // Precompute exclusion lists once
-  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, hideParcelOnly, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
     shouldHideVacantLand(),
     shouldHideEntities(),
+    shouldHideParcelOnly(),
     getTargetCitiesList(),
   ]);
 
@@ -228,6 +244,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
         AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
         AND upper(${properties.ownerName}) NOT LIKE '%LIVESTOCK%'
       )
+    )`);
+  }
+
+  // Exclude parcel-only properties (no real street address)
+  if (hideParcelOnly) {
+    statsConditions.push(sql`(
+      ${properties.address} IS NOT NULL
+      AND ${properties.address} != ''
+      AND ${properties.address} != ${properties.parcelId}
     )`);
   }
 
@@ -313,11 +338,12 @@ export async function getProperties(
   params: GetPropertiesParams = {}
 ): Promise<PropertyWithLead[]> {
   // Precompute exclusion lists once (parallel with query building)
-  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, targetCities] = await Promise.all([
+  const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, hideParcelOnly, targetCities] = await Promise.all([
     shouldHideBigOperators(),
     getBigOperatorNames(),
     shouldHideVacantLand(),
     shouldHideEntities(),
+    shouldHideParcelOnly(),
     getTargetCitiesList(),
   ]);
 
@@ -369,6 +395,15 @@ export async function getProperties(
         AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
         AND upper(${properties.ownerName}) NOT LIKE '%LIVESTOCK%'
       )
+    )`);
+  }
+
+  // Exclude parcel-only properties (no real street address)
+  if (hideParcelOnly) {
+    conditions.push(sql`(
+      ${properties.address} IS NOT NULL
+      AND ${properties.address} != ''
+      AND ${properties.address} != ${properties.parcelId}
     )`);
   }
 

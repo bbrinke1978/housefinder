@@ -27,6 +27,7 @@ const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
   hideVacantLand: true,
   hideEntities: true,
+  hideParcelOnly: true,
 };
 
 interface SettingsFormProps {
@@ -439,6 +440,31 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                   setDashboardSettings((prev) => ({
                     ...prev,
                     hideEntities: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-input"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label htmlFor="hideParcelOnly" className="text-sm font-medium">
+                  Hide parcel-only properties (no address)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Exclude properties that have no street address — only a raw parcel ID like
+                  "2A-0584-0000". These usually cannot be marketed or visited without
+                  additional research.
+                </p>
+              </div>
+              <input
+                id="hideParcelOnly"
+                type="checkbox"
+                checked={dashboardSettings.hideParcelOnly}
+                onChange={(e) =>
+                  setDashboardSettings((prev) => ({
+                    ...prev,
+                    hideParcelOnly: e.target.checked,
                   }))
                 }
                 className="h-4 w-4 rounded border-input"

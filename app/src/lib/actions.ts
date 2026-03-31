@@ -430,12 +430,14 @@ export interface DashboardSettings {
   hideBigOperators: boolean;
   hideVacantLand: boolean;
   hideEntities: boolean;
+  hideParcelOnly: boolean;
 }
 
 const DASHBOARD_DEFAULTS: DashboardSettings = {
   hideBigOperators: true,
   hideVacantLand: true,
   hideEntities: true,
+  hideParcelOnly: true,
 };
 
 /**
@@ -463,6 +465,10 @@ export async function getDashboardSettings(): Promise<DashboardSettings> {
       map.get("dashboard.hideEntities") === "false"
         ? false
         : DASHBOARD_DEFAULTS.hideEntities,
+    hideParcelOnly:
+      map.get("dashboard.hideParcelOnly") === "false"
+        ? false
+        : DASHBOARD_DEFAULTS.hideParcelOnly,
   };
 }
 
@@ -470,6 +476,7 @@ const updateDashboardSettingsSchema = z.object({
   hideBigOperators: z.boolean(),
   hideVacantLand: z.boolean(),
   hideEntities: z.boolean(),
+  hideParcelOnly: z.boolean(),
 });
 
 /**
@@ -500,6 +507,11 @@ export async function updateDashboardSettings(
       key: "dashboard.hideEntities",
       value: String(parsed.hideEntities),
       description: "Hide LLC, Trust, and Estate-owned properties from dashboard — focus on individual owners only",
+    },
+    {
+      key: "dashboard.hideParcelOnly",
+      value: String(parsed.hideParcelOnly),
+      description: "Hide properties with no street address — only a parcel ID like '2A-0584-0000'",
     },
   ];
 
