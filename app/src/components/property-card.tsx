@@ -110,10 +110,9 @@ function getLeadSourceInfo(raw: string | null) {
 interface LeadSourceSelectorProps {
   leadId: string;
   currentSource: string | null;
-  propertyId: string;
 }
 
-function LeadSourceSelector({ leadId, currentSource, propertyId }: LeadSourceSelectorProps) {
+function LeadSourceSelector({ leadId, currentSource }: LeadSourceSelectorProps) {
   const [open, setOpen] = useState(false);
   const [source, setSource] = useState(parseLeadSource(currentSource).value);
   const [otherText, setOtherText] = useState(parseLeadSource(currentSource).otherText ?? "");
@@ -304,7 +303,6 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <LeadSourceSelector
               leadId={property.leadId}
               currentSource={property.leadSource ?? null}
-              propertyId={property.id}
             />
           </div>
           <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0 shrink-0">

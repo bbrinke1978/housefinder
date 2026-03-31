@@ -452,8 +452,8 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                   Hide parcel-only properties (no address)
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Exclude properties that have no street address — only a raw parcel ID like
-                  "2A-0584-0000". These usually cannot be marketed or visited without
+                  Exclude properties that have no street address &mdash; only a raw parcel ID like
+                  &ldquo;2A-0584-0000&rdquo;. These usually cannot be marketed or visited without
                   additional research.
                 </p>
               </div>
