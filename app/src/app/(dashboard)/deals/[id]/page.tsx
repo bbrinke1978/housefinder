@@ -50,7 +50,18 @@ export default async function DealDetailPage({
 }) {
   const { id } = await params;
   const { tab } = await searchParams;
-  const activeTab = tab ?? 'overview';
+
+  // Map legacy tab names to new consolidated tabs
+  const tabMap: Record<string, string> = {
+    overview: 'overview',
+    calculator: 'analysis',
+    comps: 'analysis',
+    contract: 'financials',
+    budget: 'financials',
+    notes: 'activity',
+  };
+  const rawTab = tab ?? 'overview';
+  const activeTab = tabMap[rawTab] ?? rawTab;
 
   const [deal, notes, budget] = await Promise.all([
     getDeal(id),
@@ -65,6 +76,7 @@ export default async function DealDetailPage({
 
   return (
     <div className='space-y-4'>
+      {/* Back link */}
       <div className='flex items-center gap-3'>
         <Link
           href='/deals'
@@ -75,29 +87,45 @@ export default async function DealDetailPage({
         </Link>
       </div>
 
-      <div className='flex items-center gap-3 flex-wrap'>
-        <h1 className='text-xl font-bold md:text-2xl'>{deal.address}</h1>
-        <Badge variant={statusVariant(deal.status)}>
+      {/* Deal header */}
+      <div className='flex items-start gap-3 flex-wrap'>
+        <div className='flex-1 min-w-0'>
+          <h1 className='text-xl font-bold md:text-2xl leading-tight'>{deal.address}</h1>
+          <p className='text-sm text-muted-foreground mt-0.5'>
+            {deal.city}, {deal.state}
+          </p>
+        </div>
+        <Badge variant={statusVariant(deal.status)} className='shrink-0'>
           {statusLabel(deal.status)}
         </Badge>
       </div>
 
-      <p className='text-sm text-muted-foreground'>
-        {deal.city}, {deal.state}
-      </p>
-
+      {/* Guide panel stays at top, outside tabs */}
       <DealGuidePanel status={deal.status} />
 
+      {/* 4-tab layout */}
       <Tabs defaultValue={activeTab}>
-        <TabsList className='flex-wrap'>
-          <TabsTrigger value='overview'>Overview</TabsTrigger>
-          <TabsTrigger value='calculator'>Calculator</TabsTrigger>
-          <TabsTrigger value='comps'>Comps</TabsTrigger>
-          <TabsTrigger value='contract'>Contract</TabsTrigger>
-          <TabsTrigger value='notes'>Notes ({notes.length})</TabsTrigger>
-          <TabsTrigger value='budget'>Budget</TabsTrigger>
+        <TabsList className='grid w-full grid-cols-4 h-auto rounded-xl p-1'>
+          <TabsTrigger value='overview' className='rounded-lg text-xs sm:text-sm py-2'>
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value='analysis' className='rounded-lg text-xs sm:text-sm py-2'>
+            Analysis
+          </TabsTrigger>
+          <TabsTrigger value='financials' className='rounded-lg text-xs sm:text-sm py-2'>
+            Financials
+          </TabsTrigger>
+          <TabsTrigger value='activity' className='rounded-lg text-xs sm:text-sm py-2'>
+            Activity
+            {notes.length > 0 && (
+              <span className='ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold w-4 h-4 flex-shrink-0'>
+                {notes.length > 9 ? '9+' : notes.length}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
+        {/* OVERVIEW: Deal details + blast generator */}
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
             <DealOverview deal={deal} />
@@ -105,24 +133,35 @@ export default async function DealDetailPage({
           </div>
         </TabsContent>
 
-        <TabsContent value='calculator' className='mt-4'>
-          <DealMaoCalculator deal={deal} />
+        {/* ANALYSIS: MAO Calculator + Comps */}
+        <TabsContent value='analysis' className='mt-4'>
+          <div className='space-y-6'>
+            <DealMaoCalculator deal={deal} />
+            <div className='border-t border-border pt-6'>
+              <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'>
+                Comparable Sales
+              </h3>
+              <DealCompEntry deal={deal} />
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value='comps' className='mt-4'>
-          <DealCompEntry deal={deal} />
+        {/* FINANCIALS: Contract tracker + Budget */}
+        <TabsContent value='financials' className='mt-4'>
+          <div className='space-y-6'>
+            <DealContractTracker deal={deal} />
+            <div className='border-t border-border pt-6'>
+              <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'>
+                Budget & Expenses
+              </h3>
+              <BudgetTab deal={deal} budget={budget} expenses={expenses} />
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value='contract' className='mt-4'>
-          <DealContractTracker deal={deal} />
-        </TabsContent>
-
-        <TabsContent value='notes' className='mt-4'>
+        {/* ACTIVITY: Notes */}
+        <TabsContent value='activity' className='mt-4'>
           <DealNotes dealId={deal.id} initialNotes={notes} />
-        </TabsContent>
-
-        <TabsContent value='budget' className='mt-4'>
-          <BudgetTab deal={deal} budget={budget} expenses={expenses} />
         </TabsContent>
       </Tabs>
     </div>
