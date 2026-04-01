@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, KanbanSquare, Briefcase, Settings, LogOut, BarChart2 } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,11 +18,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Map", href: "/map", icon: MapPin },
-  { label: "Pipeline", href: "/pipeline", icon: KanbanSquare },
   { label: "Deals", href: "/deals", icon: Briefcase },
+  { label: "Buyers", href: "/deals/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Map", href: "/map", icon: MapPin },
 ];
 
 export function AppSidebar() {
@@ -35,9 +34,7 @@ export function AppSidebar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md">
             <MapPin className="h-4 w-4 text-white" />
           </div>
-          <span
-            className="text-xl font-bold tracking-wide text-sidebar-foreground"
-          >
+          <span className="text-xl font-bold tracking-wide text-sidebar-foreground">
             HouseFinder
           </span>
         </div>
@@ -50,6 +47,8 @@ export function AppSidebar() {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
+                : item.href === "/deals"
+                ? pathname === "/deals" || (pathname.startsWith("/deals") && !pathname.startsWith("/deals/buyers"))
                 : pathname.startsWith(item.href);
             return (
               <SidebarMenuItem key={item.href}>
@@ -75,6 +74,17 @@ export function AppSidebar() {
           <span className="ml-1">Quick navigation</span>
         </div>
         <SidebarMenu>
+          {/* Settings gear icon */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname === "/settings"}
+              render={<Link href="/settings" />}
+              className="transition-all duration-200 rounded-xl"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="font-semibold">Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ callbackUrl: "/login" })}
