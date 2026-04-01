@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getDeals } from "@/lib/deal-queries";
-import { DealKanban } from "@/components/deal-kanban";
-import { DealList } from "@/components/deal-list";
+import { DealsSearchWrapper } from "@/components/deals-search-wrapper";
+import { LayoutGrid, List } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -14,64 +14,64 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
   const deals = await getDeals();
 
   return (
-    <div className="p-4 md:p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+    <div className="p-4 md:p-6 space-y-4">
+      {/* Header row */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold">Deals</h1>
-          <span className="text-sm text-muted-foreground rounded-full bg-muted px-2.5 py-0.5">
+          <span className="text-sm text-muted-foreground rounded-full bg-muted px-2.5 py-0.5 tabular-nums">
             {deals.length}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex rounded-lg border overflow-hidden text-sm">
+          <div className="flex rounded-xl border border-border overflow-hidden text-sm bg-muted/40">
             <Link
               href="/deals?view=kanban"
-              className={`px-3 py-1.5 transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
                 view === "kanban"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  ? "bg-background text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              aria-label="Kanban view"
             >
-              Kanban
+              <LayoutGrid className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Kanban</span>
             </Link>
             <Link
               href="/deals?view=list"
-              className={`px-3 py-1.5 border-l transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 border-l border-border transition-colors ${
                 view === "list"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  ? "bg-background text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
+              aria-label="List view"
             >
-              List
+              <List className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">List</span>
             </Link>
           </div>
 
           {/* New deal button */}
           <Link
             href="/deals/new"
-            className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors min-h-[36px]"
           >
-            + New Deal
+            + New
           </Link>
         </div>
       </div>
 
       {/* Mobile kanban hint */}
       {view !== "list" && (
-        <p className="text-xs text-muted-foreground mb-2 md:hidden">
-          Scroll horizontally to see all columns
+        <p className="text-xs text-muted-foreground md:hidden">
+          Swipe horizontally to see all columns
         </p>
       )}
 
-      {/* Content */}
-      {view === "list" ? (
-        <DealList deals={deals} />
-      ) : (
-        <DealKanban deals={deals} />
-      )}
+      {/* Search + content (client-side filtering) */}
+      <DealsSearchWrapper deals={deals} view={view} />
     </div>
   );
 }
