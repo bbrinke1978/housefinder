@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, User, DollarSign, Flame, Pencil, X, Check, Phone, Mail } from "lucide-react";
+import { MapPin, User, DollarSign, Flame, Pencil, X, Check, Phone, Mail, Home } from "lucide-react";
 import { updateDeal } from "@/lib/deal-actions";
 import type { DealWithBuyer, OwnerContact } from "@/types";
 import { CONDITION_OPTIONS, TIMELINE_OPTIONS, MOTIVATION_OPTIONS } from "@/types";
@@ -454,6 +454,46 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Assessor Data — from linked property */}
+      {(deal.buildingSqft || deal.yearBuilt || deal.assessedValue || deal.lotAcres) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Home className="h-4 w-4 text-muted-foreground" />
+              Property Details (Assessor)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {deal.buildingSqft && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Building</p>
+                  <p className="text-sm font-semibold">{deal.buildingSqft.toLocaleString()} sqft</p>
+                </div>
+              )}
+              {deal.yearBuilt && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Year Built</p>
+                  <p className="text-sm font-semibold">{deal.yearBuilt}</p>
+                </div>
+              )}
+              {deal.assessedValue && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Assessed Value</p>
+                  <p className="text-sm font-semibold">${deal.assessedValue.toLocaleString()}</p>
+                </div>
+              )}
+              {deal.lotAcres && (
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Lot Size</p>
+                  <p className="text-sm font-semibold">{deal.lotAcres} acres</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
         <Pencil className="h-4 w-4 mr-1" />

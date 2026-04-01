@@ -48,8 +48,8 @@ function buildMlsUrl(address: string, city: string): string {
 }
 
 function buildZillowUrl(address: string, city: string, state: string): string {
-  const query = `${address} ${city} ${state}`.trim();
-  return `https://www.zillow.com/homes/${encodeURIComponent(query)}_rb/`;
+  const query = `${address}, ${city}, ${state}`.trim();
+  return `https://www.zillow.com/homes/${encodeURIComponent(query)}`;
 }
 
 export function DealCompEntry({ deal }: DealCompEntryProps) {

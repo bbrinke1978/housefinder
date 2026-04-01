@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { deals, buyers, dealNotes, ownerContacts } from "@/db/schema";
+import { deals, buyers, dealNotes, ownerContacts, properties } from "@/db/schema";
 import { eq, desc, gte, lte, or, isNull, and } from "drizzle-orm";
 import type { DealWithBuyer, DealNote, Buyer, OwnerContact } from "@/types";
 
@@ -82,9 +82,15 @@ export async function getDeal(id: string): Promise<DealWithBuyer | null> {
       createdAt: deals.createdAt,
       updatedAt: deals.updatedAt,
       buyerName: buyers.name,
+      // Assessor data from linked property
+      buildingSqft: properties.buildingSqft,
+      yearBuilt: properties.yearBuilt,
+      assessedValue: properties.assessedValue,
+      lotAcres: properties.lotAcres,
     })
     .from(deals)
     .leftJoin(buyers, eq(deals.assignedBuyerId, buyers.id))
+    .leftJoin(properties, eq(deals.propertyId, properties.id))
     .where(eq(deals.id, id))
     .limit(1);
 

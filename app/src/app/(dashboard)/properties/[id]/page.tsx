@@ -55,15 +55,25 @@ export default async function PropertyDetailPage({
       </p>
 
       <Tabs defaultValue="overview">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="signals">
-            Signals ({signals.length})
+        <TabsList className="grid w-full grid-cols-4 h-auto rounded-xl p-1">
+          <TabsTrigger value="overview" className="rounded-lg text-xs sm:text-sm py-2">Overview</TabsTrigger>
+          <TabsTrigger value="signals" className="rounded-lg text-xs sm:text-sm py-2">
+            Signals
+            {signals.length > 0 && (
+              <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold w-4 h-4 flex-shrink-0">
+                {signals.length > 9 ? "9+" : signals.length}
+              </span>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="notes">
-            Notes ({notes.length})
+          <TabsTrigger value="notes" className="rounded-lg text-xs sm:text-sm py-2">
+            Notes
+            {notes.length > 0 && (
+              <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold w-4 h-4 flex-shrink-0">
+                {notes.length > 9 ? "9+" : notes.length}
+              </span>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
+          <TabsTrigger value="contact" className="rounded-lg text-xs sm:text-sm py-2">Contact</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">

@@ -197,8 +197,13 @@ export interface DealWithBuyer {
   arvNotes: string | null;
   createdAt: Date;
   updatedAt: Date;
-  // from join
+  // from joins
   buyerName?: string | null;
+  // assessor data from linked property
+  buildingSqft?: number | null;
+  yearBuilt?: number | null;
+  assessedValue?: number | null;
+  lotAcres?: string | null;
 }
 
 export interface DealNote {
