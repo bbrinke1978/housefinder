@@ -55,9 +55,9 @@ export default async function PropertyDetailPage({
       </p>
 
       <Tabs defaultValue="overview">
-        <TabsList className="!grid !w-full grid-cols-4 !h-auto rounded-xl p-1.5 gap-1">
-          <TabsTrigger value="overview" className="!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1">Overview</TabsTrigger>
-          <TabsTrigger value="signals" className="!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1">
+        <TabsList className="!flex !w-full !h-auto rounded-lg bg-muted p-1 gap-1 overflow-hidden">
+          <TabsTrigger value="overview" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">Overview</TabsTrigger>
+          <TabsTrigger value="signals" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">
             Signals
             {signals.length > 0 && (
               <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0">
@@ -65,7 +65,7 @@ export default async function PropertyDetailPage({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="notes" className="!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1">
+          <TabsTrigger value="notes" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">
             Notes
             {notes.length > 0 && (
               <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0">
@@ -73,7 +73,7 @@ export default async function PropertyDetailPage({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="contact" className="!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1">Contact</TabsTrigger>
+          <TabsTrigger value="contact" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">Contact</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">

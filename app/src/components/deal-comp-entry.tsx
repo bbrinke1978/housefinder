@@ -48,10 +48,8 @@ function buildMlsUrl(address: string, city: string): string {
 }
 
 function buildZillowUrl(address: string, city: string, state: string): string {
-  // Convert "1110 E MAIN ST" → "1110-E-MAIN-ST" for Zillow URL format
-  const addrSlug = address.replace(/[^a-zA-Z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  const citySlug = city.replace(/[^a-zA-Z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  return `https://www.zillow.com/homes/${addrSlug}-${citySlug}-${state}_rb/`;
+  const query = `${address} ${city} ${state}`.trim();
+  return `https://www.google.com/search?q=${encodeURIComponent(`site:zillow.com ${query}`)}`;
 }
 
 export function DealCompEntry({ deal }: DealCompEntryProps) {
