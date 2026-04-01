@@ -165,7 +165,7 @@ export function PropertyMap({ geojson, cities, counties }: PropertyMapProps) {
   }, []);
 
   return (
-    <div className="relative h-[calc(100vh-10rem)] w-full overflow-hidden rounded-lg">
+    <div className="relative h-full w-full overflow-hidden rounded-xl">
       {/* Filter chips */}
       <MapFilters
         cities={cities}

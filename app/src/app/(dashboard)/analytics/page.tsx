@@ -85,15 +85,15 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
         <h1 className="text-xl font-bold">Analytics</h1>
       </div>
 
-      {/* Tab navigation */}
-      <div className="flex overflow-x-auto text-sm mb-6 border-b border-border gap-1">
+      {/* Tab navigation — horizontally scrollable on mobile */}
+      <div className="flex overflow-x-auto scrollbar-hide text-sm mb-6 border-b border-border gap-1 -mx-4 px-4 md:mx-0 md:px-0">
         {tabs.map((t) => (
           <Link
             key={t.id}
             href={`/analytics?tab=${t.id}`}
-            className={`px-3 py-2 whitespace-nowrap transition-colors border-b-2 -mb-px ${
+            className={`px-3 py-2.5 whitespace-nowrap transition-colors border-b-2 -mb-px min-h-[44px] flex items-center ${
               activeTab === t.id
-                ? "border-primary text-primary font-medium"
+                ? "border-primary text-primary font-semibold"
                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
             }`}
           >

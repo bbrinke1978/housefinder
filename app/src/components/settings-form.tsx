@@ -185,13 +185,14 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
                     handleAddCity();
                   }
                 }}
-                className="max-w-xs"
+                className="flex-1 min-w-0"
               />
               <Button
                 type="button"
                 variant="outline"
                 size="default"
                 onClick={handleAddCity}
+                className="shrink-0"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Add
@@ -508,14 +509,14 @@ export function SettingsForm({ initialCities, initialAlertSettings, initialDashb
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {themeOptions.map(({ value, label, icon: Icon }) => (
               <Button
                 key={value}
                 type="button"
                 variant={theme === value ? "default" : "outline"}
                 onClick={() => setTheme(value)}
-                className="gap-1.5"
+                className="gap-1.5 flex-1 min-w-[80px]"
               >
                 <Icon className="h-4 w-4" />
                 {label}

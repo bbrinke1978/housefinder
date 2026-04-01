@@ -251,7 +251,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               </span>
             </div>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="flex flex-wrap shrink-0 items-center gap-1 justify-end max-w-[120px]">
             {badge && (
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.badgeClass}`}>
                 {badge.label}

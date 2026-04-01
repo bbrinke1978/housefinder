@@ -11,7 +11,7 @@ const PropertyMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[calc(100vh-8rem)] items-center justify-center rounded-lg bg-muted">
+      <div className="flex h-full min-h-[400px] items-center justify-center rounded-xl bg-muted">
         <p className="text-muted-foreground">Loading map...</p>
       </div>
     ),
