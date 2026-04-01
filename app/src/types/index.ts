@@ -43,6 +43,11 @@ export interface PropertyWithLead {
   lastContactedAt: Date | null;
   /** True when an active deal exists for this property */
   hasDeal?: boolean;
+  // UGRC assessor data (may be null if not yet imported)
+  buildingSqft: number | null;
+  yearBuilt: number | null;
+  assessedValue: number | null;
+  lotAcres: string | null;
 }
 
 /** Map view: includes coordinates and aggregated signal types */

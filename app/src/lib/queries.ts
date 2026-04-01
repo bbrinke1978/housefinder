@@ -119,6 +119,10 @@ export async function getPropertyDetail(
       firstSeenAt: leads.firstSeenAt,
       lastViewedAt: leads.lastViewedAt,
       lastContactedAt: leads.lastContactedAt,
+      buildingSqft: properties.buildingSqft,
+      yearBuilt: properties.yearBuilt,
+      assessedValue: properties.assessedValue,
+      lotAcres: properties.lotAcres,
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))
@@ -534,6 +538,10 @@ export async function getProperties(
       lastViewedAt: leads.lastViewedAt,
       lastContactedAt: leads.lastContactedAt,
       hasDeal: sql<boolean>`EXISTS (SELECT 1 FROM deals WHERE deals.property_id = ${properties.id})`,
+      buildingSqft: properties.buildingSqft,
+      yearBuilt: properties.yearBuilt,
+      assessedValue: properties.assessedValue,
+      lotAcres: properties.lotAcres,
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))

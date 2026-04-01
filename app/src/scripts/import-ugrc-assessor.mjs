@@ -1,0 +1,210 @@
+/**
+ * import-ugrc-assessor.mjs
+ *
+ * Downloads UGRC LIR (Land Information Records) parcel data for our 4 target
+ * counties and enriches the properties table with assessor details.
+ *
+ * Fields imported: building_sqft, year_built, assessed_value, lot_acres
+ * Matched by: parcel_id
+ * Policy: only UPDATE — never overwrites existing non-null values with null.
+ *
+ * Usage:
+ *   node src/scripts/import-ugrc-assessor.mjs
+ *
+ * Requires DATABASE_URL in environment or pass on CLI.
+ */
+
+import pg from "pg";
+
+const { Client } = pg;
+
+const DB_URL =
+  process.env.DATABASE_URL ||
+  "postgresql://hfadmin:L0K9dV6bgKl67mH084PUOFlBGSPJ80@housefinder-db.postgres.database.azure.com:5432/housefinder?sslmode=require";
+
+// UGRC ArcGIS FeatureServer base
+const ARCGIS_BASE =
+  "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services";
+
+// County LIR layers for our 4 target counties
+const COUNTIES = [
+  { name: "Carbon", service: "Parcels_Carbon_LIR" },
+  { name: "Emery", service: "Parcels_Emery_LIR" },
+  { name: "Juab", service: "Parcels_Juab_LIR" },
+  { name: "Millard", service: "Parcels_Millard_LIR" },
+];
+
+const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS";
+const PAGE_SIZE = 1000; // ArcGIS default max
+
+/**
+ * Fetch all features from an ArcGIS FeatureServer layer using pagination.
+ * Returns an array of attribute objects.
+ */
+async function fetchAllFeatures(serviceName) {
+  const url = `${ARCGIS_BASE}/${serviceName}/FeatureServer/0/query`;
+  let offset = 0;
+  const all = [];
+
+  while (true) {
+    const params = new URLSearchParams({
+      where: "1=1",
+      outFields: FIELDS,
+      returnGeometry: "false",
+      resultOffset: String(offset),
+      resultRecordCount: String(PAGE_SIZE),
+      f: "json",
+    });
+
+    const res = await fetch(`${url}?${params}`);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} from ${serviceName}`);
+    }
+
+    const data = await res.json();
+
+    if (data.error) {
+      throw new Error(`ArcGIS error: ${JSON.stringify(data.error)}`);
+    }
+
+    const features = data.features ?? [];
+    for (const f of features) {
+      all.push(f.attributes);
+    }
+
+    console.log(
+      `  Fetched ${all.length} records (page offset ${offset})...`
+    );
+
+    // ArcGIS returns fewer than PAGE_SIZE when we've reached the end
+    if (features.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+
+  return all;
+}
+
+/**
+ * For parcels that have multiple building records with the same PARCEL_ID,
+ * aggregate by summing BLDG_SQFT and taking the first non-null for other fields.
+ */
+function aggregateByParcelId(features) {
+  const map = new Map();
+
+  for (const f of features) {
+    const pid = f.PARCEL_ID;
+    if (!pid) continue;
+
+    if (!map.has(pid)) {
+      map.set(pid, {
+        parcelId: pid,
+        buildingSqft: f.BLDG_SQFT ?? null,
+        yearBuilt: f.BUILT_YR ?? null,
+        assessedValue:
+          f.TOTAL_MKT_VALUE != null ? Math.round(f.TOTAL_MKT_VALUE) : null,
+        lotAcres: f.PARCEL_ACRES ?? null,
+      });
+    } else {
+      // Additional building record for same parcel — sum sqft
+      const existing = map.get(pid);
+      if (f.BLDG_SQFT != null) {
+        existing.buildingSqft = (existing.buildingSqft ?? 0) + f.BLDG_SQFT;
+      }
+      // Keep earliest year_built
+      if (f.BUILT_YR != null && (existing.yearBuilt == null || f.BUILT_YR < existing.yearBuilt)) {
+        existing.yearBuilt = f.BUILT_YR;
+      }
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+async function main() {
+  const client = new Client({ connectionString: DB_URL });
+  await client.connect();
+  console.log("Connected to database.");
+
+  let totalUpdated = 0;
+  let totalSkipped = 0;
+  let totalNoMatch = 0;
+
+  for (const county of COUNTIES) {
+    console.log(`\n== ${county.name} County ==`);
+    console.log(`Fetching from ${county.service}...`);
+
+    let features;
+    try {
+      features = await fetchAllFeatures(county.service);
+    } catch (err) {
+      console.error(`  ERROR fetching ${county.name}: ${err.message}`);
+      continue;
+    }
+
+    console.log(`  Total raw records: ${features.length}`);
+    const parcels = aggregateByParcelId(features);
+    console.log(`  Unique parcels after aggregation: ${parcels.length}`);
+
+    let countyUpdated = 0;
+    let countySkipped = 0;
+    let countyNoMatch = 0;
+
+    for (const parcel of parcels) {
+      // Only update fields that have data in UGRC; never null out existing data
+      // We use COALESCE so existing non-null values are preserved if UGRC sends null
+      const res = await client.query(
+        `UPDATE properties SET
+           building_sqft  = COALESCE(building_sqft,  $2::integer),
+           year_built     = COALESCE(year_built,     $3::integer),
+           assessed_value = COALESCE(assessed_value, $4::integer),
+           lot_acres      = COALESCE(lot_acres,      $5::numeric),
+           updated_at     = NOW()
+         WHERE parcel_id = $1
+         AND ($2::integer IS NOT NULL OR $3::integer IS NOT NULL OR $4::integer IS NOT NULL OR $5::numeric IS NOT NULL)
+         RETURNING id`,
+        [
+          parcel.parcelId,
+          parcel.buildingSqft,
+          parcel.yearBuilt,
+          parcel.assessedValue,
+          parcel.lotAcres,
+        ]
+      );
+
+      if (res.rowCount > 0) {
+        countyUpdated++;
+      } else {
+        // Check if it's a no-match or just no data to set
+        const check = await client.query(
+          "SELECT id FROM properties WHERE parcel_id = $1 LIMIT 1",
+          [parcel.parcelId]
+        );
+        if (check.rowCount === 0) {
+          countyNoMatch++;
+        } else {
+          countySkipped++;
+        }
+      }
+    }
+
+    console.log(`  Updated: ${countyUpdated}`);
+    console.log(`  Skipped (no UGRC data): ${countySkipped}`);
+    console.log(`  No match in our DB: ${countyNoMatch}`);
+    totalUpdated += countyUpdated;
+    totalSkipped += countySkipped;
+    totalNoMatch += countyNoMatch;
+  }
+
+  console.log("\n== Summary ==");
+  console.log(`Total properties enriched: ${totalUpdated}`);
+  console.log(`Skipped (no assessor data): ${totalSkipped}`);
+  console.log(`No parcel_id match in our DB: ${totalNoMatch}`);
+
+  await client.end();
+  console.log("Done.");
+}
+
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});

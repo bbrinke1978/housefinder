@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Flame, MapPin, User, Home, BarChart3, Briefcase } from "lucide-react";
+import { Flame, MapPin, User, Home, BarChart3, Briefcase, Ruler } from "lucide-react";
 import { format } from "date-fns";
 import { DollarSign } from "lucide-react";
 import type { PropertyWithLead, DistressSignalRow } from "@/types";
@@ -182,6 +182,46 @@ export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
           )}
         </CardContent>
       </Card>
+      {/* Assessor Data */}
+      {(property.buildingSqft || property.yearBuilt || property.assessedValue || property.lotAcres) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Ruler className="h-4 w-4 text-muted-foreground" />
+              Assessor Data
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {property.buildingSqft && (
+              <p className="text-sm">
+                <span className="text-muted-foreground">Building sqft:</span>{" "}
+                {property.buildingSqft.toLocaleString()} sqft
+              </p>
+            )}
+            {property.yearBuilt && (
+              <p className="text-sm">
+                <span className="text-muted-foreground">Year built:</span>{" "}
+                {property.yearBuilt}
+              </p>
+            )}
+            {property.assessedValue && (
+              <p className="text-sm">
+                <span className="text-muted-foreground">Assessed value:</span>{" "}
+                ${property.assessedValue.toLocaleString()}
+              </p>
+            )}
+            {property.lotAcres && (
+              <p className="text-sm">
+                <span className="text-muted-foreground">Lot size:</span>{" "}
+                {parseFloat(property.lotAcres).toFixed(2)} acres
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-2">
+              Source: UGRC county assessor data. May not reflect recent renovations.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
 
     {/* Start Deal CTA */}

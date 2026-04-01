@@ -9,6 +9,7 @@ import {
   date,
   serial,
   doublePrecision,
+  numeric,
   uniqueIndex,
   index,
 } from "drizzle-orm/pg-core";
@@ -55,6 +56,11 @@ export const properties = pgTable(
     propertyType: text("property_type"),
     latitude: doublePrecision("latitude"),
     longitude: doublePrecision("longitude"),
+    // UGRC assessor data (populated by import-ugrc-assessor script)
+    buildingSqft: integer("building_sqft"),
+    yearBuilt: integer("year_built"),
+    assessedValue: integer("assessed_value"),
+    lotAcres: numeric("lot_acres", { precision: 10, scale: 4 }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

@@ -284,6 +284,21 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
         )}
 
+        {/* Assessor data: sqft + year built */}
+        {(property.buildingSqft || property.yearBuilt) && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            {property.buildingSqft && (
+              <span>{property.buildingSqft.toLocaleString()} sqft</span>
+            )}
+            {property.buildingSqft && property.yearBuilt && (
+              <span className="text-border">·</span>
+            )}
+            {property.yearBuilt && (
+              <span>Built {property.yearBuilt}</span>
+            )}
+          </div>
+        )}
+
         {/* Compact score row: [circle] [bar] [tier badge] */}
         <div className="flex items-center gap-2 mt-2">
           <span
