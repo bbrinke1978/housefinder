@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes, buyers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { deals, dealNotes, buyers, ownerContacts } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -80,6 +80,19 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
 
   const parsed = createDealSchema.parse(cleaned);
 
+  // Auto-fill sellerPhone from owner_contacts if not provided and propertyId given
+  let resolvedPhone = parsed.sellerPhone ?? null;
+  if (!resolvedPhone && parsed.propertyId) {
+    const contacts = await db
+      .select({ phone: ownerContacts.phone, email: ownerContacts.email })
+      .from(ownerContacts)
+      .where(eq(ownerContacts.propertyId, parsed.propertyId))
+      .orderBy(desc(ownerContacts.isManual), desc(ownerContacts.createdAt))
+      .limit(5);
+    const primaryPhone = contacts.find((c) => c.phone)?.phone ?? null;
+    if (primaryPhone) resolvedPhone = primaryPhone;
+  }
+
   // Auto-compute MAO: ARV * 0.70 - repairEstimate - wholesaleFee
   let mao: number | null = null;
   if (
@@ -96,7 +109,7 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
       address: parsed.address,
       city: parsed.city,
       sellerName: parsed.sellerName ?? null,
-      sellerPhone: parsed.sellerPhone ?? null,
+      sellerPhone: resolvedPhone,
       condition: parsed.condition ?? null,
       timeline: parsed.timeline ?? null,
       motivation: parsed.motivation ?? null,

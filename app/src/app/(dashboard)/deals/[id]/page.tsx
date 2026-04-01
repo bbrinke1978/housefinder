@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { getDeal, getDealNotes } from '@/lib/deal-queries';
+import { getDeal, getDealNotes, getDealContacts } from '@/lib/deal-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
@@ -63,10 +63,11 @@ export default async function DealDetailPage({
   const rawTab = tab ?? 'overview';
   const activeTab = tabMap[rawTab] ?? rawTab;
 
-  const [deal, notes, budget] = await Promise.all([
+  const [deal, notes, budget, contacts] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
+    getDealContacts(id),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
 
@@ -133,7 +134,7 @@ export default async function DealDetailPage({
         {/* OVERVIEW: Deal details + blast generator */}
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
-            <DealOverview deal={deal} />
+            <DealOverview deal={deal} contacts={contacts} />
             <DealBlastGenerator deal={deal} />
           </div>
         </TabsContent>

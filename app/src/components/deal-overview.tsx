@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, User, DollarSign, Flame, Pencil, X, Check } from "lucide-react";
+import { MapPin, User, DollarSign, Flame, Pencil, X, Check, Phone, Mail } from "lucide-react";
 import { updateDeal } from "@/lib/deal-actions";
-import type { DealWithBuyer } from "@/types";
+import type { DealWithBuyer, OwnerContact } from "@/types";
 import { CONDITION_OPTIONS, TIMELINE_OPTIONS, MOTIVATION_OPTIONS } from "@/types";
 
 interface DealOverviewProps {
   deal: DealWithBuyer;
+  contacts?: OwnerContact[];
 }
 
 function fmt(n: number | null | undefined): string {
@@ -76,7 +77,7 @@ function isHotSeller(deal: DealWithBuyer): boolean {
   );
 }
 
-export function DealOverview({ deal }: DealOverviewProps) {
+export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -330,16 +331,41 @@ export function DealOverview({ deal }: DealOverviewProps) {
               Seller
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1">
+          <CardContent className="space-y-1.5">
             <p className="font-medium">{deal.sellerName ?? "Unknown"}</p>
-            {deal.sellerPhone && (
+            {deal.sellerPhone ? (
               <a
                 href={`tel:${deal.sellerPhone}`}
-                className="text-sm text-primary hover:underline"
+                className="flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
+                <Phone className="h-3 w-3" />
                 {deal.sellerPhone}
               </a>
+            ) : (
+              contacts.filter((c) => c.phone).slice(0, 2).map((c) => (
+                <a
+                  key={c.id}
+                  href={`tel:${c.phone}`}
+                  className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+                >
+                  <Phone className="h-3 w-3" />
+                  {c.phone}
+                  {c.source !== "manual" && (
+                    <span className="text-xs text-muted-foreground">({c.source})</span>
+                  )}
+                </a>
+              ))
             )}
+            {contacts.filter((c) => c.email).slice(0, 1).map((c) => (
+              <a
+                key={c.id}
+                href={`mailto:${c.email}`}
+                className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <Mail className="h-3 w-3" />
+                {c.email}
+              </a>
+            ))}
             {deal.askingPrice != null && (
               <p className="text-sm">
                 <span className="text-muted-foreground">Asking:</span>{" "}

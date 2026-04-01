@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
-import { deals, buyers, dealNotes } from "@/db/schema";
+import { deals, buyers, dealNotes, ownerContacts } from "@/db/schema";
 import { eq, desc, gte, lte, or, isNull, and } from "drizzle-orm";
-import type { DealWithBuyer, DealNote, Buyer } from "@/types";
+import type { DealWithBuyer, DealNote, Buyer, OwnerContact } from "@/types";
 
 /**
  * getDeals — returns all deals joined with buyer name, newest-updated first.
@@ -153,6 +153,39 @@ export async function getMatchingBuyers(dealPrice: number): Promise<Buyer[]> {
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }));
+}
+
+/**
+ * getDealContacts — returns owner contacts for the property linked to a deal.
+ * Returns empty array if the deal has no propertyId.
+ */
+export async function getDealContacts(dealId: string): Promise<OwnerContact[]> {
+  // Fetch the propertyId for this deal
+  const [row] = await db
+    .select({ propertyId: deals.propertyId })
+    .from(deals)
+    .where(eq(deals.id, dealId))
+    .limit(1);
+
+  if (!row?.propertyId) return [];
+
+  const contacts = await db
+    .select({
+      id: ownerContacts.id,
+      propertyId: ownerContacts.propertyId,
+      phone: ownerContacts.phone,
+      email: ownerContacts.email,
+      source: ownerContacts.source,
+      isManual: ownerContacts.isManual,
+      needsSkipTrace: ownerContacts.needsSkipTrace,
+      createdAt: ownerContacts.createdAt,
+      updatedAt: ownerContacts.updatedAt,
+    })
+    .from(ownerContacts)
+    .where(eq(ownerContacts.propertyId, row.propertyId))
+    .orderBy(desc(ownerContacts.isManual), desc(ownerContacts.createdAt));
+
+  return contacts as unknown as OwnerContact[];
 }
 
 /**
