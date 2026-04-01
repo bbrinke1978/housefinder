@@ -111,20 +111,20 @@ export default async function DealDetailPage({
 
       {/* 4-tab layout */}
       <Tabs defaultValue={activeTab}>
-        <TabsList className='grid w-full grid-cols-4 h-auto rounded-xl p-1'>
-          <TabsTrigger value='overview' className='rounded-lg text-xs sm:text-sm py-2'>
+        <TabsList className='!grid !w-full grid-cols-4 !h-auto rounded-xl p-1.5 gap-1'>
+          <TabsTrigger value='overview' className='!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1'>
             Overview
           </TabsTrigger>
-          <TabsTrigger value='analysis' className='rounded-lg text-xs sm:text-sm py-2'>
+          <TabsTrigger value='analysis' className='!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1'>
             Analysis
           </TabsTrigger>
-          <TabsTrigger value='financials' className='rounded-lg text-xs sm:text-sm py-2'>
+          <TabsTrigger value='financials' className='!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1'>
             Financials
           </TabsTrigger>
-          <TabsTrigger value='activity' className='rounded-lg text-xs sm:text-sm py-2'>
+          <TabsTrigger value='activity' className='!h-auto rounded-lg text-xs sm:text-sm py-2.5 px-1'>
             Activity
             {notes.length > 0 && (
-              <span className='ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold w-4 h-4 flex-shrink-0'>
+              <span className='ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0'>
                 {notes.length > 9 ? '9+' : notes.length}
               </span>
             )}
