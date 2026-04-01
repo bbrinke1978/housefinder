@@ -300,7 +300,14 @@ export function DealOverview({ deal }: DealOverviewProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium">{deal.address}</p>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}, ${deal.state}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium hover:underline hover:text-primary transition-colors inline-block"
+            >
+              {deal.address}
+            </a>
             <p className="text-sm text-muted-foreground">
               {deal.city}, {deal.state}
             </p>

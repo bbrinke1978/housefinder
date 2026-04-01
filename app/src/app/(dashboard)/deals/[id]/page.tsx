@@ -91,9 +91,14 @@ export default async function DealDetailPage({
       <div className='flex items-start gap-3 flex-wrap'>
         <div className='flex-1 min-w-0'>
           <h1 className='text-xl font-bold md:text-2xl leading-tight'>{deal.address}</h1>
-          <p className='text-sm text-muted-foreground mt-0.5'>
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}, ${deal.state}`)}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-sm text-muted-foreground mt-0.5 hover:underline hover:text-foreground transition-colors inline-block'
+          >
             {deal.city}, {deal.state}
-          </p>
+          </a>
         </div>
         <Badge variant={statusVariant(deal.status)} className='shrink-0'>
           {statusLabel(deal.status)}

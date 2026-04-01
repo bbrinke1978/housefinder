@@ -246,9 +246,15 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
               <MapPin className="h-3 w-3 flex-shrink-0" />
-              <span>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.address || property.parcelId}, ${property.city}, ${property.state}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="hover:underline hover:text-foreground transition-colors"
+              >
                 {property.city}, {property.state}
-              </span>
+              </a>
             </div>
           </div>
           <div className="flex flex-wrap shrink-0 items-center gap-1 justify-end max-w-[120px]">

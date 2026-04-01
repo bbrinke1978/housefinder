@@ -49,7 +49,15 @@ export function DealCard({ deal }: DealCardProps) {
           />
         )}
       </div>
-      <p className="text-xs text-muted-foreground truncate">{deal.city}</p>
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}`)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="text-xs text-muted-foreground truncate block hover:underline hover:text-foreground transition-colors"
+      >
+        {deal.city}
+      </a>
 
       {deal.sellerName && (
         <p className="mt-1 text-xs text-muted-foreground truncate">
