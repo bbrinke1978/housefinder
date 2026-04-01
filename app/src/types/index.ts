@@ -41,6 +41,8 @@ export interface PropertyWithLead {
   firstSeenAt: Date | null;
   lastViewedAt: Date | null;
   lastContactedAt: Date | null;
+  /** True when an active deal exists for this property */
+  hasDeal?: boolean;
 }
 
 /** Map view: includes coordinates and aggregated signal types */

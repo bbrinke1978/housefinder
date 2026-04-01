@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig } from "@/db/schema";
+import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig, deals } from "@/db/schema";
 import { eq, and, sql, desc, asc, ilike, exists, isNotNull, notInArray } from "drizzle-orm";
 import type {
   PropertyWithLead,
@@ -533,6 +533,7 @@ export async function getProperties(
       firstSeenAt: leads.firstSeenAt,
       lastViewedAt: leads.lastViewedAt,
       lastContactedAt: leads.lastContactedAt,
+      hasDeal: sql<boolean>`EXISTS (SELECT 1 FROM deals WHERE deals.property_id = ${properties.id})`,
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))

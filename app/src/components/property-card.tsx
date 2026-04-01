@@ -257,7 +257,12 @@ export function PropertyCard({ property }: PropertyCardProps) {
               </a>
             </div>
           </div>
-          <div className="flex flex-wrap shrink-0 items-center gap-1 justify-end max-w-[120px]">
+          <div className="flex flex-wrap shrink-0 items-center gap-1 justify-end max-w-[140px]">
+            {property.hasDeal && (
+              <span className="inline-block text-[10px] tracking-wider uppercase px-2 py-0.5 rounded-full font-semibold bg-teal-500/10 text-teal-500 border border-teal-500/20">
+                Deal Active
+              </span>
+            )}
             {badge && (
               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${badge.badgeClass}`}>
                 {badge.label}
