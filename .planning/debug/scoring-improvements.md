@@ -1,8 +1,8 @@
 ---
-status: investigating
+status: resolved
 trigger: "Implement improved distress scoring using tiered tax lien amounts and multi-year delinquency data, then add Utah Legals scraping for NOD signals."
 created: 2026-03-19T00:00:00Z
-updated: 2026-03-19T00:00:00Z
+updated: 2026-03-19T01:00:00Z
 ---
 
 ## Current Focus
@@ -51,13 +51,28 @@ started: Always been this way — scoring was designed with flat weights initial
 ## Resolution
 
 root_cause: scoreProperty() uses flat weights from config; does not inspect raw_data for amount tiers or year counts
-fix: (in progress)
-  1. Modify scoreAllProperties() to fetch raw_data alongside signals
-  2. Implement tiered weight logic for tax_lien by amountDue
-  3. Modify upsertFromDelinquent() to use year as recorded_date for Carbon so multi-year = multiple signals
-  4. scoreProperty gets multi-year bonus by counting signals of same type on same property
-  5. Emery 5-year back tax HTML scraper (Task 2)
-  6. Utah Legals NOD scraper (Task 3)
-  7. Re-score all properties (Task 5)
-verification: empty until verified
-files_changed: []
+fix: |
+  1. scoreProperty() now tiers tax_lien weight by amountDue: <$100=1, $100-499=2, $500-999=3, $1000+=4
+  2. Multi-year bonus: each additional tax_lien signal on same property adds +1
+  3. scoreAllProperties() now fetches raw_data with each signal row
+  4. upsertFromDelinquent() stores year as Jan-1 recorded_date enabling per-year signal rows
+  5. New emery-5year-backtax.ts scraper (Playwright, wpDataTables ID=127)
+  6. New utah-legals.ts scraper (Playwright, ASP.NET form, weekly Monday 6AM)
+  7. Ran rescore-leads.mjs against production - 2011 properties rescored
+verification: |
+  Production DB after rescore:
+  - score 1: 1321 properties (no/tiny amounts)
+  - score 2: 299 properties ($100-499)
+  - score 3: 116 properties ($500-999)
+  - score 4: 275 hot leads ($1000+)
+  Matches expected distribution from context exactly.
+files_changed:
+  - scraper/src/scoring/score.ts
+  - scraper/src/scoring/types.ts
+  - scraper/src/lib/upsert.ts
+  - scraper/src/functions/emeryScrape.ts
+  - scraper/src/functions/utahLegalsScrape.ts (new)
+  - scraper/src/sources/emery-5year-backtax.ts (new)
+  - scraper/src/sources/utah-legals.ts (new)
+  - scraper/src/index.ts
+  - app/src/scripts/rescore-leads.mjs (new)

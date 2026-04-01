@@ -225,3 +225,13 @@ Plans:
 - [ ] 11-03-PLAN.md — Inner pages: deals kanban mobile scroll, analytics chart refresh, map styling
 - [ ] 11-04-PLAN.md — Detail pages: property detail, deal detail, pipeline, settings palette sweep
 - [ ] 11-05-PLAN.md — Command palette (Ctrl+K) and final visual verification checkpoint
+
+### Phase 12: Email & Call Campaigns
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
