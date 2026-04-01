@@ -47,6 +47,11 @@ function buildMlsUrl(address: string, city: string): string {
   return `https://www.utahrealestate.com/search/map#query=${encodeURIComponent(query)}`;
 }
 
+function buildZillowUrl(address: string, city: string, state: string): string {
+  const query = `${address} ${city} ${state}`.trim();
+  return `https://www.zillow.com/homes/${encodeURIComponent(query)}_rb/`;
+}
+
 export function DealCompEntry({ deal }: DealCompEntryProps) {
   const [comps, setComps] = useState<DealComp[]>(() =>
     parseSavedComps(deal.comps)
@@ -101,27 +106,39 @@ export function DealCompEntry({ deal }: DealCompEntryProps) {
   }
 
   const mlsUrl = buildMlsUrl(deal.address, deal.city);
+  const zillowUrl = buildZillowUrl(deal.address, deal.city, deal.state);
 
   return (
     <div className="space-y-4">
-      {/* MLS Quick Link */}
+      {/* MLS + Zillow Quick Links */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            MLS Research
+            Research Links
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-3">
-            Search Utah Real Estate MLS for comparable sales near this property.
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Search MLS for comparable sales, or view this property on Zillow.
           </p>
-          <a href={mlsUrl} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="gap-2">
-              <ExternalLink className="h-4 w-4" />
-              Search MLS Comps — {deal.address}, {deal.city}
-            </Button>
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <a href={mlsUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Search MLS Comps — {deal.address}, {deal.city}
+              </Button>
+            </a>
+            <a href={zillowUrl} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                View on Zillow
+              </Button>
+            </a>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Note: Zillow Zestimates may be inaccurate in Utah (non-disclosure state). Use MLS comps for accurate ARV.
+          </p>
         </CardContent>
       </Card>
 
