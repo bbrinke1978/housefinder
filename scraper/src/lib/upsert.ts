@@ -6,6 +6,33 @@ import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validat
 import type { EmeryBackTaxRecord } from "../sources/emery-5year-backtax.js";
 import type { UtahLegalsNotice } from "../sources/utah-legals.js";
 
+/**
+ * Normalizes addresses from county assessor format to standard format.
+ * County data often stores addresses as "STREET NAME: NUMBER" (e.g. "E MAIN ST: 1110")
+ * which should be "1110 E MAIN ST". Also title-cases the result.
+ */
+function normalizeAddress(raw: string): string {
+  if (!raw) return raw;
+
+  // Pattern: "STREET NAME: NUMBER" → "NUMBER STREET NAME"
+  // e.g. "E MAIN ST: 1110" → "1110 E MAIN ST"
+  // e.g. "N 100 W: 450" → "450 N 100 W"
+  const colonMatch = raw.match(/^([A-Za-z0-9 .]+?):\s*(\d+[A-Za-z]?)$/);
+  if (colonMatch) {
+    raw = `${colonMatch[2]} ${colonMatch[1]}`;
+  }
+
+  // Title case: "1110 E MAIN ST" → "1110 E Main St"
+  return raw.replace(/\b([a-zA-Z]+)\b/g, (word) => {
+    // Keep directionals and short words uppercase: N, S, E, W, NE, NW, SE, SW, PO
+    if (/^[NSEW]{1,2}$|^PO$/i.test(word)) return word.toUpperCase();
+    // Keep common abbreviations uppercase: ST, AVE, DR, LN, CT, RD, BLVD, HWY, APT, STE
+    if (/^(ST|AVE|DR|LN|CT|RD|BLVD|HWY|APT|STE|PL|WAY|CIR|TRL|LOOP|PKWY)$/i.test(word))
+      return word.toUpperCase();
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  });
+}
+
 /** Default city for each county when the scraper doesn't extract one */
 const COUNTY_DEFAULT_CITY: Record<string, string> = {
   carbon: "Price",
@@ -28,6 +55,7 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
   const ownerType = classifyOwnerType(record.ownerName);
   const resolvedCounty = county ?? record.county ?? "carbon";
   const city = record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "";
+  const address = normalizeAddress(record.address);
 
   // Carry propertyType through when the scraper extracted one.
   // Null means "not available from this source" — preserved in the DB as-is on conflict.
@@ -37,7 +65,7 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
     .insert(properties)
     .values({
       parcelId: record.parcelId,
-      address: record.address,
+      address,
       city,
       county: resolvedCounty,
       state: "UT",
@@ -53,8 +81,8 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
         // Scrapers like emery-5year-backtax and carbon-recorder pass "" for
         // address/city — without this guard, they wipe out good data from
         // assessor scrapes that ran earlier.
-        address: record.address
-          ? record.address
+        address: address
+          ? address
           : sql`${properties.address}`,
         city: city
           ? city
