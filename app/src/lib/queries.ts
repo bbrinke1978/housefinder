@@ -261,6 +261,20 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     )`);
   }
 
+  // Exclude PO Box addresses — never real properties, just noise
+  statsConditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%PO BOX%'
+  )`);
+  statsConditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%P.O. BOX%'
+  )`);
+  statsConditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%P O BOX%'
+  )`);
+
   // Filter to target cities only
   if (targetCities.length > 0) {
     statsConditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
@@ -411,6 +425,20 @@ export async function getProperties(
       AND ${properties.address} != ${properties.parcelId}
     )`);
   }
+
+  // Exclude PO Box addresses — never real properties, just noise
+  conditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%PO BOX%'
+  )`);
+  conditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%P.O. BOX%'
+  )`);
+  conditions.push(sql`(
+    ${properties.address} IS NULL
+    OR upper(${properties.address}) NOT LIKE '%P O BOX%'
+  )`);
 
   // Filter to target cities only (unless a specific city filter is set)
   if (!params.city && targetCities.length > 0) {
