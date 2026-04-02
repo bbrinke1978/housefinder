@@ -49,13 +49,14 @@ jobs:
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 
       - name: Configure startup command for Chromium deps
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+        continue-on-error: true
+        id: azure_login
 
       - name: Set startup file
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
+        if: steps.azure_login.outcome == 'success'
         run: |
           az webapp config set \
             --resource-group rg-housefinder \
