@@ -58,6 +58,6 @@ jobs:
         if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         run: |
           az webapp config set \
-            --resource-group housefinder-rg \
+            --resource-group rg-housefinder \
             --name housefinder-scraper \
             --startup-file /home/site/wwwroot/startup.sh
