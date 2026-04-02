@@ -1,4 +1,5 @@
 import { chromium, type Browser, type Page } from "playwright";
+import { execSync } from "child_process";
 
 /**
  * Promise-based sleep for rate limiting between page requests.
@@ -15,13 +16,45 @@ export function rateLimitDelay(): number {
   return 1000 + Math.floor(Math.random() * 1000);
 }
 
+let depsInstalled = false;
+
 /**
- * Launches a Playwright Chromium browser in headless mode
- * with a descriptive User-Agent identifying the bot.
+ * Installs Chromium system dependencies on Azure Linux App Service.
+ * Only runs once per process lifetime (tracked by depsInstalled flag).
+ * Safe to call on non-Linux or local environments — it no-ops.
+ */
+function installChromiumDeps(): void {
+  if (depsInstalled || process.platform !== "linux") return;
+  try {
+    console.log("[launchBrowser] Installing Chromium system dependencies...");
+    execSync(
+      "apt-get update -qq && apt-get install -y --no-install-recommends " +
+        "libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 " +
+        "libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 " +
+        "libpango-1.0-0 libcairo2 libasound2 libatspi2.0-0 libxshmfence1",
+      { timeout: 60000, stdio: "pipe" }
+    );
+    depsInstalled = true;
+    console.log("[launchBrowser] System dependencies installed.");
+  } catch (err) {
+    console.error("[launchBrowser] Failed to install deps:", err instanceof Error ? err.message : err);
+  }
+}
+
+/**
+ * Launches a Playwright Chromium browser in headless mode.
+ * On first failure (missing system deps on Azure), automatically installs
+ * them and retries once. This makes the scraper self-healing after deploys.
  */
 export async function launchBrowser(): Promise<Browser> {
-  const browser = await chromium.launch({ headless: true });
-  return browser;
+  try {
+    return await chromium.launch({ headless: true });
+  } catch (firstError) {
+    console.warn("[launchBrowser] First launch failed, installing system deps and retrying...");
+    installChromiumDeps();
+    // Retry after installing deps — if this fails too, let it throw
+    return await chromium.launch({ headless: true });
+  }
 }
 
 /**

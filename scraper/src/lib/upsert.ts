@@ -1,6 +1,6 @@
 import { db } from "../db/client.js";
 import { properties, distressSignals } from "../db/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { classifyOwnerType } from "./scraper-utils.js";
 import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validation.js";
 import type { EmeryBackTaxRecord } from "../sources/emery-5year-backtax.js";
@@ -49,10 +49,22 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
     .onConflictDoUpdate({
       target: properties.parcelId,
       set: {
-        address: record.address,
-        city,
-        ownerName: record.ownerName ?? null,
-        ownerType,
+        // Only overwrite address/city/ownerName if the new value is non-empty.
+        // Scrapers like emery-5year-backtax and carbon-recorder pass "" for
+        // address/city — without this guard, they wipe out good data from
+        // assessor scrapes that ran earlier.
+        address: record.address
+          ? record.address
+          : sql`${properties.address}`,
+        city: city
+          ? city
+          : sql`${properties.city}`,
+        ownerName: record.ownerName
+          ? record.ownerName
+          : sql`${properties.ownerName}`,
+        ownerType: record.ownerName
+          ? ownerType
+          : sql`${properties.ownerType}`,
         // Only overwrite propertyType if a new value was scraped
         ...(propertyTypeValue !== null ? { propertyType: propertyTypeValue } : {}),
         updatedAt: now,

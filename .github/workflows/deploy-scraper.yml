@@ -47,3 +47,17 @@ jobs:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+      - name: Configure startup command for Chromium deps
+        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set startup file
+        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
+        run: |
+          az webapp config set \
+            --resource-group housefinder-rg \
+            --name housefinder-scraper \
+            --startup-file /home/site/wwwroot/startup.sh

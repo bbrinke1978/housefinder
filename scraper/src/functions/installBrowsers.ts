@@ -44,11 +44,11 @@ async function installBrowsers(
     report.binarySearchError = "find command failed";
   }
 
-  // Try to launch a browser to confirm it actually works
+  // Try to launch a browser using launchBrowser() which auto-installs deps on failure
   let launchTest: string;
   try {
-    const { chromium } = await import("playwright");
-    const browser = await chromium.launch({ headless: true });
+    const { launchBrowser } = await import("../lib/scraper-utils.js");
+    const browser = await launchBrowser();
     const version = browser.version();
     await browser.close();
     launchTest = `OK - launched chromium ${version}`;
