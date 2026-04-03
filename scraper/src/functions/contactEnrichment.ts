@@ -229,7 +229,7 @@ async function contactEnrichmentHttpHandler(
           stats,
           batchSize: batch,
           elapsedSeconds: elapsed,
-          costNote: `Estimated cost: $${stats.estimatedCost.toFixed(2)} (${stats.found} successful traces at ~$0.02/lead)`,
+          costNote: `Estimated cost: $${(stats.found * 0.02).toFixed(2)} (${stats.found} successful traces at ~$0.02/lead)`,
         },
         null,
         2
