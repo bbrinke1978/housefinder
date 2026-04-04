@@ -124,8 +124,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Email & Call Campaigns
 
-- [ ] **CAMP-01**: System stores email sequence definitions (name, steps with subject/body/delay) and campaign enrollment state in PostgreSQL
-- [ ] **CAMP-02**: System stores contact event types (called_client, left_voicemail, emailed_client, sent_text, met_in_person, received_email) with notes and timestamps in a contact_events table
+- [x] **CAMP-01**: System stores email sequence definitions (name, steps with subject/body/delay) and campaign enrollment state in PostgreSQL
+- [x] **CAMP-02**: System stores contact event types (called_client, left_voicemail, emailed_client, sent_text, met_in_person, received_email) with notes and timestamps in a contact_events table
 - [ ] **CAMP-03**: User can log contact events (6 types) from the property detail page Contact tab with optional notes
 - [ ] **CAMP-04**: Activity timeline on property detail shows all contact events, notes, and sent emails chronologically
 - [ ] **CAMP-05**: Touchpoint count badge appears on dashboard property cards showing total contact events per lead; call script modal shows configurable talk track with lead details pre-filled

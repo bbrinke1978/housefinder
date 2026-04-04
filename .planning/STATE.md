@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 11 of 11 (HouseFinder UI Revamp)
-Plan: 5 of 5 in current phase (Complete — awaiting human-verify checkpoint)
-Status: Phase 11 Active — Plans 1-5 Complete (pending visual sign-off)
-Last activity: 2026-03-30 — Completed 11-05 (Command palette Ctrl+K, final visual checkpoint pending)
+Phase: 12 of 12 (Email & Call Campaigns)
+Plan: 1 of 6 in current phase (Complete)
+Status: Phase 12 Active — Plan 1 Complete
+Last activity: 2026-04-02 — Completed 12-01 (Campaign schema + contact event types + resend installed)
 
-Progress: [██████████] 99%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [██████████] 99%
 | Phase 11-housefinder-ui-revamp P04 | 8min | 2 tasks | 11 files |
 | Phase 11-housefinder-ui-revamp P02 | 5min | 2 tasks | 5 files |
 | Phase 11-housefinder-ui-revamp P05 | 5min | 1 tasks | 3 files |
+| Phase 12-email-call-campaigns P01 | 8min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -168,6 +169,10 @@ Recent decisions affecting current work:
 - [Phase 11-housefinder-ui-revamp]: bg-primary/5 + border-primary/20 replaces blue tinted info boxes — works in both modes without dark: variants
 - [Phase 11-housefinder-ui-revamp]: Mobile filter drawer uses controlled state with plain button (not SheetTrigger) to avoid base-ui asChild composition pitfall
 - [Phase 11-05]: CommandMenu built on @base-ui/react/dialog directly (no cmdk/Radix) — project uses @base-ui/react exclusively; custom activeIndex state provides identical keyboard UX
+- [Phase 12-01]: DEFAULT_SEQUENCE_DELAY_DAYS [1,3,7,14,30] mirrors Brian's Day 1/3/7/14/30 call cadence from CONTEXT.md update
+- [Phase 12-01]: CALL_SCRIPTS TypeScript constant has 5 pre-built scripts (Acquisitions, Dispositions, Agent Partnership, JV Partner, Objection Handling) with {senderName}/{city}/{address} merge fields
+- [Phase 12-01]: contactEventTypeEnum pgEnum for DB-level type safety; campaignEnrollments.stopReason text for auto-stop triggers (deal_closed/unenrolled/completed/email_bounced/re_enrolled)
+- [Phase 12-01]: MAIL_SETTINGS_KEYS maps TS keys to scraperConfig DB keys (mail.fromName, mail.resendApiKey, etc) — extends existing key-value config pattern
 
 ### Roadmap Evolution
 
@@ -187,7 +192,6 @@ None yet.
 
 ## Session Continuity
 
-
-Last session: 2026-03-30
-Stopped at: Completed 11-05-PLAN.md Task 1 (Command palette Ctrl+K) — waiting at human-verify checkpoint for visual sign-off on complete UI revamp
-Resume file: .planning/phases/11-housefinder-ui-revamp/11-02-SUMMARY.md
+Last session: 2026-04-02
+Stopped at: Completed 12-01-PLAN.md (Campaign schema + types + resend)
+Resume file: .planning/phases/12-email-call-campaigns/12-01-SUMMARY.md

@@ -242,7 +242,7 @@ Plans:
   8. Follow-up emails dispatch automatically daily via Azure Functions timer trigger for all due enrollments
   9. Enrollments auto-stop when the lead's deal status changes to closed or dead
   10. Activity timeline appears on both property detail and deal detail pages
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md — Schema (email_sequences, email_steps, campaign_enrollments, email_send_log, contact_events), types, npm install
