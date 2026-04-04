@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +22,7 @@ const navItems = [
   { label: "Buyers", href: "/deals/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
+  { label: "Campaigns", href: "/campaigns", icon: Mail },
 ];
 
 export function AppSidebar() {
@@ -74,6 +75,17 @@ export function AppSidebar() {
           <span className="ml-1">Quick navigation</span>
         </div>
         <SidebarMenu>
+          {/* Mail Settings gear icon */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname.startsWith("/settings/mail")}
+              render={<Link href="/settings/mail" />}
+              className="transition-all duration-200 rounded-xl"
+            >
+              <Mail className="h-4 w-4" />
+              <span className="font-semibold">Mail Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           {/* Settings gear icon */}
           <SidebarMenuItem>
             <SidebarMenuButton

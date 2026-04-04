@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2 } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, BarChart2, Mail } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
+// Mobile bottom nav: 5 items — replaced "Buyers" with "Campaigns" (Buyers accessible from desktop sidebar)
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
-  { label: "Buyers", href: "/deals/buyers", icon: Users },
+  { label: "Campaigns", href: "/campaigns", icon: Mail },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
 ];

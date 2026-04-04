@@ -11,6 +11,7 @@ import {
   BarChart2,
   Settings,
   Search,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,8 @@ const navigationItems = [
   { label: "Pipeline", href: "/pipeline", icon: KanbanSquare, description: "Lead pipeline" },
   { label: "Deals", href: "/deals", icon: Briefcase, description: "Deal management" },
   { label: "Analytics", href: "/analytics", icon: BarChart2, description: "Data insights" },
+  { label: "Campaigns", href: "/campaigns", icon: Mail, description: "Email sequences & outreach" },
+  { label: "Mail Settings", href: "/settings/mail", icon: Settings, description: "Sender details & Resend API key" },
   { label: "Settings", href: "/settings", icon: Settings, description: "App settings" },
 ];
 

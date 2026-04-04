@@ -174,6 +174,36 @@ export async function updateSequence(
 }
 
 /**
+ * Fetch a single sequence with its steps for the editor.
+ * Exposed as a server action so client components can call it without bundling pg.
+ */
+export async function fetchSequenceForEdit(
+  sequenceId: string
+): Promise<{
+  sequence: import("@/db/schema").EmailSequenceRow;
+  steps: import("@/db/schema").EmailStepRow[];
+} | null> {
+  const parsed = z.uuid().safeParse(sequenceId);
+  if (!parsed.success) return null;
+
+  const [sequence] = await db
+    .select()
+    .from(emailSequences)
+    .where(eq(emailSequences.id, parsed.data))
+    .limit(1);
+
+  if (!sequence) return null;
+
+  const steps = await db
+    .select()
+    .from(emailSteps)
+    .where(eq(emailSteps.sequenceId, parsed.data))
+    .orderBy(emailSteps.stepNumber);
+
+  return { sequence, steps };
+}
+
+/**
  * Soft-delete a sequence by setting isActive=false.
  * Does not hard-delete to preserve enrollment history.
  */

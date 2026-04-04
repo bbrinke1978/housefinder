@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { scraperConfig } from "@/db/schema";
-import { eq, like } from "drizzle-orm";
+import { like } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
 import { MAIL_SETTINGS_KEYS, type MailSettings } from "@/types/index";
