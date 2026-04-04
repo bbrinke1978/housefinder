@@ -10,6 +10,8 @@ import { TouchpointBadge } from "@/components/touchpoint-badge";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
+  /** Whether this card is selected (for bulk enrollment) */
+  selected?: boolean;
 }
 
 function ownerTypeBadge(type: string | null): { label: string; badgeClass: string } | null {
@@ -223,7 +225,7 @@ function LeadSourceSelector({ leadId, currentSource }: LeadSourceSelectorProps) 
   );
 }
 
-export function PropertyCard({ property }: PropertyCardProps) {
+export function PropertyCard({ property, selected }: PropertyCardProps) {
   const hot = property.isHot;
   const displayScore = normalizeScore(property.distressScore);
   const pct = Math.min((displayScore / 10) * 100, 100);
@@ -234,9 +236,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Link href={`/properties/${property.id}`} className="group block">
       <div
-        className={`relative bg-card rounded-xl p-3 md:p-4 border border-border transition-all duration-200 hover:border-primary/30 ${
+        className={`relative bg-card rounded-xl p-3 md:p-4 border transition-all duration-200 hover:border-primary/30 ${
           hot ? "hot-pulse" : ""
-        }`}
+        } ${selected ? "border-primary/50 ring-1 ring-primary/20" : "border-border"}`}
         style={{ boxShadow: "var(--shadow-card)" }}
       >
         {/* Header: address + badges */}

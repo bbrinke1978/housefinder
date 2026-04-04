@@ -6,9 +6,10 @@ import {
   getProperties,
   getDistinctCities,
 } from "@/lib/queries";
+import { getSequences } from "@/lib/campaign-queries";
 import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
-import { PropertyCard } from "@/components/property-card";
+import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
 import { MapPin } from "lucide-react";
 
 interface DashboardPageProps {
@@ -42,10 +43,11 @@ export default async function DashboardPage({
     search: typeof params.search === "string" ? params.search : undefined,
   };
 
-  const [stats, properties, cities] = await Promise.all([
+  const [stats, properties, cities, sequences] = await Promise.all([
     getDashboardStats(),
     getProperties(filterParams),
     getDistinctCities(),
+    getSequences(),
   ]);
 
   return (
@@ -98,11 +100,7 @@ export default async function DashboardPage({
           </p>
         </div>
       ) : (
-        <div className="stagger-children grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 relative z-0">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        <DashboardPropertyGrid properties={properties} sequences={sequences} />
       )}
     </div>
   );

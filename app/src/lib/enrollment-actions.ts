@@ -7,7 +7,6 @@ import {
   ownerContacts,
   campaignEnrollments,
   emailSendLog,
-  emailSteps,
 } from "@/db/schema";
 import { eq, and, isNotNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

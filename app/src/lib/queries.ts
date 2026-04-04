@@ -581,23 +581,43 @@ export async function getProperties(
 
   // Enrich with touchpoint counts for the returned lead IDs
   const leadIds = rows.map((r) => r.leadId as string);
-  const touchpointRows = await db
-    .select({
-      leadId: contactEvents.leadId,
-      count: sql<number>`count(*)::int`,
-    })
-    .from(contactEvents)
-    .where(inArray(contactEvents.leadId, leadIds))
-    .groupBy(contactEvents.leadId);
+  const propertyIds = rows.map((r) => r.id as string);
+
+  const [touchpointRows, emailRows] = await Promise.all([
+    db
+      .select({
+        leadId: contactEvents.leadId,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(contactEvents)
+      .where(inArray(contactEvents.leadId, leadIds))
+      .groupBy(contactEvents.leadId),
+    db
+      .select({ propertyId: ownerContacts.propertyId })
+      .from(ownerContacts)
+      .where(
+        and(
+          inArray(ownerContacts.propertyId, propertyIds),
+          isNotNull(ownerContacts.email)
+        )
+      ),
+  ]);
 
   const touchpointMap = new Map<string, number>();
   for (const tr of touchpointRows) {
     touchpointMap.set(tr.leadId, tr.count);
   }
 
+  // Build set of propertyIds that have a real (non-MAILING) email
+  const emailPropertySet = new Set<string>();
+  for (const er of emailRows) {
+    emailPropertySet.add(er.propertyId);
+  }
+
   return rows.map((row) => ({
     ...row,
     touchpointCount: touchpointMap.get(row.leadId as string) ?? 0,
+    hasEmail: emailPropertySet.has(row.id as string),
   })) as PropertyWithLead[];
 }
 

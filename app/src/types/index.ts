@@ -45,6 +45,8 @@ export interface PropertyWithLead {
   hasDeal?: boolean;
   /** Number of contact touchpoints logged for this lead */
   touchpointCount?: number;
+  /** True when a real (non-mailing) email exists in ownerContacts for this property */
+  hasEmail?: boolean;
   // UGRC assessor data (may be null if not yet imported)
   buildingSqft: number | null;
   yearBuilt: number | null;

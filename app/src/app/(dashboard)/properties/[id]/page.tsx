@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getPropertyDetail, getPropertySignals, getPropertyNotes, getOwnerContacts } from "@/lib/queries";
 import { getLeadTimeline } from "@/lib/contact-event-queries";
+import { getLeadActiveEnrollment, getSequences } from "@/lib/campaign-queries";
 import { markLeadViewed, getActiveVacantFlag } from "@/lib/actions";
 import { PropertyOverview } from "@/components/property-overview";
 import { SignalTimeline } from "@/components/signal-timeline";
@@ -30,9 +31,11 @@ export default async function PropertyDetailPage({
     notFound();
   }
 
-  const [notes, timeline] = await Promise.all([
+  const [notes, timeline, activeEnrollment, sequences] = await Promise.all([
     getPropertyNotes(property.leadId),
     getLeadTimeline(property.leadId),
+    getLeadActiveEnrollment(property.leadId),
+    getSequences(),
   ]);
 
   // Mark lead as viewed (clears "new" badge on dashboard)
@@ -103,6 +106,8 @@ export default async function PropertyDetailPage({
             city={property.city}
             contacts={contacts}
             timeline={timeline}
+            activeEnrollment={activeEnrollment}
+            sequences={sequences}
           />
         </TabsContent>
       </Tabs>

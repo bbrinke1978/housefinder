@@ -22,10 +22,11 @@ import {
   Activity,
 } from "lucide-react";
 import { saveOwnerPhone } from "@/lib/actions";
-import type { OwnerContact, TimelineEntry } from "@/types";
+import type { OwnerContact, TimelineEntry, EmailSequenceSummary, EnrollmentWithDetails } from "@/types";
 import { ContactEventForm } from "@/components/contact-event-form";
 import { ActivityTimeline } from "@/components/activity-timeline";
 import { CallScriptModal } from "@/components/call-script-modal";
+import { EnrollButton } from "@/components/campaigns/enroll-button";
 
 interface ContactTabProps {
   ownerName: string | null;
@@ -36,6 +37,10 @@ interface ContactTabProps {
   city: string;
   contacts: OwnerContact[];
   timeline: TimelineEntry[];
+  /** Active campaign enrollment for this lead, if any */
+  activeEnrollment?: EnrollmentWithDetails | null;
+  /** Available sequences for enrollment */
+  sequences?: EmailSequenceSummary[];
 }
 
 export function ContactTab({
@@ -47,6 +52,8 @@ export function ContactTab({
   city,
   contacts,
   timeline,
+  activeEnrollment = null,
+  sequences = [],
 }: ContactTabProps) {
   const [phone, setPhone] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -337,6 +344,24 @@ export function ContactTab({
           ) : (
             <p className="text-sm text-muted-foreground">No email found</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Email sequence enrollment */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            Email Sequence
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EnrollButton
+            leadId={leadId}
+            hasEmail={emailContacts.length > 0}
+            currentEnrollment={activeEnrollment}
+            sequences={sequences}
+          />
         </CardContent>
       </Card>
 

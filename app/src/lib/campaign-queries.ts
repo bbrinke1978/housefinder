@@ -7,7 +7,7 @@ import {
   leads,
   properties,
 } from "@/db/schema";
-import { eq, sql, inArray } from "drizzle-orm";
+import { eq, sql, inArray, and } from "drizzle-orm";
 import type {
   EmailSequenceSummary,
   EnrollmentWithDetails,
@@ -112,6 +112,59 @@ export async function getSequenceWithSteps(sequenceId: string): Promise<{
     .orderBy(emailSteps.stepNumber);
 
   return { sequence, steps };
+}
+
+/**
+ * Returns the active enrollment for a specific lead, if any.
+ * Used by the property detail page to show enrollment state in EnrollButton.
+ */
+export async function getLeadActiveEnrollment(
+  leadId: string
+): Promise<EnrollmentWithDetails | null> {
+  const rows = await db
+    .select({
+      id: campaignEnrollments.id,
+      leadId: campaignEnrollments.leadId,
+      sequenceId: campaignEnrollments.sequenceId,
+      currentStep: campaignEnrollments.currentStep,
+      status: campaignEnrollments.status,
+      nextSendAt: campaignEnrollments.nextSendAt,
+      enrolledAt: campaignEnrollments.enrolledAt,
+      ownerName: properties.ownerName,
+      address: properties.address,
+      city: properties.city,
+    })
+    .from(campaignEnrollments)
+    .innerJoin(leads, eq(leads.id, campaignEnrollments.leadId))
+    .innerJoin(properties, eq(properties.id, leads.propertyId))
+    .where(
+      and(
+        eq(campaignEnrollments.leadId, leadId),
+        eq(campaignEnrollments.status, "active")
+      )
+    )
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) return null;
+
+  const [stepCount] = await db
+    .select({ count: sql<number>`cast(count(*) as integer)` })
+    .from(emailSteps)
+    .where(eq(emailSteps.sequenceId, row.sequenceId));
+
+  return {
+    id: row.id,
+    leadId: row.leadId,
+    ownerName: row.ownerName,
+    address: row.address,
+    city: row.city,
+    currentStep: row.currentStep,
+    totalSteps: stepCount?.count ?? 0,
+    status: row.status as CampaignStatus,
+    nextSendAt: row.nextSendAt,
+    enrolledAt: row.enrolledAt,
+  };
 }
 
 /**
