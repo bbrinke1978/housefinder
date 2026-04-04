@@ -126,9 +126,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **CAMP-01**: System stores email sequence definitions (name, steps with subject/body/delay) and campaign enrollment state in PostgreSQL
 - [x] **CAMP-02**: System stores contact event types (called_client, left_voicemail, emailed_client, sent_text, met_in_person, received_email) with notes and timestamps in a contact_events table
-- [ ] **CAMP-03**: User can log contact events (6 types) from the property detail page Contact tab with optional notes
-- [ ] **CAMP-04**: Activity timeline on property detail shows all contact events, notes, and sent emails chronologically
-- [ ] **CAMP-05**: Touchpoint count badge appears on dashboard property cards showing total contact events per lead; call script modal shows configurable talk track with lead details pre-filled
+- [x] **CAMP-03**: User can log contact events (6 types) from the property detail page Contact tab with optional notes
+- [x] **CAMP-04**: Activity timeline on property detail shows all contact events, notes, and sent emails chronologically
+- [x] **CAMP-05**: Touchpoint count badge appears on dashboard property cards showing total contact events per lead; call script modal shows configurable talk track with lead details pre-filled
 - [ ] **CAMP-06**: User can create, edit, and manage email sequences with configurable multi-step drip delays from a Campaigns page accessible via sidebar navigation
 - [ ] **CAMP-07**: Mail Settings page (gear icon in sidebar) stores from name, from email, reply-to, Resend API key, phone number, and email signature template
 - [ ] **CAMP-08**: User can enroll a lead in a sequence from property detail page — step 0 sends immediately via Resend; one active enrollment per lead enforced
@@ -263,11 +263,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-06 | Phase 11 | Planned |
 | UI-07 | Phase 11 | Planned |
 | UI-08 | Phase 11 | Planned |
-| CAMP-01 | Phase 12 | Planned |
-| CAMP-02 | Phase 12 | Planned |
-| CAMP-03 | Phase 12 | Planned |
-| CAMP-04 | Phase 12 | Planned |
-| CAMP-05 | Phase 12 | Planned |
+| CAMP-01 | Phase 12 | Complete |
+| CAMP-02 | Phase 12 | Complete |
+| CAMP-03 | Phase 12 | Complete |
+| CAMP-04 | Phase 12 | Complete |
+| CAMP-05 | Phase 12 | Complete |
 | CAMP-06 | Phase 12 | Planned |
 | CAMP-07 | Phase 12 | Planned |
 | CAMP-08 | Phase 12 | Planned |

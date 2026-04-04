@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 12 of 12 (Email & Call Campaigns)
-Plan: 1 of 6 in current phase (Complete)
-Status: Phase 12 Active — Plan 1 Complete
-Last activity: 2026-04-02 — Completed 12-01 (Campaign schema + contact event types + resend installed)
+Plan: 2 of 6 in current phase (Complete)
+Status: Phase 12 Active — Plan 2 Complete
+Last activity: 2026-04-04 — Completed 12-02 (Contact event logging, activity timeline, touchpoint badges, call script modal)
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 11-housefinder-ui-revamp P02 | 5min | 2 tasks | 5 files |
 | Phase 11-housefinder-ui-revamp P05 | 5min | 1 tasks | 3 files |
 | Phase 12-email-call-campaigns P01 | 8min | 2 tasks | 7 files |
+| Phase 12-email-call-campaigns P02 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -173,6 +174,11 @@ Recent decisions affecting current work:
 - [Phase 12-01]: CALL_SCRIPTS TypeScript constant has 5 pre-built scripts (Acquisitions, Dispositions, Agent Partnership, JV Partner, Objection Handling) with {senderName}/{city}/{address} merge fields
 - [Phase 12-01]: contactEventTypeEnum pgEnum for DB-level type safety; campaignEnrollments.stopReason text for auto-stop triggers (deal_closed/unenrolled/completed/email_bounced/re_enrolled)
 - [Phase 12-01]: MAIL_SETTINGS_KEYS maps TS keys to scraperConfig DB keys (mail.fromName, mail.resendApiKey, etc) — extends existing key-value config pattern
+- [Phase 12-02]: logContactEvent accepts (_prevState, formData) signature for useActionState — consistent with React 19 form action pattern established in Phase 06
+- [Phase 12-02]: getLeadTimeline uses parallel fetch + client-side merge/sort (not SQL UNION) — easier to extend with future event types
+- [Phase 12-02]: getProperties enriches touchpointCount via post-query inArray groupBy — single extra query for all cards, not N+1 subqueries
+- [Phase 12-02]: CallScriptModal uses Dialog.Close directly without asChild — @base-ui/react does not support asChild on Close unlike Radix
+- [Phase 12-02]: CALL_SCRIPTS merge fields resolved client-side from props — no scraperConfig DB fetch at call time since scripts are constants
 
 ### Roadmap Evolution
 
@@ -192,6 +198,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: Completed 12-01-PLAN.md (Campaign schema + types + resend)
-Resume file: .planning/phases/12-email-call-campaigns/12-01-SUMMARY.md
+Last session: 2026-04-04
+Stopped at: Completed 12-02-PLAN.md (Contact event logging UI + activity timeline + call scripts)
+Resume file: .planning/phases/12-email-call-campaigns/12-02-SUMMARY.md
