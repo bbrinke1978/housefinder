@@ -43,6 +43,8 @@ export interface PropertyWithLead {
   lastContactedAt: Date | null;
   /** True when an active deal exists for this property */
   hasDeal?: boolean;
+  /** Number of contact touchpoints logged for this lead */
+  touchpointCount?: number;
   // UGRC assessor data (may be null if not yet imported)
   buildingSqft: number | null;
   yearBuilt: number | null;
@@ -279,3 +281,228 @@ export interface ExpenseLine {
 
 // Budget health status for MAO profit indicators (per user decision)
 export type BudgetHealth = "profitable" | "break_even" | "loss";
+
+// -- Email Campaign & Contact Event Types --
+
+export type ContactEventType =
+  | "called_client"
+  | "left_voicemail"
+  | "emailed_client"
+  | "sent_text"
+  | "met_in_person"
+  | "received_email";
+
+export const CONTACT_EVENT_LABELS: Record<ContactEventType, string> = {
+  called_client: "Called client",
+  left_voicemail: "Left voicemail",
+  emailed_client: "Emailed client",
+  sent_text: "Sent text",
+  met_in_person: "Met in person",
+  received_email: "Received email",
+};
+
+export type CampaignStatus = "active" | "paused" | "completed" | "stopped";
+
+export interface EmailSequenceSummary {
+  id: string;
+  name: string;
+  isActive: boolean;
+  stepCount: number;
+  activeEnrollments: number;
+  totalSent: number;
+}
+
+export interface EnrollmentWithDetails {
+  id: string;
+  leadId: string;
+  ownerName: string | null;
+  address: string;
+  city: string;
+  currentStep: number;
+  totalSteps: number;
+  status: CampaignStatus;
+  nextSendAt: Date | null;
+  enrolledAt: Date;
+}
+
+export interface ContactEvent {
+  id: string;
+  leadId: string;
+  eventType: ContactEventType;
+  notes: string | null;
+  occurredAt: Date;
+}
+
+export interface TimelineEntry {
+  id: string;
+  type: ContactEventType | "note" | "email_sent" | "status_change";
+  label: string;
+  notes: string | null;
+  occurredAt: Date;
+}
+
+export const MAIL_SETTINGS_KEYS = {
+  FROM_NAME: "mail.fromName",
+  FROM_EMAIL: "mail.fromEmail",
+  REPLY_TO: "mail.replyTo",
+  RESEND_KEY: "mail.resendApiKey",
+  PHONE: "mail.phone",
+  SIGNATURE: "mail.signature",
+} as const;
+
+export interface MailSettings {
+  fromName: string;
+  fromEmail: string;
+  replyTo: string;
+  resendApiKey: string;
+  phone: string;
+  signature: string;
+}
+
+/**
+ * Default follow-up cadence from Brian's sales system.
+ * Day 1 Call → Day 3 Text → Day 7 Call → Day 14 Call → Day 30 Call
+ * Email sequences mirror this cadence.
+ */
+export const DEFAULT_SEQUENCE_DELAY_DAYS = [1, 3, 7, 14, 30] as const;
+
+/**
+ * Pre-built call scripts from Brian's sales training system.
+ * Stored as structured data for display in the call script modal.
+ */
+export type CallScriptType =
+  | "acquisitions"
+  | "dispositions"
+  | "agent_partnership"
+  | "jv_partner"
+  | "objection_handling";
+
+export const CALL_SCRIPT_LABELS: Record<CallScriptType, string> = {
+  acquisitions: "Acquisitions Script",
+  dispositions: "Dispositions Script",
+  agent_partnership: "Agent Partnership Script",
+  jv_partner: "JV Partner Script",
+  objection_handling: "Objection Handling",
+};
+
+export interface CallScriptStep {
+  label: string;
+  text: string;
+}
+
+export const CALL_SCRIPTS: Record<CallScriptType, CallScriptStep[]> = {
+  acquisitions: [
+    {
+      label: "Opener",
+      text: "Hey this is {senderName}, I'm looking to buy a few properties in {city}. Is this the owner of {address}?",
+    },
+    {
+      label: "Discovery",
+      text: "Tell me a little about the property — how long have you owned it? What's the condition like?",
+    },
+    {
+      label: "Motivation",
+      text: "What's driving your interest in selling right now? Is there a timeline you're working with?",
+    },
+    {
+      label: "Price",
+      text: "Have you thought about a price you'd be happy with? What would make this a no-brainer for you?",
+    },
+    {
+      label: "Surprise",
+      text: "[Pause after their number.] Hmm... [silence] That's a bit more than I was thinking, but let me see what I can do.",
+    },
+    {
+      label: "Close",
+      text: "If I can get you [offer] cash, close in 2 weeks, no repairs, no commissions — would you be open to moving forward?",
+    },
+  ],
+  dispositions: [
+    {
+      label: "Opener",
+      text: "Hey this is {senderName}, I have an off-market deal in {city} — are you still buying in that area?",
+    },
+    {
+      label: "Price Range",
+      text: "We're at [asking price]. What price range are you working in right now?",
+    },
+    {
+      label: "Rehab Level",
+      text: "This one needs [condition] work. Are you comfortable with that level of rehab?",
+    },
+    {
+      label: "Cash Ready",
+      text: "Are you buying with cash or do you have financing lined up?",
+    },
+    {
+      label: "Timeline",
+      text: "We can close in 2-3 weeks. Does that timeline work for you?",
+    },
+  ],
+  agent_partnership: [
+    {
+      label: "Opener",
+      text: "Hey this is {senderName}, I work with investors buying off-market deals in {city}. Do you work with investors?",
+    },
+    {
+      label: "Cash Buy",
+      text: "We buy properties as-is, all cash, fast close. No showings, no repairs, no hassle for the seller.",
+    },
+    {
+      label: "Front Commission",
+      text: "We pay a buyer's agent commission on the front end — you get paid at closing just like a traditional sale.",
+    },
+    {
+      label: "Back-End Listing",
+      text: "Once we rehab it, we typically list with the agent who brought us the deal. That's a second commission for you.",
+    },
+  ],
+  jv_partner: [
+    {
+      label: "Opener",
+      text: "Hey this is {senderName}. We find deeply discounted off-market deals. You bring the capital. We split the profit 50/50.",
+    },
+    {
+      label: "Our Role",
+      text: "We handle acquisition, negotiation, project management, and disposition. You're passive.",
+    },
+    {
+      label: "Your Role",
+      text: "You fund the purchase and rehab. We protect your capital with an assignment of contract and/or deed.",
+    },
+    {
+      label: "Returns",
+      text: "Typical deals net $20-50k profit split equally. Average hold time 60-120 days.",
+    },
+  ],
+  objection_handling: [
+    {
+      label: "Retail Price Response",
+      text: "I totally understand — you want top dollar. The challenge is I have to account for repairs, holding costs, and my profit. Here's what I can offer...",
+    },
+    {
+      label: "Too Low Response",
+      text: "I hear you. Can you help me understand what you need to net out of this? Let's see if we can find a number that works.",
+    },
+    {
+      label: "Ask",
+      text: "What's the best you can do on price?",
+    },
+    {
+      label: "Mirror",
+      text: "[Repeat their last 2-3 words back as a question.] 'The repairs are too much'... the repairs are too much?",
+    },
+    {
+      label: "Surprise",
+      text: "[Audible inhale.] Hmm... [long pause] That's tough for me to work with.",
+    },
+    {
+      label: "Silence",
+      text: "[Say nothing. Let them fill the silence. They often lower their number.]",
+    },
+    {
+      label: "Soft Counter",
+      text: "What if I could get you [slightly higher number]? Could we do something today?",
+    },
+  ],
+};
