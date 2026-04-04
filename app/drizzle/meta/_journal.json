@@ -22,6 +22,20 @@
       "when": 1774718068250,
       "tag": "0002_perfect_jack_murdock",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774815132724,
+      "tag": "0003_gorgeous_maximus",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775277811627,
+      "tag": "0004_goofy_la_nuit",
+      "breakpoints": true
     }
   ]
 }

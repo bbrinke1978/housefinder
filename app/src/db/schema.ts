@@ -460,3 +460,132 @@ export const alertHistory = pgTable(
     index("idx_alert_history_lead_id").on(table.leadId),
   ]
 );
+
+// -- Contact Events & Email Campaigns --
+
+export const contactEventTypeEnum = pgEnum("contact_event_type", [
+  "called_client",
+  "left_voicemail",
+  "emailed_client",
+  "sent_text",
+  "met_in_person",
+  "received_email",
+]);
+
+export const contactEvents = pgTable(
+  "contact_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    eventType: contactEventTypeEnum("event_type").notNull(),
+    notes: text("notes"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_contact_events_lead_id").on(table.leadId),
+    index("idx_contact_events_occurred_at").on(table.occurredAt),
+  ]
+);
+
+export const emailSequences = pgTable("email_sequences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const emailSteps = pgTable(
+  "email_steps",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sequenceId: uuid("sequence_id")
+      .notNull()
+      .references(() => emailSequences.id),
+    stepNumber: integer("step_number").notNull(),
+    // Default cadence from Brian's sales system: Day 1, 3, 7, 14, 30
+    delayDays: integer("delay_days").notNull().default(0),
+    subject: text("subject").notNull(),
+    // Stores template with {firstName}, {senderName}, etc. merge fields
+    bodyHtml: text("body_html").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_email_steps_sequence_step").on(
+      table.sequenceId,
+      table.stepNumber
+    ),
+  ]
+);
+
+export const campaignEnrollments = pgTable(
+  "campaign_enrollments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    sequenceId: uuid("sequence_id")
+      .notNull()
+      .references(() => emailSequences.id),
+    currentStep: integer("current_step").notNull().default(0),
+    // status values: active | paused | completed | stopped
+    status: text("status").notNull().default("active"),
+    nextSendAt: timestamp("next_send_at", { withTimezone: true }),
+    enrolledAt: timestamp("enrolled_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    stoppedAt: timestamp("stopped_at", { withTimezone: true }),
+    // stopReason values: deal_closed | unenrolled | completed | email_bounced | re_enrolled
+    stopReason: text("stop_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_campaign_enrollments_lead_id").on(table.leadId),
+    index("idx_campaign_enrollments_next_send_at").on(table.nextSendAt),
+  ]
+);
+
+export const emailSendLog = pgTable("email_send_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  enrollmentId: uuid("enrollment_id")
+    .notNull()
+    .references(() => campaignEnrollments.id),
+  stepId: uuid("step_id")
+    .notNull()
+    .references(() => emailSteps.id),
+  leadId: uuid("lead_id")
+    .notNull()
+    .references(() => leads.id),
+  toEmail: text("to_email").notNull(),
+  resendEmailId: text("resend_email_id"),
+  sentAt: timestamp("sent_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  // status values: sent | bounced | failed | quota_exceeded
+  status: text("status").notNull().default("sent"),
+});
+
+export type ContactEventRow = InferSelectModel<typeof contactEvents>;
+export type EmailSequenceRow = InferSelectModel<typeof emailSequences>;
+export type EmailStepRow = InferSelectModel<typeof emailSteps>;
+export type CampaignEnrollmentRow = InferSelectModel<typeof campaignEnrollments>;
+export type EmailSendLogRow = InferSelectModel<typeof emailSendLog>;
