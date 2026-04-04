@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 12 of 12 (Email & Call Campaigns)
-Plan: 4 of 6 in current phase (Complete)
-Status: Phase 12 Active — Plan 4 Complete
-Last activity: 2026-04-04 — Completed 12-04 (Email enrollment flow: EnrollButton, BulkEnroll, outreach template)
+Plan: 5 of 5 in current phase (Complete)
+Status: Phase 12 Complete — All Plans Done
+Last activity: 2026-04-04 — Completed 12-05 (Campaign dispatch timer, deal auto-stop, deal detail timeline)
 
 Progress: [██████████] 100%
 
@@ -62,6 +62,7 @@ Progress: [██████████] 100%
 | Phase 12-email-call-campaigns P02 | 5min | 2 tasks | 10 files |
 | Phase 12-email-call-campaigns P03 | 7 | 2 tasks | 12 files |
 | Phase 12-email-call-campaigns P04 | 6 | 2 tasks | 12 files |
+| Phase 12-email-call-campaigns P05 | 3min | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -185,6 +186,9 @@ Recent decisions affecting current work:
 - [Phase 12-email-call-campaigns]: useTransition for campaign server actions — actions use (formData) signature not (prevState, formData)
 - [Phase 12-email-call-campaigns]: MAILING: prefix filter required in enrollLeadInSequence — ownerContacts email column stores both real emails and mailing addresses with MAILING: prefix
 - [Phase 12-email-call-campaigns]: logContactEvent after email send is non-fatal — enrollment not rolled back if timeline event fails
+- [Phase 12-05]: scraper schema.ts extended with 7 campaign tables — separate from app schema, must stay in sync when app schema changes
+- [Phase 12-05]: nextStepNumber = currentStep + 2 in dispatch — 0-based currentStep + 1-indexed stepNumber offset; dispatch sends stepNumber = currentStep + 2
+- [Phase 12-05]: campaignDispatch Resend send uses text: not react: — scraper has no JSX compilation; plain text + appended signature used instead of react-email component
 
 ### Roadmap Evolution
 
@@ -205,5 +209,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-04
-Stopped at: Completed 12-04-PLAN.md (Email Enrollment Flow)
+Stopped at: Completed 12-05-PLAN.md (Campaign Dispatch Timer + Deal Timeline)
 Resume file: .planning/phases/12-email-call-campaigns/12-04-SUMMARY.md
