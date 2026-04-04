@@ -10,3 +10,4 @@ export * from "./functions/utahLegalsScrape.js";
 export * from "./functions/installBrowsers.js";
 export * from "./functions/llcEnrichment.js";
 export * from "./functions/contactEnrichment.js";
+export * from "./functions/campaignDispatch.js";

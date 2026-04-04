@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { deals, buyers, dealNotes, ownerContacts, properties } from "@/db/schema";
+import { deals, buyers, dealNotes, ownerContacts, properties, leads } from "@/db/schema";
 import { eq, desc, gte, lte, or, isNull, and } from "drizzle-orm";
 import type { DealWithBuyer, DealNote, Buyer, OwnerContact } from "@/types";
 
@@ -192,6 +192,22 @@ export async function getDealContacts(dealId: string): Promise<OwnerContact[]> {
     .orderBy(desc(ownerContacts.isManual), desc(ownerContacts.createdAt));
 
   return contacts as unknown as OwnerContact[];
+}
+
+/**
+ * getLeadIdByPropertyId — returns the lead ID for a property, or null if none.
+ * Used by deal detail page to load the activity timeline.
+ */
+export async function getLeadIdByPropertyId(
+  propertyId: string
+): Promise<string | null> {
+  const [row] = await db
+    .select({ id: leads.id })
+    .from(leads)
+    .where(eq(leads.propertyId, propertyId))
+    .limit(1);
+
+  return row?.id ?? null;
 }
 
 /**

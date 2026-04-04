@@ -185,6 +185,150 @@ export const ownerContacts = pgTable(
   ]
 );
 
+// ── Deals ──────────────────────────────────────────────────────────────────
+
+export const deals = pgTable(
+  "deals",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    propertyId: uuid("property_id").references(() => properties.id),
+    address: text("address").notNull(),
+    city: text("city").notNull(),
+    state: text("state").notNull().default("UT"),
+    status: text("status").notNull().default("lead"),
+    // status values: lead | qualified | analyzed | offered | under_contract |
+    // marketing | assigned | closing | closed | dead
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_deals_status").on(table.status),
+    index("idx_deals_property_id").on(table.propertyId),
+  ]
+);
+
+// ── Contact Events & Email Campaigns ──────────────────────────────────────
+
+export const contactEventTypeEnum = pgEnum("contact_event_type", [
+  "called_client",
+  "left_voicemail",
+  "emailed_client",
+  "sent_text",
+  "met_in_person",
+  "received_email",
+]);
+
+export const contactEvents = pgTable(
+  "contact_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    eventType: contactEventTypeEnum("event_type").notNull(),
+    notes: text("notes"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_contact_events_lead_id").on(table.leadId),
+    index("idx_contact_events_occurred_at").on(table.occurredAt),
+  ]
+);
+
+export const emailSequences = pgTable("email_sequences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const emailSteps = pgTable(
+  "email_steps",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    sequenceId: uuid("sequence_id")
+      .notNull()
+      .references(() => emailSequences.id),
+    stepNumber: integer("step_number").notNull(),
+    delayDays: integer("delay_days").notNull().default(0),
+    subject: text("subject").notNull(),
+    bodyHtml: text("body_html").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("uq_email_steps_sequence_step").on(
+      table.sequenceId,
+      table.stepNumber
+    ),
+  ]
+);
+
+export const campaignEnrollments = pgTable(
+  "campaign_enrollments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    leadId: uuid("lead_id")
+      .notNull()
+      .references(() => leads.id),
+    sequenceId: uuid("sequence_id")
+      .notNull()
+      .references(() => emailSequences.id),
+    currentStep: integer("current_step").notNull().default(0),
+    status: text("status").notNull().default("active"),
+    nextSendAt: timestamp("next_send_at", { withTimezone: true }),
+    enrolledAt: timestamp("enrolled_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    stoppedAt: timestamp("stopped_at", { withTimezone: true }),
+    stopReason: text("stop_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_campaign_enrollments_lead_id").on(table.leadId),
+    index("idx_campaign_enrollments_next_send_at").on(table.nextSendAt),
+  ]
+);
+
+export const emailSendLog = pgTable("email_send_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  enrollmentId: uuid("enrollment_id")
+    .notNull()
+    .references(() => campaignEnrollments.id),
+  stepId: uuid("step_id")
+    .notNull()
+    .references(() => emailSteps.id),
+  leadId: uuid("lead_id")
+    .notNull()
+    .references(() => leads.id),
+  toEmail: text("to_email").notNull(),
+  resendEmailId: text("resend_email_id"),
+  sentAt: timestamp("sent_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  status: text("status").notNull().default("sent"),
+});
+
 // ── Alert History ─────────────────────────────────────────────────────────
 
 export const alertHistory = pgTable(

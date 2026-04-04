@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { getDeal, getDealNotes, getDealContacts } from '@/lib/deal-queries';
+import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@/lib/deal-queries';
+import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
@@ -13,6 +14,8 @@ import { DealBlastGenerator } from '@/components/deal-blast-generator';
 import { DealGuidePanel } from '@/components/deal-guide-panel';
 import { DealCompEntry } from '@/components/deal-comp-entry';
 import { BudgetTab } from '@/components/budget-tab';
+import { ActivityTimeline } from '@/components/activity-timeline';
+import type { TimelineEntry } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +73,15 @@ export default async function DealDetailPage({
     getDealContacts(id),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
+
+  // Load activity timeline if deal is linked to a property (has a lead)
+  let contactTimeline: TimelineEntry[] = [];
+  if (deal?.propertyId) {
+    const leadId = await getLeadIdByPropertyId(deal.propertyId);
+    if (leadId) {
+      contactTimeline = await getLeadTimeline(leadId);
+    }
+  }
 
   if (!deal) {
     notFound();
@@ -165,9 +177,17 @@ export default async function DealDetailPage({
           </div>
         </TabsContent>
 
-        {/* ACTIVITY: Notes */}
+        {/* ACTIVITY: Notes + Contact Timeline */}
         <TabsContent value='activity' className='mt-4'>
           <DealNotes dealId={deal.id} initialNotes={notes} />
+          {contactTimeline.length > 0 && (
+            <div className='mt-6 space-y-3'>
+              <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+                Contact History
+              </h3>
+              <ActivityTimeline entries={contactTimeline} />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
