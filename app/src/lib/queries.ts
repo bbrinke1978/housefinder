@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
-import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig, deals } from "@/db/schema";
-import { eq, and, sql, desc, asc, ilike, exists, isNotNull, notInArray } from "drizzle-orm";
+import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig, deals, contactEvents } from "@/db/schema";
+import { eq, and, sql, desc, asc, ilike, exists, inArray, isNotNull } from "drizzle-orm";
 import type {
   PropertyWithLead,
   MapProperty,
@@ -577,7 +577,28 @@ export async function getProperties(
     .orderBy(orderBy)
     .limit(100);
 
-  return rows as PropertyWithLead[];
+  if (rows.length === 0) return [];
+
+  // Enrich with touchpoint counts for the returned lead IDs
+  const leadIds = rows.map((r) => r.leadId as string);
+  const touchpointRows = await db
+    .select({
+      leadId: contactEvents.leadId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(contactEvents)
+    .where(inArray(contactEvents.leadId, leadIds))
+    .groupBy(contactEvents.leadId);
+
+  const touchpointMap = new Map<string, number>();
+  for (const tr of touchpointRows) {
+    touchpointMap.set(tr.leadId, tr.count);
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    touchpointCount: touchpointMap.get(row.leadId as string) ?? 0,
+  })) as PropertyWithLead[];
 }
 
 // -- Target cities from settings (for filter dropdown + dashboard filtering) --

@@ -19,22 +19,34 @@ import {
   Building2,
   Plus,
   MapPin,
+  Activity,
 } from "lucide-react";
 import { saveOwnerPhone } from "@/lib/actions";
-import type { OwnerContact } from "@/types";
+import type { OwnerContact, TimelineEntry } from "@/types";
+import { ContactEventForm } from "@/components/contact-event-form";
+import { ActivityTimeline } from "@/components/activity-timeline";
+import { CallScriptModal } from "@/components/call-script-modal";
 
 interface ContactTabProps {
   ownerName: string | null;
   ownerType: string | null;
   propertyId: string;
+  leadId: string;
+  address: string;
+  city: string;
   contacts: OwnerContact[];
+  timeline: TimelineEntry[];
 }
 
 export function ContactTab({
   ownerName,
   ownerType,
   propertyId,
+  leadId,
+  address,
+  city,
   contacts,
+  timeline,
 }: ContactTabProps) {
   const [phone, setPhone] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -222,27 +234,37 @@ export function ContactTab({
         </CardHeader>
         <CardContent className="space-y-3">
           {phonesContacts.length > 0 ? (
-            phonesContacts.map((contact) => (
-              <div
-                key={contact.id}
-                className="flex items-center justify-between gap-2"
-              >
-                <a
-                  href={`tel:${contact.phone}`}
-                  className="text-sm font-medium text-primary underline hover:text-primary/80"
+            <div className="space-y-2">
+              {phonesContacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  className="flex items-center justify-between gap-2 flex-wrap"
                 >
-                  {contact.phone}
-                </a>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {contact.source}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(contact.createdAt).toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <a
+                      href={`tel:${contact.phone}`}
+                      className="text-sm font-medium text-primary underline hover:text-primary/80"
+                    >
+                      {contact.phone}
+                    </a>
+                    <CallScriptModal
+                      ownerName={ownerName}
+                      address={address}
+                      city={city}
+                      phone={contact.phone}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs capitalize">
+                      {contact.source}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(contact.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">
               No phone numbers found yet.
@@ -315,6 +337,37 @@ export function ContactTab({
           ) : (
             <p className="text-sm text-muted-foreground">No email found</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Contact event log form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            Log Contact Event
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ContactEventForm leadId={leadId} />
+        </CardContent>
+      </Card>
+
+      {/* Activity timeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-4 w-4 text-muted-foreground" />
+            Activity Timeline
+            {timeline.length > 0 && (
+              <span className="ml-auto text-xs font-normal text-muted-foreground">
+                {timeline.length} event{timeline.length === 1 ? "" : "s"}
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ActivityTimeline entries={timeline} />
         </CardContent>
       </Card>
     </div>

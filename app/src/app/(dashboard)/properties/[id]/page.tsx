@@ -3,6 +3,7 @@ import { Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getPropertyDetail, getPropertySignals, getPropertyNotes, getOwnerContacts } from "@/lib/queries";
+import { getLeadTimeline } from "@/lib/contact-event-queries";
 import { markLeadViewed, getActiveVacantFlag } from "@/lib/actions";
 import { PropertyOverview } from "@/components/property-overview";
 import { SignalTimeline } from "@/components/signal-timeline";
@@ -29,7 +30,10 @@ export default async function PropertyDetailPage({
     notFound();
   }
 
-  const notes = await getPropertyNotes(property.leadId);
+  const [notes, timeline] = await Promise.all([
+    getPropertyNotes(property.leadId),
+    getLeadTimeline(property.leadId),
+  ]);
 
   // Mark lead as viewed (clears "new" badge on dashboard)
   await markLeadViewed(id);
@@ -90,7 +94,16 @@ export default async function PropertyDetailPage({
         </TabsContent>
 
         <TabsContent value="contact" className="mt-4">
-          <ContactTab ownerName={property.ownerName} ownerType={property.ownerType} propertyId={id} contacts={contacts} />
+          <ContactTab
+            ownerName={property.ownerName}
+            ownerType={property.ownerType}
+            propertyId={id}
+            leadId={property.leadId}
+            address={property.address}
+            city={property.city}
+            contacts={contacts}
+            timeline={timeline}
+          />
         </TabsContent>
       </Tabs>
     </div>

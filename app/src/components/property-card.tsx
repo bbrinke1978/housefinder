@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import type { PropertyWithLead } from "@/types";
 import { LEAD_SOURCES } from "@/types";
 import { updateLeadSource } from "@/lib/actions";
+import { TouchpointBadge } from "@/components/touchpoint-badge";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
@@ -320,9 +321,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </span>
         </div>
 
-        {/* Bottom row: lead status + source badge + hover CTA */}
+        {/* Bottom row: lead status + source badge + touchpoints + hover CTA */}
         <div className="flex items-center justify-between mt-2.5 gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
               {property.leadStatus.replace("_", " ")}
             </span>
@@ -330,6 +331,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
               leadId={property.leadId}
               currentSource={property.leadSource ?? null}
             />
+            {(property.touchpointCount ?? 0) > 0 && (
+              <TouchpointBadge count={property.touchpointCount ?? 0} />
+            )}
           </div>
           <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0 shrink-0">
             View details
