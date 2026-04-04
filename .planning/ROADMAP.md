@@ -228,13 +228,28 @@ Plans:
 
 ### Phase 12: Email & Call Campaigns
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can run multi-step email drip sequences to distressed property owners via Resend, log all contact events (calls, emails, texts, meetings) with an activity timeline, and manage campaigns from a dedicated page — all without leaving HouseFinder
 **Depends on:** Phase 11
-**Plans:** 0 plans
+**Requirements**: CAMP-01, CAMP-02, CAMP-03, CAMP-04, CAMP-05, CAMP-06, CAMP-07, CAMP-08, CAMP-09, CAMP-10, CAMP-11, CAMP-12
+**Success Criteria** (what must be TRUE):
+  1. Contact events (6 types: called, voicemail, emailed, text, met, received email) can be logged from property detail pages with an activity timeline showing all outreach chronologically
+  2. Touchpoint count badges appear on dashboard property cards showing total contact events per lead
+  3. A call script modal shows a configurable talk track with lead details pre-filled when about to call
+  4. Email sequences with configurable multi-step drip delays (e.g., 0/5/5/7 day pattern) can be created and managed from a Campaigns page
+  5. Mail settings (from name, email, reply-to, Resend API key, phone, signature) are configurable from a dedicated Mail Settings page
+  6. Leads can be enrolled in sequences individually from property detail or in bulk from the dashboard — step 0 sends immediately
+  7. Leads without a contact email show a clear disabled state and cannot be enrolled
+  8. Follow-up emails dispatch automatically daily via Azure Functions timer trigger for all due enrollments
+  9. Enrollments auto-stop when the lead's deal status changes to closed or dead
+  10. Activity timeline appears on both property detail and deal detail pages
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 12 to break down)
+- [ ] 12-01-PLAN.md — Schema (email_sequences, email_steps, campaign_enrollments, email_send_log, contact_events), types, npm install
+- [ ] 12-02-PLAN.md — Contact event logging, activity timeline, touchpoint badges, call script modal
+- [ ] 12-03-PLAN.md — Campaigns page (sequence CRUD), mail settings page, navigation updates
+- [ ] 12-04-PLAN.md — Email enrollment actions, outreach template, enroll button + bulk enroll UI
+- [ ] 12-05-PLAN.md — Scraper campaign dispatch timer, deal auto-stop, deal detail timeline, verification
 
 ### Phase 13: Contract & E-Signature
 

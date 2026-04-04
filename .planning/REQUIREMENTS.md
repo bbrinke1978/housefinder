@@ -122,6 +122,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **UI-07**: All pages (deals, analytics, property detail, deal detail, pipeline, settings, map) use semantic color tokens with zero remnants of old palette — including responsive chart colors and mobile kanban horizontal scroll
 - [x] **UI-08**: Command palette (Ctrl+K / Cmd+K) provides keyboard navigation to all major pages via shadcn Command + Dialog components
 
+### Email & Call Campaigns
+
+- [ ] **CAMP-01**: System stores email sequence definitions (name, steps with subject/body/delay) and campaign enrollment state in PostgreSQL
+- [ ] **CAMP-02**: System stores contact event types (called_client, left_voicemail, emailed_client, sent_text, met_in_person, received_email) with notes and timestamps in a contact_events table
+- [ ] **CAMP-03**: User can log contact events (6 types) from the property detail page Contact tab with optional notes
+- [ ] **CAMP-04**: Activity timeline on property detail shows all contact events, notes, and sent emails chronologically
+- [ ] **CAMP-05**: Touchpoint count badge appears on dashboard property cards showing total contact events per lead; call script modal shows configurable talk track with lead details pre-filled
+- [ ] **CAMP-06**: User can create, edit, and manage email sequences with configurable multi-step drip delays from a Campaigns page accessible via sidebar navigation
+- [ ] **CAMP-07**: Mail Settings page (gear icon in sidebar) stores from name, from email, reply-to, Resend API key, phone number, and email signature template
+- [ ] **CAMP-08**: User can enroll a lead in a sequence from property detail page — step 0 sends immediately via Resend; one active enrollment per lead enforced
+- [ ] **CAMP-09**: User can bulk-select leads from dashboard and enroll them in a sequence; leads without contact email show clear disabled state
+- [ ] **CAMP-10**: Outreach emails use react-email templates with merge fields ({firstName}, {address}, {city}, {senderName}, {phone}) and auto-appended email signature
+- [ ] **CAMP-11**: Follow-up emails dispatch automatically daily via Azure Functions timer trigger for enrollments where nextSendAt is past due, with idempotency protection against duplicate sends
+- [ ] **CAMP-12**: Enrollments auto-stop when lead's deal status changes to closed or dead; activity timeline visible on deal detail pages
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -163,6 +178,10 @@ Explicitly excluded. Documented to prevent scope creep.
 | Customizable dashboard layouts | Deferred — drag-and-drop widgets are v2+ |
 | User card density preferences | Deferred — compact/comfortable/spacious is v2+ |
 | Custom themes/skins | Deferred — not in Phase 11 scope |
+| Gmail API sync | Deferred — sensitive OAuth scope, weeks for verification; Resend handles sending |
+| Google Calendar follow-up reminders | Deferred — OAuth complexity, activity timeline provides visibility |
+| Auto-enrollment rules | Deferred — manual enrollment first, automation later |
+| SMS/text messaging integration | Deferred — separate phase |
 
 ## Traceability
 
@@ -244,12 +263,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-06 | Phase 11 | Planned |
 | UI-07 | Phase 11 | Planned |
 | UI-08 | Phase 11 | Planned |
+| CAMP-01 | Phase 12 | Planned |
+| CAMP-02 | Phase 12 | Planned |
+| CAMP-03 | Phase 12 | Planned |
+| CAMP-04 | Phase 12 | Planned |
+| CAMP-05 | Phase 12 | Planned |
+| CAMP-06 | Phase 12 | Planned |
+| CAMP-07 | Phase 12 | Planned |
+| CAMP-08 | Phase 12 | Planned |
+| CAMP-09 | Phase 12 | Planned |
+| CAMP-10 | Phase 12 | Planned |
+| CAMP-11 | Phase 12 | Planned |
+| CAMP-12 | Phase 12 | Planned |
 
 **Coverage:**
-- v1 requirements: 64 total
-- Mapped to phases: 64
+- v1 requirements: 76 total
+- Mapped to phases: 76
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-26 — added Phase 11 UI revamp requirements (UI-01 through UI-08)*
+*Last updated: 2026-04-02 — added Phase 12 email & call campaigns requirements (CAMP-01 through CAMP-12)*
