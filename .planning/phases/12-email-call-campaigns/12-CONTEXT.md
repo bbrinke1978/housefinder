@@ -15,7 +15,7 @@ Build email outreach sequences and call logging into HouseFinder so the investor
 
 ### Email Sending Approach
 - Send emails via a transactional email service (Resend) — not Gmail API, not copy-paste
-- Multi-step drip sequences: Initial email + configurable follow-ups with day delays (like reference: 5/5/7 day pattern)
+- Multi-step drip sequences: Default follow-up cadence from Brian's sales system: Day 1 Call → Day 3 Text → Day 7 Call → Day 14 Call → Day 30 Call. Email sequences should mirror this cadence (Day 1, Day 3, Day 7, Day 14, Day 30) rather than generic 5/5/7 pattern
 - Placeholders/merge fields: Claude's discretion based on available data in properties/contacts tables
 - Auto-stop sequences when a lead's deal stage changes (e.g., Closed Won, Closed Lost)
 - One sequence per lead at a time — enrolling in new sequence unenrolls from current
@@ -26,6 +26,12 @@ Build email outreach sequences and call logging into HouseFinder so the investor
 - Phone numbers render as `tel:` links so Google Voice or native dialer handles them
 - Contact types match reference app: Called client, Left voicemail, Emailed client, Sent text, Met in person, Received email
 - Talk track / call script feature: display a configurable script with lead details pre-filled when about to call
+- Pre-built call scripts from Brian's sales training system:
+  - **Acquisitions Script**: "Hey this is ___, I'm looking to buy a few properties in {city}..." → Discovery → Motivation → Price → Surprise → Close
+  - **Dispositions Script**: "Hey this is ___, I have an off-market deal in {city} — are you still buying?" → Price range, Rehab level, Cash ready, Timeline
+  - **Agent Partnership Script**: Offering cash buy, front-end commission, back-end listing
+  - **JV Partner Script**: "We find discounted deals. You bring capital. We split profit."
+  - **Objection Handling**: Retail price response, Too low response, negotiation ladder (Ask → Mirror → Surprise → Silence → Soft counter)
 - Touchpoint counter on property cards — Claude's discretion on badge design (simple count vs icon breakdown)
 - Activity timeline on property and deal detail pages showing all contacts chronologically
 
@@ -59,7 +65,9 @@ Build email outreach sequences and call logging into HouseFinder so the investor
 ## Specific Ideas
 
 - Reference app uses Resend as email service with API key configuration
-- Reference sequence pattern: Initial Email (immediate) → 1st Follow-up (5 days) → 2nd Follow-up (5 days) → Final Follow-up (7 days)
+- Brian's proven follow-up cadence: Day 1 Call → Day 3 Text → Day 7 Call → Day 14 Call → Day 30 Call
+- Default email sequence should pre-fill with 5 steps matching this cadence (Day 1, 3, 7, 14, 30)
+- Buyer intake email template: "Hey! I'm building my buyers list for off-market deals in Utah. What's your buy box? Cities, Price Range, Rehab Level, Cash or Financing, Timeline to close?"
 - Reference placeholders: {firstName}, {senderName} — email signature added automatically
 - Reference settings: profile name, from email, reply-to email, API key, phone number for signature
 - Reference pipeline stages auto-stop sequences (Closed Won / Closed Lost)
@@ -77,6 +85,11 @@ Build email outreach sequences and call logging into HouseFinder so the investor
 - Auto-enrollment rules (score-based, distress-type-based) — future enhancement
 - Configurable contact outcome types — future enhancement if needed
 - SMS/text messaging integration — separate phase
+- Buyers List CRM (tiers: VIP/Active/Mass, buy box, intake forms, dispositions pipeline) — separate phase
+- KPI & Agent Scoring Dashboard (weighted formula: Calls*1 + Conversations*2 + Leads*3 + Offers*5 + Contracts*10, daily goals, team tracking) — separate phase
+- Motivation scoring on leads (1-10 scale, Hot/Warm/Cold filter) — future enhancement
+- Profit allocation tracker (Babylon system: 10% Nest Egg / 20% Debt / 20% Marketing / 50% Ops) — future financials enhancement
+- Weekly accountability numbers dashboard (leads, offers, contracts, cash, nest egg, debt) — future analytics enhancement
 
 </deferred>
 
