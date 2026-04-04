@@ -129,11 +129,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CAMP-03**: User can log contact events (6 types) from the property detail page Contact tab with optional notes
 - [x] **CAMP-04**: Activity timeline on property detail shows all contact events, notes, and sent emails chronologically
 - [x] **CAMP-05**: Touchpoint count badge appears on dashboard property cards showing total contact events per lead; call script modal shows configurable talk track with lead details pre-filled
-- [ ] **CAMP-06**: User can create, edit, and manage email sequences with configurable multi-step drip delays from a Campaigns page accessible via sidebar navigation
-- [ ] **CAMP-07**: Mail Settings page (gear icon in sidebar) stores from name, from email, reply-to, Resend API key, phone number, and email signature template
-- [ ] **CAMP-08**: User can enroll a lead in a sequence from property detail page — step 0 sends immediately via Resend; one active enrollment per lead enforced
-- [ ] **CAMP-09**: User can bulk-select leads from dashboard and enroll them in a sequence; leads without contact email show clear disabled state
-- [ ] **CAMP-10**: Outreach emails use react-email templates with merge fields ({firstName}, {address}, {city}, {senderName}, {phone}) and auto-appended email signature
+- [x] **CAMP-06**: User can create, edit, and manage email sequences with configurable multi-step drip delays from a Campaigns page accessible via sidebar navigation
+- [x] **CAMP-07**: Mail Settings page (gear icon in sidebar) stores from name, from email, reply-to, Resend API key, phone number, and email signature template
+- [x] **CAMP-08**: User can enroll a lead in a sequence from property detail page — step 0 sends immediately via Resend; one active enrollment per lead enforced
+- [x] **CAMP-09**: User can bulk-select leads from dashboard and enroll them in a sequence; leads without contact email show clear disabled state
+- [x] **CAMP-10**: Outreach emails use react-email templates with merge fields ({firstName}, {address}, {city}, {senderName}, {phone}) and auto-appended email signature
 - [ ] **CAMP-11**: Follow-up emails dispatch automatically daily via Azure Functions timer trigger for enrollments where nextSendAt is past due, with idempotency protection against duplicate sends
 - [ ] **CAMP-12**: Enrollments auto-stop when lead's deal status changes to closed or dead; activity timeline visible on deal detail pages
 

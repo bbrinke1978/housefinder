@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 12 of 12 (Email & Call Campaigns)
-Plan: 3 of 6 in current phase (Complete)
-Status: Phase 12 Active — Plan 3 Complete
-Last activity: 2026-04-02 — Completed 12-03 (Campaigns UI, mail settings page, navigation updates)
+Plan: 4 of 6 in current phase (Complete)
+Status: Phase 12 Active — Plan 4 Complete
+Last activity: 2026-04-04 — Completed 12-04 (Email enrollment flow: EnrollButton, BulkEnroll, outreach template)
 
 Progress: [██████████] 100%
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 12-email-call-campaigns P01 | 8min | 2 tasks | 7 files |
 | Phase 12-email-call-campaigns P02 | 5min | 2 tasks | 10 files |
 | Phase 12-email-call-campaigns P03 | 7 | 2 tasks | 12 files |
+| Phase 12-email-call-campaigns P04 | 6 | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,8 @@ Recent decisions affecting current work:
 - [Phase 12-02]: CALL_SCRIPTS merge fields resolved client-side from props — no scraperConfig DB fetch at call time since scripts are constants
 - [Phase 12-email-call-campaigns]: fetchSequenceForEdit as server action prevents pg/net/tls bundling into client components
 - [Phase 12-email-call-campaigns]: useTransition for campaign server actions — actions use (formData) signature not (prevState, formData)
+- [Phase 12-email-call-campaigns]: MAILING: prefix filter required in enrollLeadInSequence — ownerContacts email column stores both real emails and mailing addresses with MAILING: prefix
+- [Phase 12-email-call-campaigns]: logContactEvent after email send is non-fatal — enrollment not rolled back if timeline event fails
 
 ### Roadmap Evolution
 
@@ -201,6 +204,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: Completed 12-03-PLAN.md (Campaigns UI, Mail Settings, Navigation)
-Resume file: .planning/phases/12-email-call-campaigns/12-03-SUMMARY.md
+Last session: 2026-04-04
+Stopped at: Completed 12-04-PLAN.md (Email Enrollment Flow)
+Resume file: .planning/phases/12-email-call-campaigns/12-04-SUMMARY.md
