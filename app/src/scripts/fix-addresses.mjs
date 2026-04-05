@@ -24,11 +24,14 @@ async function main() {
   console.log("Connected to database.");
 
   // Fix properties table: "STREET NAME: NUMBER" → "NUMBER STREET NAME"
+  // Broad pattern: anything before a colon followed by a house number at end
+  // Handles parens, special chars, etc. e.g. "E Tamarac AVE (370N): 370"
   const propResult = await client.query(`
     UPDATE properties
-    SET address = regexp_replace(address, '^([A-Za-z0-9 .]+?):\\s*(\\d+[A-Za-z]?)$', '\\2 \\1'),
+    SET address = regexp_replace(address, '^(.+?):\\s*(\\d+[A-Za-z]?)$', '\\2 \\1'),
         updated_at = NOW()
-    WHERE address ~ '^[A-Za-z0-9 .]+?:\\s*\\d+[A-Za-z]?$'
+    WHERE address ~ '^.+:\\s*\\d+[A-Za-z]?$'
+      AND address !~ '^\\d'
     RETURNING id, address
   `);
   console.log(`Fixed ${propResult.rowCount} property addresses.`);
@@ -41,9 +44,10 @@ async function main() {
   // Fix deals table: same pattern
   const dealResult = await client.query(`
     UPDATE deals
-    SET address = regexp_replace(address, '^([A-Za-z0-9 .]+?):\\s*(\\d+[A-Za-z]?)$', '\\2 \\1'),
+    SET address = regexp_replace(address, '^(.+?):\\s*(\\d+[A-Za-z]?)$', '\\2 \\1'),
         updated_at = NOW()
-    WHERE address ~ '^[A-Za-z0-9 .]+?:\\s*\\d+[A-Za-z]?$'
+    WHERE address ~ '^.+:\\s*\\d+[A-Za-z]?$'
+      AND address !~ '^\\d'
     RETURNING id, address
   `);
   console.log(`Fixed ${dealResult.rowCount} deal addresses.`);

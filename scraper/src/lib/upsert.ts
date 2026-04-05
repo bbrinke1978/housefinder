@@ -17,9 +17,10 @@ function normalizeAddress(raw: string): string {
   // Pattern: "STREET NAME: NUMBER" → "NUMBER STREET NAME"
   // e.g. "E MAIN ST: 1110" → "1110 E MAIN ST"
   // e.g. "N 100 W: 450" → "450 N 100 W"
-  const colonMatch = raw.match(/^([A-Za-z0-9 .]+?):\s*(\d+[A-Za-z]?)$/);
+  // e.g. "E Tamarac AVE (370N): 370" → "370 E Tamarac AVE (370N)"
+  const colonMatch = raw.match(/^(.+?):\s*(\d+[A-Za-z]?)$/);
   if (colonMatch) {
-    raw = `${colonMatch[2]} ${colonMatch[1]}`;
+    raw = `${colonMatch[2]} ${colonMatch[1].trim()}`;
   }
 
   // Title case: "1110 E MAIN ST" → "1110 E Main St"
