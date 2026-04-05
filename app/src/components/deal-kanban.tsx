@@ -147,9 +147,10 @@ function ColumnGuide({ colKey, open, onToggle, onClose }: ColumnGuideProps) {
 
 interface DealKanbanProps {
   deals: DealWithBuyer[];
+  coverPhotos?: Record<string, string>;
 }
 
-export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
+export function DealKanban({ deals: initialDeals, coverPhotos = {} }: DealKanbanProps) {
   const [deals, setDeals] = useState(initialDeals);
   const [openGuide, setOpenGuide] = useState<DealStatus | null>(null);
 
@@ -237,7 +238,7 @@ export function DealKanban({ deals: initialDeals }: DealKanbanProps) {
                             {...dragProvided.draggableProps}
                             {...dragProvided.dragHandleProps}
                           >
-                            <DealCard deal={deal} />
+                            <DealCard deal={deal} coverPhotoUrl={coverPhotos[deal.id]} />
                           </div>
                         )}
                       </Draggable>

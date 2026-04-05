@@ -9,9 +9,10 @@ import { DealList } from "@/components/deal-list";
 interface DealsSearchWrapperProps {
   deals: DealWithBuyer[];
   view: string;
+  coverPhotos?: Record<string, string>;
 }
 
-export function DealsSearchWrapper({ deals, view }: DealsSearchWrapperProps) {
+export function DealsSearchWrapper({ deals, view, coverPhotos = {} }: DealsSearchWrapperProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -68,9 +69,9 @@ export function DealsSearchWrapper({ deals, view }: DealsSearchWrapperProps) {
 
       {/* Deals content */}
       {view === "list" ? (
-        <DealList deals={filtered} />
+        <DealList deals={filtered} coverPhotos={coverPhotos} />
       ) : (
-        <DealKanban deals={filtered} />
+        <DealKanban deals={filtered} coverPhotos={coverPhotos} />
       )}
     </div>
   );

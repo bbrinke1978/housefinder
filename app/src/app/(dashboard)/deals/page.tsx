@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { getDeals } from "@/lib/deal-queries";
+import { db } from "@/db/client";
+import { propertyPhotos } from "@/db/schema";
+import { and, eq, inArray } from "drizzle-orm";
+import { generatePhotoSasUrl } from "@/lib/blob-storage";
 import { DealsSearchWrapper } from "@/components/deals-search-wrapper";
 import { LayoutGrid, List } from "lucide-react";
 
@@ -12,6 +16,26 @@ interface DealsPageProps {
 export default async function DealsPage({ searchParams }: DealsPageProps) {
   const { view = "kanban" } = await searchParams;
   const deals = await getDeals();
+
+  // Batch-fetch cover photos for all deals
+  const dealIds = deals.map((d) => d.id);
+  let coverPhotos: Record<string, string> = {};
+  if (dealIds.length > 0) {
+    const coverRows = await db
+      .select({ dealId: propertyPhotos.dealId, blobName: propertyPhotos.blobName })
+      .from(propertyPhotos)
+      .where(
+        and(
+          inArray(propertyPhotos.dealId, dealIds),
+          eq(propertyPhotos.isCover, true)
+        )
+      );
+    coverPhotos = Object.fromEntries(
+      coverRows
+        .filter((r) => r.dealId !== null)
+        .map((r) => [r.dealId as string, generatePhotoSasUrl(r.blobName)])
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -71,7 +95,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
       )}
 
       {/* Search + content (client-side filtering) */}
-      <DealsSearchWrapper deals={deals} view={view} />
+      <DealsSearchWrapper deals={deals} view={view} coverPhotos={coverPhotos} />
     </div>
   );
 }

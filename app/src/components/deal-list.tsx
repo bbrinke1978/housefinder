@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { ImageOff } from "lucide-react";
 import type { DealWithBuyer, DealStatus } from "@/types";
 
 const STATUS_BADGE: Record<DealStatus, string> = {
@@ -36,9 +38,10 @@ function formatCurrency(value: number | null): string {
 
 interface DealListProps {
   deals: DealWithBuyer[];
+  coverPhotos?: Record<string, string>;
 }
 
-export function DealList({ deals }: DealListProps) {
+export function DealList({ deals, coverPhotos = {} }: DealListProps) {
   if (deals.length === 0) {
     return (
       <p className="text-center text-muted-foreground py-12">
@@ -69,13 +72,30 @@ export function DealList({ deals }: DealListProps) {
           {deals.map((deal) => (
             <tr key={deal.id} className="hover:bg-accent transition-colors min-h-[44px]">
               <td className="py-2.5 pr-4">
-                <Link
-                  href={`/deals/${deal.id}`}
-                  className="hover:underline font-medium"
-                >
-                  {deal.address}
-                </Link>
-                <p className="text-xs text-muted-foreground">{deal.city}</p>
+                <div className="flex items-center gap-2">
+                  <div className="shrink-0 h-9 w-9 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                    {coverPhotos[deal.id] ? (
+                      <Image
+                        src={coverPhotos[deal.id]}
+                        alt="Cover"
+                        width={36}
+                        height={36}
+                        className="h-9 w-9 object-cover"
+                      />
+                    ) : (
+                      <ImageOff className="h-4 w-4 text-muted-foreground/40" />
+                    )}
+                  </div>
+                  <div>
+                    <Link
+                      href={`/deals/${deal.id}`}
+                      className="hover:underline font-medium"
+                    >
+                      {deal.address}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">{deal.city}</p>
+                  </div>
+                </div>
               </td>
               <td className="py-2.5 pr-4 hidden sm:table-cell text-muted-foreground">
                 {deal.sellerName ?? "—"}

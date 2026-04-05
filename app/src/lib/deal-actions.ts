@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes, buyers, ownerContacts } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { deals, dealNotes, buyers, ownerContacts, propertyPhotos } from "@/db/schema";
+import { eq, desc, and, isNull } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -130,6 +130,55 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
     noteType: "status_change",
     newStatus: "lead",
   });
+
+  // Carry over property photos to the new deal (best-effort)
+  if (parsed.propertyId) {
+    try {
+      await db
+        .update(propertyPhotos)
+        .set({ dealId: inserted.id, isInbox: false })
+        .where(
+          and(
+            eq(propertyPhotos.propertyId, parsed.propertyId),
+            isNull(propertyPhotos.dealId)
+          )
+        );
+
+      // Auto-set cover: find first exterior photo for this deal with no existing cover
+      const existingCover = await db
+        .select({ id: propertyPhotos.id })
+        .from(propertyPhotos)
+        .where(
+          and(
+            eq(propertyPhotos.dealId, inserted.id),
+            eq(propertyPhotos.isCover, true)
+          )
+        )
+        .limit(1);
+
+      if (existingCover.length === 0) {
+        const firstExterior = await db
+          .select({ id: propertyPhotos.id })
+          .from(propertyPhotos)
+          .where(
+            and(
+              eq(propertyPhotos.dealId, inserted.id),
+              eq(propertyPhotos.category, "exterior")
+            )
+          )
+          .limit(1);
+
+        if (firstExterior.length > 0) {
+          await db
+            .update(propertyPhotos)
+            .set({ isCover: true })
+            .where(eq(propertyPhotos.id, firstExterior[0].id));
+        }
+      }
+    } catch (err) {
+      console.error("[createDeal] Failed to carry over property photos:", err);
+    }
+  }
 
   revalidatePath("/deals");
   redirect(`/deals/${inserted.id}`);
