@@ -43,6 +43,13 @@
       "when": 1775398180119,
       "tag": "0005_simple_expediter",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775427367091,
+      "tag": "0006_powerful_devos",
+      "breakpoints": true
     }
   ]
 }

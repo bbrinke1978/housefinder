@@ -689,3 +689,48 @@ export const contractSigners = pgTable(
 
 export type ContractRow = InferSelectModel<typeof contracts>;
 export type ContractSignerRow = InferSelectModel<typeof contractSigners>;
+
+// -- Property Photos --
+
+export const photoCategory = pgEnum("photo_category", [
+  "exterior",
+  "kitchen",
+  "bathroom",
+  "living",
+  "bedroom",
+  "garage",
+  "roof",
+  "foundation",
+  "yard",
+  "other",
+]);
+
+export const propertyPhotos = pgTable(
+  "property_photos",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dealId: uuid("deal_id").references(() => deals.id),
+    propertyId: uuid("property_id").references(() => properties.id),
+    isInbox: boolean("is_inbox").notNull().default(false),
+    blobName: text("blob_name").notNull(),
+    blobUrl: text("blob_url").notNull(),
+    category: photoCategory("category").notNull().default("other"),
+    caption: text("caption"),
+    isCover: boolean("is_cover").notNull().default(false),
+    sortOrder: integer("sort_order").notNull().default(0),
+    fileSizeBytes: integer("file_size_bytes"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_property_photos_deal_id").on(table.dealId),
+    index("idx_property_photos_property_id").on(table.propertyId),
+    index("idx_property_photos_is_inbox").on(table.isInbox),
+  ]
+);
+
+export type PropertyPhotoRow = InferSelectModel<typeof propertyPhotos>;

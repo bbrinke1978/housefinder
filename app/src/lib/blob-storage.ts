@@ -8,6 +8,7 @@ import {
 const CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING ?? "";
 const CONTAINER_NAME = "receipts";
 const CONTRACTS_CONTAINER = "contracts";
+const PHOTOS_CONTAINER = "photos";
 
 function getBlobServiceClient(): BlobServiceClient {
   if (!CONNECTION_STRING) {
@@ -140,4 +141,78 @@ export function generateContractSasUrl(blobName: string): string {
   );
 
   return `https://${accountName}.blob.core.windows.net/${CONTRACTS_CONTAINER}/${blobName}?${sasParams.toString()}`;
+}
+
+/**
+ * uploadPhotoBlob — upload a photo buffer to Azure Blob Storage "photos" container.
+ * Creates the container if it doesn't exist (idempotent first-run).
+ * Returns the blob URL (not a SAS URL — container is private).
+ */
+export async function uploadPhotoBlob(
+  buffer: Buffer,
+  blobName: string
+): Promise<string> {
+  const client = getBlobServiceClient();
+  const containerClient = client.getContainerClient(PHOTOS_CONTAINER);
+  await containerClient.createIfNotExists();
+  const blobClient = containerClient.getBlockBlobClient(blobName);
+
+  await blobClient.uploadData(buffer, {
+    blobHTTPHeaders: { blobContentType: "image/jpeg" },
+  });
+
+  return blobClient.url;
+}
+
+/**
+ * generatePhotoSasUrl — generate a 1-hour read-only SAS URL for a photo.
+ * Must be called server-side.
+ */
+export function generatePhotoSasUrl(blobName: string): string {
+  if (!CONNECTION_STRING) {
+    throw new Error("AZURE_STORAGE_CONNECTION_STRING is not set");
+  }
+
+  const accountNameMatch = CONNECTION_STRING.match(/AccountName=([^;]+)/);
+  const accountKeyMatch = CONNECTION_STRING.match(/AccountKey=([^;]+)/);
+
+  if (!accountNameMatch || !accountKeyMatch) {
+    throw new Error(
+      "AZURE_STORAGE_CONNECTION_STRING does not contain AccountName or AccountKey"
+    );
+  }
+
+  const accountName = accountNameMatch[1];
+  const accountKey = accountKeyMatch[1];
+
+  const sharedKeyCredential = new StorageSharedKeyCredential(
+    accountName,
+    accountKey
+  );
+
+  const expiresOn = new Date();
+  expiresOn.setHours(expiresOn.getHours() + 1);
+
+  const sasParams = generateBlobSASQueryParameters(
+    {
+      containerName: PHOTOS_CONTAINER,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      expiresOn,
+    },
+    sharedKeyCredential
+  );
+
+  return `https://${accountName}.blob.core.windows.net/${PHOTOS_CONTAINER}/${blobName}?${sasParams.toString()}`;
+}
+
+/**
+ * deletePhotoBlob — delete a photo from Azure Blob Storage "photos" container.
+ * Uses deleteIfExists to be idempotent — no error if blob is already gone.
+ */
+export async function deletePhotoBlob(blobName: string): Promise<void> {
+  const client = getBlobServiceClient();
+  const containerClient = client.getContainerClient(PHOTOS_CONTAINER);
+  const blobClient = containerClient.getBlockBlobClient(blobName);
+  await blobClient.deleteIfExists();
 }
