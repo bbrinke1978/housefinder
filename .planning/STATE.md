@@ -66,6 +66,7 @@ Progress: [███████████████████████
 | Phase 12-email-call-campaigns P05 | 3min | 1 tasks | 6 files |
 | Phase 13-contract-e-signature P01 | 6min | 2 tasks | 10 files |
 | Phase 13-contract-e-signature P03 | 2min | 2 tasks | 5 files |
+| Phase 13-contract-e-signature P02 | 3min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -198,6 +199,9 @@ Recent decisions affecting current work:
 - [Phase 13-contract-e-signature]: Pointer Events API for signature canvas: single handler for mouse/touch/stylus, setPointerCapture prevents events escaping canvas boundary
 - [Phase 13-contract-e-signature]: touchAction:none on canvas: prevents iOS Safari scroll interception during drawing — critical mobile compatibility fix
 - [Phase 13-contract-e-signature]: new Uint8Array(buffer) wraps Node Buffer for Web Response BodyInit compatibility in strict TypeScript
+- [Phase 13-contract-e-signature]: ContractTab uses 'use client' (not server wrapper) — simpler pattern matching BudgetTab, data fetched server-side in parent page
+- [Phase 13-contract-e-signature]: contracts/page.tsx groups by Active/Executed/Expired+Voided — workflow-ordered, terminal contracts at bottom
+- [Phase 13-contract-e-signature]: Contracts nav item placed between Deals and Buyers — deal lifecycle order
 
 ### Roadmap Evolution
 

@@ -143,12 +143,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CONTRACT-02**: System stores signer records with unique signing tokens, expiration, signature data (drawn/typed), IP address, user agent, and document hash for legal audit trail
 - [x] **CONTRACT-03**: Standard Utah wholesale contract templates with default clauses (as-is condition, inspection period, earnest money, closing timeline, assignment clause, default & remedies) auto-populate on contract creation
 - [x] **CONTRACT-04**: Contract creation auto-fills all available deal data: property address, city, county, parcel ID, seller name, offer price, ARV, assignment fee
-- [ ] **CONTRACT-05**: User can review and edit contract before sending — add, remove, modify, and reorder clauses per deal
-- [ ] **CONTRACT-06**: Contracts tab on deal detail page shows all contracts for that deal with status badges and action buttons (send, void, resend, download)
-- [ ] **CONTRACT-07**: Global Contracts page shows all contracts across all deals with status filtering and deal links
-- [ ] **CONTRACT-08**: Sidebar navigation includes Contracts link between Deals and Campaigns
+- [x] **CONTRACT-05**: User can review and edit contract before sending — add, remove, modify, and reorder clauses per deal
+- [x] **CONTRACT-06**: Contracts tab on deal detail page shows all contracts for that deal with status badges and action buttons (send, void, resend, download)
+- [x] **CONTRACT-07**: Global Contracts page shows all contracts across all deals with status filtering and deal links
+- [x] **CONTRACT-08**: Sidebar navigation includes Contracts link between Deals and Campaigns
 - [x] **CONTRACT-09**: Contract PDF generated server-side via @react-pdf/renderer with property details, parties, financial terms, clauses, signature lines, and audit trail page
-- [ ] **CONTRACT-10**: User can preview contract as downloadable PDF before sending
+- [x] **CONTRACT-10**: User can preview contract as downloadable PDF before sending
 - [x] **CONTRACT-11**: Public signing page (/sign/[token]) allows sellers and buyers to sign without a HouseFinder account — token-gated with 72-hour default expiration
 - [x] **CONTRACT-12**: Signer can draw (canvas) or type their signature on mobile or desktop; canvas uses Pointer Events with touchAction:none for iOS Safari compatibility
 - [x] **CONTRACT-13**: Signing page validates token expiration and already-signed status, showing appropriate messages for expired or completed links
