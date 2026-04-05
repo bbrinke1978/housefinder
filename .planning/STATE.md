@@ -10,11 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 13 of 13 (Contract & E-Signature)
-Plan: 1 of 4 in current phase (Complete)
-Status: In Progress — Phase 13 Plan 01 Complete
-Last activity: 2026-04-05 — Completed 13-01 (Contract schema, types, queries, server actions, PDF generation)
+Plan: 3 of 4 in current phase (Complete)
+Status: In Progress — Phase 13 Plan 03 Complete
+Last activity: 2026-04-05 — Completed 13-03 (Public signing page, signature canvas, PDF endpoint)
+Stopped at: Completed 13-03-PLAN.md (Public signing page, signature canvas, PDF endpoint)
 
-Progress: [██████████] 25% of Phase 13
+Progress: [███████████████████████████████] 75% of Phase 13
 
 ## Performance Metrics
 
@@ -64,6 +65,7 @@ Progress: [██████████] 25% of Phase 13
 | Phase 12-email-call-campaigns P04 | 6 | 2 tasks | 12 files |
 | Phase 12-email-call-campaigns P05 | 3min | 1 tasks | 6 files |
 | Phase 13-contract-e-signature P01 | 6min | 2 tasks | 10 files |
+| Phase 13-contract-e-signature P03 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -193,6 +195,9 @@ Recent decisions affecting current work:
 - [Phase 13-01]: advanceContractStatus uses db.execute(sql) for NOT IN multi-status check — drizzle lacks native notInArray for text columns
 - [Phase 13-01]: Inter-Regular.ttf committed to public/fonts/ — CDN fonts unreliable in server-side PDF generation on Azure App Service
 - [Phase 13-01]: Contract blob path pattern: {dealId}/{contractId}-executed.pdf — deal-scoped, predictable, no collisions
+- [Phase 13-contract-e-signature]: Pointer Events API for signature canvas: single handler for mouse/touch/stylus, setPointerCapture prevents events escaping canvas boundary
+- [Phase 13-contract-e-signature]: touchAction:none on canvas: prevents iOS Safari scroll interception during drawing — critical mobile compatibility fix
+- [Phase 13-contract-e-signature]: new Uint8Array(buffer) wraps Node Buffer for Web Response BodyInit compatibility in strict TypeScript
 
 ### Roadmap Evolution
 
