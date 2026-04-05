@@ -6,14 +6,15 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@/lib/deal-queries';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
+import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
-import { DealContractTracker } from '@/components/deal-contract-tracker';
 import { DealNotes } from '@/components/deal-notes';
 import { DealBlastGenerator } from '@/components/deal-blast-generator';
 import { DealGuidePanel } from '@/components/deal-guide-panel';
 import { DealCompEntry } from '@/components/deal-comp-entry';
 import { BudgetTab } from '@/components/budget-tab';
+import { ContractTab } from '@/components/contract-tab';
 import { ActivityTimeline } from '@/components/activity-timeline';
 import type { TimelineEntry } from '@/types';
 
@@ -66,11 +67,13 @@ export default async function DealDetailPage({
   const rawTab = tab ?? 'overview';
   const activeTab = tabMap[rawTab] ?? rawTab;
 
-  const [deal, notes, budget, contacts] = await Promise.all([
+  const [deal, notes, budget, contacts, contracts, contractCount] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
     getDealContacts(id),
+    getDealContracts(id),
+    getContractCountByDealId(id),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
 
@@ -132,6 +135,11 @@ export default async function DealDetailPage({
           </TabsTrigger>
           <TabsTrigger value='financials' className='!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2'>
             Financials
+            {contractCount > 0 && (
+              <span className='ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0'>
+                {contractCount > 9 ? '9+' : contractCount}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value='activity' className='!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2'>
             Activity
@@ -164,10 +172,10 @@ export default async function DealDetailPage({
           </div>
         </TabsContent>
 
-        {/* FINANCIALS: Contract tracker + Budget */}
+        {/* FINANCIALS: Contract tab + Budget */}
         <TabsContent value='financials' className='mt-4'>
           <div className='space-y-6'>
-            <DealContractTracker deal={deal} />
+            <ContractTab deal={deal} contracts={contracts} />
             <div className='border-t border-border pt-6'>
               <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'>
                 Budget & Expenses
