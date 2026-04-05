@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 14 of 14 (Mobile Photo Capture)
-Plan: 2 of 3 in current phase (Complete)
-Status: In Progress — Phase 14 Plan 02 Complete
-Last activity: 2026-04-05 — Completed 14-02 (PhotoUpload, PhotoGallery, PhotoTab, deal detail Photos tab, blast generator cover photo)
-Stopped at: Completed 14-02-PLAN.md
+Plan: 3 of 3 in current phase (Complete)
+Status: Phase 14 Complete
+Last activity: 2026-04-05 — Completed 14-03 (PhotoFab, PhotoInbox, sidebar nav, deal card thumbnails, property-to-deal photo carry-over)
+Stopped at: Completed 14-03-PLAN.md
 
-Progress: [██████████████████████████░░░░░░░░░░░░░░] 66% of Phase 14
+Progress: [████████████████████████████████████████] 100% of Phase 14
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [███████████████████████
 | Phase 13-contract-e-signature P04 | 2min | 2 tasks | 3 files |
 | Phase 14-mobile-photo-capture P01 | 3min | 2 tasks | 5 files |
 | Phase 14-mobile-photo-capture P02 | 4min | 2 tasks | 7 files |
+| Phase 14-mobile-photo-capture P03 | 4min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -214,6 +215,9 @@ Recent decisions affecting current work:
 - [Phase 14-02]: Captions imported statically (not via next/dynamic) — plain Plugin function, not React component; dynamic() fails type checks
 - [Phase 14-02]: YARL Lightbox uses dynamic/ssr:false; Captions cast as unknown as Plugin for TypeScript plugins prop compatibility
 - [Phase 14-02]: Deal detail page now has 5 tabs: Overview, Analysis, Financials, Photos, Activity
+- [Phase 14-03]: coverPhotos passed as Record<string,string> (not Map) through prop chain — plain objects serialize cleanly as Next.js server-to-client props
+- [Phase 14-03]: createDeal photo carry-over is best-effort (try/catch) — deal creation never blocked by photo migration failure
+- [Phase 14-03]: PhotoFab uses md:hidden CSS class for mobile-only visibility — simpler than useSidebar hook
 
 ### Roadmap Evolution
 
@@ -234,5 +238,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Completed 14-02-PLAN.md (PhotoUpload, PhotoGallery, PhotoTab, deal detail Photos tab, blast generator cover photo)
-Resume file: .planning/phases/14-mobile-photo-capture/14-02-SUMMARY.md
+Stopped at: Completed 14-03-PLAN.md (PhotoFab, PhotoInbox, sidebar nav, deal card thumbnails, property-to-deal photo carry-over)
+Resume file: .planning/phases/14-mobile-photo-capture/14-03-SUMMARY.md
