@@ -589,3 +589,103 @@ export type EmailSequenceRow = InferSelectModel<typeof emailSequences>;
 export type EmailStepRow = InferSelectModel<typeof emailSteps>;
 export type CampaignEnrollmentRow = InferSelectModel<typeof campaignEnrollments>;
 export type EmailSendLogRow = InferSelectModel<typeof emailSendLog>;
+
+// -- Contracts & E-Signature --
+
+export const contractStatusEnum = pgEnum("contract_lifecycle_status", [
+  "draft",
+  "sent",
+  "seller_signed",
+  "countersigned",
+  "executed",
+  "expired",
+  "voided",
+  "amended",
+]);
+
+export const contractTypeEnum = pgEnum("contract_type", [
+  "purchase_agreement",
+  "assignment",
+]);
+
+export const contracts = pgTable(
+  "contracts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    contractType: contractTypeEnum("contract_type").notNull(),
+    status: contractStatusEnum("status").notNull().default("draft"),
+    // Auto-filled from deal, user can edit before sending
+    propertyAddress: text("property_address").notNull(),
+    city: text("city").notNull(),
+    county: text("county"),
+    parcelId: text("parcel_id"),
+    sellerName: text("seller_name"),
+    buyerName: text("buyer_name"),
+    purchasePrice: integer("purchase_price"),
+    arv: integer("arv"),
+    assignmentFee: integer("assignment_fee"),
+    earnestMoney: integer("earnest_money").default(100),
+    inspectionPeriodDays: integer("inspection_period_days").default(10),
+    closingDays: integer("closing_days").default(30),
+    // Editable clauses — stored as JSON array of {id, title, body, order, isDefault}
+    clauses: text("clauses"), // JSON string
+    // Signed PDF stored in Azure Blob Storage
+    signedPdfBlobName: text("signed_pdf_blob_name"),
+    signedPdfUrl: text("signed_pdf_url"),
+    documentHash: text("document_hash"), // SHA-256 of final signed PDF
+    // Lifecycle timestamps
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    executedAt: timestamp("executed_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    voidedAt: timestamp("voided_at", { withTimezone: true }),
+    voidReason: text("void_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_contracts_deal_id").on(table.dealId),
+    index("idx_contracts_status").on(table.status),
+  ]
+);
+
+export const contractSigners = pgTable(
+  "contract_signers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contractId: uuid("contract_id")
+      .notNull()
+      .references(() => contracts.id),
+    signerOrder: integer("signer_order").notNull(), // 1 = first signer, 2 = countersigner
+    signerRole: text("signer_role").notNull(), // "seller" | "buyer" | "wholesaler"
+    signerName: text("signer_name").notNull(),
+    signerEmail: text("signer_email").notNull(),
+    signingToken: text("signing_token").notNull().unique(), // crypto.randomUUID()
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+    signedAt: timestamp("signed_at", { withTimezone: true }),
+    signatureData: text("signature_data"), // base64 PNG (drawn) or typed name
+    signatureType: text("signature_type"), // "drawn" | "typed"
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    documentHash: text("document_hash"), // SHA-256 of PDF at time of signing
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_contract_signers_contract_id").on(table.contractId),
+    uniqueIndex("uq_contract_signer_order").on(
+      table.contractId,
+      table.signerOrder
+    ),
+  ]
+);
+
+export type ContractRow = InferSelectModel<typeof contracts>;
+export type ContractSignerRow = InferSelectModel<typeof contractSigners>;

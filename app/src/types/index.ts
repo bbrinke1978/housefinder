@@ -392,6 +392,125 @@ export interface CallScriptStep {
   text: string;
 }
 
+// -- Contract & E-Signature Types --
+
+export type ContractLifecycleStatus =
+  | "draft"
+  | "sent"
+  | "seller_signed"
+  | "countersigned"
+  | "executed"
+  | "expired"
+  | "voided"
+  | "amended";
+
+export type ContractType = "purchase_agreement" | "assignment";
+
+export interface ContractClause {
+  id: string;
+  title: string;
+  body: string;
+  order: number;
+  isDefault: boolean;
+}
+
+export const DEFAULT_PURCHASE_CLAUSES: ContractClause[] = [
+  {
+    id: "as-is",
+    title: "As-Is Condition",
+    body: "Buyer agrees to purchase the Property in its current \"as-is\" condition. Seller makes no warranties, representations, or guarantees of any kind, express or implied, regarding the condition of the Property, including without limitation its physical condition, structural integrity, mechanical systems, or compliance with applicable laws or regulations.",
+    order: 1,
+    isDefault: true,
+  },
+  {
+    id: "inspection",
+    title: "Inspection Period",
+    body: "Buyer shall have 10 business days from the date of full execution of this Agreement (the \"Inspection Period\") to conduct any and all inspections of the Property at Buyer's sole expense. If Buyer is not satisfied with the condition of the Property for any reason, Buyer may cancel this Agreement by written notice to Seller prior to the expiration of the Inspection Period, and the Earnest Money shall be returned to Buyer in full.",
+    order: 2,
+    isDefault: true,
+  },
+  {
+    id: "earnest-money",
+    title: "Earnest Money",
+    body: "Buyer shall deposit $100.00 (the \"Earnest Money\") with the closing agent within 3 business days of the date of full execution of this Agreement. The Earnest Money shall be applied toward the Purchase Price at closing. In the event this Agreement is terminated pursuant to the Inspection Period provision, the Earnest Money shall be refunded to Buyer.",
+    order: 3,
+    isDefault: true,
+  },
+  {
+    id: "closing-timeline",
+    title: "Closing Timeline",
+    body: "The closing of this transaction (\"Closing\") shall occur within 30 days from the date of full execution of this Agreement, or on such other date as the parties may agree in writing. Time is of the essence with respect to the Closing date.",
+    order: 4,
+    isDefault: true,
+  },
+  {
+    id: "title-closing-costs",
+    title: "Title and Closing Costs",
+    body: "Seller shall convey clear and marketable title to the Property by general warranty deed, free and clear of all liens, encumbrances, and restrictions, except for those of record that Buyer has approved. Seller shall pay for the cost of the title insurance commitment and the owner's title insurance policy. Each party shall pay their own closing costs unless otherwise agreed in writing.",
+    order: 5,
+    isDefault: true,
+  },
+  {
+    id: "assignment",
+    title: "Assignment Clause",
+    body: "Buyer may assign this Agreement, or any interest herein, to any third party without the consent of Seller. In the event of assignment, the assignee shall assume all obligations of Buyer under this Agreement and Buyer shall be released from all further obligations hereunder.",
+    order: 6,
+    isDefault: true,
+  },
+  {
+    id: "default-remedies",
+    title: "Default and Remedies",
+    body: "If either party defaults in the performance of their obligations under this Agreement, the non-defaulting party shall be entitled to retain or recover the Earnest Money as liquidated damages, which the parties agree is a reasonable estimate of the damages that would be suffered in the event of such default. This shall be the sole and exclusive remedy of the non-defaulting party for such default.",
+    order: 7,
+    isDefault: true,
+  },
+];
+
+export const DEFAULT_ASSIGNMENT_CLAUSES: ContractClause[] = [
+  {
+    id: "assignment-terms",
+    title: "Assignment of Contract",
+    body: "Assignor hereby assigns, transfers, and conveys to Assignee all of Assignor's right, title, and interest in and to that certain Purchase and Sale Agreement (the \"Original Agreement\") including all rights to purchase the Property described therein. Assignee hereby assumes all obligations of Assignor under the Original Agreement from and after the date of this Assignment.",
+    order: 1,
+    isDefault: true,
+  },
+  {
+    id: "assignment-fee",
+    title: "Assignment Fee",
+    body: "In consideration of this Assignment, Assignee shall pay to Assignor an Assignment Fee in the amount specified herein. The Assignment Fee shall be paid at closing and shall be in addition to the original Purchase Price under the Original Agreement.",
+    order: 2,
+    isDefault: true,
+  },
+  {
+    id: "earnest-money-assignment",
+    title: "Earnest Money",
+    body: "Assignee shall be responsible for all Earnest Money required under the Original Agreement. Any Earnest Money previously deposited by Assignor shall be credited against amounts owed by Assignee.",
+    order: 3,
+    isDefault: true,
+  },
+  {
+    id: "closing-timeline-assignment",
+    title: "Closing Timeline",
+    body: "The Closing shall occur on the date specified in the Original Agreement, or on such other date as may be agreed upon by all parties. Assignee acknowledges and accepts the Closing timeline set forth in the Original Agreement.",
+    order: 4,
+    isDefault: true,
+  },
+  {
+    id: "representations",
+    title: "Representations",
+    body: "Assignor represents and warrants that: (a) the Original Agreement is in full force and effect; (b) Assignor is not in default under the Original Agreement; (c) Assignor has the full right and authority to assign the Original Agreement; and (d) the Original Agreement has not been previously assigned.",
+    order: 5,
+    isDefault: true,
+  },
+];
+
+import type { ContractRow, ContractSignerRow } from "@/db/schema";
+
+export interface ContractWithSigners extends ContractRow {
+  signers: ContractSignerRow[];
+  parsedClauses: ContractClause[];
+}
+
 export const CALL_SCRIPTS: Record<CallScriptType, CallScriptStep[]> = {
   acquisitions: [
     {
