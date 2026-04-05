@@ -1,10 +1,16 @@
 "use client";
 
-import { useTransition } from "react";
-import { Send, Eye, XCircle, RefreshCw } from "lucide-react";
+import { useTransition, useState } from "react";
+import { Send, Eye, XCircle, RefreshCw, Download, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ContractStatusBadge } from "@/components/contract-status-badge";
-import { sendForSigning, voidContract, resendSigningLink } from "@/lib/contract-actions";
+import {
+  sendForSigning,
+  voidContract,
+  resendSigningLink,
+  downloadSignedPdf,
+} from "@/lib/contract-actions";
 import type { ContractWithSigners } from "@/types";
 
 interface ContractListItemProps {
@@ -18,6 +24,7 @@ const CONTRACT_TYPE_LABELS: Record<string, string> = {
 
 export function ContractListItem({ contract }: ContractListItemProps) {
   const [isPending, startTransition] = useTransition();
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const counterparty =
     contract.signers.find((s) => s.signerOrder === 1)?.signerName ??
@@ -28,10 +35,34 @@ export function ContractListItem({ contract }: ContractListItemProps) {
   const canSend = contract.status === "draft";
   const canVoid = contract.status !== "executed" && contract.status !== "voided";
   const canResend =
-    (contract.status === "sent" || contract.status === "seller_signed" || contract.status === "countersigned") &&
+    (contract.status === "sent" ||
+      contract.status === "seller_signed" ||
+      contract.status === "countersigned" ||
+      contract.status === "expired") &&
     contract.signers.some((s) => !s.signedAt);
 
-  const activeSigner = contract.signers.find((s) => !s.signedAt && s.tokenExpiresAt !== null);
+  const activeSigner = contract.signers.find(
+    (s) => !s.signedAt && s.tokenExpiresAt !== null
+  );
+
+  const isExecuted =
+    contract.status === "executed" && !!contract.signedPdfBlobName;
+
+  // Expiration countdown: show for in-flight contracts with an active signer
+  const expirationLabel: string | null = (() => {
+    if (
+      contract.status === "sent" ||
+      contract.status === "seller_signed" ||
+      contract.status === "countersigned"
+    ) {
+      const expiry = activeSigner?.tokenExpiresAt;
+      if (!expiry) return null;
+      const expiresAt = new Date(expiry);
+      if (expiresAt < new Date()) return "Expired";
+      return `Expires ${formatDistanceToNow(expiresAt, { addSuffix: true })}`;
+    }
+    return null;
+  })();
 
   function handleSend() {
     startTransition(async () => {
@@ -54,8 +85,24 @@ export function ContractListItem({ contract }: ContractListItemProps) {
     });
   }
 
+  function handleDownload() {
+    setDownloadError(null);
+    startTransition(async () => {
+      const result = await downloadSignedPdf(contract.id);
+      if ("error" in result) {
+        setDownloadError(result.error);
+      } else {
+        window.open(result.url, "_blank", "noopener,noreferrer");
+      }
+    });
+  }
+
   const createdDate = contract.createdAt
-    ? new Date(contract.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? new Date(contract.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : "—";
 
   return (
@@ -71,10 +118,33 @@ export function ContractListItem({ contract }: ContractListItemProps) {
         <p className="text-xs text-muted-foreground">
           {counterparty} &middot; Created {createdDate}
         </p>
+        {expirationLabel && (
+          <p className="text-xs flex items-center gap-1 text-amber-600 dark:text-amber-400">
+            <Clock className="h-3 w-3" />
+            {expirationLabel}
+          </p>
+        )}
+        {downloadError && (
+          <p className="text-xs text-destructive">{downloadError}</p>
+        )}
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-1.5 flex-shrink-0">
+        {/* Download Signed PDF — executed contracts only */}
+        {isExecuted && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDownload}
+            disabled={isPending}
+            className="h-7 text-xs"
+          >
+            <Download className="h-3 w-3 mr-1" />
+            Download PDF
+          </Button>
+        )}
+
         {/* Preview PDF — always available */}
         <a
           href={`/api/contracts/${contract.id}/pdf`}
