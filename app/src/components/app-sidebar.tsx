@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
+  { label: "Contracts", href: "/contracts", icon: FileText },
   { label: "Buyers", href: "/deals/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
