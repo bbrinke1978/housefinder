@@ -287,7 +287,7 @@ Plans:
   6. Property photos carry over to deal when "Start Deal" creates a deal from that property
   7. Deal cards in deals list show cover photo thumbnail
   8. Deal blast generator auto-populates cover photo SAS URL
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 14-01-PLAN.md — Schema (property_photos, photo_category enum), blob storage extension, server actions, query functions

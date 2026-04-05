@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 13 — Contract & E-Signature (Complete)
+**Current focus:** Phase 14 — Mobile Photo Capture
 
 ## Current Position
 
-Phase: 13 of 13 (Contract & E-Signature)
-Plan: 4 of 4 in current phase (Complete)
-Status: Complete — Phase 13 All Plans Complete
-Last activity: 2026-04-05 — Completed 13-04 (Email templates, signed PDF download, end-to-end integration)
-Stopped at: Completed 13-04-PLAN.md (Email templates, signed PDF download, end-to-end integration)
+Phase: 14 of 14 (Mobile Photo Capture)
+Plan: 1 of 3 in current phase (Complete)
+Status: In Progress — Phase 14 Plan 01 Complete
+Last activity: 2026-04-05 — Completed 14-01 (propertyPhotos schema, blob storage photo functions, server actions, query functions)
+Stopped at: Completed 14-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 100% of Phase 13
+Progress: [█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33% of Phase 14
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [███████████████████████
 | Phase 13-contract-e-signature P03 | 2min | 2 tasks | 5 files |
 | Phase 13-contract-e-signature P02 | 3min | 2 tasks | 8 files |
 | Phase 13-contract-e-signature P04 | 2min | 2 tasks | 3 files |
+| Phase 14-mobile-photo-capture P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -205,6 +206,10 @@ Recent decisions affecting current work:
 - [Phase 13-contract-e-signature]: Contracts nav item placed between Deals and Buyers — deal lifecycle order
 - [Phase 13-contract-e-signature]: contract-emails.tsx returns { subject, html } tuple — subject and HTML kept co-located to prevent subject/body mismatch bugs
 - [Phase 13-contract-e-signature]: sendCountersignNotificationEmail distinct from signing invitation — uses buildCountersignNotificationHtml which emphasizes first signer completed
+- [Phase 14-01]: PhotoCategoryValue local type union used instead of inferred pgEnum type — avoids TypeScript Parameters<> hack
+- [Phase 14-01]: assignPhotosToDeal uses inArray(propertyPhotos.id, photoIds) to scope update to specified photos only (not all inbox)
+- [Phase 14-01]: isInbox = true auto-set when both dealId and propertyId are null/empty — inbox is the default landing zone
+- [Phase 14-01]: isCover auto-set to true for first exterior photo uploaded to a deal with no existing exterior cover
 
 ### Roadmap Evolution
 
@@ -225,5 +230,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Completed 13-04-PLAN.md (Email templates, signed PDF download, end-to-end integration)
-Resume file: .planning/phases/13-contract-e-signature/13-04-SUMMARY.md
+Stopped at: Completed 14-01-PLAN.md (propertyPhotos schema, blob storage photo functions, server actions, query functions)
+Resume file: .planning/phases/14-mobile-photo-capture/14-01-SUMMARY.md
