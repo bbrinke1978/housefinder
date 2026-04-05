@@ -160,12 +160,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PHOTO-01**: User can upload multiple photos from phone camera or gallery with client-side compression (1600px max, JPEG 80% quality) and per-file upload progress indicators
 - [x] **PHOTO-02**: Photos are organized by predefined area categories (Exterior, Kitchen, Bathroom, Living, Bedroom, Garage, Roof, Foundation, Yard, Other) with tag selection during upload; first Exterior photo auto-selected as cover
-- [ ] **PHOTO-03**: Deal detail photo gallery displays photos grouped by category in a responsive grid with full-screen lightbox (swipe navigation, caption overlay) via yet-another-react-lightbox
+- [x] **PHOTO-03**: Deal detail photo gallery displays photos grouped by category in a responsive grid with full-screen lightbox (swipe navigation, caption overlay) via yet-another-react-lightbox
 - [ ] **PHOTO-04**: Photo Inbox page (/photos/inbox) stores unassigned captures for later review and assignment to deals — accessible from sidebar navigation
 - [ ] **PHOTO-05**: Floating action button (FAB) on mobile views opens camera for quick single-photo capture to inbox, positioned above MobileBottomNav
 - [x] **PHOTO-06**: Photos can be attached to properties OR deals; property photos carry over to deal automatically when "Start Deal" creates a deal from that property
 - [ ] **PHOTO-07**: Deal cards in deals list show cover photo thumbnail (48x48) when a cover photo exists
-- [ ] **PHOTO-08**: Deal blast generator auto-populates cover photo SAS URL in the "Photos:" line; field remains editable for manual override
+- [x] **PHOTO-08**: Deal blast generator auto-populates cover photo SAS URL in the "Photos:" line; field remains editable for manual override
 - [x] **PHOTO-09**: User can manually delete photos, set/change cover photo, and edit captions from the deal detail Photos tab
 
 ## v2 Requirements

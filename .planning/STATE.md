@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 14 of 14 (Mobile Photo Capture)
-Plan: 1 of 3 in current phase (Complete)
-Status: In Progress — Phase 14 Plan 01 Complete
-Last activity: 2026-04-05 — Completed 14-01 (propertyPhotos schema, blob storage photo functions, server actions, query functions)
-Stopped at: Completed 14-01-PLAN.md
+Plan: 2 of 3 in current phase (Complete)
+Status: In Progress — Phase 14 Plan 02 Complete
+Last activity: 2026-04-05 — Completed 14-02 (PhotoUpload, PhotoGallery, PhotoTab, deal detail Photos tab, blast generator cover photo)
+Stopped at: Completed 14-02-PLAN.md
 
-Progress: [█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33% of Phase 14
+Progress: [██████████████████████████░░░░░░░░░░░░░░] 66% of Phase 14
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [█████████████░░░░░░░░░░
 | Phase 13-contract-e-signature P02 | 3min | 2 tasks | 8 files |
 | Phase 13-contract-e-signature P04 | 2min | 2 tasks | 3 files |
 | Phase 14-mobile-photo-capture P01 | 3min | 2 tasks | 5 files |
+| Phase 14-mobile-photo-capture P02 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -210,6 +211,9 @@ Recent decisions affecting current work:
 - [Phase 14-01]: assignPhotosToDeal uses inArray(propertyPhotos.id, photoIds) to scope update to specified photos only (not all inbox)
 - [Phase 14-01]: isInbox = true auto-set when both dealId and propertyId are null/empty — inbox is the default landing zone
 - [Phase 14-01]: isCover auto-set to true for first exterior photo uploaded to a deal with no existing exterior cover
+- [Phase 14-02]: Captions imported statically (not via next/dynamic) — plain Plugin function, not React component; dynamic() fails type checks
+- [Phase 14-02]: YARL Lightbox uses dynamic/ssr:false; Captions cast as unknown as Plugin for TypeScript plugins prop compatibility
+- [Phase 14-02]: Deal detail page now has 5 tabs: Overview, Analysis, Financials, Photos, Activity
 
 ### Roadmap Evolution
 
@@ -230,5 +234,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Completed 14-01-PLAN.md (propertyPhotos schema, blob storage photo functions, server actions, query functions)
-Resume file: .planning/phases/14-mobile-photo-capture/14-01-SUMMARY.md
+Stopped at: Completed 14-02-PLAN.md (PhotoUpload, PhotoGallery, PhotoTab, deal detail Photos tab, blast generator cover photo)
+Resume file: .planning/phases/14-mobile-photo-capture/14-02-SUMMARY.md
