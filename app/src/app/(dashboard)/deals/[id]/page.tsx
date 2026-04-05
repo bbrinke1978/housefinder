@@ -7,6 +7,7 @@ import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
+import { getDealPhotos, getDealCoverPhoto } from '@/lib/photo-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
 import { DealNotes } from '@/components/deal-notes';
@@ -15,6 +16,7 @@ import { DealGuidePanel } from '@/components/deal-guide-panel';
 import { DealCompEntry } from '@/components/deal-comp-entry';
 import { BudgetTab } from '@/components/budget-tab';
 import { ContractTab } from '@/components/contract-tab';
+import { PhotoTab } from '@/components/photo-tab';
 import { ActivityTimeline } from '@/components/activity-timeline';
 import type { TimelineEntry } from '@/types';
 
@@ -62,18 +64,21 @@ export default async function DealDetailPage({
     comps: 'analysis',
     contract: 'financials',
     budget: 'financials',
+    photos: 'photos',
     notes: 'activity',
   };
   const rawTab = tab ?? 'overview';
   const activeTab = tabMap[rawTab] ?? rawTab;
 
-  const [deal, notes, budget, contacts, contracts, contractCount] = await Promise.all([
+  const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
     getDealContacts(id),
     getDealContracts(id),
     getContractCountByDealId(id),
+    getDealPhotos(id),
+    getDealCoverPhoto(id),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
 
@@ -141,6 +146,14 @@ export default async function DealDetailPage({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value='photos' className='!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2'>
+            Photos
+            {photos.length > 0 && (
+              <span className='ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0'>
+                {photos.length > 9 ? '9+' : photos.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value='activity' className='!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2'>
             Activity
             {notes.length > 0 && (
@@ -155,7 +168,7 @@ export default async function DealDetailPage({
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
             <DealOverview deal={deal} contacts={contacts} />
-            <DealBlastGenerator deal={deal} />
+            <DealBlastGenerator deal={deal} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />
           </div>
         </TabsContent>
 
@@ -183,6 +196,11 @@ export default async function DealDetailPage({
               <BudgetTab deal={deal} budget={budget} expenses={expenses} />
             </div>
           </div>
+        </TabsContent>
+
+        {/* PHOTOS: Photo upload + gallery */}
+        <TabsContent value='photos' className='mt-4'>
+          <PhotoTab photos={photos} dealId={id} />
         </TabsContent>
 
         {/* ACTIVITY: Notes + Contact Timeline */}

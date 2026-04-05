@@ -10,6 +10,7 @@ import type { DealWithBuyer } from "@/types";
 
 interface DealBlastGeneratorProps {
   deal: DealWithBuyer;
+  coverPhotoSasUrl?: string | null;
 }
 
 const BLAST_STATUSES = [
@@ -46,8 +47,8 @@ function buildBlast(deal: DealWithBuyer, photoUrl: string): string {
   return lines.join("\n");
 }
 
-export function DealBlastGenerator({ deal }: DealBlastGeneratorProps) {
-  const [photoUrl, setPhotoUrl] = useState("");
+export function DealBlastGenerator({ deal, coverPhotoSasUrl }: DealBlastGeneratorProps) {
+  const [photoUrl, setPhotoUrl] = useState(coverPhotoSasUrl ?? "");
   const [copied, setCopied] = useState(false);
 
   const canBlast = BLAST_STATUSES.includes(deal.status);
@@ -91,7 +92,7 @@ export function DealBlastGenerator({ deal }: DealBlastGeneratorProps) {
                 placeholder="https://drive.google.com/... or imgur link"
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                Paste a Google Drive or Imgur link. Will be included in the blast text.
+                Auto-populated from cover photo. Override with a Google Drive or Imgur link if needed.
               </p>
             </div>
 
