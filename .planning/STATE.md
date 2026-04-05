@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 12 of 12 (Email & Call Campaigns)
-Plan: 5 of 5 in current phase (Complete)
-Status: Phase 12 Complete — All Plans Done
-Last activity: 2026-04-04 — Completed 12-05 (Campaign dispatch timer, deal auto-stop, deal detail timeline)
+Phase: 13 of 13 (Contract & E-Signature)
+Plan: 1 of 4 in current phase (Complete)
+Status: In Progress — Phase 13 Plan 01 Complete
+Last activity: 2026-04-05 — Completed 13-01 (Contract schema, types, queries, server actions, PDF generation)
 
-Progress: [██████████] 100%
+Progress: [██████████] 25% of Phase 13
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Phase 12-email-call-campaigns P03 | 7 | 2 tasks | 12 files |
 | Phase 12-email-call-campaigns P04 | 6 | 2 tasks | 12 files |
 | Phase 12-email-call-campaigns P05 | 3min | 1 tasks | 6 files |
+| Phase 13-contract-e-signature P01 | 6min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -189,6 +190,9 @@ Recent decisions affecting current work:
 - [Phase 12-05]: scraper schema.ts extended with 7 campaign tables — separate from app schema, must stay in sync when app schema changes
 - [Phase 12-05]: nextStepNumber = currentStep + 2 in dispatch — 0-based currentStep + 1-indexed stepNumber offset; dispatch sends stepNumber = currentStep + 2
 - [Phase 12-05]: campaignDispatch Resend send uses text: not react: — scraper has no JSX compilation; plain text + appended signature used instead of react-email component
+- [Phase 13-01]: advanceContractStatus uses db.execute(sql) for NOT IN multi-status check — drizzle lacks native notInArray for text columns
+- [Phase 13-01]: Inter-Regular.ttf committed to public/fonts/ — CDN fonts unreliable in server-side PDF generation on Azure App Service
+- [Phase 13-01]: Contract blob path pattern: {dealId}/{contractId}-executed.pdf — deal-scoped, predictable, no collisions
 
 ### Roadmap Evolution
 
@@ -208,6 +212,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04
-Stopped at: Completed 12-05-PLAN.md (Campaign Dispatch Timer + Deal Timeline)
-Resume file: .planning/phases/12-email-call-campaigns/12-04-SUMMARY.md
+Last session: 2026-04-05
+Stopped at: Completed 13-01-PLAN.md (Contract schema, types, queries, server actions, PDF generation)
+Resume file: .planning/phases/13-contract-e-signature/13-01-SUMMARY.md

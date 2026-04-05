@@ -265,7 +265,7 @@ Plans:
   6. Signing order enforced: first signer signs, then countersigner is notified automatically; both get the fully executed PDF by email
   7. Signed contract PDFs are stored in Azure Blob Storage and downloadable from deal detail
   8. Deal auto-advances to "Under Contract" and active campaign enrollment auto-stops when purchase agreement is fully executed
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 13-01-PLAN.md — Schema (contracts, contract_signers), types, @react-pdf/renderer install, blob storage extension, contract queries/actions/PDF generation
