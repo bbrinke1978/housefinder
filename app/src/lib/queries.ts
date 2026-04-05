@@ -275,6 +275,30 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     OR upper(${properties.address}) NOT LIKE '%P O BOX%'
   )`);
 
+  // Exclude vacant land
+  statsConditions.push(sql`(
+    ${properties.propertyType} IS NULL
+    OR ${properties.propertyType} != 'vacant_land'
+  )`);
+
+  // Exclude apartment units (addresses with # unit numbers like "1220 E 800 N #6C")
+  statsConditions.push(sql`(
+    ${properties.address} IS NULL
+    OR ${properties.address} NOT LIKE '%#%'
+  )`);
+
+  // Exclude government, institutional, and commercial properties — not wholesalable
+  statsConditions.push(sql`(
+    ${properties.ownerName} IS NULL
+    OR (
+      upper(${properties.ownerName}) NOT LIKE '%STATE OF UTAH%'
+      AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
+      AND upper(${properties.ownerName}) NOT LIKE '%SCHOOL DISTRICT%'
+      AND upper(${properties.ownerName}) NOT LIKE '%HOUSING AUTHORITY%'
+      AND upper(${properties.ownerName}) NOT LIKE '%INSTITUTIONAL TRUST%'
+    )
+  )`);
+
   // Filter to target cities only
   if (targetCities.length > 0) {
     statsConditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
@@ -438,6 +462,30 @@ export async function getProperties(
   conditions.push(sql`(
     ${properties.address} IS NULL
     OR upper(${properties.address}) NOT LIKE '%P O BOX%'
+  )`);
+
+  // Exclude vacant land
+  conditions.push(sql`(
+    ${properties.propertyType} IS NULL
+    OR ${properties.propertyType} != 'vacant_land'
+  )`);
+
+  // Exclude apartment units (addresses with # unit numbers like "1220 E 800 N #6C")
+  conditions.push(sql`(
+    ${properties.address} IS NULL
+    OR ${properties.address} NOT LIKE '%#%'
+  )`);
+
+  // Exclude government, institutional, and commercial properties — not wholesalable
+  conditions.push(sql`(
+    ${properties.ownerName} IS NULL
+    OR (
+      upper(${properties.ownerName}) NOT LIKE '%STATE OF UTAH%'
+      AND upper(${properties.ownerName}) NOT LIKE '%BUREAU OF LAND%'
+      AND upper(${properties.ownerName}) NOT LIKE '%SCHOOL DISTRICT%'
+      AND upper(${properties.ownerName}) NOT LIKE '%HOUSING AUTHORITY%'
+      AND upper(${properties.ownerName}) NOT LIKE '%INSTITUTIONAL TRUST%'
+    )
   )`);
 
   // Filter to target cities only (unless a specific city filter is set)
