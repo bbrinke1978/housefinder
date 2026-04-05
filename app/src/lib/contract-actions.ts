@@ -20,6 +20,12 @@ import { getContractById } from "@/lib/contract-queries";
 import { generateContractPdf } from "@/lib/contract-pdf";
 import { uploadContract } from "@/lib/blob-storage";
 import type { ContractWithSigners } from "@/types";
+import {
+  buildSigningInvitationHtml,
+  buildCountersignNotificationHtml,
+  buildExecutedContractHtml,
+} from "@/lib/contract-emails";
+import { generateContractSasUrl } from "@/lib/blob-storage";
 
 // ── createContract ──────────────────────────────────────────────────────────
 
@@ -425,8 +431,8 @@ async function advanceContractStatus(contractId: string): Promise<void> {
       .set({ tokenExpiresAt: expiresAt })
       .where(eq(contractSigners.id, signer2.id));
 
-    // Email signer 2
-    await sendSigningInvitationEmail(signer2, contract);
+    // Email signer 2: countersign notification (distinct from initial invitation)
+    await sendCountersignNotificationEmail(signer1, signer2, contract);
   }
 }
 
@@ -559,6 +565,38 @@ export async function extendSigningDeadline(
   }
 }
 
+// ── downloadSignedPdf ────────────────────────────────────────────────────────
+
+/**
+ * downloadSignedPdf — fetch SAS URL for the executed PDF.
+ * Client components call this and open the URL in a new tab.
+ */
+export async function downloadSignedPdf(
+  contractId: string
+): Promise<{ url: string } | { error: string }> {
+  try {
+    const contractRows = await db
+      .select()
+      .from(contracts)
+      .where(eq(contracts.id, contractId))
+      .limit(1);
+
+    if (contractRows.length === 0) return { error: "Contract not found" };
+    const contract = contractRows[0];
+
+    if (!contract.signedPdfBlobName) {
+      return { error: "Signed PDF not available" };
+    }
+
+    const url = await generateContractSasUrl(contract.signedPdfBlobName);
+    return { url };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Failed to get download URL";
+    return { error: message };
+  }
+}
+
 // ── Email helpers ─────────────────────────────────────────────────────────────
 
 async function sendSigningInvitationEmail(
@@ -573,7 +611,8 @@ async function sendSigningInvitationEmail(
     if (!resendApiKey) return;
 
     const resend = new Resend(resendApiKey);
-    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    const baseUrl =
+      process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
     const signingUrl = `${baseUrl}/sign/${signer.signingToken}`;
 
     const contractTitle =
@@ -581,45 +620,66 @@ async function sendSigningInvitationEmail(
         ? "Real Estate Purchase Agreement"
         : "Assignment of Contract";
 
-    const roleLabel =
-      signer.signerRole === "seller"
-        ? "Seller"
-        : signer.signerRole === "buyer"
-        ? "Buyer"
-        : "Wholesaler";
-
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #1a1a1a;">Please Sign: ${contractTitle}</h2>
-        <p>Hello ${signer.signerName},</p>
-        <p>You have been requested to sign the following document as <strong>${roleLabel}</strong>:</p>
-        <p style="background: #f5f5f5; padding: 12px; border-radius: 6px;">
-          <strong>${contractTitle}</strong><br/>
-          Property: ${contract.propertyAddress}, ${contract.city}, UT
-        </p>
-        <p>Please click the button below to review and sign the document. This link will expire in 72 hours.</p>
-        <p style="margin: 24px 0;">
-          <a href="${signingUrl}" style="background: #6d28d9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Review &amp; Sign Document
-          </a>
-        </p>
-        <p style="color: #666; font-size: 13px;">
-          If the button doesn't work, copy and paste this link:<br/>
-          <a href="${signingUrl}">${signingUrl}</a>
-        </p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="color: #999; font-size: 12px;">
-          ${mailSettings.fromName}<br/>
-          ${mailSettings.phone || ""}<br/>
-          ${mailSettings.signature || ""}
-        </p>
-      </div>
-    `;
+    const { subject, html } = buildSigningInvitationHtml({
+      signerName: signer.signerName,
+      signerRole: signer.signerRole ?? "wholesaler",
+      contractTitle,
+      propertyAddress: contract.propertyAddress,
+      city: contract.city,
+      signingUrl,
+      fromName: mailSettings.fromName,
+      phone: mailSettings.phone || undefined,
+      signature: mailSettings.signature || undefined,
+    });
 
     await resend.emails.send({
       from: `${mailSettings.fromName} <${mailSettings.fromEmail}>`,
       to: [signer.signerEmail],
-      subject: `Please sign: ${contractTitle} for ${contract.propertyAddress}`,
+      subject,
+      html,
+    });
+  } catch {
+    // Non-fatal: email failure doesn't block contract state changes
+  }
+}
+
+async function sendCountersignNotificationEmail(
+  signer1: ContractSignerRow,
+  signer2: ContractSignerRow,
+  contract: ContractRow
+): Promise<void> {
+  try {
+    const mailSettings = await getMailSettings();
+    const resendApiKey =
+      mailSettings.resendApiKey || process.env.RESEND_API_KEY || "";
+
+    if (!resendApiKey) return;
+
+    const resend = new Resend(resendApiKey);
+    const baseUrl =
+      process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    const signingUrl = `${baseUrl}/sign/${signer2.signingToken}`;
+
+    const contractTitle =
+      contract.contractType === "purchase_agreement"
+        ? "Real Estate Purchase Agreement"
+        : "Assignment of Contract";
+
+    const { subject, html } = buildCountersignNotificationHtml({
+      firstSignerName: signer1.signerName,
+      contractTitle,
+      propertyAddress: contract.propertyAddress,
+      city: contract.city,
+      signingUrl,
+      fromName: mailSettings.fromName,
+      phone: mailSettings.phone || undefined,
+      signature: mailSettings.signature || undefined,
+    });
+
+    await resend.emails.send({
+      from: `${mailSettings.fromName} <${mailSettings.fromEmail}>`,
+      to: [signer2.signerEmail],
+      subject,
       html,
     });
   } catch {
@@ -646,24 +706,19 @@ async function sendExecutedContractEmails(
         ? "Real Estate Purchase Agreement"
         : "Assignment of Contract";
 
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #1a1a1a;">Fully Executed: ${contractTitle}</h2>
-        <p>All parties have signed. Please find the fully executed document attached.</p>
-        <p style="background: #f0fdf4; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a;">
-          <strong>${contractTitle}</strong><br/>
-          Property: ${contract.propertyAddress}, ${contract.city}, UT<br/>
-          Status: Fully Executed
-        </p>
-        <p>Please retain this copy for your records.</p>
-        <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-        <p style="color: #999; font-size: 12px;">
-          ${mailSettings.fromName}<br/>
-          ${mailSettings.phone || ""}<br/>
-          ${mailSettings.signature || ""}
-        </p>
-      </div>
-    `;
+    const baseUrl =
+      process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+    const dealUrl = `${baseUrl}/deals/${contract.dealId}?tab=financials`;
+
+    const { subject, html } = buildExecutedContractHtml({
+      contractTitle,
+      propertyAddress: contract.propertyAddress,
+      city: contract.city,
+      dealUrl,
+      fromName: mailSettings.fromName,
+      phone: mailSettings.phone || undefined,
+      signature: mailSettings.signature || undefined,
+    });
 
     const recipients = contract.signers.map((s) => s.signerEmail);
     const uniqueRecipients = [...new Set(recipients)];
@@ -674,7 +729,7 @@ async function sendExecutedContractEmails(
       await resend.emails.send({
         from: `${mailSettings.fromName} <${mailSettings.fromEmail}>`,
         to: [email],
-        subject: `Fully Executed: ${contractTitle} — ${contract.propertyAddress}`,
+        subject,
         html,
         attachments: [
           {
