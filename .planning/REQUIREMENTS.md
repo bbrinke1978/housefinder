@@ -137,6 +137,25 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CAMP-11**: Follow-up emails dispatch automatically daily via Azure Functions timer trigger for enrollments where nextSendAt is past due, with idempotency protection against duplicate sends
 - [x] **CAMP-12**: Enrollments auto-stop when lead's deal status changes to closed or dead; activity timeline visible on deal detail pages
 
+### Contract & E-Signature
+
+- [ ] **CONTRACT-01**: System stores contract definitions (purchase agreement and assignment types) with deal linkage, parties, financial terms, and editable clauses in PostgreSQL
+- [ ] **CONTRACT-02**: System stores signer records with unique signing tokens, expiration, signature data (drawn/typed), IP address, user agent, and document hash for legal audit trail
+- [ ] **CONTRACT-03**: Standard Utah wholesale contract templates with default clauses (as-is condition, inspection period, earnest money, closing timeline, assignment clause, default & remedies) auto-populate on contract creation
+- [ ] **CONTRACT-04**: Contract creation auto-fills all available deal data: property address, city, county, parcel ID, seller name, offer price, ARV, assignment fee
+- [ ] **CONTRACT-05**: User can review and edit contract before sending — add, remove, modify, and reorder clauses per deal
+- [ ] **CONTRACT-06**: Contracts tab on deal detail page shows all contracts for that deal with status badges and action buttons (send, void, resend, download)
+- [ ] **CONTRACT-07**: Global Contracts page shows all contracts across all deals with status filtering and deal links
+- [ ] **CONTRACT-08**: Sidebar navigation includes Contracts link between Deals and Campaigns
+- [ ] **CONTRACT-09**: Contract PDF generated server-side via @react-pdf/renderer with property details, parties, financial terms, clauses, signature lines, and audit trail page
+- [ ] **CONTRACT-10**: User can preview contract as downloadable PDF before sending
+- [ ] **CONTRACT-11**: Public signing page (/sign/[token]) allows sellers and buyers to sign without a HouseFinder account — token-gated with 72-hour default expiration
+- [ ] **CONTRACT-12**: Signer can draw (canvas) or type their signature on mobile or desktop; canvas uses Pointer Events with touchAction:none for iOS Safari compatibility
+- [ ] **CONTRACT-13**: Signing page validates token expiration and already-signed status, showing appropriate messages for expired or completed links
+- [ ] **CONTRACT-14**: Signing invitation email sent via Resend with prominent "Sign Now" CTA button linking to /sign/[token]
+- [ ] **CONTRACT-15**: Contract lifecycle: Draft -> Sent (email) -> Seller Signed -> Countersigned -> Executed; countersign link sent automatically after first signature; fully executed PDF emailed to both parties
+- [ ] **CONTRACT-16**: Deal auto-advances to "Under Contract" status and active campaign enrollment auto-stops (stopReason: contract_executed) when purchase agreement reaches Executed status
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -182,6 +201,11 @@ Explicitly excluded. Documented to prevent scope creep.
 | Google Calendar follow-up reminders | Deferred — OAuth complexity, activity timeline provides visibility |
 | Auto-enrollment rules | Deferred — manual enrollment first, automation later |
 | SMS/text messaging integration | Deferred — separate phase |
+| SMS delivery of signing links | Requires SMS integration not in scope |
+| JV Partnership Agreement template | Future phase if needed |
+| Custom contract template upload | Future enhancement |
+| Notarization integration | Out of scope |
+| Title company integration for closing | Future phase |
 
 ## Traceability
 
@@ -231,13 +255,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-02 | Phase 5 | Complete |
 | MAP-03 | Phase 5 | Complete |
 | MAP-04 | Phase 5 | Complete |
-| ANALYTICS-01 | Phase 6 | Complete (06-01) |
-| ANALYTICS-02 | Phase 6 | Complete (06-01) |
-| ANALYTICS-03 | Phase 6 | Complete (06-01) |
-| ANALYTICS-04 | Phase 6 | Complete (06-01) |
-| ANALYTICS-05 | Phase 6 | Complete (06-01) |
-| ANALYTICS-06 | Phase 6 | Complete (06-01) |
-| ANALYTICS-07 | Phase 6 | Complete (06-01) |
+| ANALYTICS-01 | Phase 6 | Complete |
+| ANALYTICS-02 | Phase 6 | Complete |
+| ANALYTICS-03 | Phase 6 | Complete |
+| ANALYTICS-04 | Phase 6 | Complete |
+| ANALYTICS-05 | Phase 6 | Complete |
+| ANALYTICS-06 | Phase 6 | Complete |
+| ANALYTICS-07 | Phase 6 | Complete |
 | ANALYTICS-08 | Phase 6 | Complete |
 | DEAL-01 | Phase 8 | Complete |
 | DEAL-02 | Phase 8 | Complete |
@@ -247,40 +271,56 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEAL-06 | Phase 8 | Complete |
 | DEAL-07 | Phase 8 | Complete |
 | DEAL-08 | Phase 8 | Complete |
-| BUDGET-01 | Phase 9 | Planned |
-| BUDGET-02 | Phase 9 | Planned |
-| BUDGET-03 | Phase 9 | Planned |
-| BUDGET-04 | Phase 9 | Planned |
-| BUDGET-05 | Phase 9 | Planned |
-| BUDGET-06 | Phase 9 | Planned |
-| BUDGET-07 | Phase 9 | Planned |
-| BUDGET-08 | Phase 9 | Planned |
-| UI-01 | Phase 11 | Planned |
-| UI-02 | Phase 11 | Planned |
-| UI-03 | Phase 11 | Planned |
-| UI-04 | Phase 11 | Planned |
-| UI-05 | Phase 11 | Planned |
-| UI-06 | Phase 11 | Planned |
-| UI-07 | Phase 11 | Planned |
-| UI-08 | Phase 11 | Planned |
+| BUDGET-01 | Phase 9 | Complete |
+| BUDGET-02 | Phase 9 | Complete |
+| BUDGET-03 | Phase 9 | Complete |
+| BUDGET-04 | Phase 9 | Complete |
+| BUDGET-05 | Phase 9 | Complete |
+| BUDGET-06 | Phase 9 | Complete |
+| BUDGET-07 | Phase 9 | Complete |
+| BUDGET-08 | Phase 9 | Complete |
+| UI-01 | Phase 11 | Complete |
+| UI-02 | Phase 11 | Complete |
+| UI-03 | Phase 11 | Complete |
+| UI-04 | Phase 11 | Complete |
+| UI-05 | Phase 11 | Complete |
+| UI-06 | Phase 11 | Complete |
+| UI-07 | Phase 11 | Complete |
+| UI-08 | Phase 11 | Complete |
 | CAMP-01 | Phase 12 | Complete |
 | CAMP-02 | Phase 12 | Complete |
 | CAMP-03 | Phase 12 | Complete |
 | CAMP-04 | Phase 12 | Complete |
 | CAMP-05 | Phase 12 | Complete |
-| CAMP-06 | Phase 12 | Planned |
-| CAMP-07 | Phase 12 | Planned |
-| CAMP-08 | Phase 12 | Planned |
-| CAMP-09 | Phase 12 | Planned |
-| CAMP-10 | Phase 12 | Planned |
-| CAMP-11 | Phase 12 | Planned |
-| CAMP-12 | Phase 12 | Planned |
+| CAMP-06 | Phase 12 | Complete |
+| CAMP-07 | Phase 12 | Complete |
+| CAMP-08 | Phase 12 | Complete |
+| CAMP-09 | Phase 12 | Complete |
+| CAMP-10 | Phase 12 | Complete |
+| CAMP-11 | Phase 12 | Complete |
+| CAMP-12 | Phase 12 | Complete |
+| CONTRACT-01 | Phase 13 | Planned |
+| CONTRACT-02 | Phase 13 | Planned |
+| CONTRACT-03 | Phase 13 | Planned |
+| CONTRACT-04 | Phase 13 | Planned |
+| CONTRACT-05 | Phase 13 | Planned |
+| CONTRACT-06 | Phase 13 | Planned |
+| CONTRACT-07 | Phase 13 | Planned |
+| CONTRACT-08 | Phase 13 | Planned |
+| CONTRACT-09 | Phase 13 | Planned |
+| CONTRACT-10 | Phase 13 | Planned |
+| CONTRACT-11 | Phase 13 | Planned |
+| CONTRACT-12 | Phase 13 | Planned |
+| CONTRACT-13 | Phase 13 | Planned |
+| CONTRACT-14 | Phase 13 | Planned |
+| CONTRACT-15 | Phase 13 | Planned |
+| CONTRACT-16 | Phase 13 | Planned |
 
 **Coverage:**
-- v1 requirements: 76 total
-- Mapped to phases: 76
+- v1 requirements: 92 total
+- Mapped to phases: 92
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-02 — added Phase 12 email & call campaigns requirements (CAMP-01 through CAMP-12)*
+*Last updated: 2026-04-05 — added Phase 13 contract & e-signature requirements (CONTRACT-01 through CONTRACT-16)*

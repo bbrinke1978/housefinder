@@ -253,13 +253,25 @@ Plans:
 
 ### Phase 13: Contract & E-Signature
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can generate, e-sign, and manage wholesale contracts (purchase agreements and assignment contracts) within HouseFinder — auto-filled from deal data, sent for signature via email with token-gated signing pages, tracked through a full lifecycle from draft to executed, with signed PDFs stored in Azure Blob Storage and automatic deal stage advancement on execution
 **Depends on:** Phase 12
-**Plans:** 0 plans
+**Requirements**: CONTRACT-01, CONTRACT-02, CONTRACT-03, CONTRACT-04, CONTRACT-05, CONTRACT-06, CONTRACT-07, CONTRACT-08, CONTRACT-09, CONTRACT-10, CONTRACT-11, CONTRACT-12, CONTRACT-13, CONTRACT-14, CONTRACT-15, CONTRACT-16
+**Success Criteria** (what must be TRUE):
+  1. Two contract types (Purchase Agreement and Assignment) can be created from deal detail with all available deal data auto-filled and standard Utah wholesale clauses pre-populated
+  2. User can edit clauses (add, remove, modify, reorder) before sending a contract for signature
+  3. Contracts tab on deal detail shows all contracts with status badges and actions; global Contracts page shows all contracts across deals
+  4. Contract PDF is generated server-side via @react-pdf/renderer with property details, parties, terms, clauses, and audit trail
+  5. Signing link sent via email opens a public page where seller/buyer can draw or type their signature without a HouseFinder account
+  6. Signing order enforced: first signer signs, then countersigner is notified automatically; both get the fully executed PDF by email
+  7. Signed contract PDFs are stored in Azure Blob Storage and downloadable from deal detail
+  8. Deal auto-advances to "Under Contract" and active campaign enrollment auto-stops when purchase agreement is fully executed
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 13 to break down)
+- [ ] 13-01-PLAN.md — Schema (contracts, contract_signers), types, @react-pdf/renderer install, blob storage extension, contract queries/actions/PDF generation
+- [ ] 13-02-PLAN.md — Contract tab on deal detail, create form with clause editor, global contracts page, sidebar nav
+- [ ] 13-03-PLAN.md — Public signing page (/sign/[token]), signature canvas (draw/type), PDF API endpoint
+- [ ] 13-04-PLAN.md — Email delivery (signing invitation, countersign, executed PDF), signed PDF download, auto-advance deal, auto-stop campaign
 
 ### Phase 14: Mobile Photo Capture
 
