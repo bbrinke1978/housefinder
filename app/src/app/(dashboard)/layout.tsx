@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileBottomNav } from "@/components/bottom-nav";
 import { CommandMenu } from "@/components/command-menu";
+import { PhotoFab } from "@/components/photo-fab";
 
 export default function DashboardLayout({
   children,
@@ -30,6 +31,7 @@ export default function DashboardLayout({
             {children}
           </div>
         </main>
+        <PhotoFab />
         <MobileBottomNav />
       </SidebarInset>
       <CommandMenu />
