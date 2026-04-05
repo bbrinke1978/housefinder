@@ -30,6 +30,8 @@ jobs:
         run: |
           rm -rf node_modules
           npm install --include=optional
+          # Lockfile was generated on Windows — ensure linux native binaries are present
+          npm install lightningcss-linux-x64-gnu@1.32.0 --no-save 2>/dev/null || true
 
       - name: Build Next.js app
         working-directory: ./app
