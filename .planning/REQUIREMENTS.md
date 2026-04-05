@@ -156,6 +156,18 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CONTRACT-15**: Contract lifecycle: Draft -> Sent (email) -> Seller Signed -> Countersigned -> Executed; countersign link sent automatically after first signature; fully executed PDF emailed to both parties
 - [x] **CONTRACT-16**: Deal auto-advances to "Under Contract" status and active campaign enrollment auto-stops (stopReason: contract_executed) when purchase agreement reaches Executed status
 
+### Mobile Photo Capture
+
+- [ ] **PHOTO-01**: User can upload multiple photos from phone camera or gallery with client-side compression (1600px max, JPEG 80% quality) and per-file upload progress indicators
+- [ ] **PHOTO-02**: Photos are organized by predefined area categories (Exterior, Kitchen, Bathroom, Living, Bedroom, Garage, Roof, Foundation, Yard, Other) with tag selection during upload; first Exterior photo auto-selected as cover
+- [ ] **PHOTO-03**: Deal detail photo gallery displays photos grouped by category in a responsive grid with full-screen lightbox (swipe navigation, caption overlay) via yet-another-react-lightbox
+- [ ] **PHOTO-04**: Photo Inbox page (/photos/inbox) stores unassigned captures for later review and assignment to deals — accessible from sidebar navigation
+- [ ] **PHOTO-05**: Floating action button (FAB) on mobile views opens camera for quick single-photo capture to inbox, positioned above MobileBottomNav
+- [ ] **PHOTO-06**: Photos can be attached to properties OR deals; property photos carry over to deal automatically when "Start Deal" creates a deal from that property
+- [ ] **PHOTO-07**: Deal cards in deals list show cover photo thumbnail (48x48) when a cover photo exists
+- [ ] **PHOTO-08**: Deal blast generator auto-populates cover photo SAS URL in the "Photos:" line; field remains editable for manual override
+- [ ] **PHOTO-09**: User can manually delete photos, set/change cover photo, and edit captions from the deal detail Photos tab
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -206,6 +218,9 @@ Explicitly excluded. Documented to prevent scope creep.
 | Custom contract template upload | Future enhancement |
 | Notarization integration | Out of scope |
 | Title company integration for closing | Future phase |
+| Video capture/walkthrough clips | Deferred — separate phase |
+| AI-based photo tagging | Deferred — future enhancement |
+| Before/after comparison views | Deferred — rehab documentation phase |
 
 ## Traceability
 
@@ -315,12 +330,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONTRACT-14 | Phase 13 | Planned |
 | CONTRACT-15 | Phase 13 | Planned |
 | CONTRACT-16 | Phase 13 | Planned |
+| PHOTO-01 | Phase 14 | Planned |
+| PHOTO-02 | Phase 14 | Planned |
+| PHOTO-03 | Phase 14 | Planned |
+| PHOTO-04 | Phase 14 | Planned |
+| PHOTO-05 | Phase 14 | Planned |
+| PHOTO-06 | Phase 14 | Planned |
+| PHOTO-07 | Phase 14 | Planned |
+| PHOTO-08 | Phase 14 | Planned |
+| PHOTO-09 | Phase 14 | Planned |
 
 **Coverage:**
-- v1 requirements: 92 total
-- Mapped to phases: 92
+- v1 requirements: 101 total
+- Mapped to phases: 101
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-05 — added Phase 13 contract & e-signature requirements (CONTRACT-01 through CONTRACT-16)*
+*Last updated: 2026-04-05 — added Phase 14 mobile photo capture requirements (PHOTO-01 through PHOTO-09)*

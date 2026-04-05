@@ -275,13 +275,24 @@ Plans:
 
 ### Phase 14: Mobile Photo Capture
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can capture, organize, and manage property photos from mobile devices — with categorized uploads, a photo inbox for field captures, deal detail galleries with lightbox, cover photo thumbnails on deal cards, and auto-populated deal blast photos — enabling a complete visual documentation workflow for driving-for-dollars and deal management
 **Depends on:** Phase 13
-**Plans:** 0 plans
+**Requirements**: PHOTO-01, PHOTO-02, PHOTO-03, PHOTO-04, PHOTO-05, PHOTO-06, PHOTO-07, PHOTO-08, PHOTO-09
+**Success Criteria** (what must be TRUE):
+  1. User can upload multiple photos from phone camera or gallery with client-side compression and per-file progress, tagged by area category (Exterior, Kitchen, etc.)
+  2. Deal detail page has a Photos tab showing all photos grouped by category in a responsive grid, with full-screen lightbox (swipe, caption overlay)
+  3. First Exterior photo auto-selected as cover; user can change cover photo and delete/edit captions
+  4. Photo Inbox at /photos/inbox stores unassigned captures with assign-to-deal flow; accessible from sidebar
+  5. Floating action button on mobile opens camera for quick single-photo capture to inbox
+  6. Property photos carry over to deal when "Start Deal" creates a deal from that property
+  7. Deal cards in deals list show cover photo thumbnail
+  8. Deal blast generator auto-populates cover photo SAS URL
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 14 to break down)
+- [ ] 14-01-PLAN.md — Schema (property_photos, photo_category enum), blob storage extension, server actions, query functions
+- [ ] 14-02-PLAN.md — Photo upload component (dual iOS input, batch, progress), photo gallery with YARL lightbox, Photos tab on deal detail
+- [ ] 14-03-PLAN.md — Photo FAB, Photo Inbox page, sidebar nav, deal card thumbnails, deal blast cover photo, property-to-deal carry-over
 
 ### Phase 15: Blueprints & Floor Plans
 
