@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 11 — HouseFinder UI Revamp
+**Current focus:** Phase 13 — Contract & E-Signature (Complete)
 
 ## Current Position
 
 Phase: 13 of 13 (Contract & E-Signature)
-Plan: 3 of 4 in current phase (Complete)
-Status: In Progress — Phase 13 Plan 03 Complete
-Last activity: 2026-04-05 — Completed 13-03 (Public signing page, signature canvas, PDF endpoint)
-Stopped at: Completed 13-03-PLAN.md (Public signing page, signature canvas, PDF endpoint)
+Plan: 4 of 4 in current phase (Complete)
+Status: Complete — Phase 13 All Plans Complete
+Last activity: 2026-04-05 — Completed 13-04 (Email templates, signed PDF download, end-to-end integration)
+Stopped at: Completed 13-04-PLAN.md (Email templates, signed PDF download, end-to-end integration)
 
-Progress: [███████████████████████████████] 75% of Phase 13
+Progress: [████████████████████████████████████████] 100% of Phase 13
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: [███████████████████████
 | Phase 13-contract-e-signature P01 | 6min | 2 tasks | 10 files |
 | Phase 13-contract-e-signature P03 | 2min | 2 tasks | 5 files |
 | Phase 13-contract-e-signature P02 | 3min | 2 tasks | 8 files |
+| Phase 13-contract-e-signature P04 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -202,6 +203,8 @@ Recent decisions affecting current work:
 - [Phase 13-contract-e-signature]: ContractTab uses 'use client' (not server wrapper) — simpler pattern matching BudgetTab, data fetched server-side in parent page
 - [Phase 13-contract-e-signature]: contracts/page.tsx groups by Active/Executed/Expired+Voided — workflow-ordered, terminal contracts at bottom
 - [Phase 13-contract-e-signature]: Contracts nav item placed between Deals and Buyers — deal lifecycle order
+- [Phase 13-contract-e-signature]: contract-emails.tsx returns { subject, html } tuple — subject and HTML kept co-located to prevent subject/body mismatch bugs
+- [Phase 13-contract-e-signature]: sendCountersignNotificationEmail distinct from signing invitation — uses buildCountersignNotificationHtml which emphasizes first signer completed
 
 ### Roadmap Evolution
 
@@ -222,5 +225,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Completed 13-01-PLAN.md (Contract schema, types, queries, server actions, PDF generation)
-Resume file: .planning/phases/13-contract-e-signature/13-01-SUMMARY.md
+Stopped at: Completed 13-04-PLAN.md (Email templates, signed PDF download, end-to-end integration)
+Resume file: .planning/phases/13-contract-e-signature/13-04-SUMMARY.md

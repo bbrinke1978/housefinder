@@ -152,9 +152,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **CONTRACT-11**: Public signing page (/sign/[token]) allows sellers and buyers to sign without a HouseFinder account — token-gated with 72-hour default expiration
 - [x] **CONTRACT-12**: Signer can draw (canvas) or type their signature on mobile or desktop; canvas uses Pointer Events with touchAction:none for iOS Safari compatibility
 - [x] **CONTRACT-13**: Signing page validates token expiration and already-signed status, showing appropriate messages for expired or completed links
-- [ ] **CONTRACT-14**: Signing invitation email sent via Resend with prominent "Sign Now" CTA button linking to /sign/[token]
-- [ ] **CONTRACT-15**: Contract lifecycle: Draft -> Sent (email) -> Seller Signed -> Countersigned -> Executed; countersign link sent automatically after first signature; fully executed PDF emailed to both parties
-- [ ] **CONTRACT-16**: Deal auto-advances to "Under Contract" status and active campaign enrollment auto-stops (stopReason: contract_executed) when purchase agreement reaches Executed status
+- [x] **CONTRACT-14**: Signing invitation email sent via Resend with prominent "Sign Now" CTA button linking to /sign/[token]
+- [x] **CONTRACT-15**: Contract lifecycle: Draft -> Sent (email) -> Seller Signed -> Countersigned -> Executed; countersign link sent automatically after first signature; fully executed PDF emailed to both parties
+- [x] **CONTRACT-16**: Deal auto-advances to "Under Contract" status and active campaign enrollment auto-stops (stopReason: contract_executed) when purchase agreement reaches Executed status
 
 ## v2 Requirements
 
