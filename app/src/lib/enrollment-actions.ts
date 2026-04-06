@@ -58,7 +58,7 @@ export async function enrollLeadInSequence(
     .from(ownerContacts)
     .where(
       and(
-        eq(ownerContacts.propertyId, lead.propertyId),
+        lead.propertyId ? eq(ownerContacts.propertyId, lead.propertyId) : undefined,
         isNotNull(ownerContacts.email)
       )
     )
