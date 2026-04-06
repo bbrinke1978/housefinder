@@ -296,14 +296,25 @@ Plans:
 
 ### Phase 15: Blueprints & Floor Plans
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can upload, sketch, view, and annotate property floor plans within HouseFinder — with PDF/image upload, in-app room rectangle sketching with dimensions, pin-based annotations linked to rehab budget categories, multiple floors and versions (as-is/proposed), square footage feeding deal metrics, and shareable contractor links
+**Requirements**: FLOOR-01, FLOOR-02, FLOOR-03, FLOOR-04, FLOOR-05, FLOOR-06, FLOOR-07, FLOOR-08, FLOOR-09, FLOOR-10
 **Depends on:** Phase 14
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. User can upload PDF or image floor plans and view them with pan/zoom (pinch on mobile, scroll on desktop)
+  2. User can sketch floor plans in-app with named room rectangles, editable L x W dimensions, and auto-calculated sq ft
+  3. Pin annotations with category colors can be dropped on floor plans with notes and links to rehab budget categories
+  4. Multiple floors (Main, Upper, Basement, Garage) and versions (As-Is, Proposed) are supported per deal
+  5. Floor Plans tab on deal detail shows all plans with floor selector, version toggle, and plan count badge
+  6. Total square footage from floor plans feeds into deal metrics (price/sqft, rehab/sqft, ARV/sqft)
+  7. Shareable time-limited links give contractors view-only access to floor plans with annotations
+  8. Floor plans carry over from property to deal on Start Deal
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 15 to break down)
-
+- [ ] 15-01-PLAN.md — Schema (floor_plans, floor_plan_pins), types, blob storage extension, queries, server actions
+- [ ] 15-02-PLAN.md — Floor plan upload, pan/zoom viewer, pin annotations, Floor Plans tab on deal detail
+- [ ] 15-03-PLAN.md — react-konva room rectangle sketch tool with dimensions, sqft calculation, save to DB
+- [ ] 15-04-PLAN.md — Contractor share links, Start Deal carry-over, sqft deal metrics integration
 ### Phase 16: Buyers List CRM
 
 **Goal:** [To be planned]

@@ -168,6 +168,19 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **PHOTO-08**: Deal blast generator auto-populates cover photo SAS URL in the "Photos:" line; field remains editable for manual override
 - [x] **PHOTO-09**: User can manually delete photos, set/change cover photo, and edit captions from the deal detail Photos tab
 
+### Blueprints & Floor Plans
+
+- [ ] **FLOOR-01**: User can upload PDF and image (JPG/PNG) floor plans to Azure Blob Storage with attachment to deals or properties, client-side image compression (1920px max, JPEG 0.8), and 10MB file size limit for PDFs
+- [ ] **FLOOR-02**: Uploaded floor plans display in a pan/zoom viewer with pinch-to-zoom on mobile and scroll-wheel zoom on desktop, rendering both PDF and image formats
+- [ ] **FLOOR-03**: User can sketch floor plans in-app using a react-konva room rectangle tool with draggable/resizable rooms, snap-to-grid, editable labels, and L x W dimension inputs
+- [ ] **FLOOR-04**: Multiple floors per property supported with floor selector (Main, Upper, Basement, Garage, Other) and floor label on each plan
+- [ ] **FLOOR-05**: Pin-based annotations with colored category markers (plumbing, electrical, structural, cosmetic, etc.) can be dropped on floor plans with text notes and optional links to rehab budget categories
+- [ ] **FLOOR-06**: Floor plans support versioning (As-Is and Proposed) per floor, allowing comparison of pre-rehab and post-rehab layouts
+- [ ] **FLOOR-07**: Dedicated Floor Plans tab on deal detail page with floor selector, version toggle, upload/sketch mode, and plan count badge
+- [ ] **FLOOR-08**: Shareable time-limited public link for contractors (token-gated, 7-day expiry) provides view-only access to floor plans with annotations — no HouseFinder account required
+- [ ] **FLOOR-09**: Sketched floor plans auto-calculate total square footage from room dimensions, feeding into deal metrics (price/sqft, rehab cost/sqft, ARV/sqft) on the MAO calculator
+- [ ] **FLOOR-10**: Floor plans carry over from property to deal automatically when Start Deal creates a deal, following the same best-effort pattern as photo carry-over
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -339,12 +352,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PHOTO-07 | Phase 14 | Planned |
 | PHOTO-08 | Phase 14 | Planned |
 | PHOTO-09 | Phase 14 | Planned |
+| FLOOR-01 | Phase 15 | Planned |
+| FLOOR-02 | Phase 15 | Planned |
+| FLOOR-03 | Phase 15 | Planned |
+| FLOOR-04 | Phase 15 | Planned |
+| FLOOR-05 | Phase 15 | Planned |
+| FLOOR-06 | Phase 15 | Planned |
+| FLOOR-07 | Phase 15 | Planned |
+| FLOOR-08 | Phase 15 | Planned |
+| FLOOR-09 | Phase 15 | Planned |
+| FLOOR-10 | Phase 15 | Planned |
 
 **Coverage:**
-- v1 requirements: 101 total
-- Mapped to phases: 101
+- v1 requirements: 111 total
+- Mapped to phases: 111
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-05 — added Phase 14 mobile photo capture requirements (PHOTO-01 through PHOTO-09)*
+*Last updated: 2026-04-05 — added Phase 15 blueprints & floor plans requirements (FLOOR-01 through FLOOR-10)*
