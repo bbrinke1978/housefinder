@@ -8,6 +8,7 @@ import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
 import { getDealPhotos, getDealCoverPhoto } from '@/lib/photo-queries';
+import { getFloorPlansByDeal, getFloorPlanCount } from '@/lib/floor-plan-queries';
 import { DealOverview } from '@/components/deal-overview';
 import { DealMaoCalculator } from '@/components/deal-mao-calculator';
 import { DealNotes } from '@/components/deal-notes';
@@ -18,6 +19,7 @@ import { BudgetTab } from '@/components/budget-tab';
 import { ContractTab } from '@/components/contract-tab';
 import { PhotoTab } from '@/components/photo-tab';
 import { ActivityTimeline } from '@/components/activity-timeline';
+import { FloorPlanTab } from '@/components/floor-plan-tab';
 import type { TimelineEntry } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -66,11 +68,12 @@ export default async function DealDetailPage({
     budget: 'financials',
     photos: 'photos',
     notes: 'activity',
+    'floor-plans': 'floor-plans',
   };
   const rawTab = tab ?? 'overview';
   const activeTab = tabMap[rawTab] ?? rawTab;
 
-  const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto] = await Promise.all([
+  const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto, floorPlans, floorPlanCount] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
@@ -79,8 +82,13 @@ export default async function DealDetailPage({
     getContractCountByDealId(id),
     getDealPhotos(id),
     getDealCoverPhoto(id),
+    getFloorPlansByDeal(id),
+    getFloorPlanCount(id),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
+
+  // Budget categories for floor plan pin form (soft link to budget)
+  const budgetCats = budget?.categories.map((c) => ({ id: c.id, name: c.name })) ?? [];
 
   // Load activity timeline if deal is linked to a property (has a lead)
   let contactTimeline: TimelineEntry[] = [];
@@ -162,6 +170,14 @@ export default async function DealDetailPage({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value='floor-plans' className='!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2'>
+            Plans
+            {floorPlanCount > 0 && (
+              <span className='ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0'>
+                {floorPlanCount > 9 ? '9+' : floorPlanCount}
+              </span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* OVERVIEW: Deal details + blast generator */}
@@ -214,6 +230,11 @@ export default async function DealDetailPage({
               <ActivityTimeline entries={contactTimeline} />
             </div>
           )}
+        </TabsContent>
+
+        {/* FLOOR PLANS: Upload, viewer, pin annotations */}
+        <TabsContent value='floor-plans' className='mt-4'>
+          <FloorPlanTab floorPlans={floorPlans} dealId={id} budgetCategories={budgetCats} />
         </TabsContent>
       </Tabs>
     </div>
