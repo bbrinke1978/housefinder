@@ -120,14 +120,21 @@ export default async function DealDetailPage({
       <div className='flex items-start gap-3 flex-wrap'>
         <div className='flex-1 min-w-0'>
           <h1 className='text-xl font-bold md:text-2xl leading-tight'>{deal.address}</h1>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}, ${deal.state}`)}`}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-sm text-muted-foreground mt-0.5 hover:underline hover:text-foreground transition-colors inline-block'
-          >
-            {deal.city}, {deal.state}
-          </a>
+          <div className='flex items-center gap-3 mt-0.5 flex-wrap'>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}, ${deal.state}`)}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-sm text-muted-foreground hover:underline hover:text-foreground transition-colors'
+            >
+              {deal.city}, {deal.state}
+            </a>
+            {deal.sqft != null && deal.sqft > 0 && (
+              <span className='text-sm text-muted-foreground'>
+                <span className='font-medium text-foreground'>{deal.sqft.toLocaleString()}</span> sq ft
+              </span>
+            )}
+          </div>
         </div>
         <Badge variant={statusVariant(deal.status)} className='shrink-0'>
           {statusLabel(deal.status)}

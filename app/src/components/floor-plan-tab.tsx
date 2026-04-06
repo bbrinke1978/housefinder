@@ -50,6 +50,11 @@ export function FloorPlanTab({
   const [selectedFloor, setSelectedFloor] = useState<FloorLabel | null>(null);
   const [selectedVersion, setSelectedVersion] = useState<FloorPlanVersion>("as-is");
   const [, startTransition] = useTransition();
+  // For new plan creation: "upload" or "sketch" mode toggle
+  const [newPlanMode, setNewPlanMode] = useState<"upload" | "sketch">("upload");
+  // For new sketch: floor label and version
+  const [sketchFloorLabel, setSketchFloorLabel] = useState<FloorLabel>("main");
+  const [sketchVersion, setSketchVersion] = useState<FloorPlanVersion>("as-is");
 
   // Group plans by floor label
   const plansByFloor = new Map<FloorLabel, FloorPlanWithPins[]>();
@@ -124,9 +129,11 @@ export function FloorPlanTab({
             </button>
             <button
               type="button"
-              disabled
-              className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed"
-              title="Coming in next plan"
+              onClick={() => {
+                setNewPlanMode("sketch");
+                setShowUpload(true);
+              }}
+              className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
             >
               <Pencil className="h-4 w-4" />
               Sketch Floor Plan
@@ -159,14 +166,101 @@ export function FloorPlanTab({
         </button>
       </div>
 
-      {/* Upload panel */}
+      {/* New plan panel — Upload or Sketch */}
       {showUpload && (
-        <div className="rounded-lg border bg-muted/20 p-4">
-          <h3 className="text-sm font-medium mb-3">Upload Floor Plan</h3>
-          <FloorPlanUpload
-            dealId={dealId}
-            onUploaded={handleUploaded}
-          />
+        <div className="rounded-lg border bg-muted/20 p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">New Floor Plan</h3>
+          </div>
+          {/* Mode toggle: Upload vs Sketch */}
+          <div className="flex gap-1 w-fit rounded-md border bg-muted p-0.5">
+            <button
+              type="button"
+              onClick={() => setNewPlanMode("upload")}
+              className={`inline-flex items-center gap-1.5 rounded px-3 py-1 text-xs font-medium transition-colors ${
+                newPlanMode === "upload"
+                  ? "bg-background shadow text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Upload className="h-3 w-3" />
+              Upload
+            </button>
+            <button
+              type="button"
+              onClick={() => setNewPlanMode("sketch")}
+              className={`inline-flex items-center gap-1.5 rounded px-3 py-1 text-xs font-medium transition-colors ${
+                newPlanMode === "sketch"
+                  ? "bg-background shadow text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Pencil className="h-3 w-3" />
+              Sketch
+            </button>
+          </div>
+
+          {newPlanMode === "upload" && (
+            <FloorPlanUpload
+              dealId={dealId}
+              onUploaded={handleUploaded}
+            />
+          )}
+
+          {newPlanMode === "sketch" && (
+            <div className="space-y-3">
+              {/* Floor label + version pickers for new sketch */}
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Floor</label>
+                  <select
+                    className="h-8 rounded-md border border-border bg-background px-2 text-sm"
+                    value={sketchFloorLabel}
+                    onChange={(e) => setSketchFloorLabel(e.target.value as FloorLabel)}
+                  >
+                    <option value="main">Main</option>
+                    <option value="upper">Upper</option>
+                    <option value="basement">Basement</option>
+                    <option value="garage">Garage</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted-foreground">Version</label>
+                  <div className="flex items-center border border-border rounded-md overflow-hidden h-8">
+                    <button
+                      type="button"
+                      onClick={() => setSketchVersion("as-is")}
+                      className={`px-3 text-xs h-full transition-colors ${
+                        sketchVersion === "as-is"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background hover:bg-accent"
+                      }`}
+                    >
+                      As-Is
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSketchVersion("proposed")}
+                      className={`px-3 text-xs h-full transition-colors border-l border-border ${
+                        sketchVersion === "proposed"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background hover:bg-accent"
+                      }`}
+                    >
+                      Proposed
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <FloorPlanSketch
+                dealId={dealId}
+                floorLabel={sketchFloorLabel}
+                version={sketchVersion}
+                onSave={handleUploaded}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -235,13 +329,23 @@ export function FloorPlanTab({
             budgetCategories={budgetCategories}
           />
         ) : (
-          // Sketch plan — Plan 15-03 will add the sketch tool
-          <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
-            <Pencil className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">
-              Sketch tool coming soon
-            </p>
-          </div>
+          // Sketch plan — render FloorPlanSketch with existing rooms from sketchData
+          <FloorPlanSketch
+            dealId={dealId}
+            planId={activePlan.plan.id}
+            initialRooms={
+              activePlan.plan.sketchData
+                ? (JSON.parse(activePlan.plan.sketchData) as SketchRoom[])
+                : []
+            }
+            floorLabel={activePlan.plan.floorLabel}
+            version={activePlan.plan.version}
+            onSave={() => {
+              startTransition(() => {
+                // revalidatePath in server action refreshes data after save
+              });
+            }}
+          />
         )
       ) : (
         // No plan for this floor/version — show upload prompt
@@ -251,14 +355,32 @@ export function FloorPlanTab({
               No {effectiveVersion === "as-is" ? "as-is" : "proposed"} plan for{" "}
               {activeFloor ? FLOOR_LABEL_DISPLAY[activeFloor] : "this floor"}
             </p>
-            <button
-              type="button"
-              onClick={() => setShowUpload(true)}
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Upload Floor Plan
-            </button>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewPlanMode("upload");
+                  setShowUpload(true);
+                }}
+                className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Upload
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setNewPlanMode("sketch");
+                  if (activeFloor) setSketchFloorLabel(activeFloor);
+                  setSketchVersion(effectiveVersion);
+                  setShowUpload(true);
+                }}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Pencil className="h-4 w-4" />
+                Sketch
+              </button>
+            </div>
           </div>
         )
       )}
