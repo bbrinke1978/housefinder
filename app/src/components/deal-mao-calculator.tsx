@@ -168,6 +168,12 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
     );
   }
 
+  // Per-sqft metrics (only shown when sqft is available and > 0)
+  const sqft = deal.sqft != null && deal.sqft > 0 ? deal.sqft : null;
+  const priceSqft = sqft && offerPrice > 0 ? Math.round(offerPrice / sqft) : null;
+  const rehabSqft = sqft && repairs > 0 ? Math.round(repairs / sqft) : null;
+  const arvSqft = sqft && arv > 0 ? Math.round(arv / sqft) : null;
+
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
@@ -264,6 +270,41 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
                 </span>
               </div>
             </div>
+
+            {/* Per-sqft metrics — only shown when deal has sqft from floor plans */}
+            {sqft !== null && (priceSqft !== null || rehabSqft !== null || arvSqft !== null) && (
+              <div className="space-y-1.5 border-t pt-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Per Sq Ft ({sqft.toLocaleString()} sq ft)
+                </p>
+                <div className="flex items-center gap-3 flex-wrap text-sm">
+                  {priceSqft !== null && (
+                    <span className="text-muted-foreground">
+                      Price:{" "}
+                      <span className="font-medium text-foreground">
+                        ${priceSqft}/sqft
+                      </span>
+                    </span>
+                  )}
+                  {rehabSqft !== null && (
+                    <span className="text-muted-foreground">
+                      Rehab:{" "}
+                      <span className="font-medium text-foreground">
+                        ${rehabSqft}/sqft
+                      </span>
+                    </span>
+                  )}
+                  {arvSqft !== null && (
+                    <span className="text-muted-foreground">
+                      ARV:{" "}
+                      <span className="font-medium text-foreground">
+                        ${arvSqft}/sqft
+                      </span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             <Button onClick={handleSave} disabled={saving} className="w-full mt-2">
               {saving ? "Saving..." : "Save Calculator Values"}

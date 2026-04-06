@@ -1,8 +1,9 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes, buyers, ownerContacts, propertyPhotos } from "@/db/schema";
+import { deals, dealNotes, buyers, ownerContacts, propertyPhotos, floorPlans, floorPlanPins } from "@/db/schema";
 import { eq, desc, and, isNull } from "drizzle-orm";
+import { randomUUID } from "crypto";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -177,6 +178,77 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
       }
     } catch (err) {
       console.error("[createDeal] Failed to carry over property photos:", err);
+    }
+  }
+
+  // Floor plan carry-over (best-effort — deal creation never blocked by failure)
+  if (parsed.propertyId) {
+    try {
+      const propertyPlans = await db
+        .select()
+        .from(floorPlans)
+        .where(eq(floorPlans.propertyId, parsed.propertyId));
+
+      let totalCarriedSqft = 0;
+
+      for (const plan of propertyPlans) {
+        const newPlanId = randomUUID();
+
+        await db.insert(floorPlans).values({
+          id: newPlanId,
+          dealId: inserted.id,
+          propertyId: null,
+          floorLabel: plan.floorLabel,
+          version: plan.version,
+          sourceType: plan.sourceType,
+          blobName: plan.blobName,
+          blobUrl: plan.blobUrl,
+          mimeType: plan.mimeType,
+          naturalWidth: plan.naturalWidth,
+          naturalHeight: plan.naturalHeight,
+          totalSqft: plan.totalSqft,
+          sortOrder: plan.sortOrder,
+          sketchData: plan.sketchData,
+          shareToken: null,
+          shareExpiresAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        totalCarriedSqft += plan.totalSqft ?? 0;
+
+        // Copy pins for this plan
+        const pins = await db
+          .select()
+          .from(floorPlanPins)
+          .where(eq(floorPlanPins.floorPlanId, plan.id));
+
+        if (pins.length > 0) {
+          await db.insert(floorPlanPins).values(
+            pins.map((pin) => ({
+              id: randomUUID(),
+              floorPlanId: newPlanId,
+              xPct: pin.xPct,
+              yPct: pin.yPct,
+              category: pin.category,
+              note: pin.note,
+              budgetCategoryId: null, // budget categories don't carry over
+              sortOrder: pin.sortOrder,
+              createdAt: new Date(),
+            }))
+          );
+        }
+      }
+
+      // Set deal.sqft from sum of carried-over plans
+      if (totalCarriedSqft > 0) {
+        await db
+          .update(deals)
+          .set({ sqft: totalCarriedSqft })
+          .where(eq(deals.id, inserted.id));
+      }
+    } catch (err) {
+      console.error("[createDeal] Failed to carry over floor plans:", err);
     }
   }
 
