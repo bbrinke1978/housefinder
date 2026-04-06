@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 14 — Mobile Photo Capture
+**Current focus:** Phase 15 — Blueprints & Floor Plans
 
 ## Current Position
 
 Phase: 15 of 15 (Blueprints & Floor Plans)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-04-05 — Completed 15-01 (schema, migration, types, blob storage, queries, actions)
-Stopped at: Completed 15-01-PLAN.md
+Last activity: 2026-04-06 — Completed 15-02 (upload, pan/zoom viewer, pins, floor plan tab)
+Stopped at: Completed 15-02-PLAN.md
 
-Progress: [█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33% of Phase 15
+Progress: [███████████████████░░░░░░░░░░░░░░░░░░░░░] 67% of Phase 15
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [█████████████░░░░░░░░░░
 | Phase 14-mobile-photo-capture P02 | 4min | 2 tasks | 7 files |
 | Phase 14-mobile-photo-capture P03 | 4min | 2 tasks | 11 files |
 | Phase 15-blueprints-floor-plans P01 | 3min | 2 tasks | 6 files |
+| Phase 15-blueprints-floor-plans P02 | 6min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -223,6 +224,10 @@ Recent decisions affecting current work:
 - [Phase 15-01]: recalculateDealSqft uses drizzle sum() aggregate to update deals.sqft after floor plan mutations
 - [Phase 15-01]: budgetCategoryId on floor_plan_pins has no FK constraint (soft link) per plan spec
 - [Phase 15-01]: Blob NOT deleted on deleteFloorPlan for safety — only DB row removed
+- [Phase 15-02]: react-pdf v10 + pdfjs-dist v5 used for PDF rendering — compatible with React 19 peerDeps
+- [Phase 15-02]: pdfjs worker via new URL(import.meta.url) — required for correct bundling in Next.js; CDN worker avoided
+- [Phase 15-02]: Click handler on inner TransformComponent content div (not wrapper) — ensures correct pin coordinates when zoomed
+- [Phase 15-02]: FloorPlanSketch stub created in 15-02 to satisfy linter dynamic import; full sketch implementation is 15-03
 
 ### Roadmap Evolution
 
