@@ -9,13 +9,13 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 14 of 14 (Mobile Photo Capture)
-Plan: 3 of 3 in current phase (Complete)
-Status: Phase 14 Complete
-Last activity: 2026-04-05 — Completed 14-03 (PhotoFab, PhotoInbox, sidebar nav, deal card thumbnails, property-to-deal photo carry-over)
-Stopped at: Completed 14-03-PLAN.md
+Phase: 15 of 15 (Blueprints & Floor Plans)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-04-05 — Completed 15-01 (schema, migration, types, blob storage, queries, actions)
+Stopped at: Completed 15-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 100% of Phase 14
+Progress: [█████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33% of Phase 15
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [███████████████████████
 | Phase 14-mobile-photo-capture P01 | 3min | 2 tasks | 5 files |
 | Phase 14-mobile-photo-capture P02 | 4min | 2 tasks | 7 files |
 | Phase 14-mobile-photo-capture P03 | 4min | 2 tasks | 11 files |
+| Phase 15-blueprints-floor-plans P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -218,6 +219,10 @@ Recent decisions affecting current work:
 - [Phase 14-03]: coverPhotos passed as Record<string,string> (not Map) through prop chain — plain objects serialize cleanly as Next.js server-to-client props
 - [Phase 14-03]: createDeal photo carry-over is best-effort (try/catch) — deal creation never blocked by photo migration failure
 - [Phase 14-03]: PhotoFab uses md:hidden CSS class for mobile-only visibility — simpler than useSidebar hook
+- [Phase 15-01]: Migration numbered 0008 (not 0004 as in plan) — existing migrations go up to 0007
+- [Phase 15-01]: recalculateDealSqft uses drizzle sum() aggregate to update deals.sqft after floor plan mutations
+- [Phase 15-01]: budgetCategoryId on floor_plan_pins has no FK constraint (soft link) per plan spec
+- [Phase 15-01]: Blob NOT deleted on deleteFloorPlan for safety — only DB row removed
 
 ### Roadmap Evolution
 
@@ -238,5 +243,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-05
-Stopped at: Completed 14-03-PLAN.md (PhotoFab, PhotoInbox, sidebar nav, deal card thumbnails, property-to-deal photo carry-over)
-Resume file: .planning/phases/14-mobile-photo-capture/14-03-SUMMARY.md
+Stopped at: Completed 15-01-PLAN.md (schema, migration, types, blob storage, queries, actions for floor plans)
+Resume file: .planning/phases/15-blueprints-floor-plans/15-01-SUMMARY.md

@@ -311,7 +311,7 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Schema (floor_plans, floor_plan_pins), types, blob storage extension, queries, server actions
+- [x] 15-01-PLAN.md — Schema (floor_plans, floor_plan_pins), types, blob storage extension, queries, server actions
 - [ ] 15-02-PLAN.md — Floor plan upload, pan/zoom viewer, pin annotations, Floor Plans tab on deal detail
 - [ ] 15-03-PLAN.md — react-konva room rectangle sketch tool with dimensions, sqft calculation, save to DB
 - [ ] 15-04-PLAN.md — Contractor share links, Start Deal carry-over, sqft deal metrics integration

@@ -352,12 +352,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PHOTO-07 | Phase 14 | Planned |
 | PHOTO-08 | Phase 14 | Planned |
 | PHOTO-09 | Phase 14 | Planned |
-| FLOOR-01 | Phase 15 | Planned |
+| FLOOR-01 | Phase 15 | In Progress (15-01) |
 | FLOOR-02 | Phase 15 | Planned |
 | FLOOR-03 | Phase 15 | Planned |
-| FLOOR-04 | Phase 15 | Planned |
-| FLOOR-05 | Phase 15 | Planned |
-| FLOOR-06 | Phase 15 | Planned |
+| FLOOR-04 | Phase 15 | In Progress (15-01) |
+| FLOOR-05 | Phase 15 | In Progress (15-01) |
+| FLOOR-06 | Phase 15 | In Progress (15-01) |
 | FLOOR-07 | Phase 15 | Planned |
 | FLOOR-08 | Phase 15 | Planned |
 | FLOOR-09 | Phase 15 | Planned |
