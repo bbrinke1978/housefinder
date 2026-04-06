@@ -81,6 +81,7 @@ export async function getDeal(id: string): Promise<DealWithBuyer | null> {
       arvNotes: deals.arvNotes,
       createdAt: deals.createdAt,
       updatedAt: deals.updatedAt,
+      sqft: deals.sqft,
       buyerName: buyers.name,
       // Assessor data from linked property
       buildingSqft: properties.buildingSqft,

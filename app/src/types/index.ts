@@ -208,6 +208,8 @@ export interface DealWithBuyer {
   yearBuilt?: number | null;
   assessedValue?: number | null;
   lotAcres?: string | null;
+  // from floor plans: sum of all floor plan totalSqft
+  sqft?: number | null;
 }
 
 export interface DealNote {
