@@ -308,7 +308,7 @@ Plans:
   6. Total square footage from floor plans feeds into deal metrics (price/sqft, rehab/sqft, ARV/sqft)
   7. Shareable time-limited links give contractors view-only access to floor plans with annotations
   8. Floor plans carry over from property to deal on Start Deal
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 15-01-PLAN.md — Schema (floor_plans, floor_plan_pins), types, blob storage extension, queries, server actions

@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 15 of 15 (Blueprints & Floor Plans)
-Plan: 3 of 3 in current phase
+Plan: 4 of 4 in current phase
 Status: Complete
-Last activity: 2026-04-06 — Completed 15-03 (react-konva sketch canvas, room dialog, toolbar, floor plan tab wiring)
-Stopped at: Completed 15-03-PLAN.md
+Last activity: 2026-04-06 — Completed 15-04 (contractor share page, share link UI, floor plan carry-over on Start Deal, per-sqft metrics in MAO calculator)
+Stopped at: Completed 15-04-PLAN.md
 
 Progress: [████████████████████████████████████████] 100% of Phase 15
 
@@ -74,6 +74,7 @@ Progress: [███████████████████████
 | Phase 15-blueprints-floor-plans P01 | 3min | 2 tasks | 6 files |
 | Phase 15-blueprints-floor-plans P02 | 6min | 2 tasks | 8 files |
 | Phase 15-blueprints-floor-plans P03 | 7min | 2 tasks | 7 files |
+| Phase 15-blueprints-floor-plans P04 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -232,6 +233,10 @@ Recent decisions affecting current work:
 - [Phase 15-03]: FloorPlanSketch uses string (not union types) for floorLabel/version props — avoids casting at call sites where DB returns plain strings
 - [Phase 15-03]: PIXELS_PER_FOOT=10 sketch scale factor: 120px wide room = 12 feet at default zoom
 - [Phase 15-03]: sqft added to DealWithBuyer type and getDeal query — deal header shows sqft from floor plan totals
+- [Phase 15-04]: ShareLinkPanel manages own generate/copy/revoke state inline — no prop-drilling to FloorPlanTab
+- [Phase 15-04]: budgetCategoryId set to null on carried floor plan pins — deal budget IDs differ from property budget IDs
+- [Phase 15-04]: Per-sqft metrics derived at render time from deal.sqft — DealMaoCalculator signature unchanged, reads deal.sqft from existing deal prop
+- [Phase 15-04]: FloorPlanShareView passes dealId='' to viewers in readOnly mode — dealId unused when readOnly=true
 
 ### Roadmap Evolution
 
@@ -252,5 +257,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-06
-Stopped at: Completed 15-03-PLAN.md (react-konva sketch canvas, room dialog, toolbar, floor plan tab wiring, deal sqft display)
-Resume file: .planning/phases/15-blueprints-floor-plans/15-03-SUMMARY.md
+Stopped at: Completed 15-04-PLAN.md (contractor share page, share link UI, floor plan carry-over, per-sqft MAO metrics)
+Resume file: .planning/phases/15-blueprints-floor-plans/15-04-SUMMARY.md
