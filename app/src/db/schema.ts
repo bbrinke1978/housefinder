@@ -272,6 +272,7 @@ export const deals = pgTable(
     earnestMoneyRefundable: boolean("earnest_money_refundable").default(true),
     comps: text("comps"), // JSON array of comparable sales
     arvNotes: text("arv_notes"), // free-text ARV research notes
+    sqft: integer("sqft"), // total sq ft from floor plans (sum of all floor plan totalSqft)
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -733,3 +734,68 @@ export const propertyPhotos = pgTable(
 );
 
 export type PropertyPhotoRow = InferSelectModel<typeof propertyPhotos>;
+
+// -- Floor Plans --
+
+export const floorPlans = pgTable(
+  "floor_plans",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    dealId: uuid("deal_id").references(() => deals.id),
+    propertyId: uuid("property_id").references(() => properties.id),
+    floorLabel: text("floor_label").notNull().default("main"),
+    // floorLabel values: main | upper | basement | garage | other
+    version: text("version").notNull().default("as-is"),
+    // version values: as-is | proposed
+    sourceType: text("source_type").notNull(),
+    // sourceType values: upload | sketch
+    blobName: text("blob_name"),
+    blobUrl: text("blob_url"),
+    mimeType: text("mime_type"),
+    // mimeType values: application/pdf | image/jpeg | image/png
+    sketchData: text("sketch_data"), // JSON string for sketch rooms
+    naturalWidth: integer("natural_width"), // px, for coordinate normalization
+    naturalHeight: integer("natural_height"), // px, for coordinate normalization
+    totalSqft: integer("total_sqft"),
+    shareToken: text("share_token").unique(),
+    shareExpiresAt: timestamp("share_expires_at", { withTimezone: true }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_floor_plans_deal_id").on(table.dealId),
+    index("idx_floor_plans_property_id").on(table.propertyId),
+    index("idx_floor_plans_share_token").on(table.shareToken),
+  ]
+);
+
+export const floorPlanPins = pgTable(
+  "floor_plan_pins",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    floorPlanId: uuid("floor_plan_id")
+      .notNull()
+      .references(() => floorPlans.id, { onDelete: "cascade" }),
+    xPct: doublePrecision("x_pct").notNull(), // 0.0 to 1.0
+    yPct: doublePrecision("y_pct").notNull(), // 0.0 to 1.0
+    category: text("category").notNull(),
+    // category values: plumbing|electrical|structural|cosmetic|hvac|roofing|flooring|painting|windows_doors|kitchen|bathroom|landscaping|general
+    note: text("note"),
+    budgetCategoryId: uuid("budget_category_id"), // soft link to budget_categories — no FK constraint
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_floor_plan_pins_plan_id").on(table.floorPlanId),
+  ]
+);
+
+export type FloorPlanRow = InferSelectModel<typeof floorPlans>;
+export type FloorPlanPinRow = InferSelectModel<typeof floorPlanPins>;

@@ -504,11 +504,66 @@ export const DEFAULT_ASSIGNMENT_CLAUSES: ContractClause[] = [
   },
 ];
 
-import type { ContractRow, ContractSignerRow } from "@/db/schema";
+import type { ContractRow, ContractSignerRow, FloorPlanRow, FloorPlanPinRow } from "@/db/schema";
 
 export interface ContractWithSigners extends ContractRow {
   signers: ContractSignerRow[];
   parsedClauses: ContractClause[];
+}
+
+// -- Floor Plan Types --
+
+export type FloorLabel = 'main' | 'upper' | 'basement' | 'garage' | 'other';
+export type FloorPlanVersion = 'as-is' | 'proposed';
+export type FloorPlanSourceType = 'upload' | 'sketch';
+
+export type PinCategory =
+  | 'plumbing'
+  | 'electrical'
+  | 'structural'
+  | 'cosmetic'
+  | 'hvac'
+  | 'roofing'
+  | 'flooring'
+  | 'painting'
+  | 'windows_doors'
+  | 'kitchen'
+  | 'bathroom'
+  | 'landscaping'
+  | 'general';
+
+export const PIN_COLORS: Record<PinCategory, string> = {
+  plumbing: '#3b82f6',      // blue
+  electrical: '#eab308',    // yellow
+  structural: '#ef4444',    // red
+  cosmetic: '#a855f7',      // purple
+  hvac: '#06b6d4',          // cyan
+  roofing: '#f97316',       // orange
+  flooring: '#84cc16',      // lime
+  painting: '#ec4899',      // pink
+  windows_doors: '#14b8a6', // teal
+  kitchen: '#8b5cf6',       // violet
+  bathroom: '#6366f1',      // indigo
+  landscaping: '#22c55e',   // green
+  general: '#94a3b8',       // slate
+};
+
+export interface SketchRoom {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  lengthFt: number;
+  widthFt: number;
+  sqft: number;
+}
+
+export interface FloorPlanWithPins {
+  plan: FloorPlanRow;
+  pins: FloorPlanPinRow[];
+  sasUrl: string | null;
 }
 
 export const CALL_SCRIPTS: Record<CallScriptType, CallScriptStep[]> = {

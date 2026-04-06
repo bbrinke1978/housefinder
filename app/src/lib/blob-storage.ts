@@ -9,6 +9,7 @@ const CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING ?? "";
 const CONTAINER_NAME = "receipts";
 const CONTRACTS_CONTAINER = "contracts";
 const PHOTOS_CONTAINER = "photos";
+const FLOOR_PLANS_CONTAINER = "floor-plans";
 
 function getBlobServiceClient(): BlobServiceClient {
   if (!CONNECTION_STRING) {
@@ -215,4 +216,70 @@ export async function deletePhotoBlob(blobName: string): Promise<void> {
   const containerClient = client.getContainerClient(PHOTOS_CONTAINER);
   const blobClient = containerClient.getBlockBlobClient(blobName);
   await blobClient.deleteIfExists();
+}
+
+/**
+ * uploadFloorPlanBlob — upload a floor plan (PDF or image) to Azure Blob Storage "floor-plans" container.
+ * Creates the container if it doesn't exist (idempotent first-run).
+ * Accepts explicit contentType for PDFs and images.
+ * Returns the blob URL (not a SAS URL — container is private).
+ */
+export async function uploadFloorPlanBlob(
+  buffer: Buffer,
+  blobName: string,
+  contentType: string
+): Promise<string> {
+  const client = getBlobServiceClient();
+  const containerClient = client.getContainerClient(FLOOR_PLANS_CONTAINER);
+  await containerClient.createIfNotExists();
+  const blobClient = containerClient.getBlockBlobClient(blobName);
+
+  await blobClient.uploadData(buffer, {
+    blobHTTPHeaders: { blobContentType: contentType },
+  });
+
+  return blobClient.url;
+}
+
+/**
+ * generateFloorPlanSasUrl — generate a 4-hour read-only SAS URL for a floor plan.
+ * 4-hour expiry (longer than photos) since editing sessions can be long.
+ * Must be called server-side.
+ */
+export function generateFloorPlanSasUrl(blobName: string): string {
+  if (!CONNECTION_STRING) {
+    throw new Error("AZURE_STORAGE_CONNECTION_STRING is not set");
+  }
+
+  const accountNameMatch = CONNECTION_STRING.match(/AccountName=([^;]+)/);
+  const accountKeyMatch = CONNECTION_STRING.match(/AccountKey=([^;]+)/);
+
+  if (!accountNameMatch || !accountKeyMatch) {
+    throw new Error(
+      "AZURE_STORAGE_CONNECTION_STRING does not contain AccountName or AccountKey"
+    );
+  }
+
+  const accountName = accountNameMatch[1];
+  const accountKey = accountKeyMatch[1];
+
+  const sharedKeyCredential = new StorageSharedKeyCredential(
+    accountName,
+    accountKey
+  );
+
+  const expiresOn = new Date();
+  expiresOn.setHours(expiresOn.getHours() + 4); // 4-hour expiry for editing sessions
+
+  const sasParams = generateBlobSASQueryParameters(
+    {
+      containerName: FLOOR_PLANS_CONTAINER,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      expiresOn,
+    },
+    sharedKeyCredential
+  );
+
+  return `https://${accountName}.blob.core.windows.net/${FLOOR_PLANS_CONTAINER}/${blobName}?${sasParams.toString()}`;
 }
