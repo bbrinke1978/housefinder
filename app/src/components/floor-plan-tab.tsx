@@ -2,8 +2,9 @@
 
 import dynamic from "next/dynamic";
 import { useState, useTransition } from "react";
-import { Plus, LayoutGrid, Pencil, Upload } from "lucide-react";
+import { Plus, LayoutGrid, Pencil, Upload, Link2, Copy, X, Check, RefreshCw } from "lucide-react";
 import { FloorPlanUpload } from "@/components/floor-plan-upload";
+import { generateShareLink, revokeShareLink } from "@/lib/floor-plan-actions";
 import type { FloorPlanWithPins, SketchRoom } from "@/types";
 import type { FloorLabel, FloorPlanVersion } from "@/types";
 
@@ -40,6 +41,192 @@ const FLOOR_LABEL_DISPLAY: Record<FloorLabel, string> = {
 
 // Floor label display order
 const FLOOR_ORDER: FloorLabel[] = ["main", "upper", "basement", "garage", "other"];
+
+/** Share link panel — shown inline below the active plan's viewer */
+function ShareLinkPanel({ plan }: { plan: FloorPlanWithPins }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [, startTransition] = useTransition();
+
+  const existingToken = plan.plan.shareToken ?? null;
+  const existingExpiry = plan.plan.shareExpiresAt
+    ? new Date(plan.plan.shareExpiresAt)
+    : null;
+  const isExpired =
+    existingExpiry !== null && existingExpiry < new Date();
+
+  const existingUrl =
+    existingToken && !isExpired
+      ? `${typeof window !== "undefined" ? window.location.origin : ""}/floor-plans/${existingToken}`
+      : null;
+
+  // Initialize from existing share data
+  const effectiveUrl = shareUrl ?? existingUrl;
+  const effectiveExpiry = expiresAt
+    ? new Date(expiresAt)
+    : existingExpiry && !isExpired
+    ? existingExpiry
+    : null;
+
+  async function handleGenerate() {
+    setLoading(true);
+    try {
+      const result = await generateShareLink(plan.plan.id);
+      const origin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      setShareUrl(`${origin}/floor-plans/${result.token}`);
+      setExpiresAt(result.expiresAt);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRevoke() {
+    setLoading(true);
+    try {
+      await revokeShareLink(plan.plan.id);
+      setShareUrl(null);
+      setExpiresAt(null);
+      setIsOpen(false);
+      startTransition(() => {});
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCopy() {
+    if (!effectiveUrl) return;
+    try {
+      await navigator.clipboard.writeText(effectiveUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: select the input
+    }
+  }
+
+  return (
+    <div className="mt-2">
+      {!isOpen ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border rounded-md px-2.5 py-1.5 transition-colors hover:bg-muted"
+        >
+          <Link2 className="h-3 w-3" />
+          {existingToken && !isExpired
+            ? "Shared"
+            : isExpired
+            ? "Link Expired"
+            : "Share with Contractor"}
+          {existingToken && !isExpired && (
+            <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-green-500" />
+          )}
+          {isExpired && (
+            <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-amber-500" />
+          )}
+        </button>
+      ) : (
+        <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium">Contractor Share Link</p>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {effectiveUrl ? (
+            <>
+              {/* Copyable URL */}
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  readOnly
+                  value={effectiveUrl}
+                  className="flex-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-mono min-w-0"
+                  onFocus={(e) => e.target.select()}
+                />
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="shrink-0 inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-muted transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3 w-3 text-green-600" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3" />
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {effectiveExpiry && (
+                <p className="text-[11px] text-muted-foreground">
+                  Expires:{" "}
+                  {effectiveExpiry.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleRevoke}
+                disabled={loading}
+                className="text-xs text-destructive hover:underline disabled:opacity-50"
+              >
+                {loading ? "Revoking..." : "Revoke Link"}
+              </button>
+            </>
+          ) : (
+            <>
+              {isExpired && (
+                <p className="text-xs text-amber-600">
+                  The previous link has expired.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleGenerate}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="h-3 w-3" />
+                    {isExpired ? "Generate New Link" : "Generate Share Link"}
+                  </>
+                )}
+              </button>
+              <p className="text-[11px] text-muted-foreground">
+                Links expire after 7 days.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function FloorPlanTab({
   floorPlans,
@@ -322,31 +509,35 @@ export function FloorPlanTab({
 
       {/* Plan viewer */}
       {activePlan ? (
-        activePlan.plan.sourceType === "upload" ? (
-          <FloorPlanViewer
-            plan={activePlan}
-            dealId={dealId}
-            budgetCategories={budgetCategories}
-          />
-        ) : (
-          // Sketch plan — render FloorPlanSketch with existing rooms from sketchData
-          <FloorPlanSketch
-            dealId={dealId}
-            planId={activePlan.plan.id}
-            initialRooms={
-              activePlan.plan.sketchData
-                ? (JSON.parse(activePlan.plan.sketchData) as SketchRoom[])
-                : []
-            }
-            floorLabel={activePlan.plan.floorLabel}
-            version={activePlan.plan.version}
-            onSave={() => {
-              startTransition(() => {
-                // revalidatePath in server action refreshes data after save
-              });
-            }}
-          />
-        )
+        <>
+          {activePlan.plan.sourceType === "upload" ? (
+            <FloorPlanViewer
+              plan={activePlan}
+              dealId={dealId}
+              budgetCategories={budgetCategories}
+            />
+          ) : (
+            // Sketch plan — render FloorPlanSketch with existing rooms from sketchData
+            <FloorPlanSketch
+              dealId={dealId}
+              planId={activePlan.plan.id}
+              initialRooms={
+                activePlan.plan.sketchData
+                  ? (JSON.parse(activePlan.plan.sketchData) as SketchRoom[])
+                  : []
+              }
+              floorLabel={activePlan.plan.floorLabel}
+              version={activePlan.plan.version}
+              onSave={() => {
+                startTransition(() => {
+                  // revalidatePath in server action refreshes data after save
+                });
+              }}
+            />
+          )}
+          {/* Share link panel — generate/copy/revoke contractor share link */}
+          <ShareLinkPanel plan={activePlan} />
+        </>
       ) : (
         // No plan for this floor/version — show upload prompt
         !showUpload && (
