@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 15 of 15 (Blueprints & Floor Plans)
-Plan: 2 of 3 in current phase
-Status: In Progress
-Last activity: 2026-04-06 — Completed 15-02 (upload, pan/zoom viewer, pins, floor plan tab)
-Stopped at: Completed 15-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Complete
+Last activity: 2026-04-06 — Completed 15-03 (react-konva sketch canvas, room dialog, toolbar, floor plan tab wiring)
+Stopped at: Completed 15-03-PLAN.md
 
-Progress: [███████████████████░░░░░░░░░░░░░░░░░░░░░] 67% of Phase 15
+Progress: [████████████████████████████████████████] 100% of Phase 15
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [███████████████████░░░░
 | Phase 14-mobile-photo-capture P03 | 4min | 2 tasks | 11 files |
 | Phase 15-blueprints-floor-plans P01 | 3min | 2 tasks | 6 files |
 | Phase 15-blueprints-floor-plans P02 | 6min | 2 tasks | 8 files |
+| Phase 15-blueprints-floor-plans P03 | 7min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -228,6 +229,9 @@ Recent decisions affecting current work:
 - [Phase 15-02]: pdfjs worker via new URL(import.meta.url) — required for correct bundling in Next.js; CDN worker avoided
 - [Phase 15-02]: Click handler on inner TransformComponent content div (not wrapper) — ensures correct pin coordinates when zoomed
 - [Phase 15-02]: FloorPlanSketch stub created in 15-02 to satisfy linter dynamic import; full sketch implementation is 15-03
+- [Phase 15-03]: FloorPlanSketch uses string (not union types) for floorLabel/version props — avoids casting at call sites where DB returns plain strings
+- [Phase 15-03]: PIXELS_PER_FOOT=10 sketch scale factor: 120px wide room = 12 feet at default zoom
+- [Phase 15-03]: sqft added to DealWithBuyer type and getDeal query — deal header shows sqft from floor plan totals
 
 ### Roadmap Evolution
 
@@ -247,6 +251,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-05
-Stopped at: Completed 15-01-PLAN.md (schema, migration, types, blob storage, queries, actions for floor plans)
-Resume file: .planning/phases/15-blueprints-floor-plans/15-01-SUMMARY.md
+Last session: 2026-04-06
+Stopped at: Completed 15-03-PLAN.md (react-konva sketch canvas, room dialog, toolbar, floor plan tab wiring, deal sqft display)
+Resume file: .planning/phases/15-blueprints-floor-plans/15-03-SUMMARY.md

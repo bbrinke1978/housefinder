@@ -172,13 +172,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **FLOOR-01**: User can upload PDF and image (JPG/PNG) floor plans to Azure Blob Storage with attachment to deals or properties, client-side image compression (1920px max, JPEG 0.8), and 10MB file size limit for PDFs
 - [x] **FLOOR-02**: Uploaded floor plans display in a pan/zoom viewer with pinch-to-zoom on mobile and scroll-wheel zoom on desktop, rendering both PDF and image formats
-- [ ] **FLOOR-03**: User can sketch floor plans in-app using a react-konva room rectangle tool with draggable/resizable rooms, snap-to-grid, editable labels, and L x W dimension inputs
+- [x] **FLOOR-03**: User can sketch floor plans in-app using a react-konva room rectangle tool with draggable/resizable rooms, snap-to-grid, editable labels, and L x W dimension inputs
 - [ ] **FLOOR-04**: Multiple floors per property supported with floor selector (Main, Upper, Basement, Garage, Other) and floor label on each plan
 - [x] **FLOOR-05**: Pin-based annotations with colored category markers (plumbing, electrical, structural, cosmetic, etc.) can be dropped on floor plans with text notes and optional links to rehab budget categories
-- [ ] **FLOOR-06**: Floor plans support versioning (As-Is and Proposed) per floor, allowing comparison of pre-rehab and post-rehab layouts
+- [x] **FLOOR-06**: Floor plans support versioning (As-Is and Proposed) per floor, allowing comparison of pre-rehab and post-rehab layouts
 - [x] **FLOOR-07**: Dedicated Floor Plans tab on deal detail page with floor selector, version toggle, upload/sketch mode, and plan count badge
 - [ ] **FLOOR-08**: Shareable time-limited public link for contractors (token-gated, 7-day expiry) provides view-only access to floor plans with annotations — no HouseFinder account required
-- [ ] **FLOOR-09**: Sketched floor plans auto-calculate total square footage from room dimensions, feeding into deal metrics (price/sqft, rehab cost/sqft, ARV/sqft) on the MAO calculator
+- [x] **FLOOR-09**: Sketched floor plans auto-calculate total square footage from room dimensions, feeding into deal metrics (price/sqft, rehab cost/sqft, ARV/sqft) on the MAO calculator
 - [ ] **FLOOR-10**: Floor plans carry over from property to deal automatically when Start Deal creates a deal, following the same best-effort pattern as photo carry-over
 
 ## v2 Requirements
