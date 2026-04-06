@@ -1,0 +1,1 @@
+ALTER TABLE "leads" ALTER COLUMN "property_id" DROP NOT NULL;

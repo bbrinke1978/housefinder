@@ -114,7 +114,6 @@ export const leads = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     propertyId: uuid("property_id")
-      .notNull()
       .unique()
       .references(() => properties.id),
     status: text("status").notNull().default("new"),
