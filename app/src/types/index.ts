@@ -2,7 +2,6 @@ export type LeadStatus = "new" | "contacted" | "follow_up" | "closed" | "dead";
 
 export const LEAD_SOURCES = [
   { value: "scraping", label: "Scraping Data", color: "bg-zinc-500" },
-  { value: "website", label: "Website", color: "bg-blue-500" },
   { value: "flyer", label: "Flyer", color: "bg-green-500" },
   { value: "signage", label: "Signage", color: "bg-amber-500" },
   { value: "driving", label: "Driving for $", color: "bg-orange-500" },

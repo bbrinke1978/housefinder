@@ -41,7 +41,6 @@ const TIER_OPTIONS = [
 
 const LEAD_SOURCE_OPTIONS = [
   { value: "scraping", label: "Scraping Data" },
-  { value: "website", label: "Website" },
   { value: "flyer", label: "Flyer" },
   { value: "signage", label: "Signage" },
   { value: "driving", label: "Driving for $" },
