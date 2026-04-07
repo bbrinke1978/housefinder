@@ -373,6 +373,8 @@ export interface GetPropertiesParams {
   ownerType?: string;
   /** Tier filter: "critical" (7+), "hot" (4+), "warm" (2+) */
   tier?: string;
+  /** Lead source filter: comma-separated values like "scraping,website,driving" */
+  source?: string;
   /** Search by owner name or address */
   search?: string;
 }
@@ -512,6 +514,27 @@ export async function getProperties(
     const minScore = params.minScore ? parseInt(params.minScore, 10) : 0;
     if (minScore > 0) {
       conditions.push(sql`${leads.distressScore} >= ${minScore}`);
+    }
+  }
+
+  // Filter by lead source
+  if (params.source) {
+    const sources = params.source.split(",").map((s) => s.trim()).filter(Boolean);
+    if (sources.length === 1) {
+      // Handle "other:custom text" format — match prefix
+      if (sources[0] === "other") {
+        conditions.push(sql`(${leads.leadSource} = 'other' OR ${leads.leadSource} LIKE 'other:%')`);
+      } else {
+        conditions.push(eq(leads.leadSource, sources[0]));
+      }
+    } else if (sources.length > 1) {
+      const hasOther = sources.includes("other");
+      const rest = sources.filter((s) => s !== "other");
+      if (hasOther) {
+        conditions.push(sql`(${leads.leadSource} IN (${sql.join(rest.map(s => sql`${s}`), sql`, `)}) OR ${leads.leadSource} = 'other' OR ${leads.leadSource} LIKE 'other:%')`);
+      } else {
+        conditions.push(sql`${leads.leadSource} IN (${sql.join(sources.map(s => sql`${s}`), sql`, `)})`);
+      }
     }
   }
 

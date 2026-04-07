@@ -39,6 +39,16 @@ const TIER_OPTIONS = [
   { value: "warm", label: "Warm & Above (2+)" },
 ];
 
+const LEAD_SOURCE_OPTIONS = [
+  { value: "scraping", label: "Scraping Data" },
+  { value: "website", label: "Website" },
+  { value: "flyer", label: "Flyer" },
+  { value: "signage", label: "Signage" },
+  { value: "driving", label: "Driving for $" },
+  { value: "word_of_mouth", label: "Word of Mouth" },
+  { value: "other", label: "Other" },
+];
+
 const SORT_OPTIONS = [
   { value: "score", label: "Score" },
   { value: "date", label: "Date Added" },
@@ -222,6 +232,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
   const currentHot = searchParams.get("hot") ?? "";
   const currentOwnerTypes = parseMulti(searchParams.get("ownerType") ?? "");
   const currentTiers = parseMulti(searchParams.get("tier") ?? "");
+  const currentSources = parseMulti(searchParams.get("source") ?? "");
   const currentSort = searchParams.get("sort") ?? "score";
   const [searchInput, setSearchInput] = useState(currentSearch);
 
@@ -266,6 +277,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
     currentHot ||
     currentOwnerTypes.length > 0 ||
     currentTiers.length > 0 ||
+    currentSources.length > 0 ||
     currentSort !== "score";
 
   const activeFilterCount = [
@@ -274,6 +286,7 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
     currentHot ? "hot" : "",
     currentOwnerTypes.length > 0 ? "owner" : "",
     currentTiers.length > 0 ? "tier" : "",
+    currentSources.length > 0 ? "source" : "",
     currentSort !== "score" ? "sort" : "",
   ].filter(Boolean).length;
 
@@ -326,6 +339,18 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
           selected={currentTiers}
           onChange={(v) => updateMultiParam("tier", v)}
           placeholder="All Leads"
+        />
+      </div>
+
+      {/* Lead Source filter */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Lead Source</label>
+        <MultiSelect
+          label="Sources"
+          options={LEAD_SOURCE_OPTIONS}
+          selected={currentSources}
+          onChange={(v) => updateMultiParam("source", v)}
+          placeholder="All Sources"
         />
       </div>
 
@@ -473,6 +498,16 @@ export function DashboardFilters({ cities }: DashboardFiltersProps) {
           onChange={(v) => updateMultiParam("tier", v)}
           placeholder="All Leads"
           className="w-[180px]"
+        />
+
+        {/* Lead Source filter */}
+        <MultiSelect
+          label="Sources"
+          options={LEAD_SOURCE_OPTIONS}
+          selected={currentSources}
+          onChange={(v) => updateMultiParam("source", v)}
+          placeholder="All Sources"
+          className="w-[160px]"
         />
 
         {/* Hot leads toggle */}

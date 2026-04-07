@@ -42,6 +42,7 @@ export default async function DashboardPage({
     ownerType: typeof params.ownerType === "string" ? params.ownerType : undefined,
     minScore: typeof params.minScore === "string" ? params.minScore : undefined,
     tier: typeof params.tier === "string" ? params.tier : undefined,
+    source: typeof params.source === "string" ? params.source : undefined,
     search: typeof params.search === "string" ? params.search : undefined,
   };
 
