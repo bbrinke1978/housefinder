@@ -73,17 +73,21 @@ export default async function DealDetailPage({
   const rawTab = tab ?? 'overview';
   const activeTab = tabMap[rawTab] ?? rawTab;
 
+  // Core data fetches (will throw if deal doesn't exist — that's fine, we handle with notFound)
+  // Non-essential fetches are wrapped to prevent one failure from crashing the whole page
+  const safe = <T,>(p: Promise<T>, fallback: T): Promise<T> => p.catch(() => fallback);
+
   const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto, floorPlans, floorPlanCount] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
     getDealContacts(id),
-    getDealContracts(id),
-    getContractCountByDealId(id),
-    getDealPhotos(id),
-    getDealCoverPhoto(id),
-    getFloorPlansByDeal(id),
-    getFloorPlanCount(id),
+    safe(getDealContracts(id), []),
+    safe(getContractCountByDealId(id), 0),
+    safe(getDealPhotos(id), []),
+    safe(getDealCoverPhoto(id), null),
+    safe(getFloorPlansByDeal(id), []),
+    safe(getFloorPlanCount(id), 0),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
 

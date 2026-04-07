@@ -17,24 +17,28 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
   const { view = "kanban" } = await searchParams;
   const deals = await getDeals();
 
-  // Batch-fetch cover photos for all deals
+  // Batch-fetch cover photos for all deals (non-fatal — page works without photos)
   const dealIds = deals.map((d) => d.id);
   let coverPhotos: Record<string, string> = {};
   if (dealIds.length > 0) {
-    const coverRows = await db
-      .select({ dealId: propertyPhotos.dealId, blobName: propertyPhotos.blobName })
-      .from(propertyPhotos)
-      .where(
-        and(
-          inArray(propertyPhotos.dealId, dealIds),
-          eq(propertyPhotos.isCover, true)
-        )
+    try {
+      const coverRows = await db
+        .select({ dealId: propertyPhotos.dealId, blobName: propertyPhotos.blobName })
+        .from(propertyPhotos)
+        .where(
+          and(
+            inArray(propertyPhotos.dealId, dealIds),
+            eq(propertyPhotos.isCover, true)
+          )
+        );
+      coverPhotos = Object.fromEntries(
+        coverRows
+          .filter((r) => r.dealId !== null)
+          .map((r) => [r.dealId as string, generatePhotoSasUrl(r.blobName)])
       );
-    coverPhotos = Object.fromEntries(
-      coverRows
-        .filter((r) => r.dealId !== null)
-        .map((r) => [r.dealId as string, generatePhotoSasUrl(r.blobName)])
-    );
+    } catch {
+      // Table may not exist yet — continue without cover photos
+    }
   }
 
   return (
