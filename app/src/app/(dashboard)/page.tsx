@@ -5,12 +5,14 @@ import {
   getDashboardStats,
   getProperties,
   getDistinctCities,
+  getWebsiteLeads,
 } from "@/lib/queries";
+import type { WebsiteLead } from "@/lib/queries";
 import { getSequences } from "@/lib/campaign-queries";
 import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
-import { MapPin } from "lucide-react";
+import { MapPin, Globe, Phone, MessageSquare } from "lucide-react";
 
 interface DashboardPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -43,11 +45,12 @@ export default async function DashboardPage({
     search: typeof params.search === "string" ? params.search : undefined,
   };
 
-  const [stats, properties, cities, sequences] = await Promise.all([
+  const [stats, properties, cities, sequences, websiteLeads] = await Promise.all([
     getDashboardStats(),
     getProperties(filterParams),
     getDistinctCities(),
     getSequences(),
+    getWebsiteLeads().catch(() => [] as WebsiteLead[]),
   ]);
 
   return (
@@ -85,6 +88,50 @@ export default async function DashboardPage({
           </span>
         )}
       </div>
+
+      {/* Website Leads */}
+      {websiteLeads.length > 0 && (
+        <div className="space-y-3 animate-fade-in-up stagger-3">
+          <div className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-violet-500" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Website Leads ({websiteLeads.length})
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {websiteLeads.map((lead) => (
+              <div key={lead.id} className="rounded-xl border bg-card p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium text-sm">{lead.name ?? "Unknown"}</p>
+                    {lead.address && (
+                      <p className="text-xs text-muted-foreground">{lead.address}</p>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-medium uppercase tracking-wider rounded-full bg-violet-500/15 text-violet-600 px-2 py-0.5">
+                    Website
+                  </span>
+                </div>
+                {lead.phone && (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Phone className="h-3 w-3" />
+                    <a href={`tel:${lead.phone}`} className="hover:text-foreground">{lead.phone}</a>
+                  </div>
+                )}
+                {lead.message && (
+                  <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                    <MessageSquare className="h-3 w-3 mt-0.5 shrink-0" />
+                    <p className="line-clamp-2">{lead.message}</p>
+                  </div>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  {new Date(lead.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Property grid */}
       {properties.length === 0 ? (

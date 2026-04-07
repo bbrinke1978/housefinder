@@ -1,6 +1,6 @@
 import { db } from "@/db/client";
 import { properties, leads, distressSignals, leadNotes, ownerContacts, scraperConfig, deals, contactEvents } from "@/db/schema";
-import { eq, and, sql, desc, asc, ilike, exists, inArray, isNotNull } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, exists, inArray, isNotNull, isNull } from "drizzle-orm";
 import type {
   PropertyWithLead,
   MapProperty,
@@ -811,4 +811,61 @@ export async function getMapProperties(): Promise<MapProperty[]> {
     longitude: row.longitude as number,
     signalTypes: signalMap.get(row.id) ?? [],
   })) as MapProperty[];
+}
+
+// -- Website Leads (no property) --
+
+export interface WebsiteLead {
+  id: string;
+  status: string;
+  newLeadStatus: string;
+  leadSource: string | null;
+  distressScore: number;
+  isHot: boolean;
+  createdAt: Date;
+  name: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  message: string | null;
+}
+
+export async function getWebsiteLeads(): Promise<WebsiteLead[]> {
+  const rows = await db
+    .select({
+      id: leads.id,
+      status: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      leadSource: leads.leadSource,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      createdAt: leads.createdAt,
+      noteText: leadNotes.noteText,
+    })
+    .from(leads)
+    .leftJoin(leadNotes, eq(leadNotes.leadId, leads.id))
+    .where(isNull(leads.propertyId))
+    .orderBy(desc(leads.createdAt))
+    .limit(50);
+
+  return rows.map((r) => {
+    // Parse structured note text: "Name: ...\nPhone: ...\nAddress: ...\nMessage: ..."
+    const note = r.noteText ?? "";
+    const parsed: Record<string, string> = {};
+    for (const line of note.split("\n")) {
+      const idx = line.indexOf(": ");
+      if (idx > 0) {
+        parsed[line.substring(0, idx).trim().toLowerCase()] = line.substring(idx + 2).trim();
+      }
+    }
+    return {
+      ...r,
+      noteText: undefined,
+      name: parsed.name ?? null,
+      phone: parsed.phone ?? null,
+      address: parsed.address ?? null,
+      city: parsed.city ?? null,
+      message: parsed.message ?? null,
+    };
+  });
 }
