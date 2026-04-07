@@ -8,9 +8,12 @@ export const dynamic = "force-dynamic";
 const WebLeadSchema = z.object({
   name: z.string().min(1).max(200),
   phone: z.string().min(7).max(30),
-  address: z.string().min(5).max(500),
+  address: z.string().min(1).max(500),
+  city: z.string().min(1).max(100).optional().default(""),
+  state: z.string().min(1).max(2).optional().default(""),
+  zip: z.string().min(1).max(10).optional().default(""),
   message: z.string().max(2000).optional().default(""),
-  email: z.string().email().optional(), // accepted for forward compat (LEAD-01)
+  email: z.string().email().optional(),
 });
 
 const CORS_HEADERS = {
@@ -58,20 +61,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, phone, address, message, email } = parsed.data;
+  const { name, phone, address, city, state, zip, message, email } = parsed.data;
+
+  // Build full address string
+  const fullAddress = [address, city, state, zip].filter(Boolean).join(", ");
 
   // Build structured note text
   const noteLines = [
     `Name: ${name}`,
     `Phone: ${phone}`,
-    `Address: ${address}`,
+    `Address: ${fullAddress}`,
   ];
-  if (message) {
-    noteLines.push(`Message: ${message}`);
-  }
-  if (email) {
-    noteLines.push(`Email: ${email}`);
-  }
+  if (city) noteLines.push(`City: ${city}`);
+  if (state) noteLines.push(`State: ${state}`);
+  if (zip) noteLines.push(`Zip: ${zip}`);
+  if (message) noteLines.push(`Message: ${message}`);
+  if (email) noteLines.push(`Email: ${email}`);
   const noteText = noteLines.join("\n");
 
   // Insert lead + leadNote
