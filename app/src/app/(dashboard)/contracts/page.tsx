@@ -105,7 +105,12 @@ function ContractSection({
 }
 
 export default async function ContractsPage() {
-  const allContracts = await getAllContracts();
+  let allContracts: ContractWithSigners[] = [];
+  try {
+    allContracts = await getAllContracts();
+  } catch {
+    // Table may not exist or query failed — show empty state
+  }
 
   const active = allContracts.filter((c) =>
     (ACTIVE_STATUSES as string[]).includes(c.status)

@@ -7,14 +7,20 @@ import { PhotoInbox } from "@/components/photo-inbox";
 export const dynamic = "force-dynamic";
 
 export default async function PhotoInboxPage() {
-  const [photos, dealRows] = await Promise.all([
-    getInboxPhotos(),
-    db
-      .select({ id: deals.id, address: deals.address })
-      .from(deals)
-      .orderBy(desc(deals.createdAt))
-      .limit(50),
-  ]);
+  let photos: Awaited<ReturnType<typeof getInboxPhotos>> = [];
+  let dealRows: { id: string; address: string }[] = [];
+  try {
+    [photos, dealRows] = await Promise.all([
+      getInboxPhotos(),
+      db
+        .select({ id: deals.id, address: deals.address })
+        .from(deals)
+        .orderBy(desc(deals.createdAt))
+        .limit(50),
+    ]);
+  } catch {
+    // Table may not exist or query failed — show empty state
+  }
 
   return (
     <div className="space-y-4">

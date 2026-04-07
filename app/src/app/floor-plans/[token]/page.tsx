@@ -10,7 +10,7 @@ export async function generateMetadata({
   params,
 }: FloorPlanSharePageProps): Promise<Metadata> {
   const { token } = await params;
-  const result = await getFloorPlanByShareToken(token);
+  const result = await getFloorPlanByShareToken(token).catch(() => null);
   if (!result) {
     return { title: "Floor Plan — Expired" };
   }
@@ -23,7 +23,7 @@ export default async function FloorPlanSharePage({
   params,
 }: FloorPlanSharePageProps) {
   const { token } = await params;
-  const result = await getFloorPlanByShareToken(token);
+  const result = await getFloorPlanByShareToken(token).catch(() => null);
 
   if (!result) {
     return (
