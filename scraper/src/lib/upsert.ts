@@ -9,7 +9,8 @@ import type { UtahLegalsNotice } from "../sources/utah-legals.js";
 /**
  * Normalizes addresses from county assessor format to standard format.
  * County data often stores addresses as "STREET NAME: NUMBER" (e.g. "E MAIN ST: 1110")
- * which should be "1110 E MAIN ST". Also title-cases the result.
+ * which should be "1110 E MAIN ST". Also title-cases the result and strips leading
+ * zeros from grid street numbers (e.g. "0100" → "100").
  */
 function normalizeAddress(raw: string): string {
   if (!raw) return raw;
@@ -17,11 +18,19 @@ function normalizeAddress(raw: string): string {
   // Pattern: "STREET NAME: NUMBER" → "NUMBER STREET NAME"
   // e.g. "E MAIN ST: 1110" → "1110 E MAIN ST"
   // e.g. "N 100 W: 450" → "450 N 100 W"
+  // e.g. "S 0100 W: 320" → "320 S 0100 W" (leading zeros stripped below)
   // e.g. "E Tamarac AVE (370N): 370" → "370 E Tamarac AVE (370N)"
   const colonMatch = raw.match(/^(.+?):\s*(\d+[A-Za-z]?)$/);
   if (colonMatch) {
     raw = `${colonMatch[2]} ${colonMatch[1].trim()}`;
   }
+
+  // Strip leading zeros from grid street numbers.
+  // Utah counties (especially Emery) store street numbers with leading zeros
+  // like "0100 W" or "0620 N". Standard format drops these: "100 W", "620 N".
+  // Only strip when the number is between directionals (e.g. "S 0100 W")
+  // to avoid mangling non-grid addresses.
+  raw = raw.replace(/(?<=[NSEW]\s)0+(\d+)(?=\s[NSEW])/g, "$1");
 
   // Title case: "1110 E MAIN ST" → "1110 E Main St"
   return raw.replace(/\b([a-zA-Z]+)\b/g, (word) => {
