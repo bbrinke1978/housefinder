@@ -205,7 +205,7 @@ export default async function DealDetailPage({
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
             <DealOverview deal={deal} contacts={contacts} />
-            <DealBlastGenerator deal={deal} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />
+            <DealBlastGenerator deal={deal} dealId={id} matchingBuyers={matchingBuyers} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />
             <div className='space-y-3'>
               <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
                 Matched Buyers ({matchingBuyers.length})

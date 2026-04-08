@@ -10,6 +10,9 @@ import {
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
+import { Resend } from "resend";
+import { getMailSettings } from "@/lib/mail-settings-actions";
+import { getDeal } from "@/lib/deal-queries";
 
 const BUYER_COMM_EVENT_TYPES = [
   "called_buyer",
@@ -275,6 +278,60 @@ export async function importBuyers(
 
   revalidatePath("/buyers");
   return { imported, errors };
+}
+
+/**
+ * sendDealBlast — send email via Resend to a single buyer and log the blast.
+ * Returns { success: true } or { error: string }.
+ * If mail is not configured, returns { error: "mail_not_configured" }.
+ */
+export async function sendDealBlast(
+  dealId: string,
+  buyerId: string,
+  buyerEmail: string,
+  blastText: string
+): Promise<BuyerActionResult | { error: "mail_not_configured" }> {
+  if (!dealId || !buyerId || !buyerEmail) {
+    return { error: "dealId, buyerId, and buyerEmail are required" };
+  }
+
+  const mailSettings = await getMailSettings();
+  const resendApiKey = mailSettings.resendApiKey;
+
+  if (!resendApiKey) {
+    return { error: "mail_not_configured" };
+  }
+
+  const deal = await getDeal(dealId);
+  const dealAddress = deal?.address ?? "Deal";
+
+  const resend = new Resend(resendApiKey);
+  const fromEmail = mailSettings.fromEmail || "deals@housefinder.app";
+  const fromName = mailSettings.fromName || "HouseFinder";
+
+  try {
+    await resend.emails.send({
+      from: `${fromName} <${fromEmail}>`,
+      to: buyerEmail,
+      subject: `Deal Available - ${dealAddress}`,
+      text: blastText,
+    });
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to send email",
+    };
+  }
+
+  // Log the blast event (non-fatal — email already sent)
+  try {
+    await logDealBlast(buyerId, dealId);
+  } catch {
+    // Non-fatal: email was sent; log failure is acceptable
+  }
+
+  revalidatePath(`/deals/${dealId}`);
+  revalidatePath(`/buyers/${buyerId}`);
+  return { success: true };
 }
 
 /**
