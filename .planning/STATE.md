@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 16 of 16 (Buyers List CRM)
-Plan: 4 of 5 in current phase
-Status: In Progress
-Last activity: 2026-04-05 — Completed 16-03 (buyer detail page /buyers/[id], BuyerDetailHeader with tags/follow-up, BuyerTimeline with log form, BuyerDealHistory)
-Stopped at: Completed 16-03-PLAN.md
+Plan: 5 of 5 in current phase
+Status: Complete
+Last activity: 2026-04-08 — Completed 16-05 (BuyerFollowupWidget on dashboard, overdue buyer follow-up reminders with per-buyer links to /buyers/[id])
+Stopped at: Completed 16-05-PLAN.md
 
-Progress: [████████████████████████░░░░░░░░░░░░░░░░] 60% of Phase 16
+Progress: [████████████████████████████████████████] 100% of Phase 16
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [███████████████████████
 | Phase 16-buyers-list-crm P01 | 3min | 2 tasks | 5 files |
 | Phase 16-buyers-list-crm P02 | 3min | 2 tasks | 7 files |
 | Phase 16-buyers-list-crm P03 | 5min | 2 tasks | 4 files |
+| Phase 16-buyers-list-crm P05 | 1min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,8 @@ Recent decisions affecting current work:
 - [Phase 16-03]: BuyerTimeline filter tabs use client-side useState (not URL params) — single-buyer detail page context doesn't need bookmarkable filter state
 - [Phase 16-03]: formKey increment resets log event form after submit — avoids manual field clearing
 - [Phase 16-03]: Two-column layout on lg+ (timeline main, deal history 340px sidebar); single column mobile
+- [Phase 16-05]: Widget uses return null pattern (not conditional render at call site) — cleaner, self-contained, per plan spec
+- [Phase 16-05]: getOverdueBuyerFollowups added to Promise.all with .catch([]) fallback — dashboard never fails due to CRM query error
 
 ### Roadmap Evolution
 
@@ -272,6 +275,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-05
-Stopped at: Completed 16-03-PLAN.md (buyer detail page /buyers/[id], BuyerDetailHeader, BuyerTimeline, BuyerDealHistory)
+Last session: 2026-04-08
+Stopped at: Completed 16-05-PLAN.md (BuyerFollowupWidget on dashboard, overdue buyer follow-up reminders)
+Resume file: .planning/phases/16-buyers-list-crm/16-05-SUMMARY.md
 Resume file: .planning/phases/16-buyers-list-crm/16-03-SUMMARY.md
