@@ -79,6 +79,7 @@ Progress: [███████████████████████
 | Phase 16-buyers-list-crm P02 | 3min | 2 tasks | 7 files |
 | Phase 16-buyers-list-crm P03 | 5min | 2 tasks | 4 files |
 | Phase 16-buyers-list-crm P05 | 1min | 1 tasks | 2 files |
+| Phase 16-buyers-list-crm P04 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -256,6 +257,8 @@ Recent decisions affecting current work:
 - [Phase 16-03]: Two-column layout on lg+ (timeline main, deal history 340px sidebar); single column mobile
 - [Phase 16-05]: Widget uses return null pattern (not conditional render at call site) — cleaner, self-contained, per plan spec
 - [Phase 16-05]: getOverdueBuyerFollowups added to Promise.all with .catch([]) fallback — dashboard never fails due to CRM query error
+- [Phase 16-04]: BuyerList union type: Buyer[] mode for /deals/buyers; BuyerWithMatchInfo[] mode for deal detail — preserves backward compat
+- [Phase 16-04]: sendDealBlast returns mail_not_configured sentinel — DealBlastGenerator shows inline warning with settings link, copy-to-clipboard unaffected
 
 ### Roadmap Evolution
 
