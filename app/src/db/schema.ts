@@ -216,28 +216,51 @@ export const ownerContacts = pgTable(
   ]
 );
 
+// -- Buyer CRM Enums --
+
+export const buyerCommEventTypeEnum = pgEnum("buyer_comm_event_type", [
+  "called_buyer",
+  "left_voicemail",
+  "emailed_buyer",
+  "sent_text",
+  "met_in_person",
+  "deal_blast",
+  "note",
+]);
+
+export const buyerDealInteractionStatusEnum = pgEnum(
+  "buyer_deal_interaction_status",
+  ["blasted", "interested", "closed"]
+);
+
 // -- Buyers --
 
-export const buyers = pgTable("buyers", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  phone: text("phone"),
-  email: text("email"),
-  buyBox: text("buy_box"),
-  minPrice: integer("min_price"),
-  maxPrice: integer("max_price"),
-  fundingType: text("funding_type"), // "cash" | "hard_money" | "both"
-  targetAreas: text("target_areas"),
-  rehabTolerance: text("rehab_tolerance"), // "light" | "medium" | "heavy" | "any"
-  notes: text("notes"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const buyers = pgTable(
+  "buyers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    phone: text("phone"),
+    email: text("email"),
+    buyBox: text("buy_box"),
+    minPrice: integer("min_price"),
+    maxPrice: integer("max_price"),
+    fundingType: text("funding_type"), // "cash" | "hard_money" | "both"
+    targetAreas: text("target_areas"),
+    rehabTolerance: text("rehab_tolerance"), // "light" | "medium" | "heavy" | "any"
+    notes: text("notes"),
+    isActive: boolean("is_active").notNull().default(true),
+    followUpDate: date("follow_up_date"),
+    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index("idx_buyers_follow_up_date").on(table.followUpDate)]
+);
 
 // -- Deals --
 
@@ -307,6 +330,90 @@ export const dealNotes = pgTable(
 );
 
 export type BuyerRow = InferSelectModel<typeof buyers>;
+
+// -- Buyer Communication Events --
+
+export const buyerCommunicationEvents = pgTable(
+  "buyer_communication_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => buyers.id),
+    eventType: buyerCommEventTypeEnum("event_type").notNull(),
+    notes: text("notes"),
+    dealId: uuid("deal_id").references(() => deals.id),
+    occurredAt: timestamp("occurred_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_buyer_comm_events_buyer_id").on(table.buyerId),
+    index("idx_buyer_comm_events_occurred_at").on(table.occurredAt),
+  ]
+);
+
+// -- Buyer-Deal Interactions --
+
+export const buyerDealInteractions = pgTable(
+  "buyer_deal_interactions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => buyers.id),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    status: buyerDealInteractionStatusEnum("status")
+      .notNull()
+      .default("blasted"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_buyer_deal_interactions_buyer_id").on(table.buyerId),
+    index("idx_buyer_deal_interactions_deal_id").on(table.dealId),
+    uniqueIndex("uq_buyer_deal_interaction").on(table.buyerId, table.dealId),
+  ]
+);
+
+// -- Buyer Tags --
+
+export const buyerTags = pgTable(
+  "buyer_tags",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    buyerId: uuid("buyer_id")
+      .notNull()
+      .references(() => buyers.id),
+    tag: text("tag").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_buyer_tags_buyer_id").on(table.buyerId),
+    index("idx_buyer_tags_tag").on(table.tag),
+    uniqueIndex("uq_buyer_tag").on(table.buyerId, table.tag),
+  ]
+);
+
+export type BuyerCommunicationEventRow = InferSelectModel<
+  typeof buyerCommunicationEvents
+>;
+export type BuyerDealInteractionRow = InferSelectModel<
+  typeof buyerDealInteractions
+>;
+export type BuyerTagRow = InferSelectModel<typeof buyerTags>;
+
 export type DealRow = InferSelectModel<typeof deals>;
 export type DealNoteRow = InferSelectModel<typeof dealNotes>;
 
