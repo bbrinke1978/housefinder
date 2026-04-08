@@ -6,6 +6,8 @@ export const LEAD_SOURCES = [
   { value: "signage", label: "Signage", color: "bg-amber-500" },
   { value: "driving", label: "Driving for $", color: "bg-orange-500" },
   { value: "word_of_mouth", label: "Word of Mouth", color: "bg-purple-500" },
+  { value: "website", label: "Website", color: "bg-blue-500" },
+  { value: "voicemail", label: "Voicemail", color: "bg-teal-500" },
   { value: "other", label: "Other", color: "bg-rose-500" },
 ] as const;
 
