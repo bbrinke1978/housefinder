@@ -8,6 +8,7 @@ import {
   getWebsiteLeads,
 } from "@/lib/queries";
 import type { WebsiteLead } from "@/lib/queries";
+import { LEAD_SOURCES } from "@/types";
 import { getSequences } from "@/lib/campaign-queries";
 import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
@@ -91,17 +92,23 @@ export default async function DashboardPage({
         )}
       </div>
 
-      {/* Website Leads */}
+      {/* Inbound Leads (website + voicemail) */}
       {websiteLeads.length > 0 && (
         <div className="space-y-3 animate-fade-in-up stagger-3">
           <div className="flex items-center gap-2">
             <Globe className="h-4 w-4 text-violet-500" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Website Leads ({websiteLeads.length})
+              Inbound Leads ({websiteLeads.length})
             </h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {websiteLeads.map((lead) => (
+            {websiteLeads.map((lead) => {
+              const isVoicemail = lead.leadSource === "voicemail";
+              const badgeLabel = isVoicemail ? "Voicemail" : "Website";
+              const badgeClass = isVoicemail
+                ? "bg-teal-500/15 text-teal-600"
+                : "bg-violet-500/15 text-violet-600";
+              return (
               <div key={lead.id} className="rounded-xl border bg-card p-4 space-y-2">
                 <div className="flex items-start justify-between">
                   <div>
@@ -110,8 +117,8 @@ export default async function DashboardPage({
                       <p className="text-xs text-muted-foreground">{lead.address}</p>
                     )}
                   </div>
-                  <span className="text-[10px] font-medium uppercase tracking-wider rounded-full bg-violet-500/15 text-violet-600 px-2 py-0.5">
-                    Website
+                  <span className={`text-[10px] font-medium uppercase tracking-wider rounded-full px-2 py-0.5 ${badgeClass}`}>
+                    {badgeLabel}
                   </span>
                 </div>
                 {lead.phone && (
@@ -130,7 +137,8 @@ export default async function DashboardPage({
                   {formatDateTime(lead.createdAt)}
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

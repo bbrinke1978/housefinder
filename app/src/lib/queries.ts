@@ -836,7 +836,7 @@ export async function getMapProperties(): Promise<MapProperty[]> {
   })) as MapProperty[];
 }
 
-// -- Website Leads (no property) --
+// -- Inbound Leads (no property — website forms + voicemails) --
 
 export interface WebsiteLead {
   id: string;
@@ -854,6 +854,7 @@ export interface WebsiteLead {
 }
 
 export async function getWebsiteLeads(): Promise<WebsiteLead[]> {
+  // Use subquery to get only the first note per lead (avoids duplicates from leftJoin)
   const rows = await db
     .select({
       id: leads.id,
@@ -863,17 +864,31 @@ export async function getWebsiteLeads(): Promise<WebsiteLead[]> {
       distressScore: leads.distressScore,
       isHot: leads.isHot,
       createdAt: leads.createdAt,
-      noteText: leadNotes.noteText,
     })
     .from(leads)
-    .leftJoin(leadNotes, eq(leadNotes.leadId, leads.id))
     .where(isNull(leads.propertyId))
     .orderBy(desc(leads.createdAt))
     .limit(50);
 
+  // Fetch first note for each lead separately to avoid join duplication
+  const leadIds = rows.map((r) => r.id);
+  const notes = leadIds.length > 0
+    ? await db
+        .select({ leadId: leadNotes.leadId, noteText: leadNotes.noteText })
+        .from(leadNotes)
+        .where(inArray(leadNotes.leadId, leadIds))
+    : [];
+
+  // Group notes by leadId, take first
+  const noteMap = new Map<string, string>();
+  for (const n of notes) {
+    if (!noteMap.has(n.leadId)) {
+      noteMap.set(n.leadId, n.noteText ?? "");
+    }
+  }
+
   return rows.map((r) => {
-    // Parse structured note text: "Name: ...\nPhone: ...\nAddress: ...\nMessage: ..."
-    const note = r.noteText ?? "";
+    const note = noteMap.get(r.id) ?? "";
     const parsed: Record<string, string> = {};
     for (const line of note.split("\n")) {
       const idx = line.indexOf(": ");
@@ -883,7 +898,6 @@ export async function getWebsiteLeads(): Promise<WebsiteLead[]> {
     }
     return {
       ...r,
-      noteText: undefined,
       name: parsed.name ?? null,
       phone: parsed.phone ?? null,
       address: parsed.address ?? null,
