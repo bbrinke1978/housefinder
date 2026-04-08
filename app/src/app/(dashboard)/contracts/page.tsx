@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { getAllContracts } from "@/lib/contract-queries";
 import { ContractStatusBadge } from "@/components/contract-status-badge";
 import type { ContractWithSigners, ContractLifecycleStatus } from "@/types";
+import { formatDate, formatDateShort } from "@/lib/format-date";
 
 export const dynamic = "force-dynamic";
 
@@ -26,26 +27,15 @@ function ContractRow({ contract }: { contract: ContractWithSigners }) {
     "—";
 
   const createdDate = contract.createdAt
-    ? new Date(contract.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? formatDate(contract.createdAt)
     : "—";
 
   const sentDate = contract.sentAt
-    ? new Date(contract.sentAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })
+    ? formatDateShort(contract.sentAt)
     : null;
 
   const executedDate = contract.executedAt
-    ? new Date(contract.executedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? formatDate(contract.executedAt)
     : null;
 
   return (

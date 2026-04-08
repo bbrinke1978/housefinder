@@ -7,6 +7,7 @@ import { FloorPlanUpload } from "@/components/floor-plan-upload";
 import { generateShareLink, revokeShareLink } from "@/lib/floor-plan-actions";
 import type { FloorPlanWithPins, SketchRoom } from "@/types";
 import type { FloorLabel, FloorPlanVersion } from "@/types";
+import { formatDate } from "@/lib/format-date";
 
 // Dynamically import viewer to avoid SSR issues with pdfjs and react-zoom-pan-pinch
 const FloorPlanViewer = dynamic(
@@ -175,11 +176,7 @@ function ShareLinkPanel({ plan }: { plan: FloorPlanWithPins }) {
               {effectiveExpiry && (
                 <p className="text-[11px] text-muted-foreground">
                   Expires:{" "}
-                  {effectiveExpiry.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                  {formatDate(effectiveExpiry)}
                 </p>
               )}
 

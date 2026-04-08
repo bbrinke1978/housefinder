@@ -12,6 +12,7 @@ import {
   downloadSignedPdf,
 } from "@/lib/contract-actions";
 import type { ContractWithSigners } from "@/types";
+import { formatDate } from "@/lib/format-date";
 
 interface ContractListItemProps {
   contract: ContractWithSigners;
@@ -98,11 +99,7 @@ export function ContractListItem({ contract }: ContractListItemProps) {
   }
 
   const createdDate = contract.createdAt
-    ? new Date(contract.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+    ? formatDate(contract.createdAt)
     : "—";
 
   return (

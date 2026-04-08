@@ -291,7 +291,7 @@ function HealthTable({
               {row.status.toUpperCase()}
             </td>
             <td className="py-1 pr-4">
-              {row.lastSuccessAt ? row.lastSuccessAt.toLocaleDateString() : "Never"}
+              {row.lastSuccessAt ? row.lastSuccessAt.toLocaleDateString("en-US", { timeZone: "America/Denver" }) : "Never"}
             </td>
             <td className="py-1 pr-4">{row.freshnessHours ?? "—"}</td>
             <td className="py-1">{row.lastResultCount}</td>

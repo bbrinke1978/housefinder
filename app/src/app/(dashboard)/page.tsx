@@ -13,6 +13,7 @@ import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
 import { MapPin, Globe, Phone, MessageSquare } from "lucide-react";
+import { formatDateTime } from "@/lib/format-date";
 
 interface DashboardPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -126,7 +127,7 @@ export default async function DashboardPage({
                   </div>
                 )}
                 <p className="text-[10px] text-muted-foreground">
-                  {new Date(lead.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                  {formatDateTime(lead.createdAt)}
                 </p>
               </div>
             ))}

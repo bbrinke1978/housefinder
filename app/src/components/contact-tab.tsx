@@ -266,7 +266,7 @@ export function ContactTab({
                       {contact.source}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(contact.createdAt).toLocaleDateString()}
+                      {new Date(contact.createdAt).toLocaleDateString("en-US", { timeZone: "America/Denver" })}
                     </span>
                   </div>
                 </div>
