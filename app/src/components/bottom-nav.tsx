@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, Briefcase, BarChart2, Mail } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
-// Mobile bottom nav: 5 items — replaced "Buyers" with "Campaigns" (Buyers accessible from desktop sidebar)
+// Mobile bottom nav: 5 items — Dashboard, Deals, Buyers, Analytics, Map
+// Campaigns accessible from desktop sidebar
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
-  { label: "Campaigns", href: "/campaigns", icon: Mail },
+  { label: "Buyers", href: "/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
 ];
@@ -28,8 +29,6 @@ export function MobileBottomNav() {
         const isActive =
           item.href === "/"
             ? pathname === "/"
-            : item.href === "/deals"
-            ? pathname === "/deals" || (pathname.startsWith("/deals") && !pathname.startsWith("/deals/buyers"))
             : pathname.startsWith(item.href);
         return (
           <Link

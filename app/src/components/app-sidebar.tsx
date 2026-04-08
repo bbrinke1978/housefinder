@@ -21,7 +21,7 @@ const navItems = [
   { label: "Deals", href: "/deals", icon: Briefcase },
   { label: "Contracts", href: "/contracts", icon: FileText },
   { label: "Photos", href: "/photos/inbox", icon: ImageIcon },
-  { label: "Buyers", href: "/deals/buyers", icon: Users },
+  { label: "Buyers", href: "/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
   { label: "Campaigns", href: "/campaigns", icon: Mail },
@@ -50,8 +50,6 @@ export function AppSidebar() {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
-                : item.href === "/deals"
-                ? pathname === "/deals" || (pathname.startsWith("/deals") && !pathname.startsWith("/deals/buyers"))
                 : pathname.startsWith(item.href);
             return (
               <SidebarMenuItem key={item.href}>
