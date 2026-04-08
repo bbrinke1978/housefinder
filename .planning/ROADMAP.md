@@ -102,7 +102,7 @@ Plans:
 **Depends on**: Phase 3
 **Requirements**: ANALYTICS-01, ANALYTICS-02, ANALYTICS-03, ANALYTICS-04, ANALYTICS-05, ANALYTICS-06, ANALYTICS-07, ANALYTICS-08
 **Success Criteria** (what must be TRUE):
-  1. An analytics dashboard shows pipeline conversion rates: how many leads move from New → Contacted → Closed, with average time at each stage
+  1. An analytics dashboard shows pipeline conversion rates: how many leads move from New -> Contacted -> Closed, with average time at each stage
   2. Market comparison view shows which cities/counties produce the most hot leads, highest conversion rates, and fastest response times
   3. Outreach tracking records every call attempt, outcome (answered/voicemail/no-answer/wrong-number), and time spent — showing contact rate per source
   4. Trend charts show distressed property volume over time per city/county — spot markets heating up or cooling down
@@ -315,15 +315,28 @@ Plans:
 - [ ] 15-02-PLAN.md — Floor plan upload, pan/zoom viewer, pin annotations, Floor Plans tab on deal detail
 - [ ] 15-03-PLAN.md — react-konva room rectangle sketch tool with dimensions, sqft calculation, save to DB
 - [ ] 15-04-PLAN.md — Contractor share links, Start Deal carry-over, sqft deal metrics integration
+
 ### Phase 16: Buyers List CRM
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can manage cash buyers as a full CRM — with dedicated buyer detail pages, unified communication timelines, auto-matching buyers to deals by price range and target area, buyer-deal interaction tracking (blasted/interested/closed), follow-up reminders on the dashboard, free-form tags, CSV import/export, and a searchable/filterable top-level buyers list replacing the old /deals/buyers sub-page
+**Requirements**: BUYER-01, BUYER-02, BUYER-03, BUYER-04, BUYER-05, BUYER-06, BUYER-07, BUYER-08, BUYER-09, BUYER-10, BUYER-11, BUYER-12
 **Depends on:** Phase 15
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. A top-level /buyers page shows a searchable, filterable table of all buyers with tags, status, last contact, and follow-up dates
+  2. Each buyer has a detail page (/buyers/[id]) showing full profile, communication timeline, deal interaction history, and tag management
+  3. Buyers auto-match to deals by price range AND target area, with match quality badges on deal detail
+  4. Deal blasts can be emailed to selected buyers via Resend with auto-logging to buyer communication history and buyer-deal interaction tracking
+  5. Follow-up reminder dates per buyer surface as an overdue widget on the main dashboard
+  6. CSV import with column mapping and CSV export both work for buyer list management
+  7. Sidebar and bottom nav updated to point to /buyers as first-class page
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 16 to break down)
+- [ ] 16-01-PLAN.md — Schema (buyer_communication_events, buyer_deal_interactions, buyer_tags), types, queries, server actions
+- [ ] 16-02-PLAN.md — /buyers list page with searchable table, CSV import/export, navigation updates
+- [ ] 16-03-PLAN.md — /buyers/[id] detail page with communication timeline, deal history, tags, follow-up
+- [ ] 16-04-PLAN.md — Deal detail integration: enhanced matching (price + area), email blast, interaction tracking
+- [ ] 16-05-PLAN.md — Dashboard follow-up reminder widget
 
 ### Phase 17: KPI Agent Scoring Dashboard
 

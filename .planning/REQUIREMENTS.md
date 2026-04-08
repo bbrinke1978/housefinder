@@ -80,7 +80,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Data Analytics
 
-- [x] **ANALYTICS-01**: User can view pipeline conversion funnel showing lead progression rates (New → Contacted → Follow-Up → Closed/Dead) with average time at each stage
+- [x] **ANALYTICS-01**: User can view pipeline conversion funnel showing lead progression rates (New -> Contacted -> Follow-Up -> Closed/Dead) with average time at each stage
 - [x] **ANALYTICS-02**: User can compare markets showing which cities/counties produce the most hot leads, highest conversion rates, and fastest deal timelines
 - [x] **ANALYTICS-03**: User can track outreach activity per lead — call attempts, outcomes (answered/voicemail/no-answer/wrong-number), and contact rates by source
 - [x] **ANALYTICS-04**: User can view trend charts showing distressed property volume over time per city/county to spot markets heating up or cooling down
@@ -181,6 +181,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FLOOR-09**: Sketched floor plans auto-calculate total square footage from room dimensions, feeding into deal metrics (price/sqft, rehab cost/sqft, ARV/sqft) on the MAO calculator
 - [x] **FLOOR-10**: Floor plans carry over from property to deal automatically when Start Deal creates a deal, following the same best-effort pattern as photo carry-over
 
+### Buyers List CRM
+
+- [ ] **BUYER-01**: System stores buyer communication events (called, voicemail, emailed, text, met, deal_blast, note), buyer-deal interactions (blasted, interested, closed), and buyer tags in PostgreSQL with follow-up date and last-contacted columns on buyers table
+- [ ] **BUYER-02**: User can view a searchable, filterable buyers list at /buyers with columns for name, phone, email, buy box, tags, status, last contact date, and follow-up date — with filters for search, tag, active/inactive, target area, and funding type
+- [ ] **BUYER-03**: User can view a buyer detail page at /buyers/[id] showing full profile, communication timeline, deal interaction history, and matched deals
+- [ ] **BUYER-04**: User can add and remove free-form tags per buyer (e.g., VIP, cash-only, fix-and-flip) with autocomplete suggestions from existing tags — tags filterable on list page
+- [ ] **BUYER-05**: System auto-matches buyers to deals by price range AND target area (case-insensitive city match), showing full-match and price-only-match badges on deal detail buyer list
+- [ ] **BUYER-06**: Buyer-deal interactions tracked through blasted/interested/closed funnel — auto-logged on deal blast, manually updatable from deal detail and buyer detail
+- [ ] **BUYER-07**: User can log buyer communication events (call, voicemail, email, text, meeting, note) from buyer detail page with unified chronological timeline showing icons/colors per type
+- [ ] **BUYER-08**: User can set follow-up reminder dates per buyer; overdue follow-ups display as a widget on the main dashboard with buyer name links — widget hidden when no overdue reminders
+- [ ] **BUYER-09**: User can import buyers from CSV with column mapping UI (auto-map matching headers, preview first 5 rows, per-row error reporting) via direct server action call
+- [ ] **BUYER-10**: User can export filtered or full buyer list to CSV using established buildCsv pattern with columns for all buyer fields plus tags and dates
+- [ ] **BUYER-11**: Deal blast generator supports email sending to selected buyers via Resend (alongside existing copy-to-clipboard), with auto-logging to buyer communication history and buyer-deal interaction upsert
+- [ ] **BUYER-12**: Sidebar navigation updates Buyers href from /deals/buyers to /buyers; bottom nav replaces Campaigns with Buyers; command menu updated
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -234,6 +249,9 @@ Explicitly excluded. Documented to prevent scope creep.
 | Video capture/walkthrough clips | Deferred — separate phase |
 | AI-based photo tagging | Deferred — future enhancement |
 | Before/after comparison views | Deferred — rehab documentation phase |
+| Automated buyer email sequences | Deferred — separate phase per CONTEXT.md |
+| Buyer portal (buyers log in to see deals) | Deferred — separate phase per CONTEXT.md |
+| Buyer referral tracking | Future enhancement per CONTEXT.md |
 
 ## Traceability
 
@@ -362,12 +380,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLOOR-08 | Phase 15 | Planned |
 | FLOOR-09 | Phase 15 | Planned |
 | FLOOR-10 | Phase 15 | Planned |
+| BUYER-01 | Phase 16 | Planned |
+| BUYER-02 | Phase 16 | Planned |
+| BUYER-03 | Phase 16 | Planned |
+| BUYER-04 | Phase 16 | Planned |
+| BUYER-05 | Phase 16 | Planned |
+| BUYER-06 | Phase 16 | Planned |
+| BUYER-07 | Phase 16 | Planned |
+| BUYER-08 | Phase 16 | Planned |
+| BUYER-09 | Phase 16 | Planned |
+| BUYER-10 | Phase 16 | Planned |
+| BUYER-11 | Phase 16 | Planned |
+| BUYER-12 | Phase 16 | Planned |
 
 **Coverage:**
-- v1 requirements: 111 total
-- Mapped to phases: 111
+- v1 requirements: 123 total
+- Mapped to phases: 123
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-05 — added Phase 15 blueprints & floor plans requirements (FLOOR-01 through FLOOR-10)*
+*Last updated: 2026-04-07 — added Phase 16 buyers list CRM requirements (BUYER-01 through BUYER-12)*
