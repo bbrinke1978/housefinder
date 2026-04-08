@@ -6,14 +6,15 @@ import { leads, leadNotes } from "@/db/schema";
 export const dynamic = "force-dynamic";
 
 const WebLeadSchema = z.object({
-  name: z.string().min(1).max(200),
+  name: z.string().max(200).optional().default(""),
   phone: z.string().min(7).max(30),
-  address: z.string().min(1).max(500),
+  address: z.string().max(500).optional().default(""),
   city: z.string().min(1).max(100).optional().default(""),
   state: z.string().min(1).max(2).optional().default(""),
   zip: z.string().min(1).max(10).optional().default(""),
   message: z.string().max(2000).optional().default(""),
   email: z.string().email().optional(),
+  source: z.enum(["website", "voicemail"]).optional().default("website"),
 });
 
 const CORS_HEADERS = {
@@ -61,16 +62,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, phone, address, city, state, zip, message, email } = parsed.data;
+  const { name, phone, address, city, state, zip, message, email, source } = parsed.data;
 
   // Build full address string
   const fullAddress = [address, city, state, zip].filter(Boolean).join(", ");
 
   // Build structured note text
   const noteLines = [
-    `Name: ${name}`,
+    ...(name ? [`Name: ${name}`] : []),
     `Phone: ${phone}`,
-    `Address: ${fullAddress}`,
+    ...(fullAddress ? [`Address: ${fullAddress}`] : []),
   ];
   if (city) noteLines.push(`City: ${city}`);
   if (state) noteLines.push(`State: ${state}`);
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       .insert(leads)
       .values({
         propertyId: null,
-        leadSource: "website",
+        leadSource: source,
         status: "new",
         newLeadStatus: "new",
         distressScore: 0,
