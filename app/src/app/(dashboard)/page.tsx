@@ -10,9 +10,11 @@ import {
 import type { WebsiteLead } from "@/lib/queries";
 import { LEAD_SOURCES } from "@/types";
 import { getSequences } from "@/lib/campaign-queries";
+import { getOverdueBuyerFollowups } from "@/lib/buyer-queries";
 import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
+import { BuyerFollowupWidget } from "@/components/buyer-followup-widget";
 import { MapPin, Globe, Phone, MessageSquare } from "lucide-react";
 import { formatDateTime } from "@/lib/format-date";
 
@@ -48,12 +50,13 @@ export default async function DashboardPage({
     search: typeof params.search === "string" ? params.search : undefined,
   };
 
-  const [stats, properties, cities, sequences, websiteLeads] = await Promise.all([
+  const [stats, properties, cities, sequences, websiteLeads, overdueBuyers] = await Promise.all([
     getDashboardStats(),
     getProperties(filterParams),
     getDistinctCities(),
     getSequences(),
     getWebsiteLeads().catch(() => [] as WebsiteLead[]),
+    getOverdueBuyerFollowups().catch(() => []),
   ]);
 
   return (
@@ -91,6 +94,9 @@ export default async function DashboardPage({
           </span>
         )}
       </div>
+
+      {/* Buyer Follow-Up Reminders */}
+      <BuyerFollowupWidget buyers={overdueBuyers} />
 
       {/* Inbound Leads (website + voicemail) */}
       {websiteLeads.length > 0 && (
