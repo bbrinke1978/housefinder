@@ -906,3 +906,52 @@ export async function getWebsiteLeads(): Promise<WebsiteLead[]> {
     };
   });
 }
+
+export async function getInboundLead(id: string): Promise<(WebsiteLead & { notes: { id: string; noteText: string; noteType: string; createdAt: Date }[] }) | null> {
+  const [row] = await db
+    .select({
+      id: leads.id,
+      status: leads.status,
+      newLeadStatus: leads.newLeadStatus,
+      leadSource: leads.leadSource,
+      distressScore: leads.distressScore,
+      isHot: leads.isHot,
+      createdAt: leads.createdAt,
+    })
+    .from(leads)
+    .where(and(eq(leads.id, id), isNull(leads.propertyId)))
+    .limit(1);
+
+  if (!row) return null;
+
+  const notes = await db
+    .select({
+      id: leadNotes.id,
+      noteText: leadNotes.noteText,
+      noteType: leadNotes.noteType,
+      createdAt: leadNotes.createdAt,
+    })
+    .from(leadNotes)
+    .where(eq(leadNotes.leadId, id))
+    .orderBy(desc(leadNotes.createdAt));
+
+  // Parse contact info from the first note
+  const firstNote = notes[0]?.noteText ?? "";
+  const parsed: Record<string, string> = {};
+  for (const line of firstNote.split("\n")) {
+    const idx = line.indexOf(": ");
+    if (idx > 0) {
+      parsed[line.substring(0, idx).trim().toLowerCase()] = line.substring(idx + 2).trim();
+    }
+  }
+
+  return {
+    ...row,
+    name: parsed.name ?? null,
+    phone: parsed.phone ?? null,
+    address: parsed.address ?? null,
+    city: parsed.city ?? null,
+    message: parsed.message ?? null,
+    notes: notes as { id: string; noteText: string; noteType: string; createdAt: Date }[],
+  };
+}

@@ -53,6 +53,7 @@ export async function addLeadNote(
   });
 
   revalidatePath("/properties");
+  revalidatePath("/leads");
 }
 
 const VALID_STATUSES = ["new", "contacted", "follow_up", "closed", "dead"] as const;
@@ -124,6 +125,7 @@ export async function updateLeadStatus(
   }
 
   revalidatePath("/pipeline");
+  revalidatePath("/leads");
 }
 
 // -- Target Cities --

@@ -15,6 +15,7 @@ import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
 import { BuyerFollowupWidget } from "@/components/buyer-followup-widget";
+import Link from "next/link";
 import { MapPin, Globe, Phone, MessageSquare } from "lucide-react";
 import { formatDateTime } from "@/lib/format-date";
 
@@ -115,7 +116,7 @@ export default async function DashboardPage({
                 ? "bg-teal-500/15 text-teal-600"
                 : "bg-violet-500/15 text-violet-600";
               return (
-              <div key={lead.id} className="rounded-xl border bg-card p-4 space-y-2">
+              <Link key={lead.id} href={`/leads/${lead.id}`} className="rounded-xl border bg-card p-4 space-y-2 block hover:border-foreground/20 transition-colors">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-sm">{lead.name ?? "Unknown"}</p>
@@ -142,7 +143,7 @@ export default async function DashboardPage({
                 <p className="text-[10px] text-muted-foreground">
                   {formatDateTime(lead.createdAt)}
                 </p>
-              </div>
+              </Link>
               );
             })}
           </div>
