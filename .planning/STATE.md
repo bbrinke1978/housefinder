@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 16 of 16 (Buyers List CRM)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In Progress
-Last activity: 2026-04-05 — Completed 16-01 (buyer CRM schema, 3 new tables, 2 enums, 2 new columns on buyers, buyer-queries.ts, buyer-actions.ts, 5 new types)
-Stopped at: Completed 16-01-PLAN.md
+Last activity: 2026-04-08 — Completed 16-02 (/buyers list page, BuyersListTable, BuyerCsvImport, /api/buyers/export, sidebar/bottom-nav/command-menu navigation updates)
+Stopped at: Completed 16-02-PLAN.md
 
-Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 20% of Phase 16
+Progress: [████████████████░░░░░░░░░░░░░░░░░░░░░░░░] 40% of Phase 16
 
 ## Performance Metrics
 
@@ -76,7 +76,7 @@ Progress: [████████░░░░░░░░░░░░░░░
 | Phase 15-blueprints-floor-plans P03 | 7min | 2 tasks | 7 files |
 | Phase 15-blueprints-floor-plans P04 | 3min | 2 tasks | 6 files |
 | Phase 16-buyers-list-crm P01 | 3min | 2 tasks | 5 files |
-| Phase 16-buyers-list-crm P01 | 3min | 2 tasks | 5 files |
+| Phase 16-buyers-list-crm P02 | 3min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -244,6 +244,10 @@ Recent decisions affecting current work:
 - [Phase 16-01]: importBuyers accepts typed array directly (not FormData) — arrays don't serialize cleanly to FormData, uses useTransition pattern
 - [Phase 16-01]: logDealBlast auto-logs both comm event and deal interaction in one action — single atomic call for blast tracking
 - [Phase 15-04]: FloorPlanShareView passes dealId='' to viewers in readOnly mode — dealId unused when readOnly=true
+- [Phase 16-02]: BuyerCsvImport uses custom parseCsvLine (no library) — handles quoted fields, small data avoids dependency
+- [Phase 16-02]: Dual filter: server URL params for tag/status/area/funding + client-side search for name/email/phone on fetched data
+- [Phase 16-02]: Bottom-nav Campaigns replaced by Buyers — /buyers is now first-class CRM, campaigns accessible from sidebar
+- [Phase 16-02]: /api/buyers/export is a dedicated route (not a type= param on shared /api/export) — cleaner URL for anchor download
 
 ### Roadmap Evolution
 
@@ -263,6 +267,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-05
-Stopped at: Completed 16-01-PLAN.md (buyer CRM schema extensions, buyer-queries.ts, buyer-actions.ts, 5 new types)
-Resume file: .planning/phases/16-buyers-list-crm/16-01-SUMMARY.md
+Last session: 2026-04-08
+Stopped at: Completed 16-02-PLAN.md (/buyers list page, BuyersListTable, BuyerCsvImport, /api/buyers/export, navigation updates)
+Resume file: .planning/phases/16-buyers-list-crm/16-02-SUMMARY.md
