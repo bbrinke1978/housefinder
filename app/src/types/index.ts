@@ -165,6 +165,46 @@ export interface Buyer {
   updatedAt: Date;
 }
 
+export interface BuyerWithTags extends Buyer {
+  tags: string[];
+  followUpDate: string | null;
+  lastContactedAt: Date | null;
+}
+
+export interface BuyerTimelineEntry {
+  id: string;
+  type: "comm_event" | "deal_interaction";
+  eventType?: string;
+  status?: string;
+  notes?: string | null;
+  dealId?: string | null;
+  dealAddress?: string | null;
+  occurredAt: Date;
+}
+
+export interface BuyerDealInteraction {
+  id: string;
+  buyerId: string;
+  dealId: string;
+  status: string;
+  dealAddress: string;
+  dealCity: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BuyerWithMatchInfo extends Buyer {
+  tags: string[];
+  matchesArea: boolean;
+  isFullMatch: boolean;
+}
+
+export interface OverdueBuyer {
+  id: string;
+  name: string;
+  followUpDate: string;
+}
+
 export interface DealComp {
   address: string;
   salePrice: number;
