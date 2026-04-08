@@ -183,13 +183,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Buyers List CRM
 
-- [ ] **BUYER-01**: System stores buyer communication events (called, voicemail, emailed, text, met, deal_blast, note), buyer-deal interactions (blasted, interested, closed), and buyer tags in PostgreSQL with follow-up date and last-contacted columns on buyers table
+- [x] **BUYER-01**: System stores buyer communication events (called, voicemail, emailed, text, met, deal_blast, note), buyer-deal interactions (blasted, interested, closed), and buyer tags in PostgreSQL with follow-up date and last-contacted columns on buyers table
 - [ ] **BUYER-02**: User can view a searchable, filterable buyers list at /buyers with columns for name, phone, email, buy box, tags, status, last contact date, and follow-up date — with filters for search, tag, active/inactive, target area, and funding type
 - [ ] **BUYER-03**: User can view a buyer detail page at /buyers/[id] showing full profile, communication timeline, deal interaction history, and matched deals
-- [ ] **BUYER-04**: User can add and remove free-form tags per buyer (e.g., VIP, cash-only, fix-and-flip) with autocomplete suggestions from existing tags — tags filterable on list page
+- [x] **BUYER-04**: User can add and remove free-form tags per buyer (e.g., VIP, cash-only, fix-and-flip) with autocomplete suggestions from existing tags — tags filterable on list page
 - [ ] **BUYER-05**: System auto-matches buyers to deals by price range AND target area (case-insensitive city match), showing full-match and price-only-match badges on deal detail buyer list
 - [ ] **BUYER-06**: Buyer-deal interactions tracked through blasted/interested/closed funnel — auto-logged on deal blast, manually updatable from deal detail and buyer detail
-- [ ] **BUYER-07**: User can log buyer communication events (call, voicemail, email, text, meeting, note) from buyer detail page with unified chronological timeline showing icons/colors per type
+- [x] **BUYER-07**: User can log buyer communication events (call, voicemail, email, text, meeting, note) from buyer detail page with unified chronological timeline showing icons/colors per type
 - [ ] **BUYER-08**: User can set follow-up reminder dates per buyer; overdue follow-ups display as a widget on the main dashboard with buyer name links — widget hidden when no overdue reminders
 - [ ] **BUYER-09**: User can import buyers from CSV with column mapping UI (auto-map matching headers, preview first 5 rows, per-row error reporting) via direct server action call
 - [ ] **BUYER-10**: User can export filtered or full buyer list to CSV using established buildCsv pattern with columns for all buyer fields plus tags and dates

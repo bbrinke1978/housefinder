@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 15 — Blueprints & Floor Plans
+**Current focus:** Phase 16 — Buyers List CRM
 
 ## Current Position
 
-Phase: 15 of 15 (Blueprints & Floor Plans)
-Plan: 4 of 4 in current phase
-Status: Complete
-Last activity: 2026-04-06 — Completed 15-04 (contractor share page, share link UI, floor plan carry-over on Start Deal, per-sqft metrics in MAO calculator)
-Stopped at: Completed 15-04-PLAN.md
+Phase: 16 of 16 (Buyers List CRM)
+Plan: 1 of 5 in current phase
+Status: In Progress
+Last activity: 2026-04-05 — Completed 16-01 (buyer CRM schema, 3 new tables, 2 enums, 2 new columns on buyers, buyer-queries.ts, buyer-actions.ts, 5 new types)
+Stopped at: Completed 16-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 100% of Phase 15
+Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 20% of Phase 16
 
 ## Performance Metrics
 
@@ -75,6 +75,8 @@ Progress: [███████████████████████
 | Phase 15-blueprints-floor-plans P02 | 6min | 2 tasks | 8 files |
 | Phase 15-blueprints-floor-plans P03 | 7min | 2 tasks | 7 files |
 | Phase 15-blueprints-floor-plans P04 | 3min | 2 tasks | 6 files |
+| Phase 16-buyers-list-crm P01 | 3min | 2 tasks | 5 files |
+| Phase 16-buyers-list-crm P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -236,6 +238,11 @@ Recent decisions affecting current work:
 - [Phase 15-04]: ShareLinkPanel manages own generate/copy/revoke state inline — no prop-drilling to FloorPlanTab
 - [Phase 15-04]: budgetCategoryId set to null on carried floor plan pins — deal budget IDs differ from property budget IDs
 - [Phase 15-04]: Per-sqft metrics derived at render time from deal.sqft — DealMaoCalculator signature unchanged, reads deal.sqft from existing deal prop
+- [Phase 16-01]: Buyer CRM tables placed after dealNotes in schema.ts — forward references use arrow functions () => deals.id which resolve at runtime (Drizzle pattern)
+- [Phase 16-01]: Tag fetching uses inArray() not raw SQL ANY(ARRAY[]) — safer, type-checked, consistent with project patterns
+- [Phase 16-01]: getBuyersForList fetches buyers then tags in two queries — simpler type inference, no SQL array agg needed
+- [Phase 16-01]: importBuyers accepts typed array directly (not FormData) — arrays don't serialize cleanly to FormData, uses useTransition pattern
+- [Phase 16-01]: logDealBlast auto-logs both comm event and deal interaction in one action — single atomic call for blast tracking
 - [Phase 15-04]: FloorPlanShareView passes dealId='' to viewers in readOnly mode — dealId unused when readOnly=true
 
 ### Roadmap Evolution
@@ -256,6 +263,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-06
-Stopped at: Completed 15-04-PLAN.md (contractor share page, share link UI, floor plan carry-over, per-sqft MAO metrics)
-Resume file: .planning/phases/15-blueprints-floor-plans/15-04-SUMMARY.md
+Last session: 2026-04-05
+Stopped at: Completed 16-01-PLAN.md (buyer CRM schema extensions, buyer-queries.ts, buyer-actions.ts, 5 new types)
+Resume file: .planning/phases/16-buyers-list-crm/16-01-SUMMARY.md
