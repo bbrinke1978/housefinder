@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@/lib/deal-queries';
+import { getMatchingBuyersForDeal, getInteractionsForDeal } from '@/lib/buyer-queries';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
@@ -21,6 +22,7 @@ import { PhotoTab } from '@/components/photo-tab';
 import { ActivityTimeline } from '@/components/activity-timeline';
 import { FloorPlanTab } from '@/components/floor-plan-tab';
 import type { TimelineEntry } from '@/types';
+import { BuyerList } from '@/components/buyer-list';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +90,14 @@ export default async function DealDetailPage({
     safe(getDealCoverPhoto(id), null),
     safe(getFloorPlansByDeal(id), []),
     safe(getFloorPlanCount(id), 0),
+  ]);
+
+  // Fetch matching buyers and their interaction status for this deal
+  const dealPrice = deal?.offerPrice ?? deal?.mao ?? 0;
+  const dealCity = deal?.city ?? '';
+  const [matchingBuyers, buyerInteractions] = await Promise.all([
+    safe(getMatchingBuyersForDeal(dealPrice, dealCity), []),
+    safe(getInteractionsForDeal(id), new Map<string, string>()),
   ]);
   const expenses = budget ? await getExpenses(budget.id) : [];
 
@@ -191,11 +201,17 @@ export default async function DealDetailPage({
           </TabsTrigger>
         </TabsList>
 
-        {/* OVERVIEW: Deal details + blast generator */}
+        {/* OVERVIEW: Deal details + blast generator + matched buyers */}
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
             <DealOverview deal={deal} contacts={contacts} />
             <DealBlastGenerator deal={deal} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />
+            <div className='space-y-3'>
+              <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+                Matched Buyers ({matchingBuyers.length})
+              </h3>
+              <BuyerList buyers={matchingBuyers} dealId={id} buyerInteractions={buyerInteractions} />
+            </div>
           </div>
         </TabsContent>
 

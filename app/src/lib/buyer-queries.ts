@@ -321,6 +321,28 @@ export async function getBuyersForExport(
 }
 
 /**
+ * getInteractionsForDeal — returns a map of buyerId -> interaction status
+ * for all buyers that have interacted with a specific deal.
+ */
+export async function getInteractionsForDeal(
+  dealId: string
+): Promise<Map<string, string>> {
+  const rows = await db
+    .select({
+      buyerId: buyerDealInteractions.buyerId,
+      status: buyerDealInteractions.status,
+    })
+    .from(buyerDealInteractions)
+    .where(eq(buyerDealInteractions.dealId, dealId));
+
+  const map = new Map<string, string>();
+  for (const r of rows) {
+    map.set(r.buyerId, r.status);
+  }
+  return map;
+}
+
+/**
  * getMatchingBuyersForDeal — enhanced version of getMatchingBuyers:
  * price range AND case-insensitive city match on target_areas.
  * Returns BuyerWithMatchInfo[] with tags via left join.
