@@ -329,7 +329,7 @@ Plans:
   5. Follow-up reminder dates per buyer surface as an overdue widget on the main dashboard
   6. CSV import with column mapping and CSV export both work for buyer list management
   7. Sidebar and bottom nav updated to point to /buyers as first-class page
-**Plans:** 2/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 - [ ] 16-01-PLAN.md — Schema (buyer_communication_events, buyer_deal_interactions, buyer_tags), types, queries, server actions
