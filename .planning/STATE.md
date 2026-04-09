@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 17 of 17 (Netlify Migration & Design System)
-Plan: 2 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In Progress
-Last activity: 2026-04-09 — Completed 17-02 (Playfair Display + Source Sans 3, warm brand tokens, grain overlay, light mode default)
-Stopped at: Completed 17-02-PLAN.md
+Last activity: 2026-04-09 — Completed 17-04 (SwipeCard framer-motion gestures, light-v11 map style)
+Stopped at: Completed 17-04-PLAN.md
 
-Progress: [████████████████░░░░░░░░░░░░░░░░░░░░░░░░] 40% of Phase 17
+Progress: [████████████████████████░░░░░░░░░░░░░░░░] 60% of Phase 17
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ Progress: [████████████████░░░░░░░
 | Phase 16-buyers-list-crm P04 | 4min | 2 tasks | 5 files |
 | Phase 17-netlify-migration-design-system P01 | 4min | 2 tasks | 3 files |
 | Phase 17-netlify-migration-design-system P02 | 2 | 2 tasks | 2 files |
+| Phase 17-netlify-migration-design-system P04 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -268,6 +269,8 @@ Recent decisions affecting current work:
 - [Phase 17-02]: ThemeProvider defaultTheme changed from dark to light — warm cream palette reads poorly as forced dark default
 - [Phase 17-02]: Grain overlay uses inline SVG data URI on body::before — no network request, no CSP issues on Netlify
 - [Phase 17-02]: card-elevated and card-surface upgraded to rounded-2xl — matches nobshomes card style per CONTEXT.md
+- [Phase 17-04]: ownerPhone not on PropertyWithLead — swipe-right navigates to /properties/[id]#contact instead of direct tel: dial
+- [Phase 17-04]: light-v11 Mapbox style replaces satellite-streets-v12 — clean street map matches cream/sand palette
 
 ### Roadmap Evolution
 
@@ -288,5 +291,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-09
-Stopped at: Completed 17-02-PLAN.md (Playfair Display + Source Sans 3, warm brand tokens, grain overlay, light mode default)
+Stopped at: Completed 17-04-PLAN.md (SwipeCard framer-motion gestures on property cards, Mapbox light-v11 style)
 Resume file: .planning/phases/17-netlify-migration-design-system/17-02-SUMMARY.md

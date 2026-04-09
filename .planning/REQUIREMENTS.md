@@ -207,9 +207,9 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DESIGN-04**: Light mode as default theme, dark mode available via toggle — warm navy dark mode with sand accents
 - [x] **DESIGN-05**: White cards with subtle warm shadows and rounded-2xl corners; sand gradient buttons for primary actions, blue for CTAs/links
 - [ ] **DESIGN-06**: Login page restyled with cream background, centered card, logo area, no imagery — premium warm aesthetic
-- [ ] **DESIGN-07**: Map page switches from satellite-streets-v12 to light-v11 Mapbox style matching cream/sand palette
+- [x] **DESIGN-07**: Map page switches from satellite-streets-v12 to light-v11 Mapbox style matching cream/sand palette
 - [ ] **DESIGN-08**: ALL pages restyled in one phase — no mixed old/new styling; dashboard, properties, deals, analytics, campaigns, contracts, photos, floor plans, buyers, settings, pipeline, map
-- [ ] **DESIGN-09**: Mobile swipe actions on lead/deal cards (swipe left to change status, swipe right to call) via framer-motion
+- [x] **DESIGN-09**: Mobile swipe actions on lead/deal cards (swipe left to change status, swipe right to call) via framer-motion
 - [ ] **DESIGN-10**: 44px minimum touch targets throughout; compact stat row on dashboard; mobile-first responsive on all pages
 - [x] **DESIGN-11**: images.remotePatterns configured for *.blob.core.windows.net in next.config.ts to prevent Azure Blob Storage image breakage after migration
 - [ ] **DESIGN-12**: All existing features preserved — zero functionality removed during migration and restyling
