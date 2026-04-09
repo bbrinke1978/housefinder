@@ -49,7 +49,7 @@ function getEntryIconClass(type: TimelineEntry["type"]): string {
   switch (type) {
     case "called_client":
     case "left_voicemail":
-      return "bg-violet-500/10 text-violet-500 border-violet-500/20";
+      return "bg-primary/10 text-primary border-primary/20";
     case "emailed_client":
     case "email_sent":
       return "bg-primary/10 text-primary border-primary/20";
@@ -60,7 +60,7 @@ function getEntryIconClass(type: TimelineEntry["type"]): string {
     case "received_email":
       return "bg-teal-500/10 text-teal-500 border-teal-500/20";
     case "note":
-      return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+      return "bg-muted text-muted-foreground border-border";
     case "status_change":
       return "bg-muted text-muted-foreground border-border";
     default:

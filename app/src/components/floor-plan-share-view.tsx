@@ -11,7 +11,7 @@ const PIN_CATEGORY_COLORS: Record<string, string> = {
   electrical: "#f59e0b",
   hvac: "#10b981",
   structural: "#ef4444",
-  cosmetic: "#8b5cf6",
+  cosmetic: "#1e4d8c",
   appliance: "#f97316",
   roofing: "#06b6d4",
   foundation: "#84cc16",

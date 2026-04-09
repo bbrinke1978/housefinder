@@ -40,7 +40,7 @@ const statCards = [
     key: "newToday" as const,
     icon: Sparkles,
     href: "/?sort=date",
-    iconColor: "text-violet-400",
+    iconColor: "text-primary",
   },
 ];
 

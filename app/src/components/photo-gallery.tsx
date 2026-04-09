@@ -133,7 +133,7 @@ export function PhotoGallery({ photos, dealId, canManage = false }: PhotoGallery
                     {/* Cover badge */}
                     {photo.isCover && (
                       <div className="absolute left-1 top-1">
-                        <span className="inline-flex items-center gap-0.5 rounded bg-violet-600/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        <span className="inline-flex items-center gap-0.5 rounded bg-primary/90 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                           <Star className="h-2.5 w-2.5 fill-current" />
                           Cover
                         </span>

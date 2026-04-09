@@ -106,7 +106,7 @@ export function BuyerDetailHeader({ buyer, allTags }: BuyerDetailHeaderProps) {
                 "text-xs",
                 buyer.isActive
                   ? "bg-emerald-600/15 text-emerald-600 border-emerald-600/20"
-                  : "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+                  : "bg-muted text-muted-foreground border-border"
               )}
             >
               {buyer.isActive ? "Active" : "Inactive"}

@@ -1,11 +1,11 @@
 export type LeadStatus = "new" | "contacted" | "follow_up" | "closed" | "dead";
 
 export const LEAD_SOURCES = [
-  { value: "scraping", label: "Scraping Data", color: "bg-zinc-500" },
+  { value: "scraping", label: "Scraping Data", color: "bg-slate-500" },
   { value: "flyer", label: "Flyer", color: "bg-green-500" },
   { value: "signage", label: "Signage", color: "bg-amber-500" },
   { value: "driving", label: "Driving for $", color: "bg-orange-500" },
-  { value: "word_of_mouth", label: "Word of Mouth", color: "bg-purple-500" },
+  { value: "word_of_mouth", label: "Word of Mouth", color: "bg-indigo-500" },
   { value: "website", label: "Website", color: "bg-blue-500" },
   { value: "voicemail", label: "Voicemail", color: "bg-teal-500" },
   { value: "other", label: "Other", color: "bg-rose-500" },
@@ -585,7 +585,7 @@ export const PIN_COLORS: Record<PinCategory, string> = {
   flooring: '#84cc16',      // lime
   painting: '#ec4899',      // pink
   windows_doors: '#14b8a6', // teal
-  kitchen: '#8b5cf6',       // violet
+  kitchen: '#1e4d8c',       // brand blue
   bathroom: '#6366f1',      // indigo
   landscaping: '#22c55e',   // green
   general: '#94a3b8',       // slate

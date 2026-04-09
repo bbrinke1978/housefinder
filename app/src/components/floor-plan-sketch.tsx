@@ -431,8 +431,8 @@ export function FloorPlanSketch({
                 <Rect
                   width={room.width}
                   height={room.height}
-                  fill="rgba(139,92,246,0.1)"
-                  stroke="#7c3aed"
+                  fill="rgba(30,77,140,0.1)"
+                  stroke="#1e4d8c"
                   strokeWidth={2}
                 />
                 <Text
@@ -440,7 +440,7 @@ export function FloorPlanSketch({
                   y={8}
                   text={`${room.label}\n${room.lengthFt}' x ${room.widthFt}'\n${room.sqft} sq ft`}
                   fontSize={11}
-                  fill="#4c1d95"
+                  fill="#0f2645"
                   lineHeight={1.4}
                   listening={false}
                 />

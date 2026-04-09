@@ -115,13 +115,13 @@ function getIconClass(entry: BuyerTimelineEntry): string {
     case "emailed_buyer":
       return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
     case "sent_text":
-      return "bg-purple-500/10 text-purple-500 border-purple-500/20";
+      return "bg-primary/10 text-primary border-primary/20";
     case "met_in_person":
       return "bg-orange-500/10 text-orange-500 border-orange-500/20";
     case "deal_blast":
       return "bg-amber-500/10 text-amber-500 border-amber-500/20";
     case "note":
-      return "bg-zinc-500/10 text-zinc-400 border-zinc-500/20";
+      return "bg-muted text-muted-foreground border-border";
     default:
       return "bg-muted text-muted-foreground border-border";
   }

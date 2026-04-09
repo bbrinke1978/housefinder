@@ -19,7 +19,7 @@ interface PropertyCardProps {
 function ownerTypeBadge(type: string | null): { label: string; badgeClass: string } | null {
   switch (type) {
     case "llc":
-      return { label: "LLC", badgeClass: "bg-purple-500/10 text-purple-400 border border-purple-500/20" };
+      return { label: "LLC", badgeClass: "bg-primary/10 text-primary border border-primary/20" };
     case "trust":
       return { label: "Trust", badgeClass: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" };
     case "estate":
@@ -61,9 +61,9 @@ function getTier(score: number): TierInfo {
   if (score >= 4) {
     return {
       label: "Hot",
-      badgeClass: "bg-violet-500/10 text-violet-400 border border-violet-500/20",
-      barColor: "bg-violet-500",
-      scoreCircleClass: "bg-violet-500 text-white",
+      badgeClass: "bg-primary/10 text-primary border border-primary/20",
+      barColor: "bg-primary",
+      scoreCircleClass: "bg-primary text-white",
     };
   }
   if (score >= 2) {
@@ -85,8 +85,8 @@ function getTier(score: number): TierInfo {
   return {
     label: "No Signal",
     badgeClass: "bg-muted text-muted-foreground border border-border",
-    barColor: "bg-zinc-500",
-    scoreCircleClass: "bg-zinc-500 text-white",
+    barColor: "bg-muted-foreground",
+    scoreCircleClass: "bg-muted-foreground text-white",
   };
 }
 

@@ -147,7 +147,7 @@ export function SignatureCanvas({ onSubmit, isPending }: SignatureCanvasProps) {
           onClick={() => handleModeSwitch("draw")}
           className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
             mode === "draw"
-              ? "bg-violet-600 text-white border-violet-600"
+              ? "bg-primary text-white border-primary"
               : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
           }`}
         >
@@ -158,7 +158,7 @@ export function SignatureCanvas({ onSubmit, isPending }: SignatureCanvasProps) {
           onClick={() => handleModeSwitch("type")}
           className={`px-4 py-2 text-sm font-medium rounded-md border transition-colors ${
             mode === "type"
-              ? "bg-violet-600 text-white border-violet-600"
+              ? "bg-primary text-white border-primary"
               : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
           }`}
         >
@@ -209,7 +209,7 @@ export function SignatureCanvas({ onSubmit, isPending }: SignatureCanvasProps) {
               value={typedName}
               onChange={(e) => setTypedName(e.target.value)}
               placeholder="Your full name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           {typedName.trim() && (
@@ -239,7 +239,7 @@ export function SignatureCanvas({ onSubmit, isPending }: SignatureCanvasProps) {
         type="button"
         onClick={handleSubmit}
         disabled={!canSubmit}
-        className="w-full py-3 px-6 bg-violet-600 text-white font-medium rounded-lg transition-colors hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full py-3 px-6 bg-primary text-white font-medium rounded-lg transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {isPending ? (
           <>
