@@ -37,8 +37,8 @@ export function AppSidebar() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md">
             <MapPin className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-wide text-sidebar-foreground">
-            HouseFinder
+          <span className="text-xl font-display font-bold tracking-wide text-sidebar-foreground">
+            No BS Homes
           </span>
         </div>
         <ThemeToggle />
