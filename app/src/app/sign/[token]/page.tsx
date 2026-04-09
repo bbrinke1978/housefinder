@@ -77,8 +77,8 @@ export default async function SignPage({ params }: SignPageProps) {
       <div className="max-w-2xl mx-auto">
         {/* Branding */}
         <div className="text-center mb-6">
-          <p className="text-sm font-semibold text-violet-700 tracking-wide uppercase">
-            HouseFinder
+          <p className="text-sm font-semibold text-primary tracking-wide uppercase font-display">
+            No BS Homes
           </p>
         </div>
 
@@ -199,7 +199,7 @@ export default async function SignPage({ params }: SignPageProps) {
               href={`/api/contracts/${contract.id}/pdf`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-violet-700 font-medium hover:text-violet-900 underline underline-offset-2"
+              className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:text-primary/80 underline underline-offset-2"
             >
               <svg
                 className="w-4 h-4"
@@ -282,7 +282,7 @@ function ErrorPage({
         <p className="text-sm text-gray-500 mb-6">{message}</p>
         <a
           href="/login"
-          className="text-sm text-violet-700 hover:text-violet-900 underline"
+          className="text-sm text-primary hover:text-primary/80 underline"
         >
           Back to HouseFinder
         </a>

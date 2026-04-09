@@ -21,10 +21,10 @@ export default async function SettingsPage() {
             backgroundImage: `url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=75')`,
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/60 via-zinc-950/30 to-zinc-950/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
         <div className="relative z-10 flex flex-col justify-end h-full p-6 md:p-8 text-white">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 shadow-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg">
               <Settings className="h-5 w-5 text-white" />
             </div>
             <span

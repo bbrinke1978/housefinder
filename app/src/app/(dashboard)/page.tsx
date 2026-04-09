@@ -103,7 +103,7 @@ export default async function DashboardPage({
       {websiteLeads.length > 0 && (
         <div className="space-y-3 animate-fade-in-up stagger-3">
           <div className="flex items-center gap-2">
-            <Globe className="h-4 w-4 text-violet-500" />
+            <Globe className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Inbound Leads ({websiteLeads.length})
             </h2>
@@ -114,7 +114,7 @@ export default async function DashboardPage({
               const badgeLabel = isVoicemail ? "Voicemail" : "Website";
               const badgeClass = isVoicemail
                 ? "bg-teal-500/15 text-teal-600"
-                : "bg-violet-500/15 text-violet-600";
+                : "bg-primary/10 text-primary";
               return (
               <Link key={lead.id} href={`/leads/${lead.id}`} className="rounded-xl border bg-card p-4 space-y-2 block hover:border-foreground/20 transition-colors">
                 <div className="flex items-start justify-between">

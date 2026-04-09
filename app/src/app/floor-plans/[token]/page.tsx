@@ -66,8 +66,8 @@ export default async function FloorPlanSharePage({
       <div className="max-w-4xl mx-auto">
         {/* Branding */}
         <div className="text-center mb-4">
-          <p className="text-sm font-semibold text-violet-700 tracking-wide uppercase">
-            HouseFinder
+          <p className="text-sm font-semibold text-primary tracking-wide uppercase font-display">
+            No BS Homes
           </p>
         </div>
 

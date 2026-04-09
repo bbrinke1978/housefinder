@@ -25,14 +25,14 @@ export default async function InboundLeadDetailPage({
   const badgeLabel = isVoicemail ? "Voicemail" : "Website";
   const badgeClass = isVoicemail
     ? "bg-teal-500/15 text-teal-600"
-    : "bg-violet-500/15 text-violet-600";
+    : "bg-primary/10 text-primary";
 
   const statusColors: Record<string, string> = {
     new: "bg-blue-500/15 text-blue-600",
     contacted: "bg-amber-500/15 text-amber-600",
     follow_up: "bg-orange-500/15 text-orange-600",
     closed: "bg-green-500/15 text-green-600",
-    dead: "bg-zinc-500/15 text-zinc-500",
+    dead: "bg-muted text-muted-foreground",
   };
 
   return (
