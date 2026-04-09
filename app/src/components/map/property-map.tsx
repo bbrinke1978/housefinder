@@ -192,7 +192,7 @@ export function PropertyMap({ geojson, cities, counties }: PropertyMapProps) {
       <Map
         ref={mapRef}
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
-        mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
+        mapStyle="mapbox://styles/mapbox/light-v11"
         initialViewState={{
           longitude: -111.5,
           latitude: 39.5,
