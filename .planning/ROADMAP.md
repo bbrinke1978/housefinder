@@ -338,9 +338,9 @@ Plans:
 - [ ] 16-04-PLAN.md — Deal detail integration: enhanced matching (price + area), email blast, interaction tracking
 - [ ] 16-05-PLAN.md — Dashboard follow-up reminder widget
 
-### Phase 17: KPI Agent Scoring Dashboard
+### Phase 17: Netlify Migration & No BS Homes Design System
 
-**Goal:** [To be planned]
+**Goal:** HouseFinder frontend migrated from Azure App Service to Netlify with the No BS Homes brand design system (Playfair Display + Source Sans 3, brand blue/sand palette, warm cream backgrounds, mobile-first responsive), Azure PgBouncer enabled for serverless connection pooling, and all existing features verified end-to-end on the new platform
 **Requirements**: TBD
 **Depends on:** Phase 16
 **Plans:** 0 plans

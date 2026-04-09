@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 16 — Buyers List CRM
+**Current focus:** Phase 17 — Netlify Migration & No BS Homes Design System
 
 ## Current Position
 
