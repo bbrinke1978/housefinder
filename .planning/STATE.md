@@ -9,13 +9,13 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 16 of 16 (Buyers List CRM)
-Plan: 5 of 5 in current phase
-Status: Complete
-Last activity: 2026-04-08 — Completed 16-05 (BuyerFollowupWidget on dashboard, overdue buyer follow-up reminders with per-buyer links to /buyers/[id])
-Stopped at: Completed 16-05-PLAN.md
+Phase: 17 of 17 (Netlify Migration & Design System)
+Plan: 1 of 5 in current phase
+Status: In Progress
+Last activity: 2026-04-08 — Completed 17-01 (netlify.toml, standalone removed, Azure Blob remotePatterns, deploy-app.yml disabled)
+Stopped at: Completed 17-01-PLAN.md
 
-Progress: [████████████████████████████████████████] 100% of Phase 16
+Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 20% of Phase 17
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [███████████████████████
 | Phase 16-buyers-list-crm P03 | 5min | 2 tasks | 4 files |
 | Phase 16-buyers-list-crm P05 | 1min | 1 tasks | 2 files |
 | Phase 16-buyers-list-crm P04 | 4min | 2 tasks | 5 files |
+| Phase 17-netlify-migration-design-system P01 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -259,6 +260,9 @@ Recent decisions affecting current work:
 - [Phase 16-05]: getOverdueBuyerFollowups added to Promise.all with .catch([]) fallback — dashboard never fails due to CRM query error
 - [Phase 16-04]: BuyerList union type: Buyer[] mode for /deals/buyers; BuyerWithMatchInfo[] mode for deal detail — preserves backward compat
 - [Phase 16-04]: sendDealBlast returns mail_not_configured sentinel — DealBlastGenerator shows inline warning with settings link, copy-to-clipboard unaffected
+- [Phase 17-01]: netlify.toml has no plugins block — Netlify auto-installs @netlify/plugin-nextjs for Next.js
+- [Phase 17-01]: output: standalone removed from next.config.ts — OpenNext/Netlify requires default output mode
+- [Phase 17-01]: deploy-app.yml renamed to .disabled not deleted — Azure App Service fallback reference during 1-week transition
 
 ### Roadmap Evolution
 
@@ -279,6 +283,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: Completed 16-05-PLAN.md (BuyerFollowupWidget on dashboard, overdue buyer follow-up reminders)
-Resume file: .planning/phases/16-buyers-list-crm/16-05-SUMMARY.md
-Resume file: .planning/phases/16-buyers-list-crm/16-03-SUMMARY.md
+Stopped at: Completed 17-01-PLAN.md (netlify.toml, standalone removed, Azure Blob remotePatterns, deploy-app.yml disabled)
+Resume file: .planning/phases/17-netlify-migration-design-system/17-01-SUMMARY.md

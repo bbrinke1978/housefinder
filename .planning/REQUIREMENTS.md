@@ -198,9 +198,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Netlify Migration & Design System
 
-- [ ] **NETLIFY-01**: HouseFinder frontend deployed to Netlify with auto-deploy from master, netlify.toml config, output:standalone removed, and all environment variables migrated from Azure App Service
-- [ ] **NETLIFY-02**: GitHub Actions deploy-app.yml disabled or removed — Netlify auto-deploy replaces it; deploy-scraper.yml preserved for Azure Functions
-- [ ] **NETLIFY-03**: Azure PgBouncer skipped for this phase (B1ms Burstable tier does not support it) — documented as future upgrade item
+- [x] **NETLIFY-01**: HouseFinder frontend deployed to Netlify with auto-deploy from master, netlify.toml config, output:standalone removed, and all environment variables migrated from Azure App Service
+- [x] **NETLIFY-02**: GitHub Actions deploy-app.yml disabled or removed — Netlify auto-deploy replaces it; deploy-scraper.yml preserved for Azure Functions
+- [x] **NETLIFY-03**: Azure PgBouncer skipped for this phase (B1ms Burstable tier does not support it) — documented as future upgrade item
 - [ ] **DESIGN-01**: App uses Playfair Display for display headings and Source Sans 3 for body text via next/font/google, replacing Inter — matching nobshomes.netlify.app brand typography
 - [ ] **DESIGN-02**: App uses No BS Homes warm color palette (brand blue #1e4d8c, sand accent #c4884f, cream backgrounds #fdfbf7) replacing zinc/violet palette — both light and dark mode tokens updated
 - [ ] **DESIGN-03**: Subtle grain/noise texture overlay (0.015 opacity) on all background surfaces matching nobshomes aesthetic
@@ -211,7 +211,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **DESIGN-08**: ALL pages restyled in one phase — no mixed old/new styling; dashboard, properties, deals, analytics, campaigns, contracts, photos, floor plans, buyers, settings, pipeline, map
 - [ ] **DESIGN-09**: Mobile swipe actions on lead/deal cards (swipe left to change status, swipe right to call) via framer-motion
 - [ ] **DESIGN-10**: 44px minimum touch targets throughout; compact stat row on dashboard; mobile-first responsive on all pages
-- [ ] **DESIGN-11**: images.remotePatterns configured for *.blob.core.windows.net in next.config.ts to prevent Azure Blob Storage image breakage after migration
+- [x] **DESIGN-11**: images.remotePatterns configured for *.blob.core.windows.net in next.config.ts to prevent Azure Blob Storage image breakage after migration
 - [ ] **DESIGN-12**: All existing features preserved — zero functionality removed during migration and restyling
 
 ## v2 Requirements
