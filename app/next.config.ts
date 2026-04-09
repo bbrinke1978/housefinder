@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   transpilePackages: ["mapbox-gl"],
   serverExternalPackages: ["@react-pdf/renderer"],
+  images: {
+    remotePatterns: [
+      { protocol: "https" as const, hostname: "*.blob.core.windows.net" },
+    ],
+  },
 };
 
 export default nextConfig;
