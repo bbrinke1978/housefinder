@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown } from "lucide-react";
-import { useState, useRef, useEffect, useTransition } from "react";
+import { useState, useRef, useEffect, useTransition, useCallback } from "react";
 import type { PropertyWithLead } from "@/types";
 import { LEAD_SOURCES } from "@/types";
 import { updateLeadSource } from "@/lib/actions";
 import { TouchpointBadge } from "@/components/touchpoint-badge";
+import { SwipeCard } from "@/components/swipe-card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
@@ -232,8 +234,19 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
   const badge = ownerTypeBadge(property.ownerType);
   const isEntity = property.ownerType === "llc" || property.ownerType === "trust" || property.ownerType === "estate";
   const tier = getTier(property.distressScore);
+  const isMobile = useIsMobile();
 
-  return (
+  const handleSwipeRight = useCallback(() => {
+    // Right swipe → navigate to property detail to initiate a call
+    window.location.href = `/properties/${property.id}#contact`;
+  }, [property.id]);
+
+  const handleSwipeLeft = useCallback(() => {
+    // Left swipe → navigate to property detail to change status
+    window.location.href = `/properties/${property.id}`;
+  }, [property.id]);
+
+  const cardContent = (
     <Link href={`/properties/${property.id}`} className="group block">
       <div
         className={`relative bg-card rounded-xl p-3 md:p-4 border transition-all duration-200 hover:border-primary/30 ${
@@ -345,4 +358,19 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
       </div>
     </Link>
   );
+
+  if (isMobile) {
+    return (
+      <SwipeCard
+        onSwipeRight={handleSwipeRight}
+        onSwipeLeft={handleSwipeLeft}
+        rightLabel="Call"
+        leftLabel="Status"
+      >
+        {cardContent}
+      </SwipeCard>
+    );
+  }
+
+  return cardContent;
 }
