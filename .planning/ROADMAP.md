@@ -340,10 +340,23 @@ Plans:
 
 ### Phase 17: Netlify Migration & No BS Homes Design System
 
-**Goal:** HouseFinder frontend migrated from Azure App Service to Netlify with the No BS Homes brand design system (Playfair Display + Source Sans 3, brand blue/sand palette, warm cream backgrounds, mobile-first responsive), Azure PgBouncer enabled for serverless connection pooling, and all existing features verified end-to-end on the new platform
-**Requirements**: TBD
+**Goal:** HouseFinder frontend migrated from Azure App Service to Netlify with the No BS Homes brand design system (Playfair Display + Source Sans 3, brand blue/sand palette, warm cream backgrounds, mobile-first responsive), Azure PgBouncer skipped (B1ms limitation), and all existing features verified end-to-end on the new platform
+**Requirements**: NETLIFY-01, NETLIFY-02, NETLIFY-03, DESIGN-01, DESIGN-02, DESIGN-03, DESIGN-04, DESIGN-05, DESIGN-06, DESIGN-07, DESIGN-08, DESIGN-09, DESIGN-10, DESIGN-11, DESIGN-12
 **Depends on:** Phase 16
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. HouseFinder loads on a Netlify URL with auto-deploy from master — no Azure App Service involvement
+  2. All pages render with Playfair Display headings and Source Sans 3 body text on warm cream/blue/sand palette — no zinc/violet remnants
+  3. Light mode is the default; dark mode toggle switches to warm navy dark theme
+  4. Login page has cream background with centered card and warm aesthetic
+  5. Map uses light-v11 Mapbox style matching the warm palette
+  6. Mobile swipe actions work on lead/deal cards with 44px touch targets throughout
+  7. All existing features (auth, dashboard, deals, campaigns, contracts, photos, floor plans, buyers, analytics) function correctly on Netlify
+  8. Azure Blob Storage images load correctly via configured remotePatterns
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 17 to break down)
+- [ ] 17-01-PLAN.md — Netlify deployment config, next.config.ts updates, disable GH Actions
+- [ ] 17-02-PLAN.md — Design system foundation: fonts, globals.css tokens, grain overlay, layout.tsx
+- [ ] 17-03-PLAN.md — Page-by-page design sweep: login, dashboard, sidebar, bottom nav, all inner pages
+- [ ] 17-04-PLAN.md — Mobile swipe actions (framer-motion), map style swap, mobile navigation polish
+- [ ] 17-05-PLAN.md — Environment migration checkpoint + end-to-end verification on Netlify

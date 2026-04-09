@@ -39,7 +39,7 @@ Migrate HouseFinder frontend from Azure App Service to Netlify, apply the No BS 
 - Netlify: git push auto-deploy from master (same pattern as nobshomes)
 - Remove `output: standalone` from next.config.ts, use default Next.js output for Netlify
 - Add netlify.toml with Node 20, build command, publish directory
-- Azure PgBouncer: enable on Flexible Server via Azure Portal, update DATABASE_URL to use port 6432
+- Azure PgBouncer: SKIPPED — B1ms Burstable tier does not support PgBouncer (Microsoft Docs limitation). DATABASE_URL stays on port 5432. Future upgrade item if tier changes.
 - Serverless function timeout: 26s (Netlify max on free tier) for all functions
 - Keep Azure App Service running as fallback for ~1 week after successful migration, then delete
 - All environment variables migrated to Netlify dashboard
