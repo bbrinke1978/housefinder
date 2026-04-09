@@ -352,7 +352,7 @@ Plans:
   6. Mobile swipe actions work on lead/deal cards with 44px touch targets throughout
   7. All existing features (auth, dashboard, deals, campaigns, contracts, photos, floor plans, buyers, analytics) function correctly on Netlify
   8. Azure Blob Storage images load correctly via configured remotePatterns
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] 17-01-PLAN.md — Netlify deployment config, next.config.ts updates, disable GH Actions

@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 17 of 17 (Netlify Migration & Design System)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In Progress
-Last activity: 2026-04-08 — Completed 17-01 (netlify.toml, standalone removed, Azure Blob remotePatterns, deploy-app.yml disabled)
-Stopped at: Completed 17-01-PLAN.md
+Last activity: 2026-04-09 — Completed 17-02 (Playfair Display + Source Sans 3, warm brand tokens, grain overlay, light mode default)
+Stopped at: Completed 17-02-PLAN.md
 
-Progress: [████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 20% of Phase 17
+Progress: [████████████████░░░░░░░░░░░░░░░░░░░░░░░░] 40% of Phase 17
 
 ## Performance Metrics
 
@@ -81,6 +81,7 @@ Progress: [████████░░░░░░░░░░░░░░░
 | Phase 16-buyers-list-crm P05 | 1min | 1 tasks | 2 files |
 | Phase 16-buyers-list-crm P04 | 4min | 2 tasks | 5 files |
 | Phase 17-netlify-migration-design-system P01 | 4min | 2 tasks | 3 files |
+| Phase 17-netlify-migration-design-system P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -263,6 +264,10 @@ Recent decisions affecting current work:
 - [Phase 17-01]: netlify.toml has no plugins block — Netlify auto-installs @netlify/plugin-nextjs for Next.js
 - [Phase 17-01]: output: standalone removed from next.config.ts — OpenNext/Netlify requires default output mode
 - [Phase 17-01]: deploy-app.yml renamed to .disabled not deleted — Azure App Service fallback reference during 1-week transition
+- [Phase 17-02]: Playfair_Display + Source_Sans_3 via next/font/google with --font-display/--font-body CSS variables — font variables match Tailwind @theme inline keys
+- [Phase 17-02]: ThemeProvider defaultTheme changed from dark to light — warm cream palette reads poorly as forced dark default
+- [Phase 17-02]: Grain overlay uses inline SVG data URI on body::before — no network request, no CSP issues on Netlify
+- [Phase 17-02]: card-elevated and card-surface upgraded to rounded-2xl — matches nobshomes card style per CONTEXT.md
 
 ### Roadmap Evolution
 
@@ -282,6 +287,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08
-Stopped at: Completed 17-01-PLAN.md (netlify.toml, standalone removed, Azure Blob remotePatterns, deploy-app.yml disabled)
-Resume file: .planning/phases/17-netlify-migration-design-system/17-01-SUMMARY.md
+Last session: 2026-04-09
+Stopped at: Completed 17-02-PLAN.md (Playfair Display + Source Sans 3, warm brand tokens, grain overlay, light mode default)
+Resume file: .planning/phases/17-netlify-migration-design-system/17-02-SUMMARY.md

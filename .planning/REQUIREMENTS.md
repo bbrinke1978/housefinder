@@ -201,11 +201,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **NETLIFY-01**: HouseFinder frontend deployed to Netlify with auto-deploy from master, netlify.toml config, output:standalone removed, and all environment variables migrated from Azure App Service
 - [x] **NETLIFY-02**: GitHub Actions deploy-app.yml disabled or removed — Netlify auto-deploy replaces it; deploy-scraper.yml preserved for Azure Functions
 - [x] **NETLIFY-03**: Azure PgBouncer skipped for this phase (B1ms Burstable tier does not support it) — documented as future upgrade item
-- [ ] **DESIGN-01**: App uses Playfair Display for display headings and Source Sans 3 for body text via next/font/google, replacing Inter — matching nobshomes.netlify.app brand typography
-- [ ] **DESIGN-02**: App uses No BS Homes warm color palette (brand blue #1e4d8c, sand accent #c4884f, cream backgrounds #fdfbf7) replacing zinc/violet palette — both light and dark mode tokens updated
-- [ ] **DESIGN-03**: Subtle grain/noise texture overlay (0.015 opacity) on all background surfaces matching nobshomes aesthetic
-- [ ] **DESIGN-04**: Light mode as default theme, dark mode available via toggle — warm navy dark mode with sand accents
-- [ ] **DESIGN-05**: White cards with subtle warm shadows and rounded-2xl corners; sand gradient buttons for primary actions, blue for CTAs/links
+- [x] **DESIGN-01**: App uses Playfair Display for display headings and Source Sans 3 for body text via next/font/google, replacing Inter — matching nobshomes.netlify.app brand typography
+- [x] **DESIGN-02**: App uses No BS Homes warm color palette (brand blue #1e4d8c, sand accent #c4884f, cream backgrounds #fdfbf7) replacing zinc/violet palette — both light and dark mode tokens updated
+- [x] **DESIGN-03**: Subtle grain/noise texture overlay (0.015 opacity) on all background surfaces matching nobshomes aesthetic
+- [x] **DESIGN-04**: Light mode as default theme, dark mode available via toggle — warm navy dark mode with sand accents
+- [x] **DESIGN-05**: White cards with subtle warm shadows and rounded-2xl corners; sand gradient buttons for primary actions, blue for CTAs/links
 - [ ] **DESIGN-06**: Login page restyled with cream background, centered card, logo area, no imagery — premium warm aesthetic
 - [ ] **DESIGN-07**: Map page switches from satellite-streets-v12 to light-v11 Mapbox style matching cream/sand palette
 - [ ] **DESIGN-08**: ALL pages restyled in one phase — no mixed old/new styling; dashboard, properties, deals, analytics, campaigns, contracts, photos, floor plans, buyers, settings, pipeline, map
