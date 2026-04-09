@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 Phase: 17 of 17 (Netlify Migration & Design System)
 Plan: 4 of 5 in current phase
 Status: In Progress
-Last activity: 2026-04-09 — Completed 17-04 (SwipeCard framer-motion gestures, light-v11 map style)
+Last activity: 2026-04-09 — Completed 17-03 (warm palette sweep, zero zinc/violet/purple, brand renamed to No BS Homes) + 17-04 (SwipeCard framer-motion gestures, light-v11 map style)
 Stopped at: Completed 17-04-PLAN.md
 
 Progress: [████████████████████████░░░░░░░░░░░░░░░░] 60% of Phase 17
@@ -269,6 +269,11 @@ Recent decisions affecting current work:
 - [Phase 17-02]: ThemeProvider defaultTheme changed from dark to light — warm cream palette reads poorly as forced dark default
 - [Phase 17-02]: Grain overlay uses inline SVG data URI on body::before — no network request, no CSP issues on Netlify
 - [Phase 17-02]: card-elevated and card-surface upgraded to rounded-2xl — matches nobshomes card style per CONTEXT.md
+- [Phase 17-03]: Brand renamed to "No BS Homes" with font-display on login, sidebar, public pages — aligns with CONTEXT.md brand identity
+- [Phase 17-03]: Hero banners: brand blue gradient (from-[#1e4d8c] to-[#0f2645]) replaces violet gradients across campaigns/contracts/mail pages
+- [Phase 17-03]: Chart color arrays (analytics-trends, budget-charts) use raw brand hex #1e4d8c — recharts doesn't consume Tailwind tokens
+- [Phase 17-03]: Badge tinting pattern: bg-primary/10 text-primary border-primary/20 replaces violet-500 variants throughout
+- [Phase 17-03]: No Signal tier and inactive states: bg-muted text-muted-foreground border-border replaces zinc-500
 - [Phase 17-04]: ownerPhone not on PropertyWithLead — swipe-right navigates to /properties/[id]#contact instead of direct tel: dial
 - [Phase 17-04]: light-v11 Mapbox style replaces satellite-streets-v12 — clean street map matches cream/sand palette
 
