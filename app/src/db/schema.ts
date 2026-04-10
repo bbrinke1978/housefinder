@@ -906,3 +906,27 @@ export const floorPlanPins = pgTable(
 
 export type FloorPlanRow = InferSelectModel<typeof floorPlans>;
 export type FloorPlanPinRow = InferSelectModel<typeof floorPlanPins>;
+
+// -- Users --
+
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export type UserRow = InferSelectModel<typeof users>;
+export type PasswordResetTokenRow = InferSelectModel<typeof passwordResetTokens>;

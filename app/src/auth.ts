@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -16,23 +19,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!email || !password) return null;
 
-        const authEmail = process.env.AUTH_EMAIL;
-        const authPasswordHash = process.env.AUTH_PASSWORD_HASH;
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, email.toLowerCase()))
+          .limit(1);
 
-        if (!authEmail || !authPasswordHash) {
-          console.error("AUTH_EMAIL or AUTH_PASSWORD_HASH not configured");
-          return null;
-        }
+        if (!user) return null;
 
-        if (email !== authEmail) return null;
-
-        const isValid = await bcryptjs.compare(password, authPasswordHash);
+        const isValid = await bcryptjs.compare(password, user.passwordHash);
         if (!isValid) return null;
 
         return {
-          id: "1",
-          email: authEmail,
-          name: "Investor",
+          id: user.id,
+          email: user.email,
+          name: user.name,
         };
       },
     }),
