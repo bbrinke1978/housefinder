@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -75,7 +75,7 @@ export function AppSidebar() {
           <span className="ml-1">Quick navigation</span>
         </div>
         <SidebarMenu>
-          {/* Mail Settings gear icon */}
+          {/* Mail Settings */}
           <SidebarMenuItem>
             <SidebarMenuButton
               isActive={pathname.startsWith("/settings/mail")}
@@ -84,6 +84,17 @@ export function AppSidebar() {
             >
               <Mail className="h-4 w-4" />
               <span className="font-semibold">Mail Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          {/* Skip Tracing */}
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={pathname.startsWith("/settings/skip-tracing")}
+              render={<Link href="/settings/skip-tracing" />}
+              className="transition-all duration-200 rounded-xl"
+            >
+              <Search className="h-4 w-4" />
+              <span className="font-semibold">Skip Tracing</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           {/* Settings gear icon */}
