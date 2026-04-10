@@ -363,13 +363,15 @@ Plans:
 
 ### Phase 18: Tracerfy Options
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can trigger Tracerfy skip traces from the UI (single property, bulk dashboard selection, or auto-prompt on deal creation), view results on contact cards with source badges, monitor API spend on a dedicated settings page with run history and cost controls, and see trace status badges on dashboard property cards
+**Requirements**: TRACE-01, TRACE-02, TRACE-03, TRACE-04, TRACE-05, TRACE-06, TRACE-07, TRACE-08, TRACE-09, TRACE-10, TRACE-11, TRACE-12, TRACE-13, TRACE-14, TRACE-15
 **Depends on:** Phase 17
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 18 to break down)
+- [ ] 18-01-PLAN.md — Tracerfy types, config constants, and server actions (submit, poll, store, status, history)
+- [ ] 18-02-PLAN.md — Skip Trace button on ContactTab, bulk skip trace bar on dashboard, confirmation dialog, trace status badges
+- [ ] 18-03-PLAN.md — Skip tracing settings page (mini-dashboard), auto-trace prompt on deal creation, sidebar nav
 
 ### Phase 19: Wholesale Leads
 
