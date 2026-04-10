@@ -214,6 +214,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **DESIGN-11**: images.remotePatterns configured for *.blob.core.windows.net in next.config.ts to prevent Azure Blob Storage image breakage after migration
 - [x] **DESIGN-12**: All existing features preserved — zero functionality removed during migration and restyling
 
+### Wholesale Leads
+
+- [ ] **WHOLESALE-01**: User can enter wholesale deals via two methods: email forwarding with smart parse AND manual form entry with all deal fields (address, asking price, ARV, repair estimate, sqft, beds, baths, lot size, year built, wholesaler info, source channel)
+- [ ] **WHOLESALE-02**: System smart-parses forwarded wholesaler email blasts via regex extraction, pre-filling address, asking price, ARV, sqft, beds, baths, year built, tax ID, and wholesaler contact -- user reviews and corrects before saving
+- [ ] **WHOLESALE-03**: System auto-runs analysis on save using MAO formula (ARV x 0.70 - Repairs - Fee) with instant verdict; user can edit numbers and re-run
+- [ ] **WHOLESALE-04**: Verdict displayed as traffic light (green/yellow/red) plus weighted 1-10 score with expandable breakdown showing MAO spread, equity percentage, and end buyer ROI factors
+- [ ] **WHOLESALE-05**: Profit estimate displayed as prominent dollar amount (MAO - asking price) for at-a-glance triage
+- [ ] **WHOLESALE-06**: Wholesale leads follow 4-status workflow: New -> Analyzing -> Interested -> Pass/Promoted
+- [ ] **WHOLESALE-07**: Promote to Deal button creates a new Deal in existing pipeline with all numbers pre-filled and deal tagged/flagged as wholesale-sourced
+- [ ] **WHOLESALE-08**: Timestamped notes on wholesale leads following existing deal notes pattern -- quick notes about conversations with wholesaler
+- [ ] **WHOLESALE-09**: Wholesaler directory tracks name, contact info, and aggregate stats: deals sent, deals promoted, average spread -- showing which wholesalers consistently send good deals
+- [ ] **WHOLESALE-10**: Card grid layout showing address, asking/ARV, traffic light verdict, profit estimate, and wholesaler name -- designed for fast triage/scanning
+- [ ] **WHOLESALE-11**: Filters for verdict (green/yellow/red), status (new/analyzing/interested/pass/promoted), and wholesaler source
+- [ ] **WHOLESALE-12**: Own sidebar link at /wholesale as top-level page, separate from Deals; command menu navigation included
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -427,11 +442,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DESIGN-11 | Phase 17 | Planned |
 | DESIGN-12 | Phase 17 | Planned |
 
+| WHOLESALE-01 | Phase 19 | Planned |
+| WHOLESALE-02 | Phase 19 | Planned |
+| WHOLESALE-03 | Phase 19 | Planned |
+| WHOLESALE-04 | Phase 19 | Planned |
+| WHOLESALE-05 | Phase 19 | Planned |
+| WHOLESALE-06 | Phase 19 | Planned |
+| WHOLESALE-07 | Phase 19 | Planned |
+| WHOLESALE-08 | Phase 19 | Planned |
+| WHOLESALE-09 | Phase 19 | Planned |
+| WHOLESALE-10 | Phase 19 | Planned |
+| WHOLESALE-11 | Phase 19 | Planned |
+| WHOLESALE-12 | Phase 19 | Planned |
+
 **Coverage:**
-- v1 requirements: 138 total
-- Mapped to phases: 138
+- v1 requirements: 150 total
+- Mapped to phases: 150
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-07 — added Phase 16 buyers list CRM requirements (BUYER-01 through BUYER-12)*
+*Last updated: 2026-04-09 — added Phase 19 wholesale leads requirements (WHOLESALE-01 through WHOLESALE-12)*

@@ -375,13 +375,24 @@ Plans:
 
 ### Phase 19: Wholesale Leads
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** The investor can receive wholesale deals from 3rd-party wholesalers (via email forward or manual entry), auto-analyze them with a traffic light verdict + weighted score, triage via card grid, promote gems into the Deals pipeline, and track wholesaler performance over time
+**Requirements**: WHOLESALE-01, WHOLESALE-02, WHOLESALE-03, WHOLESALE-04, WHOLESALE-05, WHOLESALE-06, WHOLESALE-07, WHOLESALE-08, WHOLESALE-09, WHOLESALE-10, WHOLESALE-11, WHOLESALE-12
 **Depends on:** Phase 18
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. User can manually enter a wholesale deal or forward a wholesaler email blast to auto-parse property details, asking price, ARV, and wholesaler contact info
+  2. Each wholesale lead shows an auto-computed traffic light verdict (green/yellow/red) with a 1-10 weighted score and expandable breakdown (MAO spread, equity %, end buyer ROI)
+  3. The wholesale leads page shows a card grid with verdict badges, profit estimates, and filters for verdict, status, and wholesaler
+  4. Wholesale leads follow a 4-status workflow (New/Analyzing/Interested/Pass/Promoted) with timestamped notes
+  5. Promote to Deal creates a new Deal pre-filled with wholesale lead data and tagged as wholesale-sourced
+  6. Wholesaler directory tracks name, contact info, deals sent, deals promoted, and average spread per wholesaler
+  7. Wholesale appears in sidebar navigation and command menu; promoted deals show a Wholesale badge on deal cards
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 19 to break down)
+- [ ] 19-01-PLAN.md -- Schema (wholesalers, wholesale_leads, wholesale_lead_notes), types, scoring engine, email parser, server actions, queries
+- [ ] 19-02-PLAN.md -- /wholesale list page with card grid, verdict badges, filters, manual entry form with live analysis
+- [ ] 19-03-PLAN.md -- Resend inbound webhook, parse review form, /wholesale/[id] detail page with notes
+- [ ] 19-04-PLAN.md -- Promote to Deal action, wholesaler directory, sidebar + command menu nav, deal card badge
 
 ### Phase 20: Security Review
 
