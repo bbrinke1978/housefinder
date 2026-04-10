@@ -5,6 +5,8 @@ import {
   wholesaleLeads,
   wholesalers,
   wholesaleLeadNotes,
+  deals,
+  dealNotes,
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { auth } from "@/auth";
@@ -12,6 +14,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
 import { computeWholesaleScore } from "@/lib/wholesale-score";
 import { parseWholesaleEmail, normalizeAddress } from "@/lib/wholesale-parser";
+import { getWholesaleLead } from "@/lib/wholesale-queries";
 
 // -- Zod schemas --
 
@@ -349,6 +352,78 @@ export async function addWholesaleNote(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/wholesale");
+}
+
+// -- promoteToDeal --
+
+/**
+ * promoteToDeal — promotes a wholesale lead to the Deals pipeline.
+ * Creates a deal with fields pre-filled from the lead, tags it as wholesale-sourced,
+ * updates the lead status to "promoted", and auto-logs a status_change note.
+ * Returns { dealId } — caller handles redirect.
+ */
+export async function promoteToDeal(
+  wholesaleLeadId: string
+): Promise<{ dealId: string }> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const lead = await getWholesaleLead(wholesaleLeadId);
+  if (!lead) throw new Error("Wholesale lead not found");
+
+  // Compute MAO for the deal
+  let mao: number | null = null;
+  if (lead.arv !== null && lead.repairEstimate !== null) {
+    mao = Math.round(lead.arv * 0.7 - lead.repairEstimate - 15000);
+  }
+
+  // Insert deal with pre-filled fields from wholesale lead
+  const [inserted] = await db
+    .insert(deals)
+    .values({
+      address: lead.address,
+      city: lead.city ?? "",
+      sellerName: lead.wholesalerName ?? null,
+      sellerPhone: lead.wholesalerPhone ?? null,
+      askingPrice: lead.askingPrice ?? null,
+      arv: lead.arv ?? null,
+      repairEstimate: lead.repairEstimate ?? null,
+      wholesaleFee: 15000,
+      mao,
+      leadSource: "wholesale",
+      status: "lead",
+    })
+    .returning({ id: deals.id });
+
+  const dealId = inserted.id;
+
+  // Auto-log "Deal created" note
+  await db.insert(dealNotes).values({
+    dealId,
+    noteText: "Deal created from wholesale lead",
+    noteType: "status_change",
+    newStatus: "lead",
+  });
+
+  // Update wholesale lead: promoted status + link to deal
+  await db
+    .update(wholesaleLeads)
+    .set({ status: "promoted", promotedDealId: dealId, updatedAt: new Date() })
+    .where(eq(wholesaleLeads.id, wholesaleLeadId));
+
+  // Auto-log status_change note on wholesale lead
+  await db.insert(wholesaleLeadNotes).values({
+    wholesaleLeadId,
+    noteText: "Promoted to Deal",
+    noteType: "status_change",
+    previousStatus: lead.status,
+    newStatus: "promoted",
+  });
+
+  revalidatePath("/wholesale");
+  revalidatePath("/deals");
+
+  return { dealId };
 }
 
 // -- createWholesaleLeadFromEmail --

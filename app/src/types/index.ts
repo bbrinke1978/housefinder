@@ -242,6 +242,7 @@ export interface DealWithBuyer {
   earnestMoneyRefundable: boolean | null;
   comps: string | null; // JSON: DealComp[]
   arvNotes: string | null;
+  leadSource: string | null; // "wholesale" when promoted from wholesale lead
   createdAt: Date;
   updatedAt: Date;
   // from joins

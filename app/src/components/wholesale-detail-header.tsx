@@ -2,10 +2,11 @@
 
 import { useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, Building2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Mail, Phone, Building2, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { updateWholesaleLeadStatus } from "@/lib/wholesale-actions";
+import { updateWholesaleLeadStatus, promoteToDeal } from "@/lib/wholesale-actions";
 import type { WholesaleLeadWithWholesaler } from "@/types";
 
 interface WholesaleDetailHeaderProps {
@@ -44,6 +45,7 @@ function statusBadgeClass(status: string): string {
 
 export function WholesaleDetailHeader({ lead }: WholesaleDetailHeaderProps) {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   function handleStatusChange(newStatus: string) {
     if (newStatus === lead.status) return;
@@ -52,7 +54,18 @@ export function WholesaleDetailHeader({ lead }: WholesaleDetailHeaderProps) {
     });
   }
 
-  const canPromote = lead.status === "interested" || lead.status === "analyzing";
+  function handlePromote() {
+    startTransition(async () => {
+      const result = await promoteToDeal(lead.id);
+      router.push(`/deals/${result.dealId}`);
+    });
+  }
+
+  // Show "Promote to Deal" only when status is not "pass" and not "promoted"
+  const canPromote = lead.status !== "pass" && lead.status !== "promoted";
+
+  // When already promoted and linked deal exists, show "View Deal" link
+  const showViewDeal = lead.status === "promoted" && lead.promotedDealId;
 
   return (
     <div className="space-y-4">
@@ -98,9 +111,17 @@ export function WholesaleDetailHeader({ lead }: WholesaleDetailHeaderProps) {
             ))}
           </select>
 
-          {canPromote ? (
-            <Button size="sm" disabled title="Coming soon — Plan 04">
-              Promote to Deal
+          {showViewDeal ? (
+            <Link
+              href={`/deals/${lead.promotedDealId!}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 py-1 text-[0.8rem] font-medium text-foreground hover:bg-muted transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View Deal
+            </Link>
+          ) : canPromote ? (
+            <Button size="sm" onClick={handlePromote} disabled={isPending}>
+              {isPending ? "Promoting..." : "Promote to Deal"}
             </Button>
           ) : null}
         </div>

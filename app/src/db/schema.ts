@@ -296,6 +296,7 @@ export const deals = pgTable(
     comps: text("comps"), // JSON array of comparable sales
     arvNotes: text("arv_notes"), // free-text ARV research notes
     sqft: integer("sqft"), // total sq ft from floor plans (sum of all floor plan totalSqft)
+    leadSource: text("lead_source"), // "wholesale" when promoted from wholesale lead; null for direct entry
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

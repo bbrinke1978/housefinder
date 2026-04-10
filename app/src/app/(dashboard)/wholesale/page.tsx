@@ -1,15 +1,16 @@
-import { getWholesaleLeads, getWholesalers } from "@/lib/wholesale-queries";
+import { getWholesaleLeads, getWholesalersWithStats } from "@/lib/wholesale-queries";
 import { WholesaleLeadGrid } from "@/components/wholesale-lead-grid";
+import { WholesaleTabs } from "@/components/wholesale-tabs";
 
 export const dynamic = "force-dynamic";
 
 export default async function WholesalePage() {
-  const [leads, wholesalers] = await Promise.all([
+  const [leads, wholesalersWithStats] = await Promise.all([
     getWholesaleLeads(),
-    getWholesalers(),
+    getWholesalersWithStats(),
   ]);
 
-  const wholesalerOptions = wholesalers.map((w) => ({
+  const wholesalerOptions = wholesalersWithStats.map((w) => ({
     id: w.id,
     name: w.name,
   }));
@@ -24,7 +25,11 @@ export default async function WholesalePage() {
         </p>
       </div>
 
-      <WholesaleLeadGrid leads={leads} wholesalers={wholesalerOptions} />
+      <WholesaleTabs
+        leads={leads}
+        wholesalers={wholesalerOptions}
+        wholesalersWithStats={wholesalersWithStats}
+      />
     </div>
   );
 }
