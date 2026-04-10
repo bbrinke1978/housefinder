@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 19 of 20 (Wholesale Leads)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-04-10 — Completed 19-02 (Wholesale list page, card grid, filters, entry form, analysis display)
-Stopped at: Completed 19-02-PLAN.md
+Last activity: 2026-04-10 — Completed 19-03 (Resend inbound webhook, parse review form, wholesale detail page with notes and status management)
+Stopped at: Completed 19-03-PLAN.md
 
 Progress: [█████████████████████████████████░░░░░░░] 83%
 
@@ -88,6 +88,7 @@ Progress: [███████████████████████
 | Phase 18-tracerfy-options P02 | 5min | 2 tasks | 10 files |
 | Phase 19-wholesale-leads P01 | 6min | 2 tasks | 7 files |
 | Phase 19-wholesale-leads P02 | 6min | 2 tasks | 6 files |
+| Phase 19-wholesale-leads P03 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -296,6 +297,10 @@ Recent decisions affecting current work:
 - [Phase 19-02]: WholesaleLeadGrid provides modal overlay for form — form renders just form content, grid provides dialog chrome
 - [Phase 19-02]: WholesaleAnalysis returns null when arv or askingPrice missing — prevents nonsensical partial scores
 - [Phase 19-02]: Wholesale sidebar nav item placed between Buyers and Analytics — deal intake flow grouping
+- [Phase 19-03]: skipAuth param on createWholesaleLeadFromEmail — webhook is server-side with no user session, public endpoint doesn't have auth context
+- [Phase 19-03]: parsedDraft added to WholesaleLeadWithWholesaler type — required for parse review form to access email-extracted fields
+- [Phase 19-03]: Two-view detail page: parse review mode for status=new+parsedDraft, full detail otherwise — clean separation without route duplication
+- [Phase 19-03]: Promote to Deal button renders disabled for interested/analyzing statuses — signals next step without broken functionality (Plan 04 implements)
 
 ### Roadmap Evolution
 
@@ -319,5 +324,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Completed 19-02-PLAN.md (Wholesale list page, card grid, filters, entry form, analysis display)
-Resume file: .planning/phases/19-wholesale-leads/19-02-SUMMARY.md
+Stopped at: Completed 19-03-PLAN.md (Resend inbound webhook, parse review form, wholesale detail page with notes and status management)
+Resume file: .planning/phases/19-wholesale-leads/19-03-SUMMARY.md

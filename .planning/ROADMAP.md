@@ -386,7 +386,7 @@ Plans:
   5. Promote to Deal creates a new Deal pre-filled with wholesale lead data and tagged as wholesale-sourced
   6. Wholesaler directory tracks name, contact info, deals sent, deals promoted, and average spread per wholesaler
   7. Wholesale appears in sidebar navigation and command menu; promoted deals show a Wholesale badge on deal cards
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 19-01-PLAN.md -- Schema (wholesalers, wholesale_leads, wholesale_lead_notes), types, scoring engine, email parser, server actions, queries
