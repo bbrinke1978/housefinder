@@ -13,6 +13,7 @@ import {
   Search,
   Mail,
   Users,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const navigationItems = [
   { label: "Pipeline", href: "/pipeline", icon: KanbanSquare, description: "Lead pipeline" },
   { label: "Deals", href: "/deals", icon: Briefcase, description: "Deal management" },
   { label: "Buyers", href: "/buyers", icon: Users, description: "Buyer CRM & contact list" },
+  { label: "Wholesale", href: "/wholesale", icon: Store, description: "Triage wholesale deals" },
   { label: "Analytics", href: "/analytics", icon: BarChart2, description: "Data insights" },
   { label: "Campaigns", href: "/campaigns", icon: Mail, description: "Email sequences & outreach" },
   { label: "Mail Settings", href: "/settings/mail", icon: Settings, description: "Sender details & Resend API key" },

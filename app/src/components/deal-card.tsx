@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { ImageOff } from "lucide-react";
+import { ImageOff, Store } from "lucide-react";
 import type { DealWithBuyer } from "@/types";
 
 interface DealCardProps {
@@ -63,12 +63,23 @@ export function DealCard({ deal, coverPhotoUrl }: DealCardProps) {
             <p className="font-semibold text-xs leading-tight truncate flex-1">
               {deal.address}
             </p>
-            {hot && (
-              <span
-                className="shrink-0 w-2 h-2 rounded-full bg-orange-500 mt-0.5"
-                title="Hot seller"
-              />
-            )}
+            <div className="flex items-center gap-1 shrink-0">
+              {deal.leadSource === "wholesale" && (
+                <span
+                  className="inline-flex items-center gap-0.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400"
+                  title="Promoted from wholesale lead"
+                >
+                  <Store className="h-2.5 w-2.5" />
+                  Wholesale
+                </span>
+              )}
+              {hot && (
+                <span
+                  className="w-2 h-2 rounded-full bg-orange-500 mt-0.5"
+                  title="Hot seller"
+                />
+              )}
+            </div>
           </div>
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${deal.address}, ${deal.city}`)}`}
