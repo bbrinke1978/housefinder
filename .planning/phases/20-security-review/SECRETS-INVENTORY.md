@@ -28,22 +28,27 @@ These secrets are stored in the Netlify dashboard under the housefinder site set
 
 ## Section 2: housefinder Scraper (Azure Functions App Settings)
 
-These secrets are stored in the Azure portal under the housefinder Azure Functions app → Configuration → Application settings. They may reference Azure Key Vault via `@Microsoft.KeyVault(...)` references.
+Sensitive secrets are stored in Azure Key Vault (`housefinder-kv`) and referenced from Azure Functions app settings via `@Microsoft.KeyVault(SecretUri=...)` references. The Functions app uses a system-assigned managed identity to resolve secrets at runtime. Non-sensitive config values remain as plain app settings.
+
+**Key Vault migration completed: 2026-04-10 (Plan 20-04)**
 
 | Secret | Value Location | Sensitivity | Last Rotated | Rotation Cadence | Notes |
 |--------|----------------|-------------|--------------|-----------------|-------|
-| `DATABASE_URL` | Azure Functions app settings | CRITICAL | Unknown | Annual | Same PostgreSQL database as the housefinder app. Connection string must match exactly including sslmode. The scraper writes scraped properties and distress signals. |
-| `RESEND_API_KEY` | Azure Functions app settings | HIGH | Unknown | Annual | Email alerts for scraper health monitoring. Can be the same key as the app or a separate one. |
-| `TRACERFY_API_KEY` | Azure Functions app settings | HIGH | Unknown | Annual | Skip trace API. Charges per lookup. Rotation in Tracerfy dashboard. |
-| `TWILIO_ACCOUNT_SID` | Azure Functions app settings | HIGH | Unknown | Annual | Twilio account identifier. Paired with TWILIO_AUTH_TOKEN. Both required for SMS alerts. |
-| `TWILIO_AUTH_TOKEN` | Azure Functions app settings | CRITICAL | Unknown | Annual | Twilio authentication token. Grants full SMS sending access on the account. Rotate in Twilio console. |
-| `TWILIO_PHONE_NUMBER` | Azure Functions app settings | LOW | N/A | N/A | Twilio phone number in E.164 format (e.g., `+18015551234`). Not a secret — it is a purchased phone number. |
-| `ALERT_EMAIL` | Azure Functions app settings | LOW | N/A | N/A | Email address for scraper health alerts. Not a secret. Update if email address changes. |
-| `ALERT_PHONE_NUMBER` | Azure Functions app settings | LOW | N/A | N/A | Phone number for SMS alerts. Not a secret. Update if phone number changes. |
-| `APP_URL` | Azure Functions app settings | LOW | N/A | N/A | housefinder app URL for constructing alert links. Not a secret. |
-| `WEBSITE_LEAD_API_KEY` | Azure Functions app settings | HIGH | Unknown | Annual | Same key as the housefinder app. Scraper may use this to post leads programmatically. If used, rotate in sync with the app's key. |
+| `DATABASE_URL` | Azure Key Vault (`housefinder-kv`) via Functions reference | CRITICAL | 2026-04-10 | Annual | KV secret name: `database-url`. Same PostgreSQL database as the housefinder app. KV reference: `@Microsoft.KeyVault(SecretUri=https://housefinder-kv.vault.azure.net/secrets/database-url/)` |
+| `TRACERFY_API_KEY` | Azure Key Vault (`housefinder-kv`) via Functions reference | HIGH | 2026-04-10 | Annual | KV secret name: `tracerfy-api-key`. Skip trace API. Charges per lookup. Rotation: update KV secret in portal, Functions app picks up new value automatically. KV reference: `@Microsoft.KeyVault(SecretUri=https://housefinder-kv.vault.azure.net/secrets/tracerfy-api-key/)` |
+| `RESEND_API_KEY` | Not currently configured | HIGH | N/A | Annual | Not present in Functions app settings as of 2026-04-10. Add as KV reference when/if configured. |
+| `TWILIO_ACCOUNT_SID` | Not currently configured | HIGH | N/A | Annual | Not present in Functions app settings as of 2026-04-10. Add as KV reference when/if configured. |
+| `TWILIO_AUTH_TOKEN` | Not currently configured | CRITICAL | N/A | Annual | Not present in Functions app settings as of 2026-04-10. Add as KV reference when/if configured. |
+| `TWILIO_PHONE_NUMBER` | Not currently configured | LOW | N/A | N/A | Not a secret. Not present in Functions app settings as of 2026-04-10. |
+| `ALERT_EMAIL` | Azure Functions app settings (plain) | LOW | N/A | N/A | Email address for scraper health alerts. Not a secret — intentionally kept as plain app setting. |
+| `ALERT_PHONE_NUMBER` | Azure Functions app settings (plain) | LOW | N/A | N/A | Phone number for SMS alerts. Not a secret — intentionally kept as plain app setting. |
+| `APP_URL` | Azure Functions app settings (plain) | LOW | N/A | N/A | housefinder app URL for constructing alert links. Not a secret — intentionally kept as plain app setting. |
+| `WEBSITE_LEAD_API_KEY` | Azure Key Vault (`housefinder-kv`) via Functions reference | HIGH | Unknown | Annual | KV secret name: `WEBSITE-LEAD-API-KEY` (existing). Must match housefinder app's `WEBSITE_LEAD_API_KEY`. Rotate both simultaneously. |
 
-**Total scraper secrets: 10**
+**Total scraper secrets: 10** (2 actively migrated to KV; 3 not yet configured in Functions; 3 non-sensitive as plain settings; 1 in KV from prior work)
+
+**Functions app managed identity:** `aa7d0a7e-7104-4494-a3b6-06b1018820bb` (system-assigned)
+**Key Vault access policy:** get, list on secrets
 
 ---
 
@@ -180,5 +185,6 @@ The following items require manual investigation or action:
 ---
 
 *Inventory created: 2026-04-10*
+*Last updated: 2026-04-10 (Plan 20-04 — Key Vault migration for scraper secrets)*
 *Phase: 20-security-review*
-*Plan: 20-03*
+*Plan: 20-03 (created), 20-04 (updated)*
