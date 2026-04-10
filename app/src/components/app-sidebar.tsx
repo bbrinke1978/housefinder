@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,6 +22,7 @@ const navItems = [
   { label: "Contracts", href: "/contracts", icon: FileText },
   { label: "Photos", href: "/photos/inbox", icon: ImageIcon },
   { label: "Buyers", href: "/buyers", icon: Users },
+  { label: "Wholesale", href: "/wholesale", icon: Building2 },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
   { label: "Campaigns", href: "/campaigns", icon: Mail },
