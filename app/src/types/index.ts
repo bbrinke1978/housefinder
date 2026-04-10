@@ -395,6 +395,34 @@ export const MAIL_SETTINGS_KEYS = {
   SIGNATURE: "mail.signature",
 } as const;
 
+// -- Tracerfy Skip Trace Types --
+
+export const TRACERFY_CONFIG_KEYS = {
+  RUN_HISTORY: "tracerfy.runHistory",
+  MONTHLY_SPEND: "tracerfy.monthlySpend",
+  LOW_BALANCE_THRESHOLD: "tracerfy.lowBalanceThreshold",
+  MONTHLY_CAP: "tracerfy.monthlyCap",
+} as const;
+
+export interface TracerfyRunEntry {
+  date: string; // ISO date
+  count: number;
+  found: number;
+  notFound: number;
+  creditsUsed: number;
+}
+
+export interface TracerfyStatus {
+  configured: boolean;
+  balance: number | null;
+  error?: string;
+}
+
+export interface TracerfyConfig {
+  lowBalanceThreshold: number; // default 2.00
+  monthlyCap: number; // default 50.00
+}
+
 export interface MailSettings {
   fromName: string;
   fromEmail: string;
