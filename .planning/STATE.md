@@ -281,6 +281,9 @@ Recent decisions affecting current work:
 
 - Phase 7 added: Frontend Design Polish
 - Phase 8 added: Wholesaling Deal Flow
+- Phase 18 added: Tracerfy Options
+- Phase 19 added: Wholesale Leads
+- Phase 20 added: Security Review
 
 ### Pending Todos
 

@@ -360,3 +360,33 @@ Plans:
 - [ ] 17-03-PLAN.md — Page-by-page design sweep: login, dashboard, sidebar, bottom nav, all inner pages
 - [ ] 17-04-PLAN.md — Mobile swipe actions (framer-motion), map style swap, mobile navigation polish
 - [ ] 17-05-PLAN.md — Environment migration checkpoint + end-to-end verification on Netlify
+
+### Phase 18: Tracerfy Options
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 17
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 18 to break down)
+
+### Phase 19: Wholesale Leads
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 18
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 19 to break down)
+
+### Phase 20: Security Review
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 19
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 20 to break down)
