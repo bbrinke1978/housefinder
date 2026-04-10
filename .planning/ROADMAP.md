@@ -366,7 +366,7 @@ Plans:
 **Goal:** The investor can trigger Tracerfy skip traces from the UI (single property, bulk dashboard selection, or auto-prompt on deal creation), view results on contact cards with source badges, monitor API spend on a dedicated settings page with run history and cost controls, and see trace status badges on dashboard property cards
 **Requirements**: TRACE-01, TRACE-02, TRACE-03, TRACE-04, TRACE-05, TRACE-06, TRACE-07, TRACE-08, TRACE-09, TRACE-10, TRACE-11, TRACE-12, TRACE-13, TRACE-14, TRACE-15
 **Depends on:** Phase 17
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 18-01-PLAN.md — Tracerfy types, config constants, and server actions (submit, poll, store, status, history)
