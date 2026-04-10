@@ -237,8 +237,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SEC-03**: Security response headers (Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) configured via next.config.ts headers() for housefinder
 - [x] **SEC-04**: Content-Security-Policy deployed in Report-Only mode on housefinder to detect violations without breaking functionality
 - [x] **SEC-05**: Password reset enforces minimum 8 characters plus at least one uppercase letter and one number, server-side validated
-- [ ] **SEC-06**: Next.js upgraded to 15.5.15 in nobshomes marketing site, patching same CVEs as housefinder
-- [ ] **SEC-07**: Security response headers and CSP-Report-Only configured on nobshomes via next.config.ts headers()
+- [x] **SEC-06**: Next.js upgraded to 15.5.15 in nobshomes marketing site, patching same CVEs as housefinder
+- [x] **SEC-07**: Security response headers and CSP-Report-Only configured on nobshomes via next.config.ts headers()
 - [ ] **SEC-08**: OWASP Top 10 code audit completed across both repos with every checklist item reviewed and documented
 - [ ] **SEC-09**: All sql.raw() and db.execute() calls audited to confirm no user-controlled input reaches unparameterized SQL
 - [ ] **SEC-10**: All public routes (sign, floor-plans, api/leads) verified as properly token-gated with no data leakage

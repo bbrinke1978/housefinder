@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 20 of 20 (Security Review)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-04-10 — Completed 20-01 (Remove migrate endpoint, upgrade Next.js CVE, security headers, password policy)
-Stopped at: Completed 20-01-PLAN.md
+Last activity: 2026-04-10 — Completed 20-02 (nobshomes Next.js 15.5.15 upgrade, security headers, CSP-Report-Only)
+Stopped at: Completed 20-02-PLAN.md
 
-Progress: [█████████████████████████████████████░░░] 90%
+Progress: [███████████████████████████████████████░] 92%
 
 ## Performance Metrics
 
@@ -92,6 +92,7 @@ Progress: [███████████████████████
 | Phase 19-wholesale-leads P04 | 4min | 2 tasks | 11 files |
 | Phase 19 P04 | 4min | 2 tasks | 11 files |
 | Phase 20-security-review P01 | 8min | 2 tasks | 8 files |
+| Phase 20-security-review P02 | 6min | 1 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -311,6 +312,8 @@ Recent decisions affecting current work:
 - [Phase 20-security-review]: api/migrate deleted entirely — eliminates attack surface at source; middleware exclusion removed
 - [Phase 20-security-review]: next.config.ts async headers() for SSR-reliable security headers over netlify.toml on Netlify adapter
 - [Phase 20-security-review]: CSP as Content-Security-Policy-Report-Only first — promote to enforcing after verifying no violations
+- [Phase 20-02]: nobshomes CSP allows unsafe-inline script and Google Analytics/GTM — required for @next/third-parties and JSON-LD structured data
+- [Phase 20-02]: git config windows.appendAtomically false required in nobshomes git repo — fixes HEAD log append failure on OneDrive
 
 ### Roadmap Evolution
 
@@ -334,6 +337,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Completed 20-01-PLAN.md (Remove migrate endpoint, upgrade Next.js 15.5.15, security headers via next.config.ts, password policy enforcement)
-Resume file: .planning/phases/20-security-review/20-01-SUMMARY.md
-Resume file: .planning/phases/19-wholesale-leads/19-03-SUMMARY.md
+Stopped at: Completed 20-02-PLAN.md (nobshomes Next.js 15.5.15 upgrade, security headers, CSP-Report-Only)
+Resume file: .planning/phases/20-security-review/20-02-SUMMARY.md
