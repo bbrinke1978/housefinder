@@ -105,6 +105,9 @@ function ResetForm() {
             placeholder="At least 8 characters"
             className="min-h-11 rounded-xl border-sand-300 bg-background text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:ring-2 focus:ring-primary/30 focus:border-primary"
           />
+          <p className="text-sm text-muted-foreground">
+            Minimum 8 characters, at least one uppercase letter and one number.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground">

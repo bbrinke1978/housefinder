@@ -75,6 +75,8 @@ export async function resetPassword(
 
   if (!token) return { error: "Invalid reset link" };
   if (!password || password.length < 8) return { error: "Password must be at least 8 characters" };
+  if (!/[A-Z]/.test(password)) return { error: "Password must contain at least one uppercase letter" };
+  if (!/[0-9]/.test(password)) return { error: "Password must contain at least one number" };
   if (password !== confirmPassword) return { error: "Passwords do not match" };
 
   // Find valid token
