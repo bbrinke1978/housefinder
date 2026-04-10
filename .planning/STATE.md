@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 19 of 20 (Wholesale Leads)
-Plan: 3 of 4 in current phase
-Status: In Progress
-Last activity: 2026-04-10 — Completed 19-03 (Resend inbound webhook, parse review form, wholesale detail page with notes and status management)
-Stopped at: Completed 19-03-PLAN.md
+Plan: 4 of 4 in current phase
+Status: Phase Complete
+Last activity: 2026-04-10 — Completed 19-04 (Promote to Deal action, wholesaler directory, navigation updates, wholesale badge on deal cards)
+Stopped at: Completed 19-04-PLAN.md
 
-Progress: [█████████████████████████████████░░░░░░░] 83%
+Progress: [████████████████████████████████████░░░░] 87%
 
 ## Performance Metrics
 
@@ -89,6 +89,8 @@ Progress: [███████████████████████
 | Phase 19-wholesale-leads P01 | 6min | 2 tasks | 7 files |
 | Phase 19-wholesale-leads P02 | 6min | 2 tasks | 6 files |
 | Phase 19-wholesale-leads P03 | 8min | 2 tasks | 8 files |
+| Phase 19-wholesale-leads P04 | 4min | 2 tasks | 11 files |
+| Phase 19 P04 | 4min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -301,6 +303,10 @@ Recent decisions affecting current work:
 - [Phase 19-03]: parsedDraft added to WholesaleLeadWithWholesaler type — required for parse review form to access email-extracted fields
 - [Phase 19-03]: Two-view detail page: parse review mode for status=new+parsedDraft, full detail otherwise — clean separation without route duplication
 - [Phase 19-03]: Promote to Deal button renders disabled for interested/analyzing statuses — signals next step without broken functionality (Plan 04 implements)
+- [Phase 19-04]: promoteToDeal inserts deal directly (not via createDeal) — createDeal calls redirect() unconditionally, cannot return dealId to caller
+- [Phase 19-04]: leadSource column added to deals table via migration 0011 — column was missing from schema despite plan assuming it existed
+- [Phase 19-04]: WholesalerDirectory uses plain HTML table — @/components/ui/table does not exist in this project
+- [Phase 19-04]: View Deal uses styled Link not Button+asChild — @base-ui/react/button does not support asChild prop
 
 ### Roadmap Evolution
 
@@ -324,5 +330,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Completed 19-03-PLAN.md (Resend inbound webhook, parse review form, wholesale detail page with notes and status management)
+Stopped at: Completed 19-04-PLAN.md (Promote to Deal action, wholesaler directory, navigation updates, wholesale badge on deal cards)
 Resume file: .planning/phases/19-wholesale-leads/19-03-SUMMARY.md
