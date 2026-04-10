@@ -930,3 +930,96 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 
 export type UserRow = InferSelectModel<typeof users>;
 export type PasswordResetTokenRow = InferSelectModel<typeof passwordResetTokens>;
+
+// -- Wholesale Leads --
+
+export const wholesalers = pgTable(
+  "wholesalers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    phone: text("phone"),
+    email: text("email"),
+    company: text("company"),
+    sourceChannel: text("source_channel"), // preferred contact channel: email/social/text
+    notes: text("notes"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_wholesalers_email").on(table.email),
+  ]
+);
+
+export const wholesaleLeads = pgTable(
+  "wholesale_leads",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    address: text("address").notNull(),
+    addressNormalized: text("address_normalized"), // lowercase, stripped for duplicate detection
+    city: text("city"),
+    state: text("state").default("UT"),
+    zip: text("zip"),
+    askingPrice: integer("asking_price"),
+    arv: integer("arv"),
+    repairEstimate: integer("repair_estimate"),
+    sqft: integer("sqft"),
+    beds: integer("beds"),
+    baths: text("baths"), // "1.5" etc
+    lotSize: text("lot_size"),
+    yearBuilt: integer("year_built"),
+    taxId: text("tax_id"),
+    mao: integer("mao"), // stored for display
+    dealScore: integer("deal_score"), // 1-10
+    verdict: text("verdict"), // "green" | "yellow" | "red"
+    scoreBreakdown: text("score_breakdown"), // JSON string
+    status: text("status").notNull().default("new"),
+    // status values: new | analyzing | interested | pass | promoted
+    wholesalerId: uuid("wholesaler_id").references(() => wholesalers.id),
+    sourceChannel: text("source_channel"), // email/social/text
+    rawEmailText: text("raw_email_text"),
+    parsedDraft: text("parsed_draft"), // JSON
+    promotedDealId: uuid("promoted_deal_id").references(() => deals.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_wholesale_leads_status").on(table.status),
+    index("idx_wholesale_leads_wholesaler_id").on(table.wholesalerId),
+    index("idx_wholesale_leads_verdict").on(table.verdict),
+    index("idx_wholesale_leads_address_normalized").on(table.addressNormalized),
+  ]
+);
+
+export const wholesaleLeadNotes = pgTable(
+  "wholesale_lead_notes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    wholesaleLeadId: uuid("wholesale_lead_id")
+      .notNull()
+      .references(() => wholesaleLeads.id),
+    noteText: text("note_text").notNull(),
+    noteType: text("note_type").notNull().default("user"), // "user" | "status_change"
+    previousStatus: text("previous_status"),
+    newStatus: text("new_status"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_wholesale_lead_notes_lead_id").on(table.wholesaleLeadId),
+  ]
+);
+
+export type WholesalerRow = InferSelectModel<typeof wholesalers>;
+export type WholesaleLeadRow = InferSelectModel<typeof wholesaleLeads>;
+export type WholesaleLeadNoteRow = InferSelectModel<typeof wholesaleLeadNotes>;

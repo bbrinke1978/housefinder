@@ -639,6 +639,81 @@ export interface FloorPlanWithPins {
   sasUrl: string | null;
 }
 
+// -- Wholesale Lead Types --
+
+export interface WholesaleLeadWithWholesaler {
+  id: string;
+  address: string;
+  addressNormalized: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  askingPrice: number | null;
+  arv: number | null;
+  repairEstimate: number | null;
+  sqft: number | null;
+  beds: number | null;
+  baths: string | null;
+  lotSize: string | null;
+  yearBuilt: number | null;
+  taxId: string | null;
+  mao: number | null;
+  dealScore: number | null;
+  verdict: string | null;
+  scoreBreakdown: string | null;
+  status: string;
+  sourceChannel: string | null;
+  rawEmailText: string | null;
+  promotedDealId: string | null;
+  wholesalerName: string | null;
+  wholesalerEmail: string | null;
+  wholesalerPhone: string | null;
+  wholesalerCompany: string | null;
+  wholesalerId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WholesalerWithStats {
+  id: string;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  company: string | null;
+  isActive: boolean;
+  totalSent: number;
+  totalPromoted: number;
+  avgSpread: number | null;
+  createdAt: Date;
+}
+
+export interface WholesaleScoreBreakdown {
+  maoSpreadPts: number;
+  equityPctPts: number;
+  endBuyerRoiPts: number;
+  total: number;
+  verdict: "green" | "yellow" | "red";
+  mao: number;
+  spreadDollars: number;
+  endBuyerProfit: number;
+  endBuyerRoi: number;
+}
+
+export interface ParsedWholesaleDeal {
+  address: string | null;
+  askingPrice: number | null;
+  arv: number | null;
+  sqft: number | null;
+  beds: number | null;
+  baths: number | null;
+  yearBuilt: number | null;
+  taxId: string | null;
+  wholesalerName: string | null;
+  wholesalerPhone: string | null;
+  wholesalerEmail: string | null;
+  confidence: number;
+}
+
 export const CALL_SCRIPTS: Record<CallScriptType, CallScriptStep[]> = {
   acquisitions: [
     {
