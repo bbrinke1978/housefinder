@@ -216,15 +216,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Wholesale Leads
 
-- [ ] **WHOLESALE-01**: User can enter wholesale deals via two methods: email forwarding with smart parse AND manual form entry with all deal fields (address, asking price, ARV, repair estimate, sqft, beds, baths, lot size, year built, wholesaler info, source channel)
-- [ ] **WHOLESALE-02**: System smart-parses forwarded wholesaler email blasts via regex extraction, pre-filling address, asking price, ARV, sqft, beds, baths, year built, tax ID, and wholesaler contact -- user reviews and corrects before saving
-- [ ] **WHOLESALE-03**: System auto-runs analysis on save using MAO formula (ARV x 0.70 - Repairs - Fee) with instant verdict; user can edit numbers and re-run
-- [ ] **WHOLESALE-04**: Verdict displayed as traffic light (green/yellow/red) plus weighted 1-10 score with expandable breakdown showing MAO spread, equity percentage, and end buyer ROI factors
-- [ ] **WHOLESALE-05**: Profit estimate displayed as prominent dollar amount (MAO - asking price) for at-a-glance triage
+- [x] **WHOLESALE-01**: User can enter wholesale deals via two methods: email forwarding with smart parse AND manual form entry with all deal fields (address, asking price, ARV, repair estimate, sqft, beds, baths, lot size, year built, wholesaler info, source channel)
+- [x] **WHOLESALE-02**: System smart-parses forwarded wholesaler email blasts via regex extraction, pre-filling address, asking price, ARV, sqft, beds, baths, year built, tax ID, and wholesaler contact -- user reviews and corrects before saving
+- [x] **WHOLESALE-03**: System auto-runs analysis on save using MAO formula (ARV x 0.70 - Repairs - Fee) with instant verdict; user can edit numbers and re-run
+- [x] **WHOLESALE-04**: Verdict displayed as traffic light (green/yellow/red) plus weighted 1-10 score with expandable breakdown showing MAO spread, equity percentage, and end buyer ROI factors
+- [x] **WHOLESALE-05**: Profit estimate displayed as prominent dollar amount (MAO - asking price) for at-a-glance triage
 - [ ] **WHOLESALE-06**: Wholesale leads follow 4-status workflow: New -> Analyzing -> Interested -> Pass/Promoted
 - [ ] **WHOLESALE-07**: Promote to Deal button creates a new Deal in existing pipeline with all numbers pre-filled and deal tagged/flagged as wholesale-sourced
-- [ ] **WHOLESALE-08**: Timestamped notes on wholesale leads following existing deal notes pattern -- quick notes about conversations with wholesaler
-- [ ] **WHOLESALE-09**: Wholesaler directory tracks name, contact info, and aggregate stats: deals sent, deals promoted, average spread -- showing which wholesalers consistently send good deals
+- [x] **WHOLESALE-08**: Timestamped notes on wholesale leads following existing deal notes pattern -- quick notes about conversations with wholesaler
+- [x] **WHOLESALE-09**: Wholesaler directory tracks name, contact info, and aggregate stats: deals sent, deals promoted, average spread -- showing which wholesalers consistently send good deals
 - [ ] **WHOLESALE-10**: Card grid layout showing address, asking/ARV, traffic light verdict, profit estimate, and wholesaler name -- designed for fast triage/scanning
 - [ ] **WHOLESALE-11**: Filters for verdict (green/yellow/red), status (new/analyzing/interested/pass/promoted), and wholesaler source
 - [ ] **WHOLESALE-12**: Own sidebar link at /wholesale as top-level page, separate from Deals; command menu navigation included

@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 18 — Tracerfy Options (Skip Tracing)
+**Current focus:** Phase 19 — Wholesale Leads
 
 ## Current Position
 
-Phase: 18 of 20 (Tracerfy Options)
-Plan: 3 of 3 in current phase
+Phase: 19 of 20 (Wholesale Leads)
+Plan: 1 of 4 in current phase
 Status: In Progress
-Last activity: 2026-04-10 — Completed 18-03 (Skip tracing settings page, auto-trace dialog on deal creation)
-Stopped at: Completed 18-03-PLAN.md
+Last activity: 2026-04-10 — Completed 19-01 (Wholesale leads schema, scoring engine, email parser, server actions, queries)
+Stopped at: Completed 19-01-PLAN.md
 
-Progress: [████████████████████████████████░░░░░░░░] 80%
+Progress: [█████████████████████████████████░░░░░░░] 83%
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Progress: [███████████████████████
 | Phase 18-tracerfy-options P01 | 3min | 2 tasks | 2 files |
 | Phase 18-tracerfy-options P03 | 3min | 2 tasks | 5 files |
 | Phase 18-tracerfy-options P02 | 5min | 2 tasks | 10 files |
+| Phase 19-wholesale-leads P01 | 6min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -286,6 +287,11 @@ Recent decisions affecting current work:
 - [Phase 18-tracerfy-options]: Dialog shows only when propertyId present + !hasContacts + tracerfyConfigured — prevents useless prompts for unconfigured installs
 - [Phase 18-02]: BulkSkipTrace via BulkEnroll extra prop — avoids two overlapping fixed bars, renders button inline in shared action bar
 - [Phase 18-02]: traceStatus populated via post-query inArray lookup — consistent with touchpointCount/hasEmail enrichment pattern in getProperties()
+- [Phase 19-01]: text for wholesale status fields (new/analyzing/interested/pass/promoted) — consistent with Phase 08-01 deal status pattern
+- [Phase 19-01]: upsertWholesaler does email-first lookup before insert — prevents duplicate wholesaler records for same sender
+- [Phase 19-01]: normalizeAddress exported from wholesale-parser.ts for reuse in both actions and queries
+- [Phase 19-01]: createWholesaleLeadFromEmail uses repairEstimate=0 for email-derived leads (repair cost not typically in blast)
+- [Phase 19-01]: wholesaleLeads.promotedDealId FK to deals.id with no cascade — link is optional, not structural
 
 ### Roadmap Evolution
 
@@ -308,6 +314,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09
-Stopped at: Completed 17-04-PLAN.md (SwipeCard framer-motion gestures on property cards, Mapbox light-v11 style)
-Resume file: .planning/phases/17-netlify-migration-design-system/17-02-SUMMARY.md
+Last session: 2026-04-10
+Stopped at: Completed 19-01-PLAN.md (Wholesale leads DB schema, scoring engine, email parser, server actions, queries)
+Resume file: .planning/phases/19-wholesale-leads/19-01-SUMMARY.md
