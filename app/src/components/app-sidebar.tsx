@@ -38,7 +38,7 @@ export function AppSidebar() {
             <MapPin className="h-4 w-4 text-white" />
           </div>
           <span className="text-xl font-display font-bold tracking-wide text-sidebar-foreground">
-            No BS Homes
+            No BS Workbench
           </span>
         </div>
         <ThemeToggle />

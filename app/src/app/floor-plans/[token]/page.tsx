@@ -67,14 +67,14 @@ export default async function FloorPlanSharePage({
         {/* Branding */}
         <div className="text-center mb-4">
           <p className="text-sm font-semibold text-primary tracking-wide uppercase font-display">
-            No BS Homes
+            No BS Workbench
           </p>
         </div>
 
         <FloorPlanShareView plan={result} />
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          Powered by HouseFinder &bull; Shared floor plan view
+          Powered by No BS Workbench &bull; Shared floor plan view
         </p>
       </div>
     </div>

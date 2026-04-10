@@ -154,7 +154,7 @@ export function buildExecutedContractHtml(
       <p style="margin: 20px 0;">
         <a href="${params.dealUrl}"
            style="color: #6d28d9; text-decoration: underline; font-size: 14px;">
-          View contract in HouseFinder
+          View contract in No BS Workbench
         </a>
       </p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />

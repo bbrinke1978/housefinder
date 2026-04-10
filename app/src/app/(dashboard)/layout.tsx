@@ -17,7 +17,7 @@ export default function DashboardLayout({
       <SidebarInset>
         {/* Mobile-only top bar with Settings gear */}
         <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-30">
-          <span className="text-base font-display font-bold tracking-wide text-foreground">No BS Homes</span>
+          <span className="text-base font-display font-bold tracking-wide text-foreground">No BS Workbench</span>
           <Link
             href="/settings"
             className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"

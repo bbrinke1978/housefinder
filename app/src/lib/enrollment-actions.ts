@@ -200,7 +200,7 @@ export async function enrollLeadInSequence(
   // 8. Send via Resend
   const resend = new Resend(resendApiKey);
   const fromAddress = mailSettings.fromEmail || "outreach@resend.dev";
-  const fromLabel = mailSettings.fromName || "HouseFinder";
+  const fromLabel = mailSettings.fromName || "No BS Workbench";
   const replyTo = mailSettings.replyTo || undefined;
 
   try {

@@ -59,7 +59,7 @@ export default function LoginPage() {
                 <MapPin className="h-5 w-5 text-white" />
               </div>
               <span className="text-2xl font-display font-bold tracking-wide text-white">
-                No BS Homes
+                No BS Workbench
               </span>
             </div>
           </div>
@@ -109,7 +109,7 @@ export default function LoginPage() {
                 <MapPin className="h-5 w-5 text-white" />
               </div>
               <span className="text-2xl font-display font-bold tracking-wide text-foreground">
-                No BS Homes
+                No BS Workbench
               </span>
             </div>
           </div>

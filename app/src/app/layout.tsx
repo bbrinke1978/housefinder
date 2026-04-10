@@ -19,7 +19,7 @@ const sourceSans3 = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "HouseFinder",
+  title: "No BS Workbench",
   description: "Distressed property lead management",
 };
 

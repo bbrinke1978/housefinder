@@ -307,7 +307,7 @@ export async function sendDealBlast(
 
   const resend = new Resend(resendApiKey);
   const fromEmail = mailSettings.fromEmail || "deals@housefinder.app";
-  const fromName = mailSettings.fromName || "HouseFinder";
+  const fromName = mailSettings.fromName || "No BS Workbench";
 
   try {
     await resend.emails.send({

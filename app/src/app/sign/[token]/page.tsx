@@ -78,7 +78,7 @@ export default async function SignPage({ params }: SignPageProps) {
         {/* Branding */}
         <div className="text-center mb-6">
           <p className="text-sm font-semibold text-primary tracking-wide uppercase font-display">
-            No BS Homes
+            No BS Workbench
           </p>
         </div>
 
@@ -241,7 +241,7 @@ export default async function SignPage({ params }: SignPageProps) {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-6">
-          Powered by HouseFinder &bull; Secure document signing
+          Powered by No BS Workbench &bull; Secure document signing
         </p>
       </div>
     </div>
@@ -284,7 +284,7 @@ function ErrorPage({
           href="/login"
           className="text-sm text-primary hover:text-primary/80 underline"
         >
-          Back to HouseFinder
+          Back to No BS Workbench
         </a>
       </div>
     </div>
