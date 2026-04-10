@@ -83,6 +83,7 @@ Progress: [███████████████████████
 | Phase 17-netlify-migration-design-system P01 | 4min | 2 tasks | 3 files |
 | Phase 17-netlify-migration-design-system P02 | 2 | 2 tasks | 2 files |
 | Phase 17-netlify-migration-design-system P04 | 2 | 2 tasks | 4 files |
+| Phase 18-tracerfy-options P01 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -276,6 +277,9 @@ Recent decisions affecting current work:
 - [Phase 17-03]: No Signal tier and inactive states: bg-muted text-muted-foreground border-border replaces zinc-500
 - [Phase 17-04]: ownerPhone not on PropertyWithLead — swipe-right navigates to /properties/[id]#contact instead of direct tel: dial
 - [Phase 17-04]: light-v11 Mapbox style replaces satellite-streets-v12 — clean street map matches cream/sand palette
+- [Phase 18-01]: PascalCase-dash field names (Email-1, Mobile-1, Landline-1) fix — scraper used snake_case which returned no results from Tracerfy API
+- [Phase 18-01]: MAX_POLL_MS=25000 wall-clock limit (not attempt count) for Netlify 26s serverless function timeout safety
+- [Phase 18-01]: property_id in json_data for reliable Tracerfy result matching; address+city as fallback only
 
 ### Roadmap Evolution
 
