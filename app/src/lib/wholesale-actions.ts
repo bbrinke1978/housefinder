@@ -356,14 +356,18 @@ export async function addWholesaleNote(formData: FormData): Promise<void> {
 /**
  * createWholesaleLeadFromEmail — parses an email blast, upserts wholesaler, inserts lead.
  * Status: "new". Stores parsedDraft and rawEmailText.
+ * Pass skipAuth=true when called from a server-side webhook route (not a user action).
  */
 export async function createWholesaleLeadFromEmail(
   bodyText: string,
   fromEmail: string,
-  subject: string
+  subject: string,
+  skipAuth = false
 ): Promise<{ id: string }> {
-  const session = await auth();
-  if (!session?.user) throw new Error("Not authenticated");
+  if (!skipAuth) {
+    const session = await auth();
+    if (!session?.user) throw new Error("Not authenticated");
+  }
 
   const parsed = parseWholesaleEmail(bodyText, fromEmail, subject);
 
