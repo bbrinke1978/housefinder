@@ -21,6 +21,8 @@ async function getTargetCities(): Promise<string[]> {
 /** Build a SQL IN clause for target cities (case-insensitive) */
 function targetCityFilter(cities: string[], alias: string = "p"): ReturnType<typeof sql> {
   if (cities.length === 0) return sql`TRUE`;
+  // SECURITY: sql.raw(alias) is safe — alias is a compile-time TypeScript constant ("p", "l", etc.),
+  // never derived from user input. It represents the SQL table alias, not a value.
   return sql`lower(${sql.raw(alias)}.city) IN (${sql.join(cities.map(c => sql`lower(${c})`), sql`, `)})`;
 }
 

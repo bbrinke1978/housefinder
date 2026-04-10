@@ -52,6 +52,8 @@ export async function getSequences(): Promise<EmailSequenceSummary[]> {
     })
     .from(campaignEnrollments)
     .where(
+      // SECURITY: sql.raw() wraps server-fetched UUIDs from DB, not user input.
+      // sequenceIds are read from emailSequences table in the query above, never from request params.
       sql`${campaignEnrollments.sequenceId} = ANY(${sql.raw(`'{${sequenceIds.join(",")}}'::uuid[]`)}) AND ${campaignEnrollments.status} = 'active'`
     )
     .groupBy(campaignEnrollments.sequenceId);
