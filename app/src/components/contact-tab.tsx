@@ -27,6 +27,7 @@ import { ContactEventForm } from "@/components/contact-event-form";
 import { ActivityTimeline } from "@/components/activity-timeline";
 import { CallScriptModal } from "@/components/call-script-modal";
 import { EnrollButton } from "@/components/campaigns/enroll-button";
+import { SkipTraceButton } from "@/components/skip-trace-button";
 
 interface ContactTabProps {
   ownerName: string | null;
@@ -64,6 +65,19 @@ export function ContactTab({
     ownerType === "llc" || ownerType === "trust" || ownerType === "estate";
   const showSkipTrace =
     !hasPhone && (ownerType === "individual" || ownerType === "unknown" || ownerType === null);
+  const hasTracerfyResult = contacts.some((c) => c.source.startsWith("tracerfy"));
+
+  /** Parse the source string and return a readable type label, or null for non-tracerfy sources. */
+  function getTracerfyTypeLabel(source: string): string | null {
+    if (!source.startsWith("tracerfy")) return null;
+    if (source === "tracerfy") return "Phone";
+    if (source === "tracerfy-address") return null; // handled as mailing address
+    const mobileMatch = source.match(/^tracerfy-mobile-/);
+    if (mobileMatch) return "Mobile";
+    const landlineMatch = source.match(/^tracerfy-landline-/);
+    if (landlineMatch) return "Landline";
+    return "Phone"; // tracerfy-2, tracerfy-3 etc (additional emails have no phone type)
+  }
 
   const phonesContacts = contacts.filter((c) => c.phone !== null);
 
@@ -149,6 +163,22 @@ export function ContactTab({
               </a>
             </div>
           )}
+          <div className="mt-2">
+            <SkipTraceButton
+              propertyId={propertyId}
+              hasTracerfyResult={hasTracerfyResult}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Skip trace button when no "needs skip trace" flag but also no tracerfy result (or already traced) */}
+      {!showSkipTrace && !isEntity && (
+        <div className="flex items-center">
+          <SkipTraceButton
+            propertyId={propertyId}
+            hasTracerfyResult={hasTracerfyResult}
+          />
         </div>
       )}
 
@@ -265,6 +295,11 @@ export function ContactTab({
                     <Badge variant="outline" className="text-xs capitalize">
                       {contact.source}
                     </Badge>
+                    {getTracerfyTypeLabel(contact.source) && (
+                      <span className="text-xs text-muted-foreground">
+                        {getTracerfyTypeLabel(contact.source)}
+                      </span>
+                    )}
                     <span className="text-xs text-muted-foreground">
                       {new Date(contact.createdAt).toLocaleDateString("en-US", { timeZone: "America/Denver" })}
                     </span>
