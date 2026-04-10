@@ -85,6 +85,7 @@ Progress: [███████████████████████
 | Phase 17-netlify-migration-design-system P04 | 2 | 2 tasks | 4 files |
 | Phase 18-tracerfy-options P01 | 3min | 2 tasks | 2 files |
 | Phase 18-tracerfy-options P03 | 3min | 2 tasks | 5 files |
+| Phase 18-tracerfy-options P02 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -283,6 +284,8 @@ Recent decisions affecting current work:
 - [Phase 18-01]: property_id in json_data for reliable Tracerfy result matching; address+city as fallback only
 - [Phase 18-tracerfy-options]: SkipTracingSettings derives monthly spend client-side by filtering runHistory by current YYYY-MM prefix
 - [Phase 18-tracerfy-options]: Dialog shows only when propertyId present + !hasContacts + tracerfyConfigured — prevents useless prompts for unconfigured installs
+- [Phase 18-02]: BulkSkipTrace via BulkEnroll extra prop — avoids two overlapping fixed bars, renders button inline in shared action bar
+- [Phase 18-02]: traceStatus populated via post-query inArray lookup — consistent with touchpointCount/hasEmail enrichment pattern in getProperties()
 
 ### Roadmap Evolution
 
