@@ -229,6 +229,21 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **WHOLESALE-11**: Filters for verdict (green/yellow/red), status (new/analyzing/interested/pass/promoted), and wholesaler source
 - [ ] **WHOLESALE-12**: Own sidebar link at /wholesale as top-level page, separate from Deals; command menu navigation included
 
+
+### Security Review
+
+- [ ] **SEC-01**: Live /api/migrate endpoint deleted and removed from middleware auth exclusion list -- eliminates account-seeding attack vector
+- [ ] **SEC-02**: Next.js upgraded to 15.5.15 in housefinder app, patching high-severity DoS CVE (GHSA-q4gf-8mx6-v5v3) and moderate disk cache CVE
+- [ ] **SEC-03**: Security response headers (Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) configured via next.config.ts headers() for housefinder
+- [ ] **SEC-04**: Content-Security-Policy deployed in Report-Only mode on housefinder to detect violations without breaking functionality
+- [ ] **SEC-05**: Password reset enforces minimum 8 characters plus at least one uppercase letter and one number, server-side validated
+- [ ] **SEC-06**: Next.js upgraded to 15.5.15 in nobshomes marketing site, patching same CVEs as housefinder
+- [ ] **SEC-07**: Security response headers and CSP-Report-Only configured on nobshomes via next.config.ts headers()
+- [ ] **SEC-08**: OWASP Top 10 code audit completed across both repos with every checklist item reviewed and documented
+- [ ] **SEC-09**: All sql.raw() and db.execute() calls audited to confirm no user-controlled input reaches unparameterized SQL
+- [ ] **SEC-10**: All public routes (sign, floor-plans, api/leads) verified as properly token-gated with no data leakage
+- [ ] **SEC-11**: Git history scanned for leaked secrets in both repos using gitleaks or manual grep; any found secrets rotated immediately
+- [ ] **SEC-12**: SECURITY-FINDINGS.md and SECRETS-INVENTORY.md delivered documenting all findings, severity ratings, fix status, and secret rotation cadence
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -455,11 +470,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WHOLESALE-11 | Phase 19 | Planned |
 | WHOLESALE-12 | Phase 19 | Planned |
 
+| SEC-01 | Phase 20 | Planned |
+| SEC-02 | Phase 20 | Planned |
+| SEC-03 | Phase 20 | Planned |
+| SEC-04 | Phase 20 | Planned |
+| SEC-05 | Phase 20 | Planned |
+| SEC-06 | Phase 20 | Planned |
+| SEC-07 | Phase 20 | Planned |
+| SEC-08 | Phase 20 | Planned |
+| SEC-09 | Phase 20 | Planned |
+| SEC-10 | Phase 20 | Planned |
+| SEC-11 | Phase 20 | Planned |
+| SEC-12 | Phase 20 | Planned |
+
 **Coverage:**
-- v1 requirements: 150 total
-- Mapped to phases: 150
+- v1 requirements: 162 total
+- Mapped to phases: 162
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-04-09 — added Phase 19 wholesale leads requirements (WHOLESALE-01 through WHOLESALE-12)*
+*Last updated: 2026-04-10 — added Phase 20 security review requirements (SEC-01 through SEC-12)

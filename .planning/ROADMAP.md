@@ -396,10 +396,22 @@ Plans:
 
 ### Phase 20: Security Review
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Both the No BS Workbench (housefinder) and the No BS Homes marketing site (nobshomes) pass a comprehensive security audit -- all critical and high vulnerabilities fixed, security headers deployed, password policy enforced, OWASP Top 10 code review completed, and secrets inventory delivered for ongoing rotation management
+**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08, SEC-09, SEC-10, SEC-11, SEC-12
 **Depends on:** Phase 19
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. The /api/migrate endpoint is deleted and no longer accessible -- middleware matcher updated to remove the exclusion
+  2. Both repos run Next.js 15.5.15 with zero high/critical npm audit findings
+  3. All HTTP responses include Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, and Referrer-Policy headers
+  4. CSP deployed in Report-Only mode on both sites to detect violations without breaking functionality
+  5. Password reset enforces minimum 8 characters plus at least one uppercase letter and one number
+  6. OWASP Top 10 code review completed across both repos with findings documented
+  7. Git history scanned for leaked secrets in both repos
+  8. SECURITY-FINDINGS.md delivered with severity-rated findings and fix status for each
+  9. SECRETS-INVENTORY.md delivered listing every secret across all deployment targets with rotation cadence
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 20 to break down)
+- [ ] 20-01-PLAN.md -- Remove /api/migrate, upgrade Next.js, password policy, security headers (housefinder)
+- [ ] 20-02-PLAN.md -- Upgrade Next.js, security headers (nobshomes)
+- [ ] 20-03-PLAN.md -- OWASP Top 10 audit, git secret scan, findings report, secrets inventory
