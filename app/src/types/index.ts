@@ -664,6 +664,7 @@ export interface WholesaleLeadWithWholesaler {
   status: string;
   sourceChannel: string | null;
   rawEmailText: string | null;
+  parsedDraft: string | null;
   promotedDealId: string | null;
   wholesalerName: string | null;
   wholesalerEmail: string | null;
