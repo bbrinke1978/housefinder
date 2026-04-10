@@ -1,9 +1,5 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcryptjs from "bcryptjs";
-import { db } from "@/db/client";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -18,6 +14,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password as string | undefined;
 
         if (!email || !password) return null;
+
+        // Dynamic imports to avoid bundling Node.js modules into Edge Runtime middleware
+        const { db } = await import("@/db/client");
+        const { users } = await import("@/db/schema");
+        const { eq } = await import("drizzle-orm");
+        const bcryptjs = (await import("bcryptjs")).default;
 
         const [user] = await db
           .select()
