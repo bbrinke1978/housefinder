@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 19 of 20 (Wholesale Leads)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In Progress
-Last activity: 2026-04-10 — Completed 19-01 (Wholesale leads schema, scoring engine, email parser, server actions, queries)
-Stopped at: Completed 19-01-PLAN.md
+Last activity: 2026-04-10 — Completed 19-02 (Wholesale list page, card grid, filters, entry form, analysis display)
+Stopped at: Completed 19-02-PLAN.md
 
 Progress: [█████████████████████████████████░░░░░░░] 83%
 
@@ -87,6 +87,7 @@ Progress: [███████████████████████
 | Phase 18-tracerfy-options P03 | 3min | 2 tasks | 5 files |
 | Phase 18-tracerfy-options P02 | 5min | 2 tasks | 10 files |
 | Phase 19-wholesale-leads P01 | 6min | 2 tasks | 7 files |
+| Phase 19-wholesale-leads P02 | 6min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -292,6 +293,9 @@ Recent decisions affecting current work:
 - [Phase 19-01]: normalizeAddress exported from wholesale-parser.ts for reuse in both actions and queries
 - [Phase 19-01]: createWholesaleLeadFromEmail uses repairEstimate=0 for email-derived leads (repair cost not typically in blast)
 - [Phase 19-01]: wholesaleLeads.promotedDealId FK to deals.id with no cascade — link is optional, not structural
+- [Phase 19-02]: WholesaleLeadGrid provides modal overlay for form — form renders just form content, grid provides dialog chrome
+- [Phase 19-02]: WholesaleAnalysis returns null when arv or askingPrice missing — prevents nonsensical partial scores
+- [Phase 19-02]: Wholesale sidebar nav item placed between Buyers and Analytics — deal intake flow grouping
 
 ### Roadmap Evolution
 
@@ -315,5 +319,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Completed 19-01-PLAN.md (Wholesale leads DB schema, scoring engine, email parser, server actions, queries)
-Resume file: .planning/phases/19-wholesale-leads/19-01-SUMMARY.md
+Stopped at: Completed 19-02-PLAN.md (Wholesale list page, card grid, filters, entry form, analysis display)
+Resume file: .planning/phases/19-wholesale-leads/19-02-SUMMARY.md

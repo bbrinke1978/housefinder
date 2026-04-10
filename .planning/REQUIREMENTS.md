@@ -225,8 +225,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **WHOLESALE-07**: Promote to Deal button creates a new Deal in existing pipeline with all numbers pre-filled and deal tagged/flagged as wholesale-sourced
 - [x] **WHOLESALE-08**: Timestamped notes on wholesale leads following existing deal notes pattern -- quick notes about conversations with wholesaler
 - [x] **WHOLESALE-09**: Wholesaler directory tracks name, contact info, and aggregate stats: deals sent, deals promoted, average spread -- showing which wholesalers consistently send good deals
-- [ ] **WHOLESALE-10**: Card grid layout showing address, asking/ARV, traffic light verdict, profit estimate, and wholesaler name -- designed for fast triage/scanning
-- [ ] **WHOLESALE-11**: Filters for verdict (green/yellow/red), status (new/analyzing/interested/pass/promoted), and wholesaler source
+- [x] **WHOLESALE-10**: Card grid layout showing address, asking/ARV, traffic light verdict, profit estimate, and wholesaler name -- designed for fast triage/scanning
+- [x] **WHOLESALE-11**: Filters for verdict (green/yellow/red), status (new/analyzing/interested/pass/promoted), and wholesaler source
 - [ ] **WHOLESALE-12**: Own sidebar link at /wholesale as top-level page, separate from Deals; command menu navigation included
 
 
@@ -466,8 +466,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WHOLESALE-07 | Phase 19 | Planned |
 | WHOLESALE-08 | Phase 19 | Planned |
 | WHOLESALE-09 | Phase 19 | Planned |
-| WHOLESALE-10 | Phase 19 | Planned |
-| WHOLESALE-11 | Phase 19 | Planned |
+| WHOLESALE-10 | Phase 19 | Complete |
+| WHOLESALE-11 | Phase 19 | Complete |
 | WHOLESALE-12 | Phase 19 | Planned |
 
 | SEC-01 | Phase 20 | Planned |

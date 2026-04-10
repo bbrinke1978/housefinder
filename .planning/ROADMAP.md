@@ -389,8 +389,8 @@ Plans:
 **Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 19-01-PLAN.md -- Schema (wholesalers, wholesale_leads, wholesale_lead_notes), types, scoring engine, email parser, server actions, queries
-- [ ] 19-02-PLAN.md -- /wholesale list page with card grid, verdict badges, filters, manual entry form with live analysis
+- [x] 19-01-PLAN.md -- Schema (wholesalers, wholesale_leads, wholesale_lead_notes), types, scoring engine, email parser, server actions, queries
+- [x] 19-02-PLAN.md -- /wholesale list page with card grid, verdict badges, filters, manual entry form with live analysis
 - [ ] 19-03-PLAN.md -- Resend inbound webhook, parse review form, /wholesale/[id] detail page with notes
 - [ ] 19-04-PLAN.md -- Promote to Deal action, wholesaler directory, sidebar + command menu nav, deal card badge
 
