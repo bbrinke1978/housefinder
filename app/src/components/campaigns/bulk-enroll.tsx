@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { Mail, Loader2, X, ChevronDown, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { bulkEnrollLeads } from "@/lib/enrollment-actions";
@@ -10,6 +10,8 @@ interface BulkEnrollProps {
   selectedLeadIds: string[];
   sequences: EmailSequenceSummary[];
   onClear: () => void;
+  /** Optional extra actions to render alongside the enroll button */
+  extra?: ReactNode;
 }
 
 type BulkResult = {
@@ -18,7 +20,7 @@ type BulkResult = {
   errors: string[];
 };
 
-export function BulkEnroll({ selectedLeadIds, sequences, onClear }: BulkEnrollProps) {
+export function BulkEnroll({ selectedLeadIds, sequences, onClear, extra }: BulkEnrollProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
@@ -120,6 +122,7 @@ export function BulkEnroll({ selectedLeadIds, sequences, onClear }: BulkEnrollPr
             </div>
 
             <div className="flex items-center gap-2">
+              {extra}
               {error && <p className="text-xs text-destructive">{error}</p>}
 
               {activeSequences.length === 0 ? (

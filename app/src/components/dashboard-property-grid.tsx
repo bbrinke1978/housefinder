@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PropertyCard } from "@/components/property-card";
 import { BulkEnroll } from "@/components/campaigns/bulk-enroll";
+import { BulkSkipTrace } from "@/components/bulk-skip-trace";
 import type { PropertyWithLead } from "@/types";
 import type { EmailSequenceSummary } from "@/types";
 import { Mail } from "lucide-react";
@@ -37,6 +38,9 @@ export function DashboardPropertyGrid({
   }
 
   const selectedLeadIds = Array.from(selectedIds);
+  const selectedPropertyIds = properties
+    .filter((p) => selectedIds.has(p.leadId))
+    .map((p) => p.id);
 
   return (
     <>
@@ -101,6 +105,12 @@ export function DashboardPropertyGrid({
           selectedLeadIds={selectedLeadIds}
           sequences={sequences}
           onClear={clearSelection}
+          extra={
+            <BulkSkipTrace
+              selectedPropertyIds={selectedPropertyIds}
+              onClear={clearSelection}
+            />
+          }
         />
       )}
     </>

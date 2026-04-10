@@ -48,6 +48,8 @@ export interface PropertyWithLead {
   touchpointCount?: number;
   /** True when a real (non-mailing) email exists in ownerContacts for this property */
   hasEmail?: boolean;
+  /** Skip trace status: traced_found, traced_not_found, or null (not traced) */
+  traceStatus?: "traced_found" | "traced_not_found" | null;
   // UGRC assessor data (may be null if not yet imported)
   buildingSqft: number | null;
   yearBuilt: number | null;

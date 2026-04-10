@@ -654,7 +654,7 @@ export async function getProperties(
   const leadIds = rows.map((r) => r.leadId as string);
   const propertyIds = rows.map((r) => r.id as string);
 
-  const [touchpointRows, emailRows] = await Promise.all([
+  const [touchpointRows, emailRows, traceRows] = await Promise.all([
     db
       .select({
         leadId: contactEvents.leadId,
@@ -672,6 +672,20 @@ export async function getProperties(
           isNotNull(ownerContacts.email)
         )
       ),
+    // Fetch tracerfy contact rows to compute traceStatus per property
+    db
+      .select({
+        propertyId: ownerContacts.propertyId,
+        phone: ownerContacts.phone,
+        email: ownerContacts.email,
+      })
+      .from(ownerContacts)
+      .where(
+        and(
+          inArray(ownerContacts.propertyId, propertyIds),
+          sql`${ownerContacts.source} = 'tracerfy'`
+        )
+      ),
   ]);
 
   const touchpointMap = new Map<string, number>();
@@ -685,10 +699,22 @@ export async function getProperties(
     emailPropertySet.add(er.propertyId);
   }
 
+  // Build traceStatus map from tracerfy source contacts
+  // traced_found = has phone or non-mailing email; traced_not_found = null row exists
+  const traceStatusMap = new Map<string, "traced_found" | "traced_not_found">();
+  for (const tr of traceRows) {
+    const pid = tr.propertyId;
+    const hasData =
+      (tr.phone !== null) ||
+      (tr.email !== null && !tr.email.startsWith("MAILING:"));
+    traceStatusMap.set(pid, hasData ? "traced_found" : "traced_not_found");
+  }
+
   return rows.map((row) => ({
     ...row,
     touchpointCount: touchpointMap.get(row.leadId as string) ?? 0,
     hasEmail: emailPropertySet.has(row.id as string),
+    traceStatus: traceStatusMap.get(row.id as string) ?? null,
   })) as PropertyWithLead[];
 }
 

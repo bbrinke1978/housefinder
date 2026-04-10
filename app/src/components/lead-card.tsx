@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Flame, AlertTriangle } from "lucide-react";
+import { Flame, AlertTriangle, Search, SearchX } from "lucide-react";
 import type { PipelineLead } from "@/types";
 
 interface LeadCardProps {
@@ -42,6 +42,16 @@ export function LeadCard({ lead }: LeadCardProps) {
           <AlertTriangle className="h-3 w-3" />
           Skip trace needed
         </span>
+        {lead.traceStatus === "traced_found" && (
+          <span title="Skip traced — results found">
+            <Search className="h-3 w-3 text-emerald-500 shrink-0" />
+          </span>
+        )}
+        {lead.traceStatus === "traced_not_found" && (
+          <span title="Skip traced — no results">
+            <SearchX className="h-3 w-3 text-muted-foreground shrink-0" />
+          </span>
+        )}
       </div>
 
       {lead.lastContactedAt && (

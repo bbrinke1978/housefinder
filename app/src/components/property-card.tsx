@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown } from "lucide-react";
+import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown, Search, SearchX } from "lucide-react";
 import { useState, useRef, useEffect, useTransition, useCallback } from "react";
 import type { PropertyWithLead } from "@/types";
 import { LEAD_SOURCES } from "@/types";
@@ -348,6 +348,16 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
             />
             {(property.touchpointCount ?? 0) > 0 && (
               <TouchpointBadge count={property.touchpointCount ?? 0} />
+            )}
+            {property.traceStatus === "traced_found" && (
+              <span title="Skip traced — results found">
+                <Search className="h-3 w-3 text-emerald-500 shrink-0" />
+              </span>
+            )}
+            {property.traceStatus === "traced_not_found" && (
+              <span title="Skip traced — no results">
+                <SearchX className="h-3 w-3 text-muted-foreground shrink-0" />
+              </span>
             )}
           </div>
           <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0 shrink-0">
