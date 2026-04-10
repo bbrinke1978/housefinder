@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 20 of 20 (Security Review)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In Progress
-Last activity: 2026-04-10 — Completed 20-02 (nobshomes Next.js 15.5.15 upgrade, security headers, CSP-Report-Only)
-Stopped at: Completed 20-02-PLAN.md
+Last activity: 2026-04-10 — Completed 20-03 (OWASP audit, git history scan, SECURITY-FINDINGS.md, SECRETS-INVENTORY.md)
+Stopped at: Completed 20-03-PLAN.md
 
-Progress: [███████████████████████████████████████░] 92%
+Progress: [████████████████████████████████████████░] 94%
 
 ## Performance Metrics
 
@@ -93,6 +93,7 @@ Progress: [███████████████████████
 | Phase 19 P04 | 4min | 2 tasks | 11 files |
 | Phase 20-security-review P01 | 8min | 2 tasks | 8 files |
 | Phase 20-security-review P02 | 6min | 1 tasks | 4 files |
+| Phase 20-security-review P03 | 12min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -314,6 +315,9 @@ Recent decisions affecting current work:
 - [Phase 20-security-review]: CSP as Content-Security-Policy-Report-Only first — promote to enforcing after verifying no violations
 - [Phase 20-02]: nobshomes CSP allows unsafe-inline script and Google Analytics/GTM — required for @next/third-parties and JSON-LD structured data
 - [Phase 20-02]: git config windows.appendAtomically false required in nobshomes git repo — fixes HEAD log append failure on OneDrive
+- [Phase 20-security-review]: MED-03: missing auth() on some server actions accepted as risk — 3-user single-tenant, middleware protects pages
+- [Phase 20-security-review]: sql.raw() usages verified safe and documented with inline SECURITY: comments
+- [Phase 20-security-review]: Netlify firewall limitation accepted risk — full lockdown requires Enterprise tier; SSL compensating controls adequate
 
 ### Roadmap Evolution
 
@@ -337,5 +341,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Completed 20-02-PLAN.md (nobshomes Next.js 15.5.15 upgrade, security headers, CSP-Report-Only)
+Stopped at: Completed 20-03-PLAN.md (OWASP audit, git history scan, SECURITY-FINDINGS.md, SECRETS-INVENTORY.md)
+Resume file: .planning/phases/20-security-review/20-03-SUMMARY.md
 Resume file: .planning/phases/20-security-review/20-02-SUMMARY.md

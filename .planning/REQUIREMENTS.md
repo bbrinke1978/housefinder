@@ -239,11 +239,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SEC-05**: Password reset enforces minimum 8 characters plus at least one uppercase letter and one number, server-side validated
 - [x] **SEC-06**: Next.js upgraded to 15.5.15 in nobshomes marketing site, patching same CVEs as housefinder
 - [x] **SEC-07**: Security response headers and CSP-Report-Only configured on nobshomes via next.config.ts headers()
-- [ ] **SEC-08**: OWASP Top 10 code audit completed across both repos with every checklist item reviewed and documented
-- [ ] **SEC-09**: All sql.raw() and db.execute() calls audited to confirm no user-controlled input reaches unparameterized SQL
-- [ ] **SEC-10**: All public routes (sign, floor-plans, api/leads) verified as properly token-gated with no data leakage
-- [ ] **SEC-11**: Git history scanned for leaked secrets in both repos using gitleaks or manual grep; any found secrets rotated immediately
-- [ ] **SEC-12**: SECURITY-FINDINGS.md and SECRETS-INVENTORY.md delivered documenting all findings, severity ratings, fix status, and secret rotation cadence
+- [x] **SEC-08**: OWASP Top 10 code audit completed across both repos with every checklist item reviewed and documented
+- [x] **SEC-09**: All sql.raw() and db.execute() calls audited to confirm no user-controlled input reaches unparameterized SQL
+- [x] **SEC-10**: All public routes (sign, floor-plans, api/leads) verified as properly token-gated with no data leakage
+- [x] **SEC-11**: Git history scanned for leaked secrets in both repos using gitleaks or manual grep; any found secrets rotated immediately
+- [x] **SEC-12**: SECURITY-FINDINGS.md and SECRETS-INVENTORY.md delivered documenting all findings, severity ratings, fix status, and secret rotation cadence
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
