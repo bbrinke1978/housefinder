@@ -232,11 +232,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Security Review
 
-- [ ] **SEC-01**: Live /api/migrate endpoint deleted and removed from middleware auth exclusion list -- eliminates account-seeding attack vector
-- [ ] **SEC-02**: Next.js upgraded to 15.5.15 in housefinder app, patching high-severity DoS CVE (GHSA-q4gf-8mx6-v5v3) and moderate disk cache CVE
-- [ ] **SEC-03**: Security response headers (Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) configured via next.config.ts headers() for housefinder
-- [ ] **SEC-04**: Content-Security-Policy deployed in Report-Only mode on housefinder to detect violations without breaking functionality
-- [ ] **SEC-05**: Password reset enforces minimum 8 characters plus at least one uppercase letter and one number, server-side validated
+- [x] **SEC-01**: Live /api/migrate endpoint deleted and removed from middleware auth exclusion list -- eliminates account-seeding attack vector
+- [x] **SEC-02**: Next.js upgraded to 15.5.15 in housefinder app, patching high-severity DoS CVE (GHSA-q4gf-8mx6-v5v3) and moderate disk cache CVE
+- [x] **SEC-03**: Security response headers (Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) configured via next.config.ts headers() for housefinder
+- [x] **SEC-04**: Content-Security-Policy deployed in Report-Only mode on housefinder to detect violations without breaking functionality
+- [x] **SEC-05**: Password reset enforces minimum 8 characters plus at least one uppercase letter and one number, server-side validated
 - [ ] **SEC-06**: Next.js upgraded to 15.5.15 in nobshomes marketing site, patching same CVEs as housefinder
 - [ ] **SEC-07**: Security response headers and CSP-Report-Only configured on nobshomes via next.config.ts headers()
 - [ ] **SEC-08**: OWASP Top 10 code audit completed across both repos with every checklist item reviewed and documented
