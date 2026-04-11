@@ -648,13 +648,17 @@ export async function runBulkSkipTrace(
  * No auth check — used on settings page before session may be available.
  */
 export async function getTracerfyStatus(): Promise<TracerfyStatus> {
-  const apiKey = process.env.TRACERFY_API_KEY;
-  if (!apiKey) {
+  const rawKey = process.env.TRACERFY_API_KEY;
+  if (!rawKey) {
     return { configured: false, balance: null };
   }
 
+  // Debug: surface key info in error for diagnosis
+  const keyLen = rawKey.length;
+  const keyPreview = `len=${keyLen}, starts="${rawKey.slice(0, 10)}...", ends="...${rawKey.slice(-5)}"`;
+
   try {
-    const analytics = (await tracerfyFetch("GET", "/analytics/", apiKey)) as {
+    const analytics = (await tracerfyFetch("GET", "/analytics/", rawKey)) as {
       balance?: number;
       credits_remaining?: number;
     };
@@ -662,10 +666,11 @@ export async function getTracerfyStatus(): Promise<TracerfyStatus> {
     const balance = analytics.balance ?? analytics.credits_remaining ?? null;
     return { configured: true, balance };
   } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to fetch balance";
     return {
       configured: true,
       balance: null,
-      error: err instanceof Error ? err.message : "Failed to fetch balance",
+      error: `${msg} [key: ${keyPreview}]`,
     };
   }
 }

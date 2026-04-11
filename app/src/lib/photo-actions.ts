@@ -2,7 +2,7 @@
 
 import { db } from "@/db/client";
 import { propertyPhotos } from "@/db/schema";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, inArray, sql } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { uploadPhotoBlob, deletePhotoBlob } from "@/lib/blob-storage";
@@ -95,21 +95,21 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string } | 
   }
 
   try {
-    const [inserted] = await db
-      .insert(propertyPhotos)
-      .values({
-        id: photoId,
-        dealId: dealId || undefined,
-        propertyId: propertyId || undefined,
-        isInbox,
-        blobName,
-        blobUrl,
-        category: category as PhotoCategoryValue,
-        caption: caption || undefined,
-        isCover,
-        fileSizeBytes: file.size || undefined,
-      })
-      .returning({ id: propertyPhotos.id });
+    await db.execute(sql`
+      INSERT INTO property_photos (id, deal_id, property_id, is_inbox, blob_name, blob_url, category, caption, is_cover, file_size_bytes)
+      VALUES (
+        ${photoId}::uuid,
+        ${dealId || null}::uuid,
+        ${propertyId || null}::uuid,
+        ${isInbox},
+        ${blobName},
+        ${blobUrl},
+        ${category}::photo_category,
+        ${caption || null},
+        ${isCover},
+        ${file.size || null}
+      )
+    `);
 
     // Revalidate relevant paths
     if (dealId) {
@@ -120,7 +120,7 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string } | 
       revalidatePath("/photos/inbox");
     }
 
-    return { id: inserted.id };
+    return { id: photoId };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Database error";
     return { error: `Failed to save photo: ${msg}` };

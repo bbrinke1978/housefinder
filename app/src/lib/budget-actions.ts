@@ -136,16 +136,10 @@ export async function addExpense(formData: FormData): Promise<{ error?: string }
   }
 
   try {
-    await db.insert(expenses).values({
-      budgetId,
-      categoryId,
-      receiptId: receiptId || sql`NULL`,
-      vendor: vendor || sql`NULL`,
-      description: description || sql`NULL`,
-      amountCents,
-      expenseDate,
-      notes: notes || sql`NULL`,
-    });
+    await db.execute(sql`
+      INSERT INTO expenses (budget_id, category_id, amount_cents, expense_date, vendor, description, notes)
+      VALUES (${budgetId}, ${categoryId}, ${amountCents}, ${expenseDate}::date, ${vendor || null}, ${description || null}, ${notes || null})
+    `);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Database error";
     return { error: `Failed to save expense: ${msg}` };
