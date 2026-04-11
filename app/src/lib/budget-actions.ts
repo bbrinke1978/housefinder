@@ -139,12 +139,12 @@ export async function addExpense(formData: FormData): Promise<{ error?: string }
     await db.insert(expenses).values({
       budgetId,
       categoryId,
-      receiptId: receiptId || null,
-      vendor: vendor || null,
-      description: description || null,
+      receiptId: receiptId || undefined,
+      vendor: vendor || undefined,
+      description: description || undefined,
       amountCents,
       expenseDate,
-      notes: notes || null,
+      notes: notes || undefined,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Database error";

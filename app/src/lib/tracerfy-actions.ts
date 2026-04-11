@@ -69,7 +69,7 @@ async function tracerfyFetch(
   body?: unknown
 ): Promise<unknown> {
   const url = `${BASE_URL}${path}`;
-  const trimmedKey = apiKey.trim();
+  const trimmedKey = apiKey.trim().replace(/^["']|["']$/g, "");
   const headers: Record<string, string> = {
     Authorization: `Bearer ${trimmedKey}`,
     Accept: "application/json",
