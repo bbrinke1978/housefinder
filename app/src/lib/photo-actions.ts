@@ -99,15 +99,15 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string } | 
       .insert(propertyPhotos)
       .values({
         id: photoId,
-        dealId: dealId || null,
-        propertyId: propertyId || null,
+        dealId: dealId || undefined,
+        propertyId: propertyId || undefined,
         isInbox,
         blobName,
         blobUrl,
         category: category as PhotoCategoryValue,
-        caption: caption || null,
+        caption: caption || undefined,
         isCover,
-        fileSizeBytes: file.size || null,
+        fileSizeBytes: file.size || undefined,
       })
       .returning({ id: propertyPhotos.id });
 

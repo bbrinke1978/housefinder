@@ -7,7 +7,7 @@ import {
   expenses,
   deals,
 } from "@/db/schema";
-import { eq, sum } from "drizzle-orm";
+import { eq, sum, sql } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { DEFAULT_BUDGET_CATEGORIES } from "@/types";
@@ -139,12 +139,12 @@ export async function addExpense(formData: FormData): Promise<{ error?: string }
     await db.insert(expenses).values({
       budgetId,
       categoryId,
-      receiptId: receiptId || undefined,
-      vendor: vendor || undefined,
-      description: description || undefined,
+      receiptId: receiptId || sql`NULL`,
+      vendor: vendor || sql`NULL`,
+      description: description || sql`NULL`,
       amountCents,
       expenseDate,
-      notes: notes || undefined,
+      notes: notes || sql`NULL`,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Database error";
