@@ -69,15 +69,8 @@ async function tracerfyFetch(
   body?: unknown
 ): Promise<unknown> {
   const url = `${BASE_URL}${path}`;
-  // Clean the API key: strip whitespace, quotes, newlines, and "Bearer " prefix if already present
-  const cleanKey = apiKey
-    .replace(/[\r\n]/g, "")
-    .trim()
-    .replace(/^["']|["']$/g, "")
-    .replace(/^Bearer\s+/i, "")
-    .trim();
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${cleanKey}`,
+    Authorization: "Bearer " + apiKey.trim(),
     Accept: "application/json",
   };
 
@@ -95,7 +88,9 @@ async function tracerfyFetch(
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(`Tracerfy ${method} ${path} -> ${response.status}: ${text}`);
+    const authHeader = headers.Authorization;
+    const authPreview = `auth="${authHeader.slice(0, 20)}...${authHeader.slice(-10)}" len=${authHeader.length}`;
+    throw new Error(`Tracerfy ${method} ${path} -> ${response.status}: ${text} [${authPreview}]`);
   }
 
   return response.json();

@@ -95,19 +95,24 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string } | 
   }
 
   try {
+    const dealIdVal = dealId || null;
+    const propertyIdVal = propertyId || null;
+    const captionVal = caption || null;
+    const fileSizeVal = file.size || null;
+
     await db.execute(sql`
       INSERT INTO property_photos (id, deal_id, property_id, is_inbox, blob_name, blob_url, category, caption, is_cover, file_size_bytes)
       VALUES (
         ${photoId}::uuid,
-        ${dealId || null}::uuid,
-        ${propertyId || null}::uuid,
+        ${dealIdVal ? sql`${dealIdVal}::uuid` : sql`NULL`},
+        ${propertyIdVal ? sql`${propertyIdVal}::uuid` : sql`NULL`},
         ${isInbox},
         ${blobName},
         ${blobUrl},
         ${category}::photo_category,
-        ${caption || null},
+        ${captionVal},
         ${isCover},
-        ${file.size || null}
+        ${fileSizeVal}
       )
     `);
 
