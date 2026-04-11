@@ -5,17 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Phase 20 — Security Review
+**Current focus:** Milestone v1.0 complete — all 20 phases shipped
 
 ## Current Position
 
 Phase: 20 of 20 (Security Review)
-Plan: 3 of 4 in current phase
-Status: In Progress
-Last activity: 2026-04-10 — Completed 20-03 (OWASP audit, git history scan, SECURITY-FINDINGS.md, SECRETS-INVENTORY.md)
-Stopped at: Completed 20-03-PLAN.md
+Plan: 4 of 4 in current phase
+Status: Complete
+Last activity: 2026-04-11 — All phases complete, CSP promoted to enforcing, migrations applied
 
-Progress: [████████████████████████████████████████░] 94%
+Progress: [████████████████████████████████████████████] 100%
 
 ## Performance Metrics
 
@@ -312,7 +311,7 @@ Recent decisions affecting current work:
 - [Phase 19-04]: View Deal uses styled Link not Button+asChild — @base-ui/react/button does not support asChild prop
 - [Phase 20-security-review]: api/migrate deleted entirely — eliminates attack surface at source; middleware exclusion removed
 - [Phase 20-security-review]: next.config.ts async headers() for SSR-reliable security headers over netlify.toml on Netlify adapter
-- [Phase 20-security-review]: CSP as Content-Security-Policy-Report-Only first — promote to enforcing after verifying no violations
+- [Phase 20-security-review]: CSP promoted from Report-Only to enforcing on 2026-04-11 — no violations observed in browser console
 - [Phase 20-02]: nobshomes CSP allows unsafe-inline script and Google Analytics/GTM — required for @next/third-parties and JSON-LD structured data
 - [Phase 20-02]: git config windows.appendAtomically false required in nobshomes git repo — fixes HEAD log append failure on OneDrive
 - [Phase 20-security-review]: MED-03: missing auth() on some server actions accepted as risk — 3-user single-tenant, middleware protects pages
@@ -340,7 +339,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10
-Stopped at: Completed 20-03-PLAN.md (OWASP audit, git history scan, SECURITY-FINDINGS.md, SECRETS-INVENTORY.md)
-Resume file: .planning/phases/20-security-review/20-03-SUMMARY.md
-Resume file: .planning/phases/20-security-review/20-02-SUMMARY.md
+Last session: 2026-04-11
+Status: Milestone v1.0 COMPLETE — all 20 phases shipped
+Final actions: CSP promoted to enforcing, DB migrations applied, Mapbox token domain-restricted, App Service decommissioned
+Remaining manual: All 3 users rotate passwords via forgot-password flow
