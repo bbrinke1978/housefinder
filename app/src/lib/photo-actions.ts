@@ -60,7 +60,17 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string }> {
   }
   const blobName = `${blobPrefix}/${photoId}-${sanitizedName}`;
 
-  const blobUrl = await uploadPhotoBlob(buffer, blobName);
+  if (!process.env.AZURE_STORAGE_CONNECTION_STRING) {
+    throw new Error("Photo storage not configured. Add AZURE_STORAGE_CONNECTION_STRING to Netlify environment variables.");
+  }
+
+  let blobUrl: string;
+  try {
+    blobUrl = await uploadPhotoBlob(buffer, blobName);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown upload error";
+    throw new Error(`Photo upload failed: ${msg}`);
+  }
 
   // isInbox = true when no dealId and no propertyId
   const isInbox = !dealId && !propertyId;

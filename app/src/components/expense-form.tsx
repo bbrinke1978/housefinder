@@ -53,7 +53,11 @@ export function ExpenseForm({
 
     startTransition(async () => {
       try {
-        await addExpense(formData);
+        const result = await addExpense(formData);
+        if (result?.error) {
+          setError(result.error);
+          return;
+        }
         form.reset();
         setAmountDisplay("");
         onSuccess?.();

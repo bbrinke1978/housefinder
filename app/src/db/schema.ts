@@ -307,6 +307,7 @@ export const deals = pgTable(
   (table) => [
     index("idx_deals_status").on(table.status),
     index("idx_deals_property_id").on(table.propertyId),
+    index("idx_deals_updated_at").on(table.updatedAt),
   ]
 );
 

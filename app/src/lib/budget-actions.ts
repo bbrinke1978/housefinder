@@ -115,10 +115,10 @@ export async function updateCategoryPlanned(
 /**
  * addExpense — insert an expense row.
  */
-export async function addExpense(formData: FormData): Promise<void> {
+export async function addExpense(formData: FormData): Promise<{ error?: string }> {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Not authenticated");
+    return { error: "Not authenticated" };
   }
 
   const budgetId = formData.get("budgetId") as string;
@@ -132,21 +132,27 @@ export async function addExpense(formData: FormData): Promise<void> {
   const dealId = formData.get("dealId") as string;
 
   if (!budgetId || !categoryId || isNaN(amountCents) || !expenseDate) {
-    throw new Error("Missing required expense fields");
+    return { error: "Missing required expense fields" };
   }
 
-  await db.insert(expenses).values({
-    budgetId,
-    categoryId,
-    receiptId,
-    vendor,
-    description,
-    amountCents,
-    expenseDate,
-    notes,
-  });
+  try {
+    await db.insert(expenses).values({
+      budgetId,
+      categoryId,
+      receiptId,
+      vendor,
+      description,
+      amountCents,
+      expenseDate,
+      notes,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Database error";
+    return { error: `Failed to save expense: ${msg}` };
+  }
 
   revalidatePath(`/deals/${dealId}`);
+  return {};
 }
 
 /**
