@@ -69,27 +69,26 @@ async function tracerfyFetch(
   body?: unknown
 ): Promise<unknown> {
   const url = `${BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    Authorization: "Bearer " + apiKey.trim(),
-    Accept: "application/json",
-  };
+  const authValue = "Bearer " + apiKey.trim();
+  const reqHeaders = new Headers();
+  reqHeaders.set("Authorization", authValue);
+  reqHeaders.set("Accept", "application/json");
 
   let fetchBody: string | undefined;
   if (body) {
-    headers["Content-Type"] = "application/json";
+    reqHeaders.set("Content-Type", "application/json");
     fetchBody = JSON.stringify(body);
   }
 
   const response = await fetch(url, {
     method,
-    headers,
+    headers: reqHeaders,
     body: fetchBody,
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    const authHeader = headers.Authorization;
-    const authPreview = `auth="${authHeader.slice(0, 20)}...${authHeader.slice(-10)}" len=${authHeader.length}`;
+    const authPreview = `auth="${authValue.slice(0, 20)}...${authValue.slice(-10)}" len=${authValue.length}`;
     throw new Error(`Tracerfy ${method} ${path} -> ${response.status}: ${text} [${authPreview}]`);
   }
 
