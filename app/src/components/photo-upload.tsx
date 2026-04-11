@@ -164,7 +164,8 @@ export function PhotoUpload({ dealId, propertyId, onUploadComplete }: PhotoUploa
       } catch (err) {
         console.error("Photo upload error:", err);
         updateStatus(item.id, "error");
-        setError("One or more photos failed to upload.");
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        setError(`Upload failed: ${msg}`);
       }
     }
 
