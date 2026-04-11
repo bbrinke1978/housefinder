@@ -69,7 +69,9 @@ async function tracerfyFetch(
   body?: unknown
 ): Promise<unknown> {
   const url = `${BASE_URL}${path}`;
-  const authValue = "Bearer " + apiKey.trim();
+  // Strip ALL non-visible characters (Netlify env vars seem to include invisible chars)
+  const cleanKey = apiKey.replace(/[^A-Za-z0-9._\-=+/]/g, "");
+  const authValue = "Bearer " + cleanKey;
   const reqHeaders = new Headers();
   reqHeaders.set("Authorization", authValue);
   reqHeaders.set("Accept", "application/json");
