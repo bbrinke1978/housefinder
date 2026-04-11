@@ -33,12 +33,12 @@ function sanitizeFilename(name: string): string {
  * uploadPhoto — upload a photo from a form submission.
  * Handles: file buffer conversion, blob path generation, DB insert, inbox/cover logic.
  */
-export async function uploadPhoto(formData: FormData): Promise<{ id: string }> {
+export async function uploadPhoto(formData: FormData): Promise<{ id: string } | { error: string }> {
   const session = await auth();
-  if (!session) throw new Error("Not authenticated");
+  if (!session) return { error: "Not authenticated" };
 
   const file = formData.get("file") as File | null;
-  if (!file) throw new Error("No file provided");
+  if (!file) return { error: "No file provided" };
 
   const dealId = (formData.get("dealId") as string | null) || null;
   const propertyId = (formData.get("propertyId") as string | null) || null;
@@ -61,7 +61,7 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string }> {
   const blobName = `${blobPrefix}/${photoId}-${sanitizedName}`;
 
   if (!process.env.AZURE_STORAGE_CONNECTION_STRING) {
-    throw new Error("Photo storage not configured. Add AZURE_STORAGE_CONNECTION_STRING to Netlify environment variables.");
+    return { error: "Photo storage not configured. Add AZURE_STORAGE_CONNECTION_STRING to Netlify environment variables." };
   }
 
   let blobUrl: string;
@@ -69,7 +69,7 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string }> {
     blobUrl = await uploadPhotoBlob(buffer, blobName);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown upload error";
-    throw new Error(`Photo upload failed: ${msg}`);
+    return { error: `Photo upload failed: ${msg}` };
   }
 
   // isInbox = true when no dealId and no propertyId
@@ -94,32 +94,37 @@ export async function uploadPhoto(formData: FormData): Promise<{ id: string }> {
     }
   }
 
-  const [inserted] = await db
-    .insert(propertyPhotos)
-    .values({
-      id: photoId,
-      dealId: dealId || null,
-      propertyId: propertyId || null,
-      isInbox,
-      blobName,
-      blobUrl,
-      category: category as PhotoCategoryValue,
-      caption: caption || null,
-      isCover,
-      fileSizeBytes: file.size || null,
-    })
-    .returning({ id: propertyPhotos.id });
+  try {
+    const [inserted] = await db
+      .insert(propertyPhotos)
+      .values({
+        id: photoId,
+        dealId: dealId || null,
+        propertyId: propertyId || null,
+        isInbox,
+        blobName,
+        blobUrl,
+        category: category as PhotoCategoryValue,
+        caption: caption || null,
+        isCover,
+        fileSizeBytes: file.size || null,
+      })
+      .returning({ id: propertyPhotos.id });
 
-  // Revalidate relevant paths
-  if (dealId) {
-    revalidatePath(`/deals/${dealId}`);
-  } else if (propertyId) {
-    revalidatePath(`/properties/${propertyId}`);
-  } else {
-    revalidatePath("/photos/inbox");
+    // Revalidate relevant paths
+    if (dealId) {
+      revalidatePath(`/deals/${dealId}`);
+    } else if (propertyId) {
+      revalidatePath(`/properties/${propertyId}`);
+    } else {
+      revalidatePath("/photos/inbox");
+    }
+
+    return { id: inserted.id };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Database error";
+    return { error: `Failed to save photo: ${msg}` };
   }
-
-  return { id: inserted.id };
 }
 
 /**

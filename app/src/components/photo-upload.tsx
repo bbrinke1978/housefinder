@@ -159,8 +159,14 @@ export function PhotoUpload({ dealId, propertyId, onUploadComplete }: PhotoUploa
         formData.append("category", category);
         if (item.caption.trim()) formData.append("caption", item.caption.trim());
 
-        await uploadPhoto(formData);
-        updateStatus(item.id, "done");
+        const result = await uploadPhoto(formData);
+        if ("error" in result) {
+          console.error("Photo upload error:", result.error);
+          updateStatus(item.id, "error");
+          setError(`Upload failed: ${result.error}`);
+        } else {
+          updateStatus(item.id, "done");
+        }
       } catch (err) {
         console.error("Photo upload error:", err);
         updateStatus(item.id, "error");
