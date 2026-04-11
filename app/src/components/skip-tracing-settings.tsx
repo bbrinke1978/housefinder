@@ -91,16 +91,20 @@ export function SkipTracingSettings({ status, runHistory, config }: SkipTracingS
             </p>
             <p className="text-3xl font-bold tabular-nums">
               {status.balance !== null && status.balance !== undefined
-                ? `$${status.balance.toFixed(2)}`
+                ? `${status.balance.toLocaleString()} credits`
                 : "—"}
             </p>
+            {status.balance !== null && status.balance !== undefined && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                ≈ ${(status.balance * 0.02).toFixed(2)} at $0.02/trace
+              </p>
+            )}
           </div>
         )}
 
         {showLowBalanceWarning && (
           <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:border-yellow-700 dark:bg-yellow-950/30 px-4 py-3 text-sm text-yellow-800 dark:text-yellow-200">
-            Low balance warning: your account balance is below your threshold of $
-            {config.lowBalanceThreshold.toFixed(2)}. Consider adding funds to avoid trace failures.
+            Low balance warning: your account balance ({status.balance} credits) is below your threshold of {config.lowBalanceThreshold} credits. Consider adding funds to avoid trace failures.
           </div>
         )}
       </div>
@@ -197,17 +201,17 @@ export function SkipTracingSettings({ status, runHistory, config }: SkipTracingS
               className="block text-sm font-medium mb-1"
               htmlFor="lowBalanceThreshold"
             >
-              Low Balance Warning Threshold ($)
+              Low Balance Warning (credits)
             </label>
             <input
               id="lowBalanceThreshold"
               type="number"
               min="0"
-              step="0.01"
+              step="1"
               value={lowBalanceThreshold}
               onChange={(e) => setLowBalanceThreshold(e.target.value)}
               className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="2.00"
+              placeholder="100"
             />
           </div>
           <div>
@@ -215,7 +219,7 @@ export function SkipTracingSettings({ status, runHistory, config }: SkipTracingS
               className="block text-sm font-medium mb-1"
               htmlFor="monthlyCap"
             >
-              Monthly Soft Cap ($)
+              Monthly Soft Cap (credits)
             </label>
             <input
               id="monthlyCap"

@@ -55,7 +55,7 @@ export function SkipTraceConfirmDialog({
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
               ) : currentBalance !== null ? (
                 <span className="font-medium text-foreground">
-                  ${currentBalance.toFixed(2)}
+                  {currentBalance.toLocaleString()} credits (≈${(currentBalance * 0.02).toFixed(2)})
                 </span>
               ) : (
                 <span className="text-muted-foreground italic">
