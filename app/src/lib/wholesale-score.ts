@@ -16,8 +16,8 @@ export function computeWholesaleScore(
   askingPrice: number,
   wholesaleFee: number = 15000
 ): WholesaleScoreBreakdown {
-  // MAO = ARV * 0.75 - repairs - wholesaleFee
-  const mao = Math.round(arv * 0.75 - repairEstimate - wholesaleFee);
+  // MAO = ARV * 0.65 - repairs - wholesaleFee
+  const mao = Math.round(arv * 0.65 - repairEstimate - wholesaleFee);
   const spreadDollars = mao - askingPrice;
 
   // Factor 1 (40%): MAO spread ratio

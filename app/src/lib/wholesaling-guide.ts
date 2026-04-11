@@ -63,7 +63,7 @@ export const STAGE_GUIDES: Record<string, StageGuide> = {
     criteria: [
       "ARV researched (comps, agent opinion, or Zillow)",
       "Repair estimate completed (walk the property if possible)",
-      "MAO = ARV × 0.75 − Repairs − Your Fee",
+      "MAO = ARV × 0.65 − Repairs − Your Fee",
       "Deal makes sense — profit margin is there",
     ],
     nextSteps: ["Make a verbal offer to the seller", "Use the soft approach"],
