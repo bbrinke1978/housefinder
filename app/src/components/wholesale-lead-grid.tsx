@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { WholesaleLeadWithWholesaler } from "@/types";
 import { WholesaleLeadCard } from "@/components/wholesale-lead-card";
 import { WholesaleLeadForm } from "@/components/wholesale-lead-form";
+import { WholesalePasteEmail } from "@/components/wholesale-paste-email";
+import { Mail } from "lucide-react";
 
 interface WholesaleLeadGridProps {
   leads: WholesaleLeadWithWholesaler[];
@@ -31,6 +33,7 @@ export function WholesaleLeadGrid({ leads, wholesalers }: WholesaleLeadGridProps
   const [status, setStatus] = useState("");
   const [wholesalerId, setWholesalerId] = useState("");
   const [formOpen, setFormOpen] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
 
   const filtered = leads.filter((l) => {
     if (verdict && l.verdict !== verdict) return false;
@@ -92,13 +95,22 @@ export function WholesaleLeadGrid({ leads, wholesalers }: WholesaleLeadGridProps
           </select>
         )}
 
-        {/* Add Lead button */}
-        <button
-          onClick={() => setFormOpen(true)}
-          className="ml-auto inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors min-h-[36px]"
-        >
-          + Add Lead
-        </button>
+        {/* Action buttons */}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setPasteOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/5 px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors min-h-[36px]"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            Paste Email
+          </button>
+          <button
+            onClick={() => setFormOpen(true)}
+            className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors min-h-[36px]"
+          >
+            + Add Lead
+          </button>
+        </div>
       </div>
 
       {/* Count indicator */}
@@ -116,14 +128,51 @@ export function WholesaleLeadGrid({ leads, wholesalers }: WholesaleLeadGridProps
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
           <p className="text-muted-foreground">
-            No wholesale leads yet. Forward a deal email or add one manually.
+            No wholesale leads yet. Paste a deal email or add one manually.
           </p>
-          <button
-            onClick={() => setFormOpen(true)}
-            className="inline-flex items-center gap-1 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            + Add Lead
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPasteOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+            >
+              <Mail className="h-4 w-4" />
+              Paste Email
+            </button>
+            <button
+              onClick={() => setFormOpen(true)}
+              className="inline-flex items-center gap-1 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              + Add Lead
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Paste email modal overlay */}
+      {pasteOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setPasteOpen(false);
+          }}
+        >
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-background border shadow-xl p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Paste Wholesale Email</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPasteOpen(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <WholesalePasteEmail onClose={() => setPasteOpen(false)} />
+          </div>
         </div>
       )}
 

@@ -13,7 +13,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
 import { computeWholesaleScore } from "@/lib/wholesale-score";
-import { parseWholesaleEmail, normalizeAddress } from "@/lib/wholesale-parser";
+import { parseWholesaleEmail, normalizeAddress, splitMultiPropertyEmail } from "@/lib/wholesale-parser";
 import { getWholesaleLead } from "@/lib/wholesale-queries";
 
 // -- Zod schemas --
@@ -497,4 +497,110 @@ export async function createWholesaleLeadFromEmail(
 
   revalidatePath("/wholesale");
   return { id: lead.id };
+}
+
+// -- createWholesaleLeadsFromPaste --
+
+export interface PastedLeadResult {
+  address: string;
+  id: string;
+  verdict: string | null;
+  dealScore: number | null;
+  askingPrice: number | null;
+  arv: number | null;
+  spreadDollars: number | null;
+  fieldsFound: number;
+  totalFields: number;
+}
+
+/**
+ * createWholesaleLeadsFromPaste — splits pasted email text into multiple properties,
+ * parses each one, and creates wholesale leads for all of them.
+ * Returns array of results for display.
+ */
+export async function createWholesaleLeadsFromPaste(
+  bodyText: string,
+  fromEmail?: string
+): Promise<{ leads: PastedLeadResult[] }> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const blocks = splitMultiPropertyEmail(bodyText);
+  const results: PastedLeadResult[] = [];
+
+  for (const block of blocks) {
+    const parsed = parseWholesaleEmail(block, fromEmail);
+
+    // Skip blocks that parsed nothing useful (no address and no price data)
+    if (!parsed.address && !parsed.askingPrice && !parsed.arv) continue;
+
+    const wholesalerId = await upsertWholesaler(
+      parsed.wholesalerEmail ?? fromEmail ?? null,
+      parsed.wholesalerName ?? null
+    );
+
+    const address = parsed.address ?? "Unknown address";
+    const addressNormalized = normalizeAddress(address);
+
+    let mao: number | null = null;
+    let dealScore: number | null = null;
+    let verdict: string | null = null;
+    let scoreBreakdown: string | null = null;
+    let spreadDollars: number | null = null;
+
+    if (parsed.arv && parsed.askingPrice) {
+      const breakdown = computeWholesaleScore(
+        parsed.arv,
+        0,
+        parsed.askingPrice
+      );
+      mao = breakdown.mao;
+      dealScore = breakdown.total;
+      verdict = breakdown.verdict;
+      scoreBreakdown = JSON.stringify(breakdown);
+      spreadDollars = breakdown.spreadDollars;
+    }
+
+    const fields = [parsed.address, parsed.askingPrice, parsed.arv, parsed.sqft, parsed.beds, parsed.baths, parsed.yearBuilt, parsed.taxId, parsed.wholesalerName];
+    const fieldsFound = fields.filter((f) => f !== null && f !== undefined).length;
+
+    const [lead] = await db
+      .insert(wholesaleLeads)
+      .values({
+        address,
+        addressNormalized,
+        askingPrice: parsed.askingPrice ?? null,
+        arv: parsed.arv ?? null,
+        sqft: parsed.sqft ?? null,
+        beds: parsed.beds ?? null,
+        baths: parsed.baths !== null ? String(parsed.baths) : null,
+        yearBuilt: parsed.yearBuilt ?? null,
+        taxId: parsed.taxId ?? null,
+        mao,
+        dealScore,
+        verdict,
+        scoreBreakdown,
+        status: "new",
+        wholesalerId,
+        sourceChannel: "email",
+        rawEmailText: block,
+        parsedDraft: JSON.stringify(parsed),
+      })
+      .returning({ id: wholesaleLeads.id });
+
+    results.push({
+      address,
+      id: lead.id,
+      verdict,
+      dealScore,
+      askingPrice: parsed.askingPrice,
+      arv: parsed.arv,
+      spreadDollars,
+      fieldsFound,
+      totalFields: fields.length,
+    });
+  }
+
+  revalidatePath("/wholesale");
+  return { leads: results };
 }

@@ -31,6 +31,76 @@ export function normalizeAddress(addr: string): string {
 }
 
 /**
+ * splitMultiPropertyEmail — splits an email blast containing multiple properties
+ * into individual property text blocks. Detects property boundaries by looking for
+ * address-like lines followed by pricing data.
+ *
+ * Heuristic: a new property block starts when we see a line that looks like a street
+ * address (number + street name) that is NOT a field label (beds, baths, sqft, etc).
+ */
+export function splitMultiPropertyEmail(text: string): string[] {
+  const lines = text.split(/\r?\n/);
+  const blocks: string[][] = [];
+  let current: string[] = [];
+
+  // Address pattern: starts with a number, followed by words (street address)
+  // but NOT a field label like "3 Beds" or "1972" (year)
+  const addressPattern = /^\d+\s+[A-Za-z]/;
+  const fieldLabelPattern = /^(\d+\.?\d*)\s*(bed|bath|sq|acre|lot|year|built|asking|arv|tax|contact|parcel|sf\b)/i;
+  // Also detect ASKING line as property separator when preceded by address-like content
+  const askingLinePattern = /^asking/i;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      current.push(line);
+      continue;
+    }
+
+    // Check if this looks like a new property address
+    const looksLikeAddress = addressPattern.test(trimmed) && !fieldLabelPattern.test(trimmed);
+
+    // Also check for "--- " or "=== " separator lines
+    const isSeparator = /^[-=_*]{3,}\s*$/.test(trimmed);
+
+    if (isSeparator) {
+      // Don't add separator to any block, just mark boundary
+      if (current.some(l => l.trim())) {
+        blocks.push(current);
+        current = [];
+      }
+      continue;
+    }
+
+    if (looksLikeAddress && current.some(l => l.trim())) {
+      // Check if the current block already has an address + pricing data
+      const currentText = current.join("\n");
+      const hasAsking = /asking/i.test(currentText);
+      const hasArv = /arv/i.test(currentText);
+      if (hasAsking || hasArv) {
+        // Current block is a complete property, start a new one
+        blocks.push(current);
+        current = [];
+      }
+    }
+
+    current.push(line);
+  }
+
+  // Push last block
+  if (current.some(l => l.trim())) {
+    blocks.push(current);
+  }
+
+  // If we only got one block, return it as-is
+  if (blocks.length <= 1) {
+    return [text];
+  }
+
+  return blocks.map(b => b.join("\n").trim()).filter(b => b.length > 0);
+}
+
+/**
  * parseWholesaleEmail — regex parser for structured wholesaler email blasts.
  * All fields return null on parse failure. Never throws.
  */

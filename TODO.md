@@ -4,9 +4,9 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 
 ## Action Items (Brian)
 
-- [ ] Get a Google Voice number (435 area code for Price, UT) — update phone on nobshomes site + HouseFinder
-- [ ] Create an LLC for wholesaling business
-- [ ] Buy a domain for No BS Homes (nobshomes.com or similar) — point DNS to Netlify
+- [x] Get a Google Voice number — (435) 250-3678, live on nobshomes site
+- [x] Create an LLC for wholesaling business
+- [x] Buy a domain for No BS Homes — owns no-bshomes.com, finder.no-bshomes.com live on Netlify
 - [ ] Sign up for Utah Courts XChange ($40/mo) — unlocks foreclosure, probate, code violation signals
 - [ ] Get Utah real estate license — unlocks Bridge API for MLS comps, property details, Zestimates
 
@@ -16,11 +16,11 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [x] Deploy to Netlify
 - [x] Wire contact form (Netlify Forms)
 - [x] Add logo
-- [ ] Replace placeholder phone number with real Google Voice number
-- [ ] Buy and connect custom domain
+- [x] Replace placeholder phone number — (435) 250-3678 live on site
+- [x] Buy and connect custom domain — no-bshomes.com on GoDaddy, DNS configured
 - [ ] Add photos — Brian & Shawn headshots for About page
-- [ ] Set up Google Analytics
-- [ ] Add sitemap.xml and robots.txt for SEO
+- [x] Set up Google Analytics — NEXT_PUBLIC_GA_ID configured
+- [x] Add sitemap — sitemap.ts dynamic route in place
 
 ## Upcoming Features (Claude Builds)
 
