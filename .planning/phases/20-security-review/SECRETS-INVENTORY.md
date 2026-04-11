@@ -45,7 +45,7 @@ Sensitive secrets are stored in Azure Key Vault (`housefinder-kv`) and reference
 | `APP_URL` | Azure Functions app settings (plain) | LOW | N/A | N/A | housefinder app URL for constructing alert links. Not a secret — intentionally kept as plain app setting. |
 | `WEBSITE_LEAD_API_KEY` | Azure Key Vault (`housefinder-kv`) via Functions reference | HIGH | Unknown | Annual | KV secret name: `WEBSITE-LEAD-API-KEY` (existing). Must match housefinder app's `WEBSITE_LEAD_API_KEY`. Rotate both simultaneously. |
 
-**Total scraper secrets: 10** (2 actively migrated to KV; 3 not yet configured in Functions; 3 non-sensitive as plain settings; 1 in KV from prior work)
+**Total scraper secrets: 10** (3 in Key Vault; 3 not yet configured in Functions — add as KV references when needed; 3 non-sensitive plain settings; 1 not applicable)
 
 **Functions app managed identity:** `aa7d0a7e-7104-4494-a3b6-06b1018820bb` (system-assigned)
 **Key Vault access policy:** get, list on secrets
@@ -155,11 +155,7 @@ WARNING: All active sessions will be immediately invalidated. All logged-in user
 
 The following items require manual investigation or action:
 
-1. **Mapbox token — restrict to domain (PRIORITY: HIGH)**
-   - Log in to Mapbox dashboard at https://account.mapbox.com/
-   - Find the `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` token
-   - Add URL restriction: `finder.no-bshomes.com`
-   - This prevents the token from being usable on any other domain even if leaked
+1. ~~**Mapbox token — restrict to domain**~~ ✓ DONE 2026-04-10. New domain-restricted token created with styles:tiles, styles:read, fonts:read, sprite:read scopes only.
 
 2. **Confirm nobshomes PostgreSQL server (PRIORITY: MEDIUM)**
    - Check whether nobshomes uses the same Azure PostgreSQL server as housefinder
@@ -185,6 +181,6 @@ The following items require manual investigation or action:
 ---
 
 *Inventory created: 2026-04-10*
-*Last updated: 2026-04-10 (Plan 20-04 — Key Vault migration for scraper secrets)*
+*Last updated: 2026-04-11 (Mapbox token restricted, scraper KV migration confirmed complete)*
 *Phase: 20-security-review*
 *Plan: 20-03 (created), 20-04 (updated)*

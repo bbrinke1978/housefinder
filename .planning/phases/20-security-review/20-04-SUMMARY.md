@@ -62,7 +62,7 @@ completed: 2026-04-10
 
 ## Decisions Made
 - Used system-assigned managed identity (simpler than app registration for single-service access)
-- Migrated 2 of 6 planned secrets to Key Vault (DATABASE_URL, TRACERFY_API_KEY); remaining 4 (RESEND, TWILIO x3, WEBSITE_LEAD_API_KEY) need manual migration as current values must be read from Azure portal
+- All 3 sensitive secrets present in Functions app settings are in Key Vault (DATABASE_URL, TRACERFY_API_KEY, WEBSITE_LEAD_API_KEY). The 4 others (RESEND, TWILIO x3) are not configured in Functions — no migration needed
 
 ## Deviations from Plan
 - Only 2 secrets migrated to Key Vault instead of all 6 — agent could only migrate secrets whose values were accessible via CLI. Remaining secrets need manual value retrieval from Azure portal.
@@ -71,8 +71,8 @@ completed: 2026-04-10
 - `az webapp delete --keep-empty-plan false` flag not supported — used `az webapp delete` without the flag; App Service Plan was already used by the Functions app so no orphaned plan.
 
 ## User Setup Required
-- Manually migrate remaining 4 secrets (RESEND_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER) to Key Vault via Azure portal
-- Verify Functions health after remaining migrations
+- RESEND_API_KEY, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER are not currently configured in Functions app settings — add as Key Vault references when/if these services are wired into the scraper
+- No immediate action needed
 
 ## Next Phase Readiness
 - Security review phase complete
