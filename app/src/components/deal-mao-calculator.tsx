@@ -67,7 +67,7 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
   const [saving, setSaving] = useState(false);
 
   // Core MAO calculation
-  const mao = Math.round(arv * 0.70 - repairs - wholesaleFee);
+  const mao = Math.round(arv * 0.75 - repairs - wholesaleFee);
   const endBuyerAllIn = offerPrice + assignmentFee + repairs;
   const endBuyerProfit = arv - endBuyerAllIn;
   const endBuyerRoi =
@@ -81,9 +81,9 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
   const baseArv = arv;
   const baseRepairs = repairs;
 
-  const arvLow = Math.round(baseArv * 0.9 * 0.70 - baseRepairs - wholesaleFee);
-  const repairsHigh = Math.round(baseArv * 0.70 - baseRepairs * 1.2 - wholesaleFee);
-  const bothWorse = Math.round(baseArv * 0.9 * 0.70 - baseRepairs * 1.2 - wholesaleFee);
+  const arvLow = Math.round(baseArv * 0.9 * 0.75 - baseRepairs - wholesaleFee);
+  const repairsHigh = Math.round(baseArv * 0.75 - baseRepairs * 1.2 - wholesaleFee);
+  const bothWorse = Math.round(baseArv * 0.9 * 0.75 - baseRepairs * 1.2 - wholesaleFee);
 
   async function handleSave() {
     setSaving(true);
@@ -219,7 +219,7 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
                 ARV × 70% − Repairs − Wholesale Fee
               </p>
               <p className="text-xs text-muted-foreground">
-                {fmt(arv)} × 0.70 − {fmt(repairs)} − {fmt(wholesaleFee)}
+                {fmt(arv)} × 0.75 − {fmt(repairs)} − {fmt(wholesaleFee)}
               </p>
             </div>
 

@@ -94,14 +94,14 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
     if (primaryPhone) resolvedPhone = primaryPhone;
   }
 
-  // Auto-compute MAO: ARV * 0.70 - repairEstimate - wholesaleFee
+  // Auto-compute MAO: ARV * 0.75 - repairEstimate - wholesaleFee
   let mao: number | null = null;
   if (
     parsed.arv !== undefined &&
     parsed.repairEstimate !== undefined
   ) {
     const fee = parsed.wholesaleFee ?? 15000;
-    mao = Math.round(parsed.arv * 0.7 - parsed.repairEstimate - fee);
+    mao = Math.round(parsed.arv * 0.75 - parsed.repairEstimate - fee);
   }
 
   const [inserted] = await db
@@ -445,7 +445,7 @@ export async function updateDeal(
       const wholesaleFee = parsed.wholesaleFee ?? current.wholesaleFee;
       if (arv !== null && repairEstimate !== null) {
         const fee = wholesaleFee ?? 15000;
-        updateFields.mao = Math.round(arv * 0.7 - repairEstimate - fee);
+        updateFields.mao = Math.round(arv * 0.75 - repairEstimate - fee);
       }
     }
   }

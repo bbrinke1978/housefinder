@@ -374,7 +374,7 @@ export async function promoteToDeal(
   // Compute MAO for the deal
   let mao: number | null = null;
   if (lead.arv !== null && lead.repairEstimate !== null) {
-    mao = Math.round(lead.arv * 0.7 - lead.repairEstimate - 15000);
+    mao = Math.round(lead.arv * 0.75 - lead.repairEstimate - 15000);
   }
 
   // Insert deal with pre-filled fields from wholesale lead

@@ -50,7 +50,7 @@ export function NewDealForm({ prefill, hasContacts = true, tracerfyConfigured = 
     const r = parseFloat(repairEstimate);
     const f = parseFloat(wholesaleFee) || 15000;
     if (!isNaN(a) && !isNaN(r)) {
-      return Math.round(a * 0.7 - r - f);
+      return Math.round(a * 0.75 - r - f);
     }
     return null;
   })();
