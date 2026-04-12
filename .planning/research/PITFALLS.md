@@ -375,3 +375,350 @@ Utah voter registration data is public, but access and permissible use varies. U
 ---
 *Pitfalls research for: HouseFinder — distressed property lead generation, Utah small towns*
 *Researched: 2026-03-17*
+
+---
+
+---
+
+# Milestone Pitfalls: v1.1 UGRC Assessor Data + XChange Court Record Intake
+
+**Milestone:** Adding UGRC assessor enrichment and Utah Courts XChange court record intake to existing HouseFinder system
+**Researched:** 2026-04-10
+**Confidence:** MEDIUM-HIGH for UGRC (official docs verified); MEDIUM for XChange workflow (access pattern verified, text parsing is empirical); MEDIUM for scoring rebalance (based on code inspection of live system)
+
+These pitfalls are specific to adding these two features to an **already-running** system with 3,114+ scored properties. The existing scoring engine and parcel dedup key are already in production — every pitfall here carries a migration cost if ignored.
+
+---
+
+## Critical Pitfalls — UGRC Assessor Integration
+
+### Pitfall U1: UGRC Desktop API Key Tied to a Single Public IP — Breaks on Azure App Service
+
+**What goes wrong:**
+The UGRC API issues two key types: browser keys (authenticated by URL pattern) and desktop/server keys (authenticated by the originating public IP address). Azure App Service does not have a stable outbound IP — the IP can change during scaling events, redeployments, or platform maintenance. If the scraper runs with a desktop key locked to an IP that no longer matches, every UGRC API call returns an authentication error. The import script fails silently if the error response is not explicitly checked.
+
+**Why it happens:**
+Developers register the key once with the IP shown at the time of registration, then deploy to Azure and forget that Azure IPs are not guaranteed stable. The UGRC docs explicitly warn: "IP Confusion: Users often mistake their local IP for their public IP when creating desktop keys — a critical error since ISP-assigned addresses aren't always static." On Azure this is structural, not accidental.
+
+**How to avoid:**
+- Use the UGRC API with a **browser key** pattern by making requests from a Next.js API route (server-side), not from a long-running scraper process. Browser keys authenticate by the registered URL domain, which is stable.
+- Alternatively, register the key against the Azure App Service's outbound IPs (which are listed in the Azure portal under "Outbound IP addresses") and set up an Azure alert if those IPs change.
+- Always check the response body on every UGRC request — authentication failures return HTTP 200 with a JSON error body, not HTTP 401. The UGRC docs state: "Be sure to always read the response body when making requests" to catch authentication issues early.
+- Log the HTTP response body whenever `result` is null or `status` is non-zero.
+
+**Warning signs:**
+- Import script runs without error but `building_sqft`, `year_built`, `assessed_value` columns remain NULL for all properties
+- UGRC API response contains `"message": "Invalid API key"` in a 200 response body (not an HTTP error)
+- Scraper logs show 0 enriched records despite properties existing in DB
+
+**Phase to address:** UGRC import phase. Verify authentication before writing a single enrichment record.
+
+---
+
+### Pitfall U2: Parcel ID Format Mismatch — UGRC Uses Normalized Formats, Existing DB Uses Raw County Formats
+
+**What goes wrong:**
+The existing `properties` table uses `parcel_id` as the unique dedup key, populated directly from county scraper output. Carbon County stores parcel numbers as `07:049:0002` (colon-delimited). Emery County uses `07-049-0002` (hyphen-delimited) or all-numeric `070490002`. UGRC's SGID standardizes parcel IDs into its own schema, but the PARCEL_ID field in UGRC data may use a different format than what the county scraper stored.
+
+The join between UGRC enrichment data and existing properties will fail silently: the UPDATE finds 0 matching rows because `07:049:0002` does not equal `07049-0002`. The enrichment import completes successfully with 0 rows updated, and the developer assumes no matching properties exist.
+
+**Why it happens:**
+The county assessor websites (the source for existing `parcel_id` values) use county-specific formats. UGRC normalizes across 29 counties but uses its own canonical form. There is no documented guarantee that UGRC's PARCEL_ID exactly matches what a given county's website displays. The research found that Utah County alone accepts at least four format variants: `123456789`, `12:345:6789`, `12 345 6789`, `12-345-6789`.
+
+**How to avoid:**
+- Before running the enrichment import at scale, sample 10-20 properties from each county: pull the `parcel_id` from the DB and the `PARCEL_ID` from UGRC, and compare character-by-character.
+- Build a normalizer function that strips all non-alphanumeric characters and zero-pads to a canonical length before matching: `normalizeParcelId(id) => id.replace(/[^0-9A-Za-z]/g, '').toUpperCase()`.
+- Store the normalized form in a separate indexed column (`parcel_id_normalized`) on the properties table. Run the UGRC join on the normalized form, not the raw form.
+- Do not overwrite `parcel_id` — it's the existing dedup key. The normalized column is only for join purposes.
+
+**Warning signs:**
+- UGRC import reports 0 matched properties despite known overlapping geographies
+- Spot-checking: a parcel ID from the DB doesn't appear in UGRC results even when manually searched at parcels.utah.gov
+- The same property has different `parcel_id` formats in the DB depending on which county scraper inserted it
+
+**Phase to address:** UGRC import phase, before writing any enrichment code. The normalizer must be proven correct for each target county before the import runs.
+
+---
+
+### Pitfall U3: UGRC LIR (Land Information Record) Coverage Is Not Uniform — Rural Counties Have Gaps
+
+**What goes wrong:**
+UGRC's Land Information Record (LIR) parcels include the assessor data fields the project needs: `BLDG_SQFT`, `BUILT_YR`, `PROP_CLASS`. But the UGRC documentation explicitly states: "Since each county has its own database and process for maintaining tax year assessment information, users should expect some variability in each County's LIR dataset." The address quality documentation specifically calls out Daggett, Duchesne, Juab, Uintah, Rich, and Sanpete counties as having "data gaps." Several of these are in the project's target geography.
+
+The import runs, matches correctly, but those fields are NULL in the UGRC data for a significant portion of properties. The developer assumes the data exists and was not matched; in reality the data does not exist in the source.
+
+**How to avoid:**
+- Before building the import script, download a sample of UGRC LIR data for Juab, Sanpete, and Sevier counties and manually count NULL rates for `BLDG_SQFT` and `BUILT_YR`. If null rate exceeds 40%, treat UGRC as supplementary for those counties, not authoritative.
+- Log enrichment coverage per county after each import run: `{county: 'juab', total: 450, enriched: 180, coverage_pct: 40}`. Surface this in the health dashboard.
+- Design the enrichment as non-blocking: `building_sqft` and `year_built` remain optional columns in the schema (they already are, per the current schema.ts). Never gate scoring or alerting on their presence.
+- Contact UGRC (ugrc-developers@utah.gov) to ask about LIR coverage for Carbon and Emery counties specifically before assuming full coverage.
+
+**Warning signs:**
+- `building_sqft` is NULL for >50% of properties in a given county after import
+- Properties in Juab, Sanpete, or Sevier show 0% enrichment despite format-matching parcel IDs
+- UGRC API search returns results with `BLDG_SQFT: null` or `BLDG_SQFT: 0` for known residential parcels
+
+**Phase to address:** UGRC import phase. Coverage audit is a prerequisite step before the import is considered complete.
+
+---
+
+### Pitfall U4: UGRC Assessor Data Is a Point-in-Time Snapshot, Not a Live Feed
+
+**What goes wrong:**
+UGRC receives parcel data from counties "on a schedule" — not in real time. The LIR dataset is a best-effort aggregation that may lag county assessor records by weeks to months. Running the UGRC enrichment import daily adds no value and creates unnecessary API load. More importantly, using `assessed_value` from UGRC in scoring as a "freshness signal" is wrong — it may reflect last year's assessment.
+
+**How to avoid:**
+- Run the UGRC enrichment import at most once per quarter, not daily or weekly.
+- Store an `assessor_data_as_of` date column on the properties table when writing enrichment data, populated from the UGRC data's own vintage field (if available) or the import timestamp.
+- Do not use `assessed_value` as a distress signal component in scoring. It is contextual metadata for the lead detail page, not a real-time indicator of financial distress.
+- Mark properties as "enriched" with a boolean flag so repeat imports skip already-enriched properties unless explicitly forced.
+
+**Warning signs:**
+- Import is scheduled to run nightly alongside scraper jobs
+- Scoring logic references `assessed_value` as a signal weight input
+- No timestamp stored for when assessor data was last refreshed per property
+
+**Phase to address:** UGRC import phase. Schedule and staleness handling must be decided before import is built.
+
+---
+
+## Critical Pitfalls — XChange Court Record Intake
+
+### Pitfall X1: The XChange Subscription Agreement Prohibits Automated Scraping — Violating It Risks Account Termination
+
+**What goes wrong:**
+XChange is a paid subscription service run by the Utah Administrative Office of the Courts under UCJA Rule 4-202.08. The rule states that the AOC "may disconnect a user of public online services whose use interferes with computer performance or access by other users." While the exact automated-access prohibition language is in the subscription agreement (not publicly available), court data services universally prohibit automated scraping without explicit bulk data agreements. Building a Playwright scraper against xchange.utcourts.gov would violate the subscription terms and risks account termination.
+
+The project has correctly identified agent-assisted manual browser access as the workflow. The pitfall is scope creep: a developer building the "intake pipeline" decides to automate the browser session to save time, which crosses the line.
+
+**How to avoid:**
+- The intake pipeline must be designed as: human opens browser → human searches XChange → human copies case details → structured intake form in the app accepts the paste/entry → app parses and creates distress signals.
+- Never automate the XChange browser session, even partially (no auto-fill, no auto-submit, no programmatic navigation to XChange URLs from the app).
+- Bulk data access IS available from the AOC's Office of Judicial Data and Research under Rule 4-202.08, but requires a separate agreement and approval process. If scale demands it later, pursue that path — not scraping.
+- Add a comment in the XChange intake code: `// IMPORTANT: This intake pipeline is manual-only. Do not automate browser interaction with xchange.utcourts.gov.`
+
+**Warning signs:**
+- Any code that opens a browser, navigates to xchange.utcourts.gov, or submits XChange search forms programmatically
+- A "batch import" feature that tries to process multiple XChange cases at once via automation
+- Using Playwright or Puppeteer against the XChange domain
+
+**Phase to address:** XChange intake phase. The constraint must be stated in the phase plan before any code is written.
+
+---
+
+### Pitfall X2: Court Case Titles Are Not Standardized — Parser Will Miss Cases Without Keyword Normalization
+
+**What goes wrong:**
+XChange displays case information as entered by court clerks into CORIS. Case titles for foreclosure cases might appear as any of: "FORECLOSURE", "FORE CLOSURE", "NONJUDICIAL FORECLOSURE", "TRUSTEE SALE", "NOTICE OF DEFAULT", "U.S. BANK NA V JONES JAMES". Probate cases might be "IN RE: ESTATE OF SMITH JOHN", "IN THE MATTER OF THE ESTATE OF", "JONES MARY PROBATE", or just "ESTATE SMITH". Code violation cases have no consistent naming convention at all.
+
+A parser with exact keyword matching will miss 30-60% of relevant cases. A parser that is too broad will import civil suits, divorces, and criminal cases as false distress signals.
+
+**Why it happens:**
+Court data entry is done by humans with no enforced vocabulary. Each county courthouse has its own clerk practices. CORIS is a data entry system, not a semantic system.
+
+**How to avoid:**
+- Build the parser with a tiered keyword system: high-confidence terms (exact match, always import) + medium-confidence terms (pattern match, flag for manual review) + exclusion terms (civil suits, criminal, family law).
+- High-confidence: `FORECLOS`, `TRUSTEE SALE`, `NOD`, `LIS PENDENS`, `PROBATE`, `IN RE ESTATE`, `TAX DEED`, `CODE VIOLATION`.
+- Medium-confidence: `DEFAULT`, `LIEN`, `IN RE`, `MATTER OF` (require secondary keyword to confirm).
+- Exclusion: `DIVORCE`, `CUSTODY`, `CRIMINAL`, `DUI`, `ASSAULT`, `CONTRACT DISPUTE` (these are civil/criminal, not distress signals).
+- Store the raw case title alongside the parsed signal type in `distress_signals.raw_data`. This allows retroactive reclassification if the parser is tuned later.
+- Treat the first 30 cases parsed as a calibration batch — manually verify every classification before trusting the parser at scale.
+
+**Warning signs:**
+- Parser imports 0 probate cases despite manual XChange searches showing them
+- Parser imports divorce or contract cases as "probate" or "foreclosure" signals
+- The `raw_data` field on distress signals doesn't contain the original case title
+
+**Phase to address:** XChange parser phase. The keyword taxonomy must be designed and reviewed before the parser is built.
+
+---
+
+### Pitfall X3: Matching Court Cases to Existing Properties by Address Is the Hardest Part — and Failures Are Silent
+
+**What goes wrong:**
+XChange shows the party address if it was provided to the court, but this is not guaranteed. When an address is available, it may be in any of these forms: `1110 E MAIN ST PRICE UT 84501`, `1110 E. Main Street, Price`, `E MAIN 1110`, `N/A`, or blank. The existing properties table has addresses in normalized form (`1110 E Main St`). A string comparison will fail silently — the court case exists but no property is matched, and no distress signal is created.
+
+Even when addresses do match by string, the match might be wrong: `123 N Main St` could be a different property than `123 N Main St #2` (a unit number). In rural Utah, street addresses without apartment numbers are common and unique, but address-only matching is still fragile.
+
+**Why it happens:**
+Court records are not a property database. They capture party addresses as provided by attorneys or clerks, with no geocoding or assessor cross-reference. The project's existing `normalizeAddress()` function handles county assessor format quirks, but it was not designed for court record address formats.
+
+**How to avoid:**
+- Match on multiple strategies in priority order, stopping at the first match:
+  1. Parcel ID — if the case documents contain a parcel number (trustee sale and tax deed cases often do), use it directly against `properties.parcel_id_normalized`.
+  2. Normalized address + city — strip punctuation, normalize abbreviations, then match against `properties.address` + `properties.city`.
+  3. Owner name + city — match `parties` from the case against `properties.owner_name`.
+  4. No match — store the court signal as an "unmatched_court_records" staging table for manual review.
+- Never discard a court record because it didn't match a property. Store it. The property may not yet exist in the system and could be added later.
+- Build a `match_confidence` field on the distress signal: `parcel_match` = HIGH, `address_match` = MEDIUM, `name_match` = LOW. Surface LOW-confidence matches for manual review before scoring.
+- Extend `normalizeAddress()` to handle court address formats: strip periods, expand `St.` to `St`, `Ave.` to `Ave`, handle `N/A` as blank.
+
+**Warning signs:**
+- 0% match rate between court case imports and existing properties despite known overlapping addresses
+- Court case records are silently discarded when no match is found
+- Distress signals imported from court cases show owner names from the case instead of the assessor record
+
+**Phase to address:** XChange intake phase. The matching strategy must be designed before the intake form is built.
+
+---
+
+### Pitfall X4: Court Case Search Results Cap at 500 — Bulk Research Sessions Will Miss Cases
+
+**What goes wrong:**
+XChange FAQ explicitly states: "Narrow searches when exceeding 500 result maximum." Any search that returns more than 500 results is silently truncated to 500. When researching all foreclosure cases in Carbon County over a date range, it is easy to exceed 500 results and not notice. The researcher believes they have a complete picture; in fact they have a partial one.
+
+**How to avoid:**
+- Structure XChange searches to stay under 500 results: search by case type AND date range (one month at a time, not one year). If a month still exceeds 500, search by case type AND plaintiff/petitioner category.
+- Record the search parameters used for each batch in the intake form so you know what was covered.
+- Build the intake pipeline to accept a "search batch ID" field so multiple XChange sessions can be aggregated without duplication. Each session should note the date range it covered.
+- Do not assume one XChange session per county covers all cases. Multiple sessions covering different date ranges are required for historical backfill.
+
+**Warning signs:**
+- XChange search shows exactly 500 results (the cap — not a coincidence)
+- Intake sessions cover wide date ranges ("all 2024 foreclosures in Carbon County") rather than narrow ones
+- No record of what date ranges have been covered in previous sessions
+
+**Phase to address:** XChange intake phase. Session management and date range tracking must be built into the intake UI.
+
+---
+
+## Critical Pitfalls — Distress Scoring Rebalance
+
+### Pitfall S1: Adding Court Record Signals Without Adjusting `hot_lead_threshold` Inflates Hot Lead Count Immediately
+
+**What goes wrong:**
+The current scoring system has a `hot_lead_threshold` of 4 (configurable in `scraper_config`). The current signals are tax liens (weight 1-4 by amount) + years-delinquent bonus (0-4). Adding court record signals (probate, lis pendens, code violation) at non-trivial weights means existing properties that were just below threshold will now cross it — not because they became more distressed, but because the scoring system changed. The hot lead count jumps from 275 to potentially 800+ in one rescore run. The user gets a flood of email/SMS alerts for leads that aren't newly distressed.
+
+**Why it happens:**
+Developers add new signal types to `scoring_signals` config with reasonable per-signal weights, then run `scoreAllProperties()` and observe the new count. They don't realize the new signals promoted hundreds of existing borderline properties to hot status.
+
+**How to avoid:**
+- Before adding any new signal type to the config, run a dry-run rescore: simulate the new weights without writing to the DB, count how many properties would cross threshold, and compare to current hot count.
+- Raise `hot_lead_threshold` proportionally when adding new signal types. Current threshold = 4 for 2 signal types. Adding 3 more signal types suggests threshold needs to rise to 6-7 to maintain signal quality.
+- Stage the rollout: add one signal type at a time, rescore, observe hot count, adjust threshold before adding the next.
+- Suppress alerts for the first rescore after adding new signals: set a flag in `scraper_config` like `scoring_version_changed = true` that prevents alert dispatch. Clear the flag after manually reviewing the new hot lead set.
+
+**Warning signs:**
+- Hot lead count more than doubles after a rescore that added new signal types
+- Alerts fire for properties that were already in the system with no new activity
+- `scoring_signals` config has new types added but `hot_lead_threshold` unchanged
+
+**Phase to address:** Scoring rebalance phase, before any new signal types go live.
+
+---
+
+### Pitfall S2: Court Record Signals and Tax Lien Signals Can Double-Count the Same Distress Event
+
+**What goes wrong:**
+A property with a trustee sale notice will have:
+- An `nod` signal (from Utah Legals scraper, already in DB)
+- A `lis_pendens` signal (from XChange court intake, newly added)
+
+These two signals represent the same foreclosure proceeding. Stacking them treats one event as two distress indicators, artificially inflating the score. A property that is in foreclosure but otherwise healthy scores higher than a property with two independent distress events (e.g., tax lien + probate).
+
+**Why it happens:**
+The data model treats each signal as independent. There is no concept of "same underlying event" across signal types. The dedup constraint on `distress_signals` (unique on `property_id + signal_type + recorded_date`) prevents duplicate signals of the same type, but not signals of different types representing the same event.
+
+**How to avoid:**
+- Treat `nod` and `lis_pendens` as mutually exclusive in scoring: if both exist for the same property with dates within 90 days of each other, score only the higher-weight one. In the current scoring engine (`score.ts`), add a deduplication step for foreclosure-type signals before summing weights.
+- Document the signal taxonomy: NOD = trust deed foreclosure (non-judicial), lis pendens = judicial lien/foreclosure action. They can co-exist as genuinely separate events (e.g., a judicial foreclosure AND a trust deed NOD from a different creditor) but are more often the same event seen from two data sources.
+- Add a `source_category` field to distress signals: `foreclosure_proceeding`, `tax_delinquency`, `probate`, `code_violation`. Only score one signal per `source_category` per property (the freshest/highest-weight one).
+
+**Warning signs:**
+- A property with one foreclosure has a higher score than a property with an NOD + tax lien (two genuinely independent events)
+- `nod` and `lis_pendens` consistently co-occur on the same properties within the same date ranges
+- Score distribution shifts dramatically after adding `lis_pendens` signals even for properties that already had `nod` signals
+
+**Phase to address:** Scoring rebalance phase. Signal taxonomy must be defined before new court-derived signal types are weighted.
+
+---
+
+### Pitfall S3: Scoring Config Is in the Database — Adding New Signal Types Requires a Data Migration, Not Just a Code Change
+
+**What goes wrong:**
+The current `scoring_signals` JSON in `scraper_config` only contains entries for the signal types that existed when `seed-config.ts` was last run. Adding `probate`, `code_violation`, and `lis_pendens` as new types requires updating this JSON in the production database. Developers who add the signal type to the `signalTypeEnum` in schema.ts and add import code for the new signals forget that `scoreProperty()` skips signals with no matching config entry (`if (!signalCfg) continue`). New signals are silently ignored in scoring.
+
+**Why it happens:**
+The scoring config is runtime-configurable (stored in DB, not hardcoded), which is correct for production flexibility. But this means a deploy that adds new signal types is incomplete until the DB config is also updated. These are two separate steps that can be done out of order or one can be forgotten.
+
+**How to avoid:**
+- Write a migration script (not a seed script) that adds new signal type configs to the `scraper_config` table via `INSERT ... ON CONFLICT DO NOTHING`. This is safe to run multiple times.
+- Add an assertion to the scoring engine startup: if `distressSignals` contains a `signal_type` value that has no entry in `scoring_signals` config, log a warning: `[scoring] Unknown signal type 'probate' — 0 weight applied. Add to scoring_signals config.`
+- The migration and the code change should be deployed together in the same release.
+
+**Warning signs:**
+- `probate` or `lis_pendens` signals exist in `distress_signals` table but no properties are scoring higher after those signals are imported
+- `scoreProperty()` logs 0 for a property known to have a court-derived signal
+- `scraper_config` row for `scoring_signals` does not contain entries for the new signal types
+
+**Phase to address:** Scoring rebalance phase, as part of the first release that adds new signal types.
+
+---
+
+## Moderate Pitfalls — Integration-Specific
+
+### Pitfall I1: UGRC Enrichment Import Overwrites Good Data with NULL When a County Has Sparse LIR Coverage
+
+**What goes wrong:**
+The existing `upsertProperty()` function in `upsert.ts` has a guard for address/city: it only overwrites if the new value is non-empty. The UGRC enrichment import script, if written naively, might use a simple `UPDATE properties SET building_sqft = $1, year_built = $2 WHERE parcel_id = $3` — which sets those fields to NULL when the LIR row has no value, overwriting any data that might have been manually entered.
+
+**How to avoid:**
+- Write the UGRC enrichment UPDATE as: `SET building_sqft = COALESCE($1, building_sqft), year_built = COALESCE($2, year_built)` — only overwrite if the new value is non-null.
+- This is the same pattern used in `upsert.ts` for address/city. Apply it consistently to all enrichment fields.
+- Track `ugrc_enriched_at` timestamp separately from `updated_at` so you can distinguish UGRC updates from other property updates.
+
+**Phase to address:** UGRC import phase. COALESCE guards must be in the first version of the import query.
+
+---
+
+### Pitfall I2: XChange Costs $0.35 Per Search — Uncontrolled Research Sessions Accumulate Cost Quickly
+
+**What goes wrong:**
+XChange subscription costs $40/month for 500 searches, then $0.35 per additional search. A researcher running broad searches to find all foreclosure/probate cases for 6 counties over 2 years of history could easily hit 2,000+ searches in a single session. At $0.35 overage, that's $525 above the monthly fee for one session.
+
+**How to avoid:**
+- Before any research session, estimate the expected search count: number of case type searches × number of date range slices × number of counties = total searches.
+- Prefer narrow, targeted searches (specific case type + specific date month) over broad searches ("all civil cases in Carbon County").
+- Track searches used per month in the intake UI by recording each session's search count. Alert when approaching 400 searches in a month (buffer before overage).
+- The $40/month subscription covers 500 searches — for targeted use (researching new leads monthly, not bulk historical backfill), this is sufficient.
+
+**Phase to address:** XChange intake phase. Cost awareness must be built into the intake workflow design.
+
+---
+
+## Phase-Specific Warnings Summary
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| UGRC import — API key setup | Desktop key IP mismatch on Azure | Use browser key pattern from Next.js API route, or verify Azure outbound IPs |
+| UGRC import — parcel matching | Format mismatch (colons vs hyphens vs bare digits) | Build `parcel_id_normalized` column before import; audit each county |
+| UGRC import — coverage | Rural county LIR gaps (Juab, Sanpete, Sevier) | Coverage audit pre-import; treat as supplementary, not required |
+| UGRC import — staleness | LIR data lags assessor by weeks/months | Run quarterly only; never use assessed_value as a scoring signal |
+| XChange intake — legal | Automating XChange browser session | Manual-only intake; no Playwright/Puppeteer against XChange |
+| XChange intake — parsing | Inconsistent case title text | Tiered keyword taxonomy; store raw_data; calibration batch |
+| XChange intake — matching | Address mismatch between court and assessor formats | Multi-strategy matching; unmatched staging table; match_confidence field |
+| XChange intake — completeness | 500-result cap on searches | Narrow searches by month; track date ranges covered |
+| Scoring rebalance — threshold | Hot lead count explosion after adding signals | Dry-run rescore before going live; raise threshold proportionally |
+| Scoring rebalance — double-counting | NOD + lis pendens both scoring for same foreclosure | Signal deduplication by source_category in scoreProperty() |
+| Scoring rebalance — config | New signal types silently ignored (no config entry) | DB migration for scoring_signals config; startup warning for unconfigured types |
+
+---
+
+## Sources — v1.1 Milestone Pitfalls
+
+- [UGRC API Getting Started](https://api.mapserv.utah.gov/getting-started/) — HIGH confidence (official UGRC documentation; browser vs desktop key distinction, IP confusion warning, and response body monitoring requirement all sourced here)
+- [UGRC API Self-Service Portal](https://developer.mapserv.utah.gov/) — HIGH confidence (official UGRC developer portal)
+- [UGRC Understanding the API for Address Locating](https://gis.utah.gov/blog/2024-08-22-understanding-the-ugrc-api-for-address-locating/) — HIGH confidence (official UGRC blog; rural county data gaps, accuracy dependencies)
+- [UGRC Utah Parcels — SGID](https://gis.utah.gov/products/sgid/cadastre/parcels/) — HIGH confidence (official UGRC; LIR field descriptions, county variability acknowledgment)
+- [Utah Courts XChange FAQ](https://www.utcourts.gov/en/court-records-publications/records/xchange/faq.html) — HIGH confidence (official Utah Courts; 500-result cap, case title entry by clerks)
+- [Utah Courts XChange Subscription Fees](https://www.utcourts.gov/en/court-records-publications/records/xchange/subscribe.html) — HIGH confidence (official Utah Courts; $40/month, $0.35/search overage)
+- [UCJA Rule 4-202.08](https://legacy.utcourts.gov/rules/view.php?type=ucja&rule=4-202.08) — HIGH confidence (official Utah Code of Judicial Administration; bulk data access process, interference/disconnection provision)
+- [HouseFinder schema.ts](../../../app/src/db/schema.ts) — HIGH confidence (live production code; parcel_id as unique key, signalTypeEnum values, existing assessor columns)
+- [HouseFinder score.ts](../../../scraper/src/scoring/score.ts) — HIGH confidence (live production code; scoring config loading, signal type skip behavior, hot_lead_threshold)
+- [HouseFinder upsert.ts](../../../scraper/src/lib/upsert.ts) — HIGH confidence (live production code; normalizeAddress() implementation, COALESCE guard pattern)
+- [Utah County Parcel Map — serial number formats](https://maps.utahcounty.gov/ParcelMap/ParcelMap.html) — MEDIUM confidence (official Utah County; four format variants documented)
+- Address matching pitfalls — fuzzy matching complexity, false positives from over-broad matching — MEDIUM confidence (multiple independent sources agree on core failure modes)
+
+---
+*Milestone pitfalls for: HouseFinder v1.1 — UGRC assessor enrichment + XChange court record intake*
+*Researched: 2026-04-10*

@@ -1,225 +1,304 @@
-# Stack Research
+# Technology Stack
 
-**Domain:** Distressed property lead generation web app (Next.js, scraping, alerts, maps)
-**Researched:** 2026-03-17
-**Confidence:** MEDIUM-HIGH (core framework HIGH, scraping/SMS MEDIUM, Utah-specific data sources LOW)
-
----
-
-## Recommended Stack
-
-### Core Technologies
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Next.js | 15.x (stable) | Full-stack React framework | Project constraint; also ideal — App Router supports server-side scraping logic, cron via Netlify Scheduled Functions, and API routes for SMS/email triggers all in one repo. Next.js 16 released Oct 2025 but introduces breaking changes (async params required, middleware renamed); stay on 15.x for stability. |
-| TypeScript | 5.x | Type safety | Project constraint. Next.js 16 requires TypeScript 5+; 15.x supports it fully. Eliminates entire classes of runtime bugs in scraping/data-parsing code where field shapes vary by county. |
-| Tailwind CSS | v4.x | Utility-first styling | Project constraint + now bundler-native in v4 (no `tailwind.config.js` needed). Faster dev, no PostCSS config friction. |
-| shadcn/ui | latest (0.9.x) | Component library | Project constraint. Fully compatible with Next.js 15 + React 19 + Tailwind v4 as of late 2024. Install via `npx shadcn@latest init`. |
-| React | 19.x | UI rendering | Ships with Next.js 15; required for shadcn/ui peer deps. |
-
-### Database
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Turso (libSQL/SQLite) | latest SDK (`@libsql/client`) | Primary data store | Free tier is generous: 500M rows read/month, 10M writes, 5GB storage, 100 databases, no credit card. Single-file SQLite semantics with cloud HTTP access — perfect for a solo-user app hosted on Netlify. Zero-cost, zero-maintenance. No separate database server to provision. |
-| Drizzle ORM | 0.45.x | Type-safe DB queries | ~7.4kb, zero dependencies, first-class SQLite/libSQL support. Code-first schema = schema lives in TypeScript, no extra build step. Significantly faster cold starts vs Prisma (< 500ms vs 1–3s), which matters for Netlify serverless functions that wake on each scrape trigger. |
-
-### Scheduling / Background Tasks
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Netlify Scheduled Functions | built-in | Daily scrape cron | No third-party service needed. Define `schedule: "0 6 * * *"` in function config for daily 6am UTC run. Runs alongside the Next.js app in the same repo with zero extra infra. Free on all Netlify plans. |
-| Netlify Background Functions | built-in | Long-running scrape tasks | Scheduled functions cap at 30 seconds — not enough for scraping 10+ county sites. Background functions run up to 15 minutes. Pattern: scheduled function fires → immediately invokes background function → scrape runs fully. |
-
-### Scraping
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Playwright | 1.x (`@playwright/test`, `playwright`) | Headless browser scraping | Most county assessor and recorder sites (Carbon, Emery, Juab, Sanpete, Millard, etc.) serve search results as server-rendered HTML, some requiring form submissions or JS-rendered tables. Playwright handles both. Better anti-detection than Puppeteer; supports Chromium/Firefox/WebKit. Use headless Chromium for server deploys. |
-| playwright-extra + puppeteer-extra-plugin-stealth | latest | Anti-bot evasion | Utah county sites are not aggressive, but some use basic bot detection. The stealth plugin patches `navigator.webdriver` and other fingerprinting signals. Adds < 50ms overhead. Worth including from the start. |
-| Cheerio | 1.x | Static HTML parsing | For county pages that return plain HTML without JavaScript rendering. Significantly faster than spinning up Playwright for every request. Strategy: try Cheerio first; fall back to Playwright when JS is required. |
-
-### Notifications / Alerts
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Resend | latest (`resend`) | Transactional email alerts | User already has a Resend account from the nychvac project. Free tier: 3,000 emails/month, 100/day. Official Next.js integration docs at resend.com/docs/send-with-nextjs. Pair with `@react-email/components` for templated hot-lead emails. |
-| Twilio | latest (`twilio`) | SMS alerts for hot leads | De facto standard for SMS. Developer account: $15 free trial credit (enough for ~1,500 texts at $0.0079/msg). After that: ~$0.0079/msg + $1.15/month for a local number. Given the alert volume (handful of hot leads per day max), monthly cost is effectively < $5 total. No cheaper alternative with comparable reliability and docs quality. |
-
-### Maps
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| react-leaflet | 5.x | Interactive property map | Free, open-source, no API key required. Uses OpenStreetMap tiles (also free). Handles pin clustering for multiple properties. **Critical note:** Leaflet requires DOM access, so the map component must be loaded with `next/dynamic` and `{ ssr: false }` — standard pattern, well-documented. |
-| Leaflet | 1.9.x | Underlying map engine | Peer dependency of react-leaflet. |
-| OpenStreetMap | N/A (tile CDN) | Map tile provider | Free, no API key, good rural Utah coverage. Alternative: MapTiler free tier (better styling) but adds API key complexity — defer unless OSM tiles look bad for the target geography. |
-
-### Authentication
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| Auth.js (NextAuth) | v5 beta (`next-auth@beta`) | Session-based auth | Project is single-user (the investor). Auth.js v5 with Credentials provider is the minimum viable auth for Next.js 15 App Router. No OAuth needed. Simple username/password stored as env vars. Do not use v4 — v5 is the current beta and the only version with App Router first-class support. |
-
-### Supporting Libraries
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `@react-email/components` | latest | Email template components | Use with Resend to build structured hot-lead email alerts with property details, distress score, and tap-to-call link. |
-| `date-fns` | 4.x | Date manipulation | Parsing scrape timestamps, computing days-since-filing for distress scoring, formatting dates for the UI. Lighter than `dayjs` for this use case. |
-| `zod` | 3.x | Runtime schema validation | Validate scraped property data before inserting to DB — counties change field names, return partial data, or serve unexpected formats. Zod parse + safe error handling prevents bad data from corrupting the lead list. |
-| `p-limit` | 6.x | Concurrency limiting | Prevent hammering county servers with parallel requests. Use `p-limit(2)` to scrape 2 counties at a time max. Also reduces ban risk. |
-| `node-html-parser` | 6.x | Fast HTML parsing fallback | Lighter alternative to Cheerio for very simple HTML; use when only extracting 1-2 fields from a known page structure. |
-
-### Development Tools
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `drizzle-kit` | DB migrations and schema push | Use `drizzle-kit push` for local dev against Turso. Zero-config migration for small schema. |
-| ESLint + `eslint-config-next` | Linting | Ships with `create-next-app`; keep defaults. Note: Next.js 16 removed `next lint` — on 15.x it still works fine. |
-| Prettier | Code formatting | Standard shadcn/ui project setup includes this. |
-| `dotenv` | Local env management | Not needed explicitly — Next.js reads `.env.local` natively. But document all required vars in `.env.example`. |
+**Project:** HouseFinder v1.1 — UGRC Assessor Data Enrichment + XChange Court Record Intake
+**Researched:** 2026-04-10
+**Confidence:** HIGH for UGRC (script already written and proven); MEDIUM for XChange parsing (approach is pattern-matching, no existing implementation to verify against)
 
 ---
 
-## Installation
+## What Already Exists (Do Not Re-Research)
 
-```bash
-# Core framework (start from scratch)
-npx create-next-app@latest housefinder --typescript --tailwind --eslint --app
+The v1.0 app is fully deployed on Netlify with this confirmed stack:
 
-# shadcn/ui
-npx shadcn@latest init
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Framework | Next.js | 15.x |
+| Language | TypeScript | 5.x |
+| Styling | Tailwind CSS | v4 + @base-ui/react |
+| Database | Azure PostgreSQL (Flexible Server) | — |
+| ORM | Drizzle ORM | 0.45.x |
+| Direct SQL | `pg` | 8.x |
+| Maps | Mapbox GL / react-map-gl | 3.x / 8.x |
+| Email | Resend + @react-email/components | — |
+| Skip trace | Tracerfy | — |
+| Auth | NextAuth v5 beta | 5.0.0-beta.30 |
+| Validation | Zod | 4.x |
+| Dates | date-fns | 4.x |
 
-# Database
-npm install drizzle-orm @libsql/client
-npm install -D drizzle-kit
+**Nothing in this list needs to change for v1.1.**
 
-# Scraping
-npm install playwright playwright-extra puppeteer-extra-plugin-stealth cheerio
-npx playwright install chromium
+---
 
-# Notifications
-npm install resend @react-email/components twilio
+## New Capabilities Required
 
-# Maps
-npm install leaflet react-leaflet
-npm install -D @types/leaflet
+### 1. UGRC Assessor Data Import
 
-# Auth
-npm install next-auth@beta
+#### What It Is
 
-# Utilities
-npm install zod date-fns p-limit node-html-parser
+UGRC (Utah Geographic Reference Center) maintains the State Geographic Information Database (SGID). County assessors voluntarily share tax roll data through the Land Information Records (LIR) work group. UGRC standardizes this into a common schema across all 29 Utah counties.
+
+#### Access Method: ArcGIS FeatureServer (NOT the UGRC Geocoder API)
+
+**Two UGRC data access paths exist. Use the FeatureServer, not the Geocoder.**
+
+| Path | URL | Purpose | Auth | Rate Limit |
+|------|-----|---------|------|-----------|
+| UGRC Geocoder API | `api.mapserv.utah.gov` | Address-to-coordinate conversion | API key required (free, UtahID account) | Not rate limited; "use responsibly" |
+| ArcGIS FeatureServer | `services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services` | Bulk parcel attribute download | None (public) | Not documented; no issues observed in practice |
+
+**Use the ArcGIS FeatureServer.** The import script (`src/scripts/import-ugrc-assessor.mjs`) already uses this path and is proven to work. It hits per-county FeatureServer layers directly with no auth required.
+
+The UGRC Geocoder API is for geocoding addresses to lat/lng, not for bulk assessor attribute downloads. Do not use it for this milestone.
+
+#### Per-County FeatureServer Layer Names
+
+Each county has its own service under the UGRC ArcGIS account:
+
+```
+https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services/Parcels_{County}_LIR/FeatureServer/0/query
 ```
 
+Confirmed layer names for target counties:
+- `Parcels_Carbon_LIR`
+- `Parcels_Emery_LIR`
+- `Parcels_Juab_LIR`
+- `Parcels_Millard_LIR`
+
+Additional counties available if scope expands: Sanpete, Sevier, Grand, Wayne (verify service names via opendata.gis.utah.gov before scripting).
+
+#### LIR Parcel Data Fields
+
+Fields available in each county LIR service (availability varies by county — rural counties share less):
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `PARCEL_ID` | string | Match key to our `properties.parcel_id` |
+| `BLDG_SQFT` | integer | Building square footage; may have multiple records per parcel |
+| `BUILT_YR` | integer | Year built |
+| `EFFBUILT_YR` | integer | Effective year built (use as fallback) |
+| `TOTAL_MKT_VALUE` | float | Total assessed market value |
+| `LAND_MKT_VALUE` | float | Land-only value |
+| `PARCEL_ACRES` | float | Lot size in acres |
+| `PROP_CLASS` | string | Property classification code |
+| `CONST_MATERIAL` | string | Construction material |
+| `FLOORS_CNT` | integer | Number of floors |
+
+#### Update Frequency
+
+- Carbon, Emery, Juab, Millard: Rural counties — quarterly to annual updates
+- No webhook or push mechanism exists; pull via scheduled script
+
+#### Query Pattern
+
+```
+GET /FeatureServer/0/query?where=1%3D1&outFields=PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS&returnGeometry=false&resultOffset=0&resultRecordCount=1000&f=json
+```
+
+ArcGIS returns max 1,000 features per page. Paginate using `resultOffset`. Page size of 1,000 is the observed default max. The existing script handles this correctly.
+
+#### No New Dependencies Required
+
+The import script uses only:
+- `pg` (already in `package.json`) — for direct SQL upserts against Azure PostgreSQL
+- Native `fetch` (Node 18+) — for ArcGIS FeatureServer HTTP calls
+
+**No new npm packages needed for UGRC import.** The script is already written in `src/scripts/import-ugrc-assessor.mjs`.
+
+#### Schema Impact
+
+The `properties` table already has the UGRC fields stubbed in schema.ts (lines 59-63):
+- `building_sqft` (integer)
+- `year_built` (integer)
+- `assessed_value` (integer)
+- `lot_acres` (numeric 10,4)
+
+No schema migration needed.
+
+#### Open SGID (Alternative — Avoid for This Use Case)
+
+UGRC also exposes a public read-only PostgreSQL database:
+- Host: `opensgid.ugrc.utah.gov:5432`
+- DB: `opensgid`
+- Credentials: `agrc` / `agrc` (public, in GitHub readme)
+
+This is useful for ad-hoc GIS queries but is the wrong tool here. The FeatureServer approach is faster for bulk export, requires no direct DB connection from Netlify functions, and is already implemented.
+
 ---
 
-## Alternatives Considered
+### 2. XChange Court Record Intake
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| Turso (libSQL/SQLite) | Supabase (PostgreSQL) | If you need multi-user concurrent writes, real-time subscriptions, or PostGIS spatial queries. For a single-user read-heavy app, Turso's zero-cost SQLite is strictly better. |
-| Turso (libSQL/SQLite) | Local SQLite file | For pure local dev only. Doesn't survive Netlify serverless restarts — filesystem is ephemeral on Netlify. Turso gives you SQLite semantics with a persistent cloud backend. |
-| Drizzle ORM | Prisma | If your team prefers schema-first workflow and doesn't care about cold start latency. For serverless functions, Drizzle's ~7kb bundle vs Prisma's engine binary is decisive. |
-| Netlify Scheduled + Background Functions | External cron (Inngest, Trigger.dev) | If Netlify's 15-minute background function limit isn't enough (it will be), or if you need retry/queue semantics. For 10 county scrapes once a day, Netlify native is sufficient and free. |
-| react-leaflet + OSM | Mapbox GL JS / react-map-gl | If you need vector tiles, 3D terrain, or custom map styles. Mapbox has a free tier but adds API key complexity and usage limits. OSM is unlimited and free. |
-| Twilio | Plivo, Vonage, Bird | Plivo and Vonage are cheaper per message at scale (> 10K/month). At < 100 texts/month (hot lead alerts only), the $1-2/month difference is irrelevant. Twilio's documentation and reliability are unmatched for developer experience. |
-| Playwright | Puppeteer | If you only need Chrome. Playwright's multi-browser support, better auto-waiting, and stealth plugin ecosystem make it strictly superior for scraping in 2025/2026. |
-| Auth.js v5 Credentials | Custom JWT auth | If Auth.js v5 beta stability is a concern. For a single-user tool, even a hardcoded env-var password check on an API route would work, but Auth.js provides session management, CSRF protection, and middleware support for free. |
+#### What XChange Is
 
----
+Utah Courts XChange (`xchange.utcourts.gov`) is the state's district and justice court case search portal, backed by CORIS (Courts Information System). It holds all district court filings since July 1, 2010, including foreclosure/mortgage cases, probate, and civil cases that generate distress signals.
 
-## What NOT to Use
+#### Access Reality — No API, No Bulk Export
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `node-cron` in Next.js API routes | Serverless functions are stateless — `node-cron` only runs for the lifetime of one request invocation, then the process dies. You will never get recurring cron behavior. | Netlify Scheduled Functions |
-| Puppeteer (standalone) | Playwright is a strict superset: broader browser support, better async handling, same API surface. Puppeteer has no advantages over Playwright for this project. | Playwright |
-| `axios` for HTTP requests | `fetch` is native in Node 18+ and Next.js 15. Zero reason to add a dependency. | Native `fetch` |
-| Mapbox (paid tier) | Free tier limits are 50,000 map loads/month — fine initially, but API key management adds friction. OSM via react-leaflet is unlimited and free. | react-leaflet + OpenStreetMap |
-| Prisma | Binary engine adds 20-80MB to bundle and 1-3s cold starts on serverless. Netlify background functions paying this tax on every scrape run is wasteful. | Drizzle ORM |
-| Next.js 16 (currently) | Released Oct 2025 with meaningful breaking changes: `params`/`searchParams` must be awaited, `middleware.ts` deprecated in favor of `proxy.ts`, `next lint` command removed. The nychvac reference project uses 15.x; stay consistent until 16.x has broader ecosystem adoption. | Next.js 15.x (latest stable) |
-| Any paid property data API (BatchLeads, PropStream, etc.) | Project constraint: $0 operating cost. All data must come from public county/state records. | Direct county assessor/recorder scraping |
+XChange has no public API. It is a subscription web portal with per-search pricing.
 
----
+| Tier | Setup | Monthly | Included Searches | Extra Search | Document |
+|------|-------|---------|------------------|-------------|---------|
+| One-time account | $10 | $0 | 0 (pay per search) | $0.35 | $1.00 |
+| Monthly subscription | $25 | $40 | 500 | $0.35 | $1.00 |
 
-## Stack Patterns by Variant
+**The correct approach for this project is agent-assisted browser workflow, not automated scraping.** The user logs into XChange via browser, searches for cases by county and case type, copies/exports the results, and pastes them into the HouseFinder import UI. The HouseFinder app parses the pasted text and creates distress signals.
 
-**For county sites that render HTML server-side (most Utah county assessors):**
-- Use Cheerio to parse static HTML
-- Fast, no browser overhead
-- Works for: carbon.utah.gov property search, basic assessor lookups
+This is explicit in the milestone context: "agent-assisted browser workflow (NOT automated scraper)."
 
-**For county sites requiring JavaScript rendering or form interactions:**
-- Use Playwright with stealth plugin
-- Required for: sites using React/Angular frontends, AJAX-based search results
-- Add `await page.waitForLoadState('networkidle')` after form submissions
+#### Case Types to Target
 
-**For the Netlify scrape pipeline:**
-- Scheduled function (`@daily`) triggers
-- Immediately calls background function via internal fetch
-- Background function runs the actual scrape (up to 15 min)
-- Background function writes results to Turso
-- Background function calls Resend + Twilio for hot leads
+From the official Case Type Codes page (`utcourts.gov/en/court-records-publications/records/xchange/case.html`):
 
-**For the map component (SSR incompatibility):**
+| Code | Name | Signal Type |
+|------|------|------------|
+| `LM` | Lien/Mortgage Foreclosure | `lis_pendens` |
+| `ES` | Estate / Personal Representative | `probate` |
+| `CO` | Conservatorship | `probate` |
+| `GM` | Guardian - Minor | `probate` |
+| `GT` | Guardian - Adult | `probate` |
+| `EV` | Eviction | `lis_pendens` (post-foreclosure occupancy) |
+| `IF` | Infraction | `code_violation` |
+| `MO` | Other Misdemeanor | `code_violation` |
+
+#### What XChange Returns Per Case
+
+Based on the help documentation, each case record surfaces:
+- Case number, case type code, filing date
+- Party names and addresses (when available)
+- Court location and assigned judge
+- Attorneys of record
+- Event history (proceedings, hearings, judgments)
+
+The user search result list shows: County, Case Number, Case Type, Filing Date, Party Name(s), Disposition.
+
+#### Parsing Approach: Regex Over LLM
+
+For XChange text output, **regex/keyword pattern matching is the right approach**, not NLP/LLM. Reasons:
+
+1. The text structure is semi-structured and consistent (CORIS system generates it uniformly)
+2. Case type codes (`LM`, `ES`, `IF`) are definitive signal classifiers — no inference needed
+3. Field labels are explicit ("Case Number:", "Filing Date:", "Plaintiff:", "Defendant:")
+4. No legal interpretation required — just field extraction and signal classification
+
+Regex patterns to implement:
+
 ```typescript
-// In your page component:
-import dynamic from 'next/dynamic'
-const PropertyMap = dynamic(() => import('@/components/PropertyMap'), { ssr: false })
+// Case type → signal type mapping
+const CASE_TYPE_TO_SIGNAL: Record<string, SignalType> = {
+  LM: 'lis_pendens',   // Lien/Mortgage Foreclosure
+  ES: 'probate',       // Estate
+  CO: 'probate',       // Conservatorship
+  GM: 'probate',       // Guardian Minor
+  GT: 'probate',       // Guardian Adult
+  EV: 'lis_pendens',   // Eviction (post-foreclosure)
+  IF: 'code_violation',
+  MO: 'code_violation',
+};
+
+// Extraction patterns
+const CASE_NUMBER = /Case\s+(?:No|Number)[:\s]+([A-Z0-9\-]+)/i;
+const FILING_DATE = /(?:Filing|Filed)\s+Date[:\s]+(\d{1,2}\/\d{1,2}\/\d{4})/i;
+const CASE_TYPE = /Case\s+Type[:\s]+([A-Z]{2})\b/i;
+const PARTY_NAME = /(?:Defendant|Respondent)[:\s]+([^\n]+)/i;
+const PARTY_ADDRESS = /Address[:\s]+([^\n]+)/i;
 ```
 
+The existing `signalTypeEnum` in schema.ts already supports all required signal types: `nod`, `tax_lien`, `lis_pendens`, `probate`, `code_violation`, `vacant`.
+
+#### No New Dependencies Required for Parsing
+
+Pattern matching uses native JavaScript RegExp. No new packages needed.
+
+The `distress_signals` table already exists with the correct schema:
+- `property_id` (FK to properties)
+- `signal_type` (enum: matches all XChange case types)
+- `recorded_date`
+- `source_url`
+- `raw_data` (store original XChange case text for audit)
+
+#### Property Matching Strategy
+
+XChange records contain defendant name + address, not parcel ID. Matching to existing `properties` records requires address-based fuzzy lookup:
+
+```typescript
+// Match by normalized address string
+// Normalize: lowercase, remove punctuation, collapse whitespace
+// Query: SELECT id FROM properties WHERE lower(address) LIKE '%123 main%' AND city ILIKE '%price%'
+```
+
+This is a `ILIKE` query against `properties.address` and `properties.city`. No new library needed — use existing Drizzle ORM queries or raw `pg` SQL.
+
+**Unmatched records** (no property found for the case address) should be surfaced in the import UI as "unmatched cases" for manual review. Do not silently drop them.
+
 ---
 
-## Version Compatibility
+## What NOT to Add
 
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| next@15.x | react@19.x, react-dom@19.x | React 19 is the default with Next.js 15 |
-| next-auth@beta (v5) | next@14+, next@15 | v5 requires Next.js 14 minimum; works on 15 |
-| react-leaflet@5.x | react@18+, react@19 | Compatible with React 19 |
-| drizzle-orm@0.45.x | @libsql/client (any recent) | Both actively maintained; use latest of each |
-| shadcn/ui (latest) | next@15, react@19, tailwind@v4 | Full compatibility confirmed late 2024 |
-| playwright@1.x | Node.js 18+ | Use Node 20 (required by Next.js 16 if you upgrade later) |
+| Avoid | Why |
+|-------|-----|
+| UGRC Geocoder API (`api.mapserv.utah.gov`) | This API is for geocoding addresses to coordinates, not for bulk parcel attribute download. Requires UtahID account and API key. The FeatureServer is already implemented and needs no auth. |
+| `@arcgis/core` or `esri-leaflet` | Heavy Esri client SDKs are for building map applications, not for bulk data fetch. The ArcGIS REST API is just HTTP — native `fetch` is all you need. |
+| LLM-based court record parsing | XChange records are semi-structured with explicit field labels and definitive case type codes. LLM adds cost, latency, and hallucination risk to a problem that regex solves cleanly. |
+| `natural`, `compromise`, or `nlp.js` | NLP libraries are for unstructured text. XChange output is structured enough for regex. If it proves inadequate, revisit — but try regex first. |
+| Playwright or headless browser automation for XChange | Utah Courts Terms of Service do not authorize automated scraping. The subscription model ($0.35/search) implies per-search billing; automated scraping would both violate ToS and generate unexpected cost. Agent-assisted manual workflow is the right design. |
+| Open SGID direct PostgreSQL connection | Adds a second external DB connection from Netlify functions. The FeatureServer HTTP approach is already working and requires no credentials or connection pool management. |
+| Any paid court record API (CourtListener, StateRecords.org) | These cover federal courts or aggregate state records with paid tiers. Utah has no official third-party API. XChange is the authoritative source. |
 
 ---
 
-## Utah-Specific Data Source Notes
+## Integration Points with Existing Code
 
-**Confidence: LOW — requires hands-on verification for each county**
+| New Feature | Integrates With | How |
+|------------|----------------|-----|
+| UGRC import script | `properties` table (Azure PostgreSQL) | `COALESCE` UPDATE by `parcel_id` — already implemented in `import-ugrc-assessor.mjs` |
+| UGRC import trigger | Netlify scheduled function or manual run via `node src/scripts/import-ugrc-assessor.mjs` | No UI needed; script runs on demand or cron |
+| XChange parser | `distress_signals` table | INSERT with `source='xchange'` and `raw_data` = original case text |
+| XChange import UI | New Next.js Server Action in `src/lib/` | Paste-to-parse form → validate → insert signals → revalidatePath('/') |
+| Unmatched XChange cases | Property lookup in `properties` table | `ILIKE` address match; surface misses in UI |
+| Signal deduplication | `uq_distress_signal_dedup` index on `(property_id, signal_type, recorded_date)` | Drizzle `onConflictDoNothing()` — already defined in schema |
 
-The following counties cover the target geography around Price, UT. Each has a different portal — some are scrapeable, some are hostile:
+---
 
-| County | Portal | Scrape Difficulty | Notes |
-|--------|--------|------------------|-------|
-| Carbon (Price) | carbon.utah.gov/service/property-search/ | Medium | Has a property search UI; structure needs manual inspection |
-| Emery | emery.utah.gov/home/offices/recorder/ | High | Minimal online presence; may require GRAMA request for bulk data |
-| Sanpete | sanpete.com | Unknown | Verify via NETR Online directory |
-| Juab | juabcounty.gov/recorder/ | Unknown | Small county; likely limited online records |
-| Millard | millardcounty.utah.gov | Unknown | Verify via NETR Online directory |
-| Sevier | sevierut.gov | Unknown | Verify manually |
+## No Installation Required
 
-**Key finding:** The Utah Public Records Online Directory at publicrecords.netronline.com/state/UT aggregates links to all county online portals. Start there to inventory which counties have searchable online systems before writing scrapers.
+All dependencies for the new features are already in `package.json`:
 
-**GRAMA (Utah's FOIA) as backup:** For counties without online portals, Utah's Government Records Access and Management Act (GRAMA) allows bulk public record requests. This is a manual fallback, not an automated solution, but worth knowing.
+| Existing Package | Used For |
+|-----------------|---------|
+| `pg` ^8.20.0 | UGRC import script DB connection |
+| `drizzle-orm` ^0.45.1 | XChange signal inserts via Server Actions |
+| `zod` ^4.3.6 | Validate parsed XChange fields before DB insert |
+| `date-fns` ^4.1.0 | Normalize XChange `Filing Date` string to Date object |
+| Native `fetch` (Node 18+) | ArcGIS FeatureServer HTTP requests |
+| Native `RegExp` | XChange text parsing |
+
+**No `npm install` commands needed for this milestone.**
+
+---
+
+## Scheduling: UGRC Import
+
+The UGRC import is a manual/periodic operation (LIR data updates quarterly for rural counties). Two delivery options:
+
+| Option | How | When to Use |
+|--------|-----|------------|
+| Manual CLI script | `node src/scripts/import-ugrc-assessor.mjs` from local machine or Netlify shell | Simplest. Run when UGRC data is known to have updated. |
+| Netlify Scheduled Function | Add `netlify/functions/ugrc-import.mts` with `schedule: "0 6 1 */3 *"` (quarterly) | If fully automated refresh is wanted in a future phase. |
+
+For v1.1, the manual CLI approach is sufficient. The script is already written and tested.
 
 ---
 
 ## Sources
 
-- Next.js 16 release blog (nextjs.org/blog/next-16, October 2025) — confirmed 15.x vs 16.x choice
-- Netlify Scheduled Functions docs (docs.netlify.com/build/functions/scheduled-functions/) — confirmed 30s limit, background function workaround
-- Turso pricing page (turso.tech/pricing, verified March 2026) — confirmed free tier: 500M reads, 10M writes, 5GB, 100 DBs
-- shadcn/ui React 19 docs (ui.shadcn.com/docs/react-19) — confirmed Next.js 15 + React 19 compatibility
-- Drizzle ORM npm (0.45.x latest) — confirmed SQLite/libSQL support, ~7.4kb bundle
-- Twilio SMS pricing (twilio.com/en-us/sms/pricing/us) — confirmed ~$0.0079/msg
-- react-leaflet docs (react-leaflet.js.org) — confirmed SSR limitation, dynamic import pattern
-- WebSearch: Playwright vs Cheerio 2026 comparison (proxyway.com) — MEDIUM confidence
-- WebSearch: Drizzle vs Prisma serverless cold starts (bytebase.com, makerkit.dev) — MEDIUM confidence
-- WebSearch: Utah county property portals (publicrecords.netronline.com, carbon.utah.gov) — LOW confidence for scrapeability
+- ArcGIS FeatureServer layer verification: `opendata.gis.utah.gov/maps/utah::utah-carbon-county-parcels-lir` — confirmed Carbon County LIR service exists and is public
+- UGRC parcel field documentation: `gis.utah.gov/products/sgid/cadastre/parcels/` — confirmed `BLDG_SQFT`, `BUILT_YR`, `TOTAL_MKT_VALUE`, `PARCEL_ACRES`, `PROP_CLASS` field names (HIGH confidence — official UGRC documentation)
+- UGRC Geocoder API: `api.mapserv.utah.gov/getting-started/` — confirmed API key requirement and "Desktop key" type needed for server-side use; NOT used for this milestone
+- Open SGID credentials: `github.com/agrc/open-sgid` — host `opensgid.ugrc.utah.gov`, user `agrc`, pass `agrc` (publicly documented)
+- XChange subscription tiers: `utcourts.gov/en/court-records-publications/records/xchange/subscribe.html` — confirmed $25 setup + $40/month for 500 searches, $0.35/search overage, $1.00/document (HIGH confidence — official source)
+- XChange case type codes: `utcourts.gov/en/court-records-publications/records/xchange/case.html` — confirmed LM (foreclosure), ES/CO/GM/GT (probate), IF/MO (code violations) (HIGH confidence — official source)
+- Existing import script: `app/src/scripts/import-ugrc-assessor.mjs` — already implemented using ArcGIS FeatureServer with pagination, aggregation, and COALESCE upsert logic
+- Existing schema: `app/src/db/schema.ts` — UGRC fields already stubbed, distress_signals table already supports all required signal types
 
 ---
 
-*Stack research for: HouseFinder — distressed property lead generation, rural Utah*
-*Researched: 2026-03-17*
+*Updated: 2026-04-10 — Milestone: v1.1 UGRC + XChange*

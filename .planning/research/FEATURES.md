@@ -228,3 +228,156 @@ Defer until product-market fit is established with the single user.
 
 *Feature research for: distressed property lead generation (rural Utah)*
 *Researched: 2026-03-17*
+
+---
+
+---
+
+# v1.1 Milestone Addendum: UGRC Assessor Data + XChange Court Records
+
+**Researched:** 2026-04-10
+**Milestone:** v1.1 Data Enrichment & Court Records
+
+This addendum covers features specific to the new milestone. The base v1.0 feature landscape above remains valid. This section answers: what is table stakes vs differentiator for the UGRC and XChange integrations, and how should court record types map to distress signal weights?
+
+---
+
+## Existing Schema State (What's Already Wired In)
+
+The DB schema already has columns for assessor data and all court signal types. These are not new features to design — they are empty fields waiting for data.
+
+**Properties table already has:**
+- `building_sqft` (integer, nullable)
+- `year_built` (integer, nullable)
+- `assessed_value` (integer, nullable)
+- `lot_acres` (numeric, nullable)
+
+**Signal type enum already includes:**
+- `nod` — active (County recorder NOD scraper, `utah-legals.ts`)
+- `tax_lien` — active (County delinquent tax scrapers)
+- `lis_pendens` — defined, not yet sourced
+- `probate` — defined, not yet sourced
+- `code_violation` — defined, not yet sourced
+- `vacant` — defined, not yet sourced
+
+**Queries already select assessor fields** in `getProperty()` and `getProperties()` — they just return NULL because no import has run. The UI display layer likely already handles these fields; they just show empty.
+
+The new milestone is **data pipeline work**, not schema design or UI design.
+
+---
+
+## Table Stakes for v1.1
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| UGRC batch import for 4 counties | Schema columns exist, queries already select them, UI presumably shows them — all returning NULL. This is the most visible "something is broken" gap. | Medium | Carbon, Emery, Millard, Juab. Use UGRC Open SGID API: `GET /api/v1/search/cadastre.[county]_county_parcels_lir/{fields}`. Free, requires API key registration at api.mapserv.utah.gov. |
+| Address normalization for parcel matching | County recorder addresses (source of `properties.address`) differ from UGRC `PARCEL_ADD` in format. Join fails without normalization. "123 N Main St" vs "123 North Main" is a real discrepancy. | Medium | Normalize both sides: uppercase, expand abbreviations (N→North, St→Street), strip unit numbers. Fall back to geocode-based spatial match when string match fails. |
+| XChange court record intake | The milestone explicitly targets probate and court-filed foreclosure signals. Without an intake workflow, `probate`, `lis_pendens`, and `code_violation` signal types remain unused. | High | XChange has no API. Browser-only with per-search billing ($0.35/search over 500/month). Must use agent-assisted workflow: user or automation searches XChange, exports/pastes results, app parses them into `distress_signals` rows. |
+| Court record parser (case type → signal type) | Raw XChange output must become structured `distress_signals` rows. Requires case type classification logic. | Medium | See signal mapping table below. Most important classification: probate vs civil/foreclosure vs code violation adjudication. |
+| Property matching for court records | Court records have party names, not parcel IDs. Must match `party_name` to `properties.owner_name` to link signals to properties. | Medium | Fuzzy name match (Levenshtein or token-sort). Owner name quality in DB varies — some are LLC names, some are person names. Exact match first, fuzzy fallback, no-match queue for manual review. |
+| Re-score after enrichment | After import runs, `scoreAllProperties()` must execute so hot lead flags and distress scores reflect new signals. | Low | `scoreAllProperties()` already exists in `scraper/src/scoring/score.ts`. Needs a trigger: either a cron job, a manual admin button, or called at end of import script. |
+
+---
+
+## Differentiators for v1.1
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Assessed value as secondary scoring context | A property with assessed value $80K carrying 3 distress signals is a better wholesale target than a $300K property with the same signals. Could add UI badge or sort weighting when assessed value is below county median. | Low | Do not add to `scoreProperty()` formula yet — calibrate after seeing real enriched data. Add as a display label ("low value + distressed") rather than a score modifier for now. |
+| Year built displayed as deal-context | Pre-1970 construction correlates with deferred maintenance and higher rehab cost. Useful context when user is evaluating whether to pursue. | Low | Pure UI — display the year, let the user interpret. No scoring change. |
+| XChange case number stored in raw_data | User can look up the full case directly in XChange when they want more detail. Zero extra work — just include case number in the JSON blob written to `distress_signals.raw_data`. | Low | `raw_data` is free-form JSON. Store `{case_number, case_type, filing_date, party_name}` at minimum. |
+| Targeted XChange search strategy (county + case type batch) | Searching by county + case type (e.g., "all Carbon County probate filings 2023-2026") returns many records per search, not one per owner name. This reduces per-search cost dramatically. | Medium | At $0.35/search over 500/month, searching ~3,100 owners individually would cost $900+. Batch by county + type instead. |
+| UGRC CURRENT_ASOF-based re-import detection | The LIR dataset includes a `CURRENT_ASOF` field showing when the county last pushed data to UGRC. Compare against last import timestamp to determine if re-import is needed, avoiding unnecessary API calls. | Low | Rural county LIR data updates quarterly at best. Store `last_imported_at` per county in `scraper_config`. |
+
+---
+
+## Anti-Features for v1.1
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| Real-time UGRC API calls on property page load | Adds latency, unknown rate limits, and LIR data changes quarterly at most — live calls are wasteful. | Batch import script that runs on demand or on a schedule. Writes to DB. API calls happen once per import, not per page view. |
+| Automated XChange browser scraping | XChange is authenticated with per-search billing. Automation would bypass billing and violates ToS. If detected, account ban. | Manual intake workflow: user opens XChange, searches by county+type, exports results page, pastes into app parser. |
+| Statewide UGRC import | Only 4 counties have active scrapers. Importing all 29 counties bloats the DB with properties in markets where no signals will ever be scraped. | Import only counties that appear in target city config: Carbon, Emery, Millard, Juab. |
+| Code violation scraping from city websites | Rural Utah city websites (Price, Fillmore, Delta) have no structured code violation databases or public APIs. XChange only surfaces violations that reached the court level. | Document as data gap. If a code violation appears in XChange as a civil case, it will be captured. True administrative violations that never go to court are inaccessible for free. |
+| Assessed value as hard scoring weight | Assessor data may be incomplete or stale for rural counties. Building a scoring dependency on potentially-null data creates silent scoring failures. | Display assessed value as context. Consider scoring modifier only after validating data completeness for all 4 counties. |
+| Fuzzy name matching with automatic insertion | If the fuzzy match is wrong, a probate signal gets attached to the wrong property. Silent bad data is worse than no data. | Fuzzy match produces candidates. Above-threshold confidence → auto-insert. Below threshold → write to a review queue (admin UI or log) for manual confirmation. |
+
+---
+
+## Signal Type Mapping: Court Records to Distress Signals
+
+This is the core classification task for the XChange parser. Utah court case types must be mapped to the existing `signal_type` enum and assigned weights in `scraper_config.scoring_signals`.
+
+| XChange Case Type | Signal Type | Recommended Weight | Freshness Days | Rationale |
+|-------------------|-------------|-------------------|----------------|-----------|
+| Probate / estate administration | `probate` | 2 | 730 (2 years) | Heirs want liquidity; probate takes 6-24 months. Signal stays fresh for 2 years. |
+| Civil foreclosure (judicial) | `lis_pendens` | 3 | 365 | Judicial foreclosure is rare in Utah — most foreclosures are nonjudicial trustee sales at county recorder level. A civil foreclosure case in XChange means the lender went court-route, indicating complicated title or contested action. High distress. |
+| Lis pendens filed (ownership dispute) | `lis_pendens` | 3 | 365 | Direct indicator of pending action that clouds title. Owner under legal pressure. |
+| Code violation / nuisance abatement (civil action) | `code_violation` | 2 | 365 | Physical distress. Owner disengaged enough that a city pursued court action. |
+| Tax deed / tax sale (court-filed action) | `tax_lien` | 2 | 365 | Tax liens are already captured at county level. A court-filed action means the county escalated — higher urgency than a raw delinquency entry. Do NOT dedup against existing `tax_lien` signals; these are separate signals. |
+| Unlawful detainer / eviction | `vacant` | 1 | 180 | Owner lost control of tenant situation. Moderate distress indicator. Lower weight because eviction ≠ financial distress necessarily. Shorter freshness — evictions resolve quickly. |
+
+**Critical nuance — Utah is a nonjudicial foreclosure state.** The `nod` signal (Notice of Default) is captured by the existing `utah-legals.ts` scraper from county recorder filings. Most Utah pre-foreclosures will NEVER appear in XChange because they never go through a court. Do not expect XChange to be a significant source of foreclosure leads. Its primary value for this system is **probate** and **code violation** cases that have no other free source.
+
+**Weight calibration baseline (for reference):** The existing scoring engine uses `tax_lien` with tiered weights (1-4 based on amount due) plus a years-delinquent bonus. An `nod` signal probably has a base weight around 3-4 (config-driven, not hard-coded). The recommended weights above position `probate` and `code_violation` as meaningful but secondary signals — a property needs stacking (e.g., `tax_lien` + `probate`) to reach hot lead threshold.
+
+---
+
+## Feature Dependencies for v1.1
+
+```
+UGRC API key (free, register at api.mapserv.utah.gov)
+  → UGRC batch import script
+    → properties.building_sqft, year_built, assessed_value, lot_acres populated
+      → Property detail UI shows real data (no new code needed — already in queries)
+      → Assessed value display label (low-effort differentiator)
+
+XChange subscription ($25 setup + $40/mo for 500 searches)
+  → User runs batch county+type search in XChange browser
+    → User exports/pastes search results into intake UI or script
+      → Court record parser classifies case types → signal_type mapping
+        → Party name fuzzy-matched to properties.owner_name
+          → Matched signals inserted into distress_signals
+            → Unmatched signals written to review queue
+              → scoreAllProperties() triggered
+                → leads.distress_score + is_hot updated
+                  → Hot lead alerts fire (existing email/SMS pipeline)
+```
+
+**Dependencies on existing features:**
+- `scoreAllProperties()` — already exists, just needs a trigger call
+- `distress_signals` table with dedup index — already exists, XChange signals upserted same as scraper signals
+- Signal type enum — already includes `probate`, `lis_pendens`, `code_violation`; no migration needed
+- `scraper_config.scoring_signals` — needs new/updated rows for `probate`, `lis_pendens`, `code_violation` weights
+
+---
+
+## Data Quality Warnings
+
+**UGRC field completeness varies by county.** Rural counties (Carbon, Emery, Millard, Juab) are smaller assessors with less complete LIR submissions. `BLDG_SQFT` and `BUILT_YR` may be NULL for a meaningful fraction of parcels — especially older rural parcels and vacant land. Import what exists; store NULL when missing; never fail the import on a missing field.
+
+**Address normalization is a genuine problem.** County recorder addresses (source of `properties.address`) often differ from UGRC `PARCEL_ADD`. The same parcel may be "123 N MAIN" in the recorder and "123 North Main Street" in UGRC. Plan for: uppercase normalization, directional expansion (N→North, S→South, E→East, W→West), street type expansion (St→Street, Ave→Avenue, Rd→Road), strip unit/apt numbers. Test match rate against a sample before committing to production import.
+
+**XChange search cost must be managed.** At $0.35/search over the 500/month included in the $40/month subscription, searching all ~3,100 property owners by name would cost approximately $900+ per run. The correct strategy is county-level batch searches by case type (e.g., "Carbon County Probate 2023-2026"), not owner-by-owner lookups. One county+type search returns dozens of results for one billing unit.
+
+**Probate case confidentiality.** Utah probate filings are partially private — the petition and inventory may be restricted while the decree is public. XChange surfaces case metadata sufficient for distress signal purposes (case number, party/decedent name, filing date, case status) without needing access to restricted documents.
+
+**Owner name matching will have noise.** `properties.owner_name` includes LLC names, trust names, and individual names from county recorder data. XChange party names are typically individual names (the decedent or debtor). LLC-owned properties will not match probate records — the probate is for the individual owner who personally owned through the LLC. This is acceptable: probate for an LLC-held property is rare anyway.
+
+---
+
+## Sources
+
+- UGRC parcels LIR field documentation: https://gis.utah.gov/products/sgid/cadastre/parcels/
+- UGRC API search endpoint docs: https://api.mapserv.utah.gov/docs/v1/endpoints/searching/
+- XChange subscription pricing: https://www.utcourts.gov/en/court-records-publications/records/xchange/subscribe.html
+- XChange public case search: https://xchange.utcourts.gov/
+- Utah foreclosure process (nonjudicial trustee sale): https://www.nolo.com/legal-encyclopedia/summary-utahs-foreclosure-laws.html
+- Utah Courts foreclosure self-help: https://www.utcourts.gov/en/self-help/categories/housing/foreclosure.html
+- PropertyRadar distress signal guide: https://www.propertyradar.com/blog/the-complete-guide-to-distressed-properties
+- BatchData distress property guide: https://batchdata.io/uncategorized/how-to-find-distressed-properties
+- Confidence: HIGH for UGRC field schema (official documentation), HIGH for XChange pricing (official subscription page), HIGH for nonjudicial foreclosure prevalence in Utah (multiple official sources), MEDIUM for XChange case type coverage (inferred from court jurisdiction + case type documentation, not explicit XChange case-type list)
+
+---
+
+*v1.1 addendum researched: 2026-04-10*
