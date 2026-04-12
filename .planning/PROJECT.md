@@ -8,11 +8,21 @@ A free, mobile-first web application that finds distressed properties in small U
 
 Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses — the earlier the better, the more distress signals the hotter the lead.
 
+## Current Milestone: v1.1 Data Enrichment & Court Records
+
+**Goal:** Enrich property data with free UGRC assessor records and unlock foreclosure/probate/code violation leads from Utah Courts XChange via agent-assisted browser workflow.
+
+**Target features:**
+- UGRC assessor data import (sqft, year built, assessed value — free, no subscription)
+- XChange court record intake (agent-assisted browser search → parse → distress signals)
+- Court record parser for foreclosure, probate, and code violation cases
+- Distress signal pipeline matching court records to existing properties
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- v1.0: Core platform shipped (20 phases) — scraping, scoring, deals, contracts, photos, CRM, campaigns, security
 
 ### Active
 

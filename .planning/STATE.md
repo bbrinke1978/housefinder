@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Milestone v1.0 complete — all 20 phases shipped
+**Current focus:** Milestone v1.1 — Data Enrichment & Court Records
 
 ## Current Position
 
-Phase: 20 of 20 (Security Review)
-Plan: 4 of 4 in current phase
-Status: Complete
-Last activity: 2026-04-11 — All phases complete, CSP promoted to enforcing, migrations applied
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-12 — Milestone v1.1 started
 
-Progress: [████████████████████████████████████████████] 100%
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
