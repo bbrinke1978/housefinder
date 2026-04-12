@@ -8,12 +8,24 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import crypto from "crypto";
+import path from "path";
+import fs from "fs";
 import type { ContractWithSigners } from "@/types";
 
-// Register Inter font using local file — no CDN dependency in server PDF generation
+// Register Inter font — try multiple paths for local/Netlify/serverless compatibility
+const fontPaths = [
+  path.join(process.cwd(), "public", "fonts", "Inter-Regular.ttf"),
+  path.join(process.cwd(), ".next", "server", "public", "fonts", "Inter-Regular.ttf"),
+  path.join(process.cwd(), "fonts", "Inter-Regular.ttf"),
+];
+
+const fontPath = fontPaths.find((p) => {
+  try { return fs.existsSync(p); } catch { return false; }
+});
+
 Font.register({
   family: "Inter",
-  src: process.cwd() + "/public/fonts/Inter-Regular.ttf",
+  src: fontPath || path.join(process.cwd(), "public", "fonts", "Inter-Regular.ttf"),
 });
 
 const styles = StyleSheet.create({

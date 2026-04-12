@@ -24,9 +24,10 @@ export async function GET(
   try {
     buffer = await generateContractPdf(contract);
   } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
     console.error("PDF generation failed:", err);
     return NextResponse.json(
-      { error: "Failed to generate PDF" },
+      { error: `Failed to generate PDF: ${msg}` },
       { status: 500 }
     );
   }
