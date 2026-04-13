@@ -139,7 +139,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
-| 22. XChange Court Record Intake | 0/3 | Not started | - |
+| 22. XChange Court Record Intake | 0/2 | Not started | - |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
@@ -458,9 +458,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — court_record_staging table schema, parser for XChange case text (probate/code_violation/lis_pendens), agent workflow prompt
-- [ ] 22-02-PLAN.md — Matching logic (parcel ID, normalized address, owner name fallback), signal creation from matched records, staging insert for unmatched
-- [ ] 22-03-PLAN.md — Intake run audit log, staging review UI (list unmatched records with manual match action), end-to-end intake verification
+- [ ] 22-01-PLAN.md — court_intake_runs schema addition (app/src/db/schema.ts) and migration 0012
+- [ ] 22-02-PLAN.md — xchange-intake.ts three-tier matching + /api/court-intake POST endpoint
 
 ### Phase 23: Scoring Rebalance
 
