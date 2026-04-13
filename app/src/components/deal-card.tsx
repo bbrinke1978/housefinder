@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { ImageOff, Store } from "lucide-react";
+import { ImageOff, Store, Search } from "lucide-react";
 import type { DealWithBuyer } from "@/types";
 
 interface DealCardProps {
@@ -115,8 +115,9 @@ export function DealCard({ deal, coverPhotoUrl }: DealCardProps) {
               {formatDistanceToNow(new Date(deal.createdAt), { addSuffix: true })}
             </p>
             {!deal.sellerPhone && (
-              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
-                No phone — skip trace
+              <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                <Search className="h-2.5 w-2.5" />
+                Needs trace
               </span>
             )}
           </div>
