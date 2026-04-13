@@ -249,7 +249,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### UGRC Assessor Enrichment
 
 - [ ] **UGRC-01**: Properties enriched with sqft, year built, assessed value, and lot size from UGRC ArcGIS FeatureServer data
-- [ ] **UGRC-02**: Parcel ID normalization handles format differences between county scrapers and UGRC (strip delimiters, uppercase)
+- [x] **UGRC-02**: Parcel ID normalization handles format differences between county scrapers and UGRC (strip delimiters, uppercase)
 - [ ] **UGRC-03**: Import runs per-county with match rate reporting (how many properties matched vs total)
 - [ ] **UGRC-04**: Assessor data visible on property detail pages (fields already exist in UI, currently NULL)
 
@@ -517,7 +517,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 *Last updated: 2026-04-10 — added Phase 20 security review requirements (SEC-01 through SEC-12)
 
 | UGRC-01 | Phase 21 | Pending |
-| UGRC-02 | Phase 21 | Pending |
+| UGRC-02 | Phase 21 | Complete |
 | UGRC-03 | Phase 21 | Pending |
 | UGRC-04 | Phase 21 | Pending |
 | XCHG-01 | Phase 22 | Pending |

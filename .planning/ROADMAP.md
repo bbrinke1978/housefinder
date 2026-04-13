@@ -138,7 +138,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
-| 21. UGRC Assessor Enrichment | 0/3 | Not started | - |
+| 21. UGRC Assessor Enrichment | 1/2 | In Progress|  |
 | 22. XChange Court Record Intake | 0/3 | Not started | - |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
@@ -439,7 +439,7 @@ Plans:
   2. The import script normalizes parcel ID format before matching (strips delimiters, uppercases) so Carbon County format differences do not prevent matches against UGRC data
   3. After each import run, a match rate report shows how many properties in that county matched vs total (e.g., "Carbon: 312/418 matched, 74%")
   4. Property detail pages display sqft, year built, assessed value, and lot size when the data is present — no code changes required, only data population
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 21-01-PLAN.md — Harden import script: remove hardcoded credential, add normalizeParcelId(), fix exceededTransferLimit pagination

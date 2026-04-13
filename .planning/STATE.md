@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 21 (UGRC Assessor Enrichment)
-Plan: —
-Status: Roadmap defined, ready for planning
-Last activity: 2026-04-10 — v1.1 roadmap created (Phases 21-23)
+Plan: 1 complete
+Status: In progress
+Last activity: 2026-04-13 — 21-01 complete (import script hardening)
 
 Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.1)
 
@@ -93,6 +93,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░░░░
 | Phase 20-security-review P01 | 8min | 2 tasks | 8 files |
 | Phase 20-security-review P02 | 6min | 1 tasks | 4 files |
 | Phase 20-security-review P03 | 12min | 2 tasks | 4 files |
+| Phase 21-ugrc-assessor-enrichment P01 | 7min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -323,6 +324,8 @@ Recent decisions affecting current work:
 - [v1.1-init]: XChange is browser-only, $40/mo subscription, no API — Phase 22 uses agent-assisted manual workflow, not automated scraping
 - [v1.1-init]: Parcel ID format normalization is prerequisite for UGRC import — strips delimiters, uppercases to match UGRC format
 - [v1.1-init]: Dry-run rescore is mandatory before activating new signal types — prevents hot lead flood on Phase 23 activation
+- [Phase 21-ugrc-assessor-enrichment]: Normalize parcel IDs on both UGRC (app) and DB (SQL UPPER/REPLACE) sides before matching to handle county format differences
+- [Phase 21-ugrc-assessor-enrichment]: Check exceededTransferLimit before breaking ArcGIS pagination loop to avoid early exit on server-capped pages
 
 ### Roadmap Evolution
 
