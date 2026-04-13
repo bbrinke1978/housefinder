@@ -473,5 +473,5 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 23-01-PLAN.md — Dry-run rescore script with signal-type simulation, threshold impact report
-- [ ] 23-02-PLAN.md — 90-day deduplication logic for NOD/lis_pendens, weight/threshold update in scraperConfig, live activation and verification
+- [ ] 23-01-PLAN.md — 90-day dedup in scoreProperty() + dry-run CLI reporting baseline vs simulated hot counts
+- [ ] 23-02-PLAN.md — Human reviews dry-run output, chooses threshold, updates scraperConfig, runs live rescore
