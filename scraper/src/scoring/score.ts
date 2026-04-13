@@ -89,12 +89,103 @@ function yearsDelinquentBonus(taxLienSignals: SignalInput[]): number {
   return 0; // 1 year or fewer — no bonus
 }
 
+// ── Signal deduplication ─────────────────────────────────────────────────────
+
+/**
+ * Collapse same-type NOD and lis_pendens signals filed within 90 days of each
+ * other, keeping only the EARLIEST signal per 90-day window per signal type.
+ *
+ * Rules:
+ * - Only applies to "nod" and "lis_pendens" signal types
+ * - Signals with null or sentinel 1970-01-01 recorded_date are treated as
+ *   distinct (cannot determine proximity) and are always kept
+ * - For deduplicated types: sort by recorded_date ascending, then walk the list
+ *   including a signal only if it is >90 days after the last included signal of
+ *   that type
+ * - All other signal types pass through unchanged
+ *
+ * @param signals - Array of signals for a single property (any status mix)
+ * @returns New array with duplicates collapsed
+ */
+export function deduplicateSignals(signals: SignalInput[]): SignalInput[] {
+  const DEDUP_TYPES = new Set(["nod", "lis_pendens"]);
+  const WINDOW_DAYS = 90;
+
+  // Separate signals into those that need dedup and those that don't
+  const toDedup: SignalInput[] = [];
+  const passThrough: SignalInput[] = [];
+
+  for (const signal of signals) {
+    if (DEDUP_TYPES.has(signal.signal_type)) {
+      toDedup.push(signal);
+    } else {
+      passThrough.push(signal);
+    }
+  }
+
+  if (toDedup.length === 0) return signals;
+
+  // Group by signal_type
+  const byType = new Map<string, SignalInput[]>();
+  for (const signal of toDedup) {
+    const group = byType.get(signal.signal_type) ?? [];
+    group.push(signal);
+    byType.set(signal.signal_type, group);
+  }
+
+  const deduped: SignalInput[] = [];
+
+  for (const [, group] of byType) {
+    // Separate signals with usable dates vs null/sentinel
+    const withDate: SignalInput[] = [];
+    const undated: SignalInput[] = [];
+
+    for (const signal of group) {
+      const d = signal.recorded_date;
+      if (d === null || d.getFullYear() <= 1970) {
+        undated.push(signal); // treat as distinct — keep all
+      } else {
+        withDate.push(signal);
+      }
+    }
+
+    // Sort dated signals ascending
+    withDate.sort((a, b) => {
+      const aTime = a.recorded_date!.getTime();
+      const bTime = b.recorded_date!.getTime();
+      return aTime - bTime;
+    });
+
+    // Walk the sorted list, keeping only signals >90 days after last kept
+    let lastKeptDate: Date | null = null;
+    for (const signal of withDate) {
+      if (lastKeptDate === null) {
+        deduped.push(signal);
+        lastKeptDate = signal.recorded_date!;
+      } else {
+        const daysDiff = differenceInDays(signal.recorded_date!, lastKeptDate);
+        if (daysDiff > WINDOW_DAYS) {
+          deduped.push(signal);
+          lastKeptDate = signal.recorded_date!;
+        }
+        // else: within 90-day window — skip (duplicate)
+      }
+    }
+
+    // Always keep undated signals
+    deduped.push(...undated);
+  }
+
+  return [...passThrough, ...deduped];
+}
+
 // ── Pure scoring function (no DB dependency) ────────────────────────────────
 
 /**
  * Calculate a weighted distress score for a single property from its signals.
  *
  * - Only active signals are considered
+ * - Signals are deduplicated (nod and lis_pendens within 90-day windows) before scoring
  * - Stale signals (older than freshness_days) are excluded
  * - Signals with no recorded_date are assumed recent and included
  * - Unknown signal types (no matching config) are skipped
@@ -112,7 +203,7 @@ export function scoreProperty(
     configMap.set(sc.signal_type, sc);
   }
 
-  const activeSignals = signals.filter((s) => s.status === "active");
+  const activeSignals = deduplicateSignals(signals.filter((s) => s.status === "active"));
   let score = 0;
   let scoredCount = 0;
 
