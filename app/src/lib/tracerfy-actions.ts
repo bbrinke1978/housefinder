@@ -19,8 +19,8 @@
  */
 
 import { db } from "@/db/client";
-import { properties, ownerContacts, scraperConfig } from "@/db/schema";
-import { eq, inArray, like } from "drizzle-orm";
+import { properties, ownerContacts, scraperConfig, deals } from "@/db/schema";
+import { eq, inArray, like, sql } from "drizzle-orm";
 import { auth } from "@/auth";
 import { z } from "zod/v4";
 import { revalidatePath } from "next/cache";
@@ -76,10 +76,20 @@ async function tracerfyFetch(
   reqHeaders.set("Authorization", authValue);
   reqHeaders.set("Accept", "application/json");
 
-  let fetchBody: string | undefined;
+  let fetchBody: BodyInit | undefined;
   if (body) {
-    reqHeaders.set("Content-Type", "application/json");
-    fetchBody = JSON.stringify(body);
+    // Use FormData for POST requests (Tracerfy API rejects application/json on some endpoints)
+    if (method === "POST") {
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(body as Record<string, string>)) {
+        formData.append(key, value);
+      }
+      fetchBody = formData;
+      // Don't set Content-Type — fetch auto-sets multipart/form-data with boundary
+    } else {
+      reqHeaders.set("Content-Type", "application/json");
+      fetchBody = JSON.stringify(body);
+    }
   }
 
   const response = await fetch(url, {
@@ -765,4 +775,50 @@ export async function saveTracerfyConfig(config: {
     console.error("[tracerfy] saveTracerfyConfig error:", err);
     return { error: "Failed to save Tracerfy config" };
   }
+}
+
+// -- findOrCreatePropertyForDeal --
+
+/**
+ * For deals without a propertyId — find an existing property by address or create one.
+ * Links the deal to the property so skip trace can work.
+ */
+export async function findOrCreatePropertyForDeal(
+  dealId: string,
+  address: string,
+  city: string
+): Promise<{ propertyId: string } | { error: string }> {
+  const session = await auth();
+  if (!session?.user) return { error: "Not authenticated" };
+
+  // Try to find existing property by address
+  const normalized = address.toLowerCase().trim();
+  const existing = await db
+    .select({ id: properties.id })
+    .from(properties)
+    .where(sql`lower(trim(${properties.address})) = ${normalized} AND lower(${properties.city}) = ${city.toLowerCase()}`)
+    .limit(1);
+
+  let propertyId: string;
+
+  if (existing.length > 0) {
+    propertyId = existing[0].id;
+  } else {
+    // Create a minimal property record via raw SQL (parcelId and county are NOT NULL in schema)
+    const result = await db.execute(sql`
+      INSERT INTO properties (address, city, state, county, parcel_id)
+      VALUES (${address}, ${city || "Unknown"}, 'UT', 'unknown', ${"DEAL-" + dealId.slice(0, 8)})
+      RETURNING id
+    `);
+    propertyId = (result.rows[0] as { id: string }).id;
+  }
+
+  // Link deal to property
+  await db
+    .update(deals)
+    .set({ propertyId })
+    .where(eq(deals.id, dealId));
+
+  revalidatePath(`/deals/${dealId}`);
+  return { propertyId };
 }
