@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties (completed 2026-03-18)
 - [x] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins (completed 2026-03-19)
 - [x] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions (completed 2026-03-29)
-- [ ] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data
+- [x] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data (completed 2026-04-13)
 - [ ] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals
 - [ ] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days
 
@@ -138,7 +138,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
-| 21. UGRC Assessor Enrichment | 1/2 | In Progress|  |
+| 21. UGRC Assessor Enrichment | 2/2 | Complete   | 2026-04-13 |
 | 22. XChange Court Record Intake | 0/3 | Not started | - |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
@@ -439,7 +439,7 @@ Plans:
   2. The import script normalizes parcel ID format before matching (strips delimiters, uppercases) so Carbon County format differences do not prevent matches against UGRC data
   3. After each import run, a match rate report shows how many properties in that county matched vs total (e.g., "Carbon: 312/418 matched, 74%")
   4. Property detail pages display sqft, year built, assessed value, and lot size when the data is present — no code changes required, only data population
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 21-01-PLAN.md — Harden import script: remove hardcoded credential, add normalizeParcelId(), fix exceededTransferLimit pagination

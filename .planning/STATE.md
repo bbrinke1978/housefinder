@@ -94,6 +94,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░░░░
 | Phase 20-security-review P02 | 6min | 1 tasks | 4 files |
 | Phase 20-security-review P03 | 12min | 2 tasks | 4 files |
 | Phase 21-ugrc-assessor-enrichment P01 | 7min | 2 tasks | 1 files |
+| Phase 21-ugrc-assessor-enrichment P02 | 40min | 1 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -326,6 +327,7 @@ Recent decisions affecting current work:
 - [v1.1-init]: Dry-run rescore is mandatory before activating new signal types — prevents hot lead flood on Phase 23 activation
 - [Phase 21-ugrc-assessor-enrichment]: Normalize parcel IDs on both UGRC (app) and DB (SQL UPPER/REPLACE) sides before matching to handle county format differences
 - [Phase 21-ugrc-assessor-enrichment]: Check exceededTransferLimit before breaking ArcGIS pagination loop to avoid early exit on server-capped pages
+- [Phase 21-ugrc-assessor-enrichment]: High no-match rate for Carbon/Juab/Millard is expected — DB holds only distress-signal properties, not all county parcels. Emery 97.5% match rate validates normalization.
 
 ### Roadmap Evolution
 
