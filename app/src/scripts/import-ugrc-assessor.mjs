@@ -18,9 +18,12 @@ import pg from "pg";
 
 const { Client } = pg;
 
-const DB_URL =
-  process.env.DATABASE_URL ||
-  "postgresql://hfadmin:L0K9dV6bgKl67mH084PUOFlBGSPJ80@housefinder-db.postgres.database.azure.com:5432/housefinder?sslmode=require";
+const DB_URL = process.env.DATABASE_URL;
+if (!DB_URL) {
+  console.error("ERROR: DATABASE_URL environment variable is required.");
+  console.error("Example: DATABASE_URL=postgresql://... node src/scripts/import-ugrc-assessor.mjs");
+  process.exit(1);
+}
 
 // UGRC ArcGIS FeatureServer base
 const ARCGIS_BASE =
@@ -76,8 +79,12 @@ async function fetchAllFeatures(serviceName) {
       `  Fetched ${all.length} records (page offset ${offset})...`
     );
 
-    // ArcGIS returns fewer than PAGE_SIZE when we've reached the end
-    if (features.length < PAGE_SIZE) break;
+    // Exit only when ArcGIS confirms no more records AND didn't hit a transfer limit.
+    // exceededTransferLimit: true means the server capped results below PAGE_SIZE —
+    // we must keep paginating even though features.length < PAGE_SIZE.
+    const hitLimit = data.exceededTransferLimit === true;
+    if (!hitLimit && features.length < PAGE_SIZE) break;
+    if (features.length === 0) break; // Safety: never infinite-loop on empty page
     offset += PAGE_SIZE;
   }
 
