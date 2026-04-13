@@ -41,6 +41,16 @@ const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_C
 const PAGE_SIZE = 1000; // ArcGIS default max
 
 /**
+ * Normalize a parcel ID for comparison: strip hyphens, dots, and spaces,
+ * uppercase. Both UGRC PARCEL_ID and DB parcel_id values are normalized
+ * before matching to handle format differences across counties.
+ */
+function normalizeParcelId(raw) {
+  if (!raw) return null;
+  return raw.replace(/[\s\-\.]/g, '').toUpperCase().trim();
+}
+
+/**
  * Fetch all features from an ArcGIS FeatureServer layer using pagination.
  * Returns an array of attribute objects.
  */
@@ -99,12 +109,12 @@ function aggregateByParcelId(features) {
   const map = new Map();
 
   for (const f of features) {
-    const pid = f.PARCEL_ID;
+    const pid = normalizeParcelId(f.PARCEL_ID);
     if (!pid) continue;
 
     if (!map.has(pid)) {
       map.set(pid, {
-        parcelId: pid,
+        parcelId: pid,   // now stores the normalized form
         buildingSqft: f.BLDG_SQFT ?? null,
         yearBuilt: f.BUILT_YR ?? null,
         assessedValue:
@@ -166,7 +176,7 @@ async function main() {
            assessed_value = COALESCE(assessed_value, $4::integer),
            lot_acres      = COALESCE(lot_acres,      $5::numeric),
            updated_at     = NOW()
-         WHERE parcel_id = $1
+         WHERE UPPER(REPLACE(REPLACE(parcel_id, '-', ''), ' ', '')) = $1
          AND ($2::integer IS NOT NULL OR $3::integer IS NOT NULL OR $4::integer IS NOT NULL OR $5::numeric IS NOT NULL)
          RETURNING id`,
         [
@@ -183,7 +193,7 @@ async function main() {
       } else {
         // Check if it's a no-match or just no data to set
         const check = await client.query(
-          "SELECT id FROM properties WHERE parcel_id = $1 LIMIT 1",
+          "SELECT id FROM properties WHERE UPPER(REPLACE(REPLACE(parcel_id, '-', ''), ' ', '')) = $1 LIMIT 1",
           [parcel.parcelId]
         );
         if (check.rowCount === 0) {
