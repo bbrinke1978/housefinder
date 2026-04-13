@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions (completed 2026-03-29)
 - [x] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data (completed 2026-04-13)
 - [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
-- [ ] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days
+- [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 
 ## Phase Details
 
@@ -140,7 +140,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
-| 23. Scoring Rebalance | 0/2 | Not started | - |
+| 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 
 ### Phase 7: Frontend Design Polish
 
@@ -470,7 +470,7 @@ Plans:
   1. A dry-run rescore command runs against the live database and reports how many properties would cross the hot lead threshold with the new signal types active — without writing any changes to the database
   2. Based on dry-run output, the hot lead threshold or signal weights are adjusted in scraperConfig so the hot lead count remains actionable (not flooded) before new signal types are enabled
   3. The scoring engine deduplicates NOD and lis_pendens signals for the same property within a 90-day window — a property with two NOD filings 30 days apart scores as one NOD signal, not two
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 23-01-PLAN.md — 90-day dedup in scoreProperty() + dry-run CLI reporting baseline vs simulated hot counts
