@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins (completed 2026-03-19)
 - [x] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions (completed 2026-03-29)
 - [x] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data (completed 2026-04-13)
-- [ ] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals
+- [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
 - [ ] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days
 
 ## Phase Details
@@ -139,7 +139,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
-| 22. XChange Court Record Intake | 1/2 | In Progress|  |
+| 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
@@ -455,7 +455,7 @@ Plans:
   2. Parsed records that match an existing property (by parcel ID, normalized address, or owner name) create distress signal rows of the correct type (probate, code_violation, or lis_pendens)
   3. Parsed records that do not match any property are written to a staging table for manual review — not silently dropped
   4. Each court intake run is logged with date, county, case type searched, records parsed, records matched, and records staged — visible as an audit trail
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 22-01-PLAN.md — court_intake_runs schema addition (app/src/db/schema.ts) and migration 0012

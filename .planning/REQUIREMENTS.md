@@ -255,11 +255,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### XChange Court Record Intake
 
-- [ ] **XCHG-01**: Agent-assisted browser workflow searches XChange by county and case type (probate, code violation)
-- [ ] **XCHG-02**: Court record text parsed into structured data (case type, parties, address, filing dates)
-- [ ] **XCHG-03**: Parsed records matched to existing properties via parcel ID, normalized address, or owner name
-- [ ] **XCHG-04**: Unmatched records staged for manual review (not silently discarded)
-- [ ] **XCHG-05**: Matched records create distress signals (probate, code_violation, lis_pendens types)
+- [x] **XCHG-01**: Agent-assisted browser workflow searches XChange by county and case type (probate, code violation)
+- [x] **XCHG-02**: Court record text parsed into structured data (case type, parties, address, filing dates)
+- [x] **XCHG-03**: Parsed records matched to existing properties via parcel ID, normalized address, or owner name
+- [x] **XCHG-04**: Unmatched records staged for manual review (not silently discarded)
+- [x] **XCHG-05**: Matched records create distress signals (probate, code_violation, lis_pendens types)
 - [x] **XCHG-06**: Court intake runs logged with audit trail (date, county, case type, match stats)
 
 ### Scoring Rebalance
@@ -520,11 +520,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UGRC-02 | Phase 21 | Complete |
 | UGRC-03 | Phase 21 | Complete |
 | UGRC-04 | Phase 21 | Complete |
-| XCHG-01 | Phase 22 | Pending |
-| XCHG-02 | Phase 22 | Pending |
-| XCHG-03 | Phase 22 | Pending |
-| XCHG-04 | Phase 22 | Pending |
-| XCHG-05 | Phase 22 | Pending |
+| XCHG-01 | Phase 22 | Complete |
+| XCHG-02 | Phase 22 | Complete |
+| XCHG-03 | Phase 22 | Complete |
+| XCHG-04 | Phase 22 | Complete |
+| XCHG-05 | Phase 22 | Complete |
 | XCHG-06 | Phase 22 | Complete |
 | SCORE2-01 | Phase 23 | Pending |
 | SCORE2-02 | Phase 23 | Pending |
