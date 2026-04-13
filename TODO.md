@@ -8,10 +8,10 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [x] **Trace icon on cards** — moved to right side next to "View details" on hover
 - [x] **Paste Email** — working, multi-property splitting
 - [x] **MAO formula** — updated to ARV × 0.65
-- [ ] **Deals page speed** — index created, retest after deploy
-- [ ] **Photo upload** — AZURE_STORAGE_CONNECTION_STRING refreshed, server action now returns errors instead of throwing. Retest.
-- [ ] **Add Expense** — null handling fixed for optional fields. Retest.
-- [ ] **Skip Tracing settings** — API key trim fix applied. Retest.
+- [x] **Deals page speed** — index on deals.updated_at added
+- [x] **Photo upload** — DB schema mismatch fixed (blob_url column missing), raw SQL insert
+- [x] **Add Expense** — raw SQL insert bypasses Drizzle null serialization bug
+- [x] **Skip Tracing settings** — Connected, invisible chars stripped from API key
 - [ ] **Rotate passwords** — all 3 users change passwords via forgot-password flow
 
 ## Action Items (Brian)
@@ -34,13 +34,20 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [x] Set up Google Analytics — NEXT_PUBLIC_GA_ID configured
 - [x] Add sitemap — sitemap.ts dynamic route in place
 
+## After XChange Account Setup
+
+- [ ] Add `COURT_INTAKE_API_KEY` to Netlify env vars (generate with `openssl rand -hex 32`)
+- [ ] First XChange intake session — Claude browses XChange, searches Carbon County probate + code violations, feeds to /api/court-intake
+- [ ] Review unmatched court records and tune address matching
+- [ ] Monitor hot lead count after first intake — threshold at 4, may need adjusting
+
 ## Upcoming Features (Claude Builds)
 
-- [ ] UGRC assessor data import — free sqft/year-built/assessed-value for all properties (no license needed, can do now)
-- [ ] XChange scraper — foreclosure, probate, code violations (needs Brian's XChange subscription first)
+- [x] UGRC assessor data import — 5,038 properties enriched with sqft/year-built/assessed-value
+- [x] XChange court record intake — parser + API endpoint built, awaiting XChange account
+- [x] Scoring rebalance — dedup + weights configured, threshold at 4
 - [ ] Bridge Data Output API integration — auto-ARV, comps, property details (needs Brian's RE license + Bridge API key)
 - [ ] GitHub Actions upgrade — Azure/functions-action@v1 → v2 before June 2026
-- [ ] Resend inbound webhook setup — configure Resend to forward wholesaler emails to /api/inbound endpoint
 
 ## Completed
 

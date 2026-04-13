@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, User, DollarSign, Flame, Pencil, X, Check, Phone, Mail, Home } from "lucide-react";
+import { MapPin, User, DollarSign, Flame, Pencil, X, Check, Phone, Mail, Home, Search } from "lucide-react";
+import { SkipTraceButton } from "@/components/skip-trace-button";
 import { updateDeal } from "@/lib/deal-actions";
 import type { DealWithBuyer, OwnerContact } from "@/types";
 import { CONDITION_OPTIONS, TIMELINE_OPTIONS, MOTIVATION_OPTIONS } from "@/types";
@@ -371,6 +372,15 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
                 <span className="text-muted-foreground">Asking:</span>{" "}
                 <span className="font-medium">{fmt(deal.askingPrice)}</span>
               </p>
+            )}
+            {/* Skip Trace button — uses propertyId if deal is linked to a property */}
+            {deal.propertyId && (
+              <div className="pt-2 border-t border-border mt-2">
+                <SkipTraceButton
+                  propertyId={deal.propertyId}
+                  hasTracerfyResult={(contacts ?? []).some((c) => c.source.startsWith("tracerfy"))}
+                />
+              </div>
             )}
           </CardContent>
         </Card>

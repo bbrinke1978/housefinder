@@ -336,6 +336,24 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
           </span>
         </div>
 
+        {/* Skip trace indicator — center right, hover only */}
+        {(property.traceStatus === "traced_found" || property.traceStatus === "traced_not_found") && (
+          <div className="flex items-center justify-end mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            {property.traceStatus === "traced_found" && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-medium">
+                <Search className="h-3 w-3" />
+                Traced
+              </span>
+            )}
+            {property.traceStatus === "traced_not_found" && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+                <SearchX className="h-3 w-3" />
+                No results
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Bottom row: lead status + source badge + touchpoints + hover CTA */}
         <div className="flex items-center justify-between mt-2.5 gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
@@ -350,22 +368,10 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
               <TouchpointBadge count={property.touchpointCount ?? 0} />
             )}
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {property.traceStatus === "traced_found" && (
-              <span title="Skip traced — results found" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <Search className="h-3 w-3 text-emerald-500" />
-              </span>
-            )}
-            {property.traceStatus === "traced_not_found" && (
-              <span title="Skip traced — no results" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <SearchX className="h-3 w-3 text-muted-foreground" />
-              </span>
-            )}
-            <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0">
-              View details
-              <ArrowRight className="h-3 w-3" />
-            </span>
-          </div>
+          <span className="flex items-center gap-1 text-xs font-bold text-primary opacity-0 transition-all duration-200 group-hover:opacity-100 translate-y-0.5 group-hover:translate-y-0 shrink-0">
+            View details
+            <ArrowRight className="h-3 w-3" />
+          </span>
         </div>
       </div>
     </Link>

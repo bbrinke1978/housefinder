@@ -110,9 +110,16 @@ export function DealCard({ deal, coverPhotoUrl }: DealCardProps) {
             )}
           </div>
 
-          <p className="mt-1 text-xs text-muted-foreground/70">
-            {formatDistanceToNow(new Date(deal.createdAt), { addSuffix: true })}
-          </p>
+          <div className="mt-1 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground/70">
+              {formatDistanceToNow(new Date(deal.createdAt), { addSuffix: true })}
+            </p>
+            {!deal.sellerPhone && (
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                No phone — skip trace
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </Link>
