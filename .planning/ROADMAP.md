@@ -138,7 +138,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
-| 21. UGRC Assessor Enrichment | 2/2 | Complete   | 2026-04-13 |
+| 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 0/3 | Not started | - |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
