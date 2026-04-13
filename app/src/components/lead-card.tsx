@@ -34,24 +34,28 @@ export function LeadCard({ lead }: LeadCardProps) {
         </p>
       )}
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-          Score: {lead.distressScore}
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-          <AlertTriangle className="h-3 w-3" />
-          Skip trace needed
-        </span>
-        {lead.traceStatus === "traced_found" && (
-          <span title="Skip traced — results found">
-            <Search className="h-3 w-3 text-emerald-500 shrink-0" />
+      <div className="mt-2 flex items-center justify-between gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            Score: {lead.distressScore}
           </span>
-        )}
-        {lead.traceStatus === "traced_not_found" && (
-          <span title="Skip traced — no results">
-            <SearchX className="h-3 w-3 text-muted-foreground shrink-0" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+            <AlertTriangle className="h-3 w-3" />
+            Skip trace needed
           </span>
-        )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {lead.traceStatus === "traced_found" && (
+            <span title="Skip traced — results found">
+              <Search className="h-3 w-3 text-emerald-500" />
+            </span>
+          )}
+          {lead.traceStatus === "traced_not_found" && (
+            <span title="Skip traced — no results">
+              <SearchX className="h-3 w-3 text-muted-foreground" />
+            </span>
+          )}
+        </div>
       </div>
 
       {lead.lastContactedAt && (
