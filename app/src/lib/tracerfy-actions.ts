@@ -34,7 +34,7 @@ import {
 // -- Constants --
 
 const BASE_URL = "https://tracerfy.com/v1/api";
-const POLL_INTERVAL_MS = 3000; // faster than scraper's 5000ms — better UX
+const POLL_INTERVAL_MS = 7000; // Tracerfy rate limits at ~20s intervals, poll every 7s to stay safe
 const MAX_POLL_MS = 25000; // stay under Netlify 26s function limit
 const COST_PER_TRACE = 0.02; // for cost estimation display
 
@@ -92,11 +92,28 @@ async function tracerfyFetch(
     }
   }
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     method,
     headers: reqHeaders,
     body: fetchBody,
   });
+
+  // Retry once on 503 rate limit (wait 20s then retry)
+  if (response.status === 503) {
+    await new Promise((r) => setTimeout(r, 20000));
+    // Rebuild FormData for retry (FormData can only be consumed once)
+    let retryBody: BodyInit | undefined;
+    if (body && method === "POST") {
+      const fd = new FormData();
+      for (const [key, value] of Object.entries(body as Record<string, string>)) {
+        fd.append(key, value);
+      }
+      retryBody = fd;
+    } else if (body) {
+      retryBody = JSON.stringify(body);
+    }
+    response = await fetch(url, { method, headers: reqHeaders, body: retryBody });
+  }
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
