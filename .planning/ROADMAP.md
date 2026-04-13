@@ -473,5 +473,5 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 23-01-PLAN.md — 90-day dedup in scoreProperty() + dry-run CLI reporting baseline vs simulated hot counts
+- [x] 23-01-PLAN.md — 90-day dedup in scoreProperty() + dry-run CLI reporting baseline vs simulated hot counts
 - [ ] 23-02-PLAN.md — Human reviews dry-run output, chooses threshold, updates scraperConfig, runs live rescore

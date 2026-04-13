@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 22 (XChange Court Record Intake)
-Plan: 2 complete
+Phase: 23 (Scoring Rebalance)
+Plan: 1 complete
 Status: In progress
-Last activity: 2026-04-13 — 22-02 complete (xchange-intake.ts + POST /api/court-intake endpoint)
+Last activity: 2026-04-13 — 23-01 complete (deduplicateSignals() in score.ts + dry-run.ts CLI)
 
 Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.1)
 
@@ -333,6 +333,10 @@ Recent decisions affecting current work:
 - [Phase 22-01]: Used serial PK for court_intake_runs audit table (not uuid); county nullable for multi-county sessions; unmatched_cases stored as TEXT JSON
 - [Phase 22]: Replicate scoreAllProperties inline in xchange-intake.ts using app Drizzle client — no cross-package import from scraper due to Next.js bundler incompatibility with ESM .js extensions
 - [Phase 22]: COURT_INTAKE_API_KEY env var for court intake auth — separate from WEBSITE_LEAD_API_KEY to allow independent revocation
+- [Phase 23-01]: Deduplicate only nod and lis_pendens — probate/code_violation/tax_lien/vacant each filing is distinct
+- [Phase 23-01]: Null and sentinel 1970-01-01 dates treated as distinct signals that cannot be proximity-checked; always kept
+- [Phase 23-01]: deduplicateSignals() called on pre-filtered activeSignals inside scoreProperty() — dedup runs only on scoreable signals
+- [Phase 23-01]: dry-run Pass B ensures XChange signal weights are non-zero (defaults 1/1/2) even if scraperConfig has them at 0
 
 ### Roadmap Evolution
 

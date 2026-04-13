@@ -264,9 +264,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Scoring Rebalance
 
-- [ ] **SCORE2-01**: Dry-run rescore simulates impact of new signal types before activating them live
+- [x] **SCORE2-01**: Dry-run rescore simulates impact of new signal types before activating them live
 - [ ] **SCORE2-02**: Hot lead threshold adjusted based on dry-run results to prevent hot lead flood
-- [ ] **SCORE2-03**: NOD and lis_pendens signals deduplicated for same property within 90-day window
+- [x] **SCORE2-03**: NOD and lis_pendens signals deduplicated for same property within 90-day window
 
 ## v2 Requirements
 
@@ -526,9 +526,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | XCHG-04 | Phase 22 | Complete |
 | XCHG-05 | Phase 22 | Complete |
 | XCHG-06 | Phase 22 | Complete |
-| SCORE2-01 | Phase 23 | Pending |
+| SCORE2-01 | Phase 23 | Complete |
 | SCORE2-02 | Phase 23 | Pending |
-| SCORE2-03 | Phase 23 | Pending |
+| SCORE2-03 | Phase 23 | Complete |
 
 **v1.1 Coverage:**
 - v1.1 requirements: 13 total
