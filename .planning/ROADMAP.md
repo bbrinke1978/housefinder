@@ -139,7 +139,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
-| 22. XChange Court Record Intake | 0/2 | Not started | - |
+| 22. XChange Court Record Intake | 1/2 | In Progress|  |
 | 23. Scoring Rebalance | 0/2 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
@@ -455,7 +455,7 @@ Plans:
   2. Parsed records that match an existing property (by parcel ID, normalized address, or owner name) create distress signal rows of the correct type (probate, code_violation, or lis_pendens)
   3. Parsed records that do not match any property are written to a staging table for manual review — not silently dropped
   4. Each court intake run is logged with date, county, case type searched, records parsed, records matched, and records staged — visible as an audit trail
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 22-01-PLAN.md — court_intake_runs schema addition (app/src/db/schema.ts) and migration 0012

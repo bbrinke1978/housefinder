@@ -260,7 +260,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **XCHG-03**: Parsed records matched to existing properties via parcel ID, normalized address, or owner name
 - [ ] **XCHG-04**: Unmatched records staged for manual review (not silently discarded)
 - [ ] **XCHG-05**: Matched records create distress signals (probate, code_violation, lis_pendens types)
-- [ ] **XCHG-06**: Court intake runs logged with audit trail (date, county, case type, match stats)
+- [x] **XCHG-06**: Court intake runs logged with audit trail (date, county, case type, match stats)
 
 ### Scoring Rebalance
 
@@ -525,7 +525,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | XCHG-03 | Phase 22 | Pending |
 | XCHG-04 | Phase 22 | Pending |
 | XCHG-05 | Phase 22 | Pending |
-| XCHG-06 | Phase 22 | Pending |
+| XCHG-06 | Phase 22 | Complete |
 | SCORE2-01 | Phase 23 | Pending |
 | SCORE2-02 | Phase 23 | Pending |
 | SCORE2-03 | Phase 23 | Pending |

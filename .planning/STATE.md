@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 21 (UGRC Assessor Enrichment)
+Phase: 22 (XChange Court Record Intake)
 Plan: 1 complete
 Status: In progress
-Last activity: 2026-04-13 — 21-01 complete (import script hardening)
+Last activity: 2026-04-12 — 22-01 complete (court_intake_runs schema + migration 0012 applied to DB)
 
 Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.1)
 
@@ -95,6 +95,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░░░░
 | Phase 20-security-review P03 | 12min | 2 tasks | 4 files |
 | Phase 21-ugrc-assessor-enrichment P01 | 7min | 2 tasks | 1 files |
 | Phase 21-ugrc-assessor-enrichment P02 | 40min | 1 tasks | 0 files |
+| Phase 22-xchange-court-record-intake P01 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -328,6 +329,7 @@ Recent decisions affecting current work:
 - [Phase 21-ugrc-assessor-enrichment]: Normalize parcel IDs on both UGRC (app) and DB (SQL UPPER/REPLACE) sides before matching to handle county format differences
 - [Phase 21-ugrc-assessor-enrichment]: Check exceededTransferLimit before breaking ArcGIS pagination loop to avoid early exit on server-capped pages
 - [Phase 21-ugrc-assessor-enrichment]: High no-match rate for Carbon/Juab/Millard is expected — DB holds only distress-signal properties, not all county parcels. Emery 97.5% match rate validates normalization.
+- [Phase 22-01]: Used serial PK for court_intake_runs audit table (not uuid); county nullable for multi-county sessions; unmatched_cases stored as TEXT JSON
 
 ### Roadmap Evolution
 
