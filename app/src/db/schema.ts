@@ -408,6 +408,20 @@ export const buyerTags = pgTable(
   ]
 );
 
+// -- Court Intake Runs --
+
+export const courtIntakeRuns = pgTable("court_intake_runs", {
+  id: serial("id").primaryKey(),
+  runAt: timestamp("run_at", { withTimezone: true }).notNull().defaultNow(),
+  county: text("county"),
+  casesProcessed: integer("cases_processed").notNull().default(0),
+  propertiesMatched: integer("properties_matched").notNull().default(0),
+  signalsCreated: integer("signals_created").notNull().default(0),
+  newHotLeads: integer("new_hot_leads").notNull().default(0),
+  unmatchedCases: text("unmatched_cases"),
+  agentNotes: text("agent_notes"),
+});
+
 export type BuyerCommunicationEventRow = InferSelectModel<
   typeof buyerCommunicationEvents
 >;
