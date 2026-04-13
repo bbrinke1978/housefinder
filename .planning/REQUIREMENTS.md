@@ -244,6 +244,30 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SEC-10**: All public routes (sign, floor-plans, api/leads) verified as properly token-gated with no data leakage
 - [x] **SEC-11**: Git history scanned for leaked secrets in both repos using gitleaks or manual grep; any found secrets rotated immediately
 - [x] **SEC-12**: SECURITY-FINDINGS.md and SECRETS-INVENTORY.md delivered documenting all findings, severity ratings, fix status, and secret rotation cadence
+## v1.1 Requirements — Data Enrichment & Court Records
+
+### UGRC Assessor Enrichment
+
+- [ ] **UGRC-01**: Properties enriched with sqft, year built, assessed value, and lot size from UGRC ArcGIS FeatureServer data
+- [ ] **UGRC-02**: Parcel ID normalization handles format differences between county scrapers and UGRC (strip delimiters, uppercase)
+- [ ] **UGRC-03**: Import runs per-county with match rate reporting (how many properties matched vs total)
+- [ ] **UGRC-04**: Assessor data visible on property detail pages (fields already exist in UI, currently NULL)
+
+### XChange Court Record Intake
+
+- [ ] **XCHG-01**: Agent-assisted browser workflow searches XChange by county and case type (probate, code violation)
+- [ ] **XCHG-02**: Court record text parsed into structured data (case type, parties, address, filing dates)
+- [ ] **XCHG-03**: Parsed records matched to existing properties via parcel ID, normalized address, or owner name
+- [ ] **XCHG-04**: Unmatched records staged for manual review (not silently discarded)
+- [ ] **XCHG-05**: Matched records create distress signals (probate, code_violation, lis_pendens types)
+- [ ] **XCHG-06**: Court intake runs logged with audit trail (date, county, case type, match stats)
+
+### Scoring Rebalance
+
+- [ ] **SCORE2-01**: Dry-run rescore simulates impact of new signal types before activating them live
+- [ ] **SCORE2-02**: Hot lead threshold adjusted based on dry-run results to prevent hot lead flood
+- [ ] **SCORE2-03**: NOD and lis_pendens signals deduplicated for same property within 90-day window
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -491,3 +515,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Requirements defined: 2026-03-17*
 *Last updated: 2026-04-10 — added Phase 20 security review requirements (SEC-01 through SEC-12)
+
+| UGRC-01 | Phase 21 | Pending |
+| UGRC-02 | Phase 21 | Pending |
+| UGRC-03 | Phase 21 | Pending |
+| UGRC-04 | Phase 21 | Pending |
+| XCHG-01 | Phase 22 | Pending |
+| XCHG-02 | Phase 22 | Pending |
+| XCHG-03 | Phase 22 | Pending |
+| XCHG-04 | Phase 22 | Pending |
+| XCHG-05 | Phase 22 | Pending |
+| XCHG-06 | Phase 22 | Pending |
+| SCORE2-01 | Phase 23 | Pending |
+| SCORE2-02 | Phase 23 | Pending |
+| SCORE2-03 | Phase 23 | Pending |
+
+**v1.1 Coverage:**
+- v1.1 requirements: 13 total
+- Mapped to phases: 13
+- Unmapped: 0
+
+---
+*Last updated: 2026-04-10 — added Phases 21-23 (v1.1 Data Enrichment & Court Records): UGRC-01 through UGRC-04, XCHG-01 through XCHG-06, SCORE2-01 through SCORE2-03*

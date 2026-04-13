@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Milestone v1.1 — Data Enrichment & Court Records
+**Current focus:** Milestone v1.1 — Data Enrichment & Court Records (Phases 21-23)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 21 (UGRC Assessor Enrichment)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-12 — Milestone v1.1 started
+Status: Roadmap defined, ready for planning
+Last activity: 2026-04-10 — v1.1 roadmap created (Phases 21-23)
 
-Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.1)
 
 ## Performance Metrics
 
@@ -317,6 +317,12 @@ Recent decisions affecting current work:
 - [Phase 20-security-review]: MED-03: missing auth() on some server actions accepted as risk — 3-user single-tenant, middleware protects pages
 - [Phase 20-security-review]: sql.raw() usages verified safe and documented with inline SECURITY: comments
 - [Phase 20-security-review]: Netlify firewall limitation accepted risk — full lockdown requires Enterprise tier; SSL compensating controls adequate
+- [v1.1-init]: UGRC import script already exists at app/src/scripts/import-ugrc-assessor.mjs — Phase 21 activates and completes it, not builds from scratch
+- [v1.1-init]: Schema already has UGRC columns (building_sqft, year_built, assessed_value, lot_acres) — currently NULL, need parcel normalization + import run
+- [v1.1-init]: Signal types probate, lis_pendens, code_violation already in distress signal enum — no schema migration needed for Phase 22
+- [v1.1-init]: XChange is browser-only, $40/mo subscription, no API — Phase 22 uses agent-assisted manual workflow, not automated scraping
+- [v1.1-init]: Parcel ID format normalization is prerequisite for UGRC import — strips delimiters, uppercases to match UGRC format
+- [v1.1-init]: Dry-run rescore is mandatory before activating new signal types — prevents hot lead flood on Phase 23 activation
 
 ### Roadmap Evolution
 
@@ -325,6 +331,7 @@ Recent decisions affecting current work:
 - Phase 18 added: Tracerfy Options
 - Phase 19 added: Wholesale Leads
 - Phase 20 added: Security Review
+- Phases 21-23 added: Milestone v1.1 Data Enrichment & Court Records
 
 ### Pending Todos
 
@@ -336,10 +343,11 @@ None yet.
 - [Phase 4]: All remaining county portals unverified — some (Emery, Juab) may have no online portal and require GRAMA requests instead
 - [Phase 5]: Utah voter roll permissible-use terms for commercial real estate unconfirmed — validate before building contact enrichment pipeline
 - [Phase 5]: Geocoding approach not yet selected — evaluate Census Geocoder, Nominatim, or county GIS data at Phase 5 planning
+- [Phase 22]: XChange $40/mo subscription must be active before court record intake workflow can be tested — confirm subscription status before planning Phase 22
 
 ## Session Continuity
 
-Last session: 2026-04-11
-Status: Milestone v1.0 COMPLETE — all 20 phases shipped
-Final actions: CSP promoted to enforcing, DB migrations applied, Mapbox token domain-restricted, App Service decommissioned
-Remaining manual: All 3 users rotate passwords via forgot-password flow
+Last session: 2026-04-10
+Status: Milestone v1.1 roadmap created — Phases 21-23 defined, ready to plan Phase 21
+Final actions: ROADMAP.md updated with Phases 21-23, STATE.md updated for v1.1 focus
+Remaining manual: None

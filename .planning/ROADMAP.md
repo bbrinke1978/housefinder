@@ -4,6 +4,8 @@
 
 HouseFinder delivers a single-user lead generation tool for distressed properties in rural Utah. The build order follows a hard dependency chain: data must exist before a dashboard can display it, scoring must be validated before alerts fire, one county must work end-to-end before expanding to nine more, and the map requires geocoded addresses from a live pipeline. Phase 1 establishes the entire data foundation. Phases 2-3 build the application and alert layers on top of real data. Phase 4 scales scraping to the full target geography. Phase 5 completes the map and contact enrichment features that depend on a full pipeline being live.
 
+v1.1 adds three phases (21-23) that enrich existing properties with free UGRC assessor data, unlock court record signals via an agent-assisted XChange workflow, and rebalance scoring to handle the new signal types safely.
+
 ## Phases
 
 **Phase Numbering:**
@@ -18,6 +20,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: County Expansion** - Scraper coverage expanded to all ~10 target Utah counties (completed 2026-03-18)
 - [x] **Phase 5: Map View** - Geographic map browsing with distress-scored property pins (completed 2026-03-19)
 - [x] **Phase 6: Data Analytics & Insights** - Track everything, surface patterns, and make data-driven investment decisions (completed 2026-03-29)
+- [ ] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data
+- [ ] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals
+- [ ] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days
 
 ## Phase Details
 
@@ -133,6 +138,9 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 4. County Expansion | 3/3 | Complete    | 2026-03-19 |
 | 5. Map View | 3/3 | Complete   | 2026-03-19 |
 | 6. Data Analytics & Insights | 4/4 | Complete    | 2026-03-29 |
+| 21. UGRC Assessor Enrichment | 0/3 | Not started | - |
+| 22. XChange Court Record Intake | 0/3 | Not started | - |
+| 23. Scoring Rebalance | 0/2 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
@@ -416,3 +424,56 @@ Plans:
 - [ ] 20-02-PLAN.md -- Upgrade Next.js, security headers (nobshomes)
 - [ ] 20-03-PLAN.md -- OWASP Top 10 audit, git secret scan, findings report, secrets inventory
 - [ ] 20-04-PLAN.md -- Migrate Functions secrets to Key Vault, decommission old App Service
+
+---
+
+## Milestone v1.1 — Data Enrichment & Court Records (Phases 21-23)
+
+### Phase 21: UGRC Assessor Enrichment
+
+**Goal:** Every scraped property has sqft, year built, assessed value, and lot size populated from free UGRC ArcGIS data — fields that already exist in the schema and UI but are currently NULL
+**Depends on:** Phase 20
+**Requirements**: UGRC-01, UGRC-02, UGRC-03, UGRC-04
+**Success Criteria** (what must be TRUE):
+  1. Running the UGRC import script against any target county populates building_sqft, year_built, assessed_value, and lot_acres on matched property rows — fields that were previously NULL are now filled
+  2. The import script normalizes parcel ID format before matching (strips delimiters, uppercases) so Carbon County format differences do not prevent matches against UGRC data
+  3. After each import run, a match rate report shows how many properties in that county matched vs total (e.g., "Carbon: 312/418 matched, 74%")
+  4. Property detail pages display sqft, year built, assessed value, and lot size when the data is present — no code changes required, only data population
+**Plans:** TBD
+
+Plans:
+- [ ] 21-01-PLAN.md — Parcel ID normalization logic, UGRC ArcGIS FeatureServer query, match-and-update import script
+- [ ] 21-02-PLAN.md — Per-county import runs, match rate reporting, verification against property detail page
+- [ ] 21-03-PLAN.md — Scheduled or on-demand re-import strategy, edge case handling (multi-parcel properties, no-match logging)
+
+### Phase 22: XChange Court Record Intake
+
+**Goal:** Probate, code violation, and lis pendens court records from Utah Courts XChange are ingested via an agent-assisted browser workflow, parsed into structured distress signals, and matched to existing properties — with unmatched records staged rather than discarded
+**Depends on:** Phase 21
+**Requirements**: XCHG-01, XCHG-02, XCHG-03, XCHG-04, XCHG-05, XCHG-06
+**Success Criteria** (what must be TRUE):
+  1. A documented agent-assisted workflow (prompt or script) searches XChange by county and case type, extracts case text, and passes it to a parser — producing structured records (case type, parties, address, filing dates) without requiring an XChange API
+  2. Parsed records that match an existing property (by parcel ID, normalized address, or owner name) create distress signal rows of the correct type (probate, code_violation, or lis_pendens)
+  3. Parsed records that do not match any property are written to a staging table for manual review — not silently dropped
+  4. Each court intake run is logged with date, county, case type searched, records parsed, records matched, and records staged — visible as an audit trail
+**Plans:** TBD
+
+Plans:
+- [ ] 22-01-PLAN.md — court_record_staging table schema, parser for XChange case text (probate/code_violation/lis_pendens), agent workflow prompt
+- [ ] 22-02-PLAN.md — Matching logic (parcel ID, normalized address, owner name fallback), signal creation from matched records, staging insert for unmatched
+- [ ] 22-03-PLAN.md — Intake run audit log, staging review UI (list unmatched records with manual match action), end-to-end intake verification
+
+### Phase 23: Scoring Rebalance
+
+**Goal:** New signal types from XChange are activated safely — a dry-run rescore validates the impact on hot lead count before going live, the hot lead threshold is tuned to prevent a flood, and same-property NOD/lis_pendens duplicates within 90 days are collapsed to one signal
+**Depends on:** Phase 22
+**Requirements**: SCORE2-01, SCORE2-02, SCORE2-03
+**Success Criteria** (what must be TRUE):
+  1. A dry-run rescore command runs against the live database and reports how many properties would cross the hot lead threshold with the new signal types active — without writing any changes to the database
+  2. Based on dry-run output, the hot lead threshold or signal weights are adjusted in scraperConfig so the hot lead count remains actionable (not flooded) before new signal types are enabled
+  3. The scoring engine deduplicates NOD and lis_pendens signals for the same property within a 90-day window — a property with two NOD filings 30 days apart scores as one NOD signal, not two
+**Plans:** TBD
+
+Plans:
+- [ ] 23-01-PLAN.md — Dry-run rescore script with signal-type simulation, threshold impact report
+- [ ] 23-02-PLAN.md — 90-day deduplication logic for NOD/lis_pendens, weight/threshold update in scraperConfig, live activation and verification
