@@ -439,12 +439,11 @@ Plans:
   2. The import script normalizes parcel ID format before matching (strips delimiters, uppercases) so Carbon County format differences do not prevent matches against UGRC data
   3. After each import run, a match rate report shows how many properties in that county matched vs total (e.g., "Carbon: 312/418 matched, 74%")
   4. Property detail pages display sqft, year built, assessed value, and lot size when the data is present — no code changes required, only data population
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Parcel ID normalization logic, UGRC ArcGIS FeatureServer query, match-and-update import script
-- [ ] 21-02-PLAN.md — Per-county import runs, match rate reporting, verification against property detail page
-- [ ] 21-03-PLAN.md — Scheduled or on-demand re-import strategy, edge case handling (multi-parcel properties, no-match logging)
+- [ ] 21-01-PLAN.md — Harden import script: remove hardcoded credential, add normalizeParcelId(), fix exceededTransferLimit pagination
+- [ ] 21-02-PLAN.md — Run import against production, record match rates, verify UI end-to-end
 
 ### Phase 22: XChange Court Record Intake
 
@@ -456,7 +455,7 @@ Plans:
   2. Parsed records that match an existing property (by parcel ID, normalized address, or owner name) create distress signal rows of the correct type (probate, code_violation, or lis_pendens)
   3. Parsed records that do not match any property are written to a staging table for manual review — not silently dropped
   4. Each court intake run is logged with date, county, case type searched, records parsed, records matched, and records staged — visible as an audit trail
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 22-01-PLAN.md — court_record_staging table schema, parser for XChange case text (probate/code_violation/lis_pendens), agent workflow prompt
@@ -472,7 +471,7 @@ Plans:
   1. A dry-run rescore command runs against the live database and reports how many properties would cross the hot lead threshold with the new signal types active — without writing any changes to the database
   2. Based on dry-run output, the hot lead threshold or signal weights are adjusted in scraperConfig so the hot lead count remains actionable (not flooded) before new signal types are enabled
   3. The scoring engine deduplicates NOD and lis_pendens signals for the same property within a 90-day window — a property with two NOD filings 30 days apart scores as one NOD signal, not two
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 23-01-PLAN.md — Dry-run rescore script with signal-type simulation, threshold impact report
