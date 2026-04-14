@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 24 — Advanced MAO Calculator
-Plan: 02 of 3
-Status: In progress — Plan 01 complete
-Last activity: 2026-04-14 — Advanced MAO Calculator Plan 01 complete
-Stopped At: Completed 24-advanced-mao-calculator-24-01-PLAN.md
+Plan: 03 of 3
+Status: Checkpoint — awaiting human verify on Plan 02 wholesaler view
+Last activity: 2026-04-12 — Advanced MAO Calculator Plan 02 Task 1 complete, checkpoint reached
+Stopped At: checkpoint:human-verify in 24-02-PLAN.md — visual sign-off needed on wholesaler panel
 
-Progress: [████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33%
+Progress: [████████████████░░░░░░░░░░░░░░░░░░░░░░░░░] 66%
 
 ## Performance Metrics
 

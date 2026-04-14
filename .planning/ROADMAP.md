@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data (completed 2026-04-13)
 - [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
-- [ ] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread
+- [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
 
 ## Phase Details
 
@@ -148,7 +148,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
-| 24. Advanced MAO Calculator | 1/2 | In progress | Plan 01 complete |
+| 24. Advanced MAO Calculator | 2/2 | Complete   | 2026-04-14 |
 
 ### Phase 7: Frontend Design Polish
 

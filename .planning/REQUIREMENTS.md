@@ -292,11 +292,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Wholesaler View
 
-- [ ] **WSALE-01**: Assignment fee configurable as dollar amount
-- [ ] **WSALE-02**: Seller-side closing costs shown (assignee pays both sides noted)
-- [ ] **WSALE-03**: Max purchase price from seller computed (end buyer MAO minus fee minus closing costs)
-- [ ] **WSALE-04**: End buyer's total out-of-pocket displayed
-- [ ] **WSALE-05**: Wholesaler's spread displayed
+- [x] **WSALE-01**: Assignment fee configurable as dollar amount
+- [x] **WSALE-02**: Seller-side closing costs shown (assignee pays both sides noted)
+- [x] **WSALE-03**: Max purchase price from seller computed (end buyer MAO minus fee minus closing costs)
+- [x] **WSALE-04**: End buyer's total out-of-pocket displayed
+- [x] **WSALE-05**: Wholesaler's spread displayed
 
 ## v2 Requirements
 
@@ -579,11 +579,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLIP-02 | Phase 24 | Complete |
 | FLIP-03 | Phase 24 | Complete |
 | FLIP-04 | Phase 24 | Complete |
-| WSALE-01 | Phase 24 | Pending |
-| WSALE-02 | Phase 24 | Pending |
-| WSALE-03 | Phase 24 | Pending |
-| WSALE-04 | Phase 24 | Pending |
-| WSALE-05 | Phase 24 | Pending |
+| WSALE-01 | Phase 24 | Complete |
+| WSALE-02 | Phase 24 | Complete |
+| WSALE-03 | Phase 24 | Complete |
+| WSALE-04 | Phase 24 | Complete |
+| WSALE-05 | Phase 24 | Complete |
 
 **v1.2 Coverage:**
 - v1.2 requirements: 16 total
