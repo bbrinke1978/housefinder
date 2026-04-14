@@ -272,23 +272,23 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### MAO Calculator Core
 
-- [ ] **MAO-01**: Calculator accepts ARV and rehab estimate as primary inputs with sell-side cost percentages
-- [ ] **MAO-02**: Sell-side costs computed from configurable buyer's agent %, selling agent %, and closing/title %
-- [ ] **MAO-03**: Net proceeds at resale displayed (ARV minus all sell-side costs)
+- [x] **MAO-01**: Calculator accepts ARV and rehab estimate as primary inputs with sell-side cost percentages
+- [x] **MAO-02**: Sell-side costs computed from configurable buyer's agent %, selling agent %, and closing/title %
+- [x] **MAO-03**: Net proceeds at resale displayed (ARV minus all sell-side costs)
 
 ### Hard Money + Carry
 
-- [ ] **HML-01**: Hard money loan parameters configurable (annual interest rate, points, LTV %, hold time months)
-- [ ] **HML-02**: Monthly carry costs configurable (tax, insurance, utilities combined dollar amount)
-- [ ] **HML-03**: Loan amount computed iteratively via convergence (MAO × LTV)
-- [ ] **HML-04**: Total HML + carry cost displayed (interest + points + monthly carry)
+- [x] **HML-01**: Hard money loan parameters configurable (annual interest rate, points, LTV %, hold time months)
+- [x] **HML-02**: Monthly carry costs configurable (tax, insurance, utilities combined dollar amount)
+- [x] **HML-03**: Loan amount computed iteratively via convergence (MAO × LTV)
+- [x] **HML-04**: Total HML + carry cost displayed (interest + points + monthly carry)
 
 ### Buyer/Flipper View
 
-- [ ] **FLIP-01**: Buy-side closing costs configurable as dollar amount
-- [ ] **FLIP-02**: Min and max profit targets configurable as dollar amounts
-- [ ] **FLIP-03**: MAO range displayed showing offer at min profit and max profit targets
-- [ ] **FLIP-04**: MAO as percentage of ARV displayed for quick reference
+- [x] **FLIP-01**: Buy-side closing costs configurable as dollar amount
+- [x] **FLIP-02**: Min and max profit targets configurable as dollar amounts
+- [x] **FLIP-03**: MAO range displayed showing offer at min profit and max profit targets
+- [x] **FLIP-04**: MAO as percentage of ARV displayed for quick reference
 
 ### Wholesaler View
 
@@ -568,17 +568,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Last updated: 2026-04-10 — added Phases 21-23 (v1.1 Data Enrichment & Court Records): UGRC-01 through UGRC-04, XCHG-01 through XCHG-06, SCORE2-01 through SCORE2-03*
 
-| MAO-01 | Phase 24 | Pending |
-| MAO-02 | Phase 24 | Pending |
-| MAO-03 | Phase 24 | Pending |
-| HML-01 | Phase 24 | Pending |
-| HML-02 | Phase 24 | Pending |
-| HML-03 | Phase 24 | Pending |
-| HML-04 | Phase 24 | Pending |
-| FLIP-01 | Phase 24 | Pending |
-| FLIP-02 | Phase 24 | Pending |
-| FLIP-03 | Phase 24 | Pending |
-| FLIP-04 | Phase 24 | Pending |
+| MAO-01 | Phase 24 | Complete |
+| MAO-02 | Phase 24 | Complete |
+| MAO-03 | Phase 24 | Complete |
+| HML-01 | Phase 24 | Complete |
+| HML-02 | Phase 24 | Complete |
+| HML-03 | Phase 24 | Complete |
+| HML-04 | Phase 24 | Complete |
+| FLIP-01 | Phase 24 | Complete |
+| FLIP-02 | Phase 24 | Complete |
+| FLIP-03 | Phase 24 | Complete |
+| FLIP-04 | Phase 24 | Complete |
 | WSALE-01 | Phase 24 | Pending |
 | WSALE-02 | Phase 24 | Pending |
 | WSALE-03 | Phase 24 | Pending |

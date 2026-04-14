@@ -106,7 +106,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — Math engine, sell-side costs, HML iterative convergence, buyer/flipper view
+- [x] 24-01-PLAN.md — Math engine, sell-side costs, HML iterative convergence, buyer/flipper view
 - [ ] 24-02-PLAN.md — Wholesaler view, view toggle, human verification checkpoint
 
 ### Phase 6: Data Analytics & Insights
@@ -148,7 +148,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
-| 24. Advanced MAO Calculator | 0/2 | Not started | - |
+| 24. Advanced MAO Calculator | 1/2 | In progress | Plan 01 complete |
 
 ### Phase 7: Frontend Design Polish
 

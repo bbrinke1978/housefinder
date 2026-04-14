@@ -10,11 +10,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 24 — Advanced MAO Calculator
-Plan: TBD (run /gsd:plan-phase 24)
-Status: Roadmap defined, ready for planning
-Last activity: 2026-04-12 — v1.2 roadmap created
+Plan: 02 of 3
+Status: In progress — Plan 01 complete
+Last activity: 2026-04-14 — Advanced MAO Calculator Plan 01 complete
+Stopped At: Completed 24-advanced-mao-calculator-24-01-PLAN.md
 
-Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -97,6 +98,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░░░░
 | Phase 21-ugrc-assessor-enrichment P02 | 40min | 1 tasks | 0 files |
 | Phase 22-xchange-court-record-intake P01 | 5 | 2 tasks | 3 files |
 | Phase 22-xchange-court-record-intake P02 | 15 | 2 tasks | 2 files |
+| Phase 24-advanced-mao-calculator P01 | 4min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -337,6 +339,9 @@ Recent decisions affecting current work:
 - [Phase 23-01]: Null and sentinel 1970-01-01 dates treated as distinct signals that cannot be proximity-checked; always kept
 - [Phase 23-01]: deduplicateSignals() called on pre-filtered activeSignals inside scoreProperty() — dedup runs only on scoreable signals
 - [Phase 23-01]: dry-run Pass B ensures XChange signal weights are non-zero (defaults 1/1/2) even if scraperConfig has them at 0
+- [Phase 24-01]: convergeMao() defined inside component body to close over all 13 state variables without parameter threading
+- [Phase 24-01]: Two convergeMao calls (minProfit, maxProfit) produce the MAO range; activeView stubbed for Plan 02 wholesaler panel
+- [Phase 24-01]: wholesaleFee key kept in handleSave FormData (mapped to assignmentFee value) to preserve DB action contract
 
 ### Roadmap Evolution
 
