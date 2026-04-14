@@ -50,7 +50,7 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
   const [offerPrice, setOfferPrice] = useState(deal.offerPrice ?? 0);
   const [assignmentFee, setAssignmentFee] = useState(deal.assignmentFee ?? 15000);
   const [saving, setSaving] = useState(false);
-  const [activeView] = useState<"buyer" | "wholesaler">("buyer");
+  const [activeView, setActiveView] = useState<"buyer" | "wholesaler">("buyer");
 
   // ── Math engine ──────────────────────────────────────────────────────────
 
@@ -174,14 +174,36 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
     );
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Wholesaler math (all derived from maoBest) ───────────────────────────
+  const maxPurchaseFromSeller = maoBest - assignmentFee;
+  const endBuyerOutOfPocket = maoBest + buyClosingCosts;
+  const wholesalerSpread = assignmentFee;
+  const wholesalerRoi =
+    maxPurchaseFromSeller > 0
+      ? Math.round((assignmentFee / maxPurchaseFromSeller) * 100)
+      : 0;
 
-  // activeView is wired for Plan 02; buyer view is rendered unconditionally for now
-  void activeView;
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-4">
-      {/* View toggle — placeholder for Plan 02 */}
+      {/* View Toggle */}
+      <div className="flex gap-2">
+        <Button
+          variant={activeView === "buyer" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setActiveView("buyer")}
+        >
+          Buyer / Flipper
+        </Button>
+        <Button
+          variant={activeView === "wholesaler" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setActiveView("wholesaler")}
+        >
+          Wholesaler
+        </Button>
+      </div>
 
       {/* Row 1: Primary Inputs + Sell-Side Costs */}
       <div className="grid gap-4 md:grid-cols-2">
@@ -264,7 +286,8 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
         </Card>
       </div>
 
-      {/* Row 2: Hard Money Loan + Buyer/Flipper MAO Results */}
+      {/* Row 2: Hard Money Loan + Buyer/Flipper MAO Results (buyer view only) */}
+      {activeView === "buyer" && (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -416,6 +439,84 @@ export function DealMaoCalculator({ deal }: DealMaoCalculatorProps) {
           </CardContent>
         </Card>
       </div>
+      )}
+
+      {/* Wholesaler panel (wholesaler view only) */}
+      {activeView === "wholesaler" && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Left: Wholesaler Inputs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Wholesaler Inputs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {numInput("assignmentFee-ws", "Assignment Fee", assignmentFee, setAssignmentFee)}
+              <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Closing Costs Note</p>
+                <p>In a standard Utah assignment, the end buyer pays their own closing costs (~1–2%). Your assignment fee is your entire spread — no deduction needed.</p>
+              </div>
+              {numInput("minProfit-ws", "End Buyer Min Profit", minProfit, setMinProfit)}
+              <p className="text-xs text-muted-foreground">Adjusting end buyer min profit recalculates max purchase price from seller.</p>
+            </CardContent>
+          </Card>
+
+          {/* Right: Wholesaler Results */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Wholesaler Results</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="rounded-lg bg-muted/50 p-4 space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium mb-2">End Buyer MAO</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">End buyer can pay up to</span>
+                    <span className="text-xl font-bold">{fmt(maoBest)}</span>
+                  </div>
+                </div>
+
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Your Numbers</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Max pay to seller</span>
+                    <span className={`font-semibold ${maxPurchaseFromSeller >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {fmt(maxPurchaseFromSeller)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Your spread (assignment fee)</span>
+                    <span className="font-semibold">{fmt(wholesalerSpread)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Wholesaler ROI</span>
+                    <span className={`font-medium ${wholesalerRoi >= 15 ? "text-green-600 dark:text-green-400" : wholesalerRoi >= 8 ? "text-yellow-600 dark:text-yellow-400" : "text-red-600 dark:text-red-400"}`}>
+                      {wholesalerRoi}%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">End Buyer Summary</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total out-of-pocket</span>
+                    <span className="font-medium">{fmt(endBuyerOutOfPocket)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Includes buy-side closing costs of {fmt(buyClosingCosts)}</p>
+                </div>
+              </div>
+
+              {offerPrice > 0 && (
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <span className="text-sm text-muted-foreground">Your offer vs max purchase price</span>
+                  <span className={`text-sm font-medium ${offerPrice <= maxPurchaseFromSeller ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {offerPrice <= maxPurchaseFromSeller ? "Under max" : "Over max"}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
