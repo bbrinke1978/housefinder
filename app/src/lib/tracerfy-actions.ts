@@ -20,7 +20,7 @@
 
 import { db } from "@/db/client";
 import { properties, ownerContacts, scraperConfig, deals } from "@/db/schema";
-import { eq, inArray, like, sql } from "drizzle-orm";
+import { eq, and, inArray, like, sql } from "drizzle-orm";
 import { auth } from "@/auth";
 import { z } from "zod/v4";
 import { revalidatePath } from "next/cache";
@@ -586,6 +586,18 @@ export async function runSkipTrace(
     });
 
     revalidatePath(`/properties/${propertyId}`);
+
+    // Update any linked deal's sellerPhone if it was empty and we found a phone
+    if (phoneCount > 0) {
+      const firstPhone = contacts.find((c) => c.phone && !c.phone.startsWith("MAILING:"))?.phone;
+      if (firstPhone) {
+        await db
+          .update(deals)
+          .set({ sellerPhone: firstPhone })
+          .where(and(eq(deals.propertyId, propertyId), sql`${deals.sellerPhone} IS NULL OR ${deals.sellerPhone} = ''`));
+        revalidatePath("/deals");
+      }
+    }
 
     return { success: true, found: found > 0, phoneCount, emailCount };
   } catch (err) {

@@ -148,7 +148,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
-| 24. Advanced MAO Calculator | 2/2 | Complete   | 2026-04-14 |
+| 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
 
 ### Phase 7: Frontend Design Polish
 
