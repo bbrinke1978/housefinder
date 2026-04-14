@@ -103,7 +103,11 @@ Plans:
   2. The map can be filtered by distress type, city, and hot lead status, and updates pin visibility without a page reload
   3. Tapping a map pin shows a summary card with the property address, distress score, and a link to its detail page
   4. The map supports pinch-to-zoom and pan gestures on mobile and does not crash or produce a blank screen during server-side rendering
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 24-01-PLAN.md — Math engine, sell-side costs, HML iterative convergence, buyer/flipper view
+- [ ] 24-02-PLAN.md — Wholesaler view, view toggle, human verification checkpoint
 
 ### Phase 6: Data Analytics & Insights
 **Goal**: The investor has full visibility into lead pipeline performance, market trends, outreach effectiveness, and scraper health — enabling data-driven decisions about which markets to focus on, when to act, and what's working
