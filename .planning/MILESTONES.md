@@ -20,3 +20,15 @@
 - Security review (OWASP audit, headers, Key Vault)
 
 **Last phase:** 20 (Security Review)
+
+## v1.1 — Data Enrichment & Court Records (Completed 2026-04-13)
+
+**Phases:** 21-23
+**Goal:** Enrich property data with free UGRC assessor records and unlock court record intake via agent-assisted XChange workflow.
+
+**Key deliverables:**
+- UGRC assessor enrichment (5,038 properties with sqft/year-built/assessed-value)
+- XChange court record intake pipeline (parser, 3-tier address matcher, /api/court-intake)
+- Scoring rebalance (signal dedup, dry-run CLI, signal weights configured)
+
+**Last phase:** 23 (Scoring Rebalance)

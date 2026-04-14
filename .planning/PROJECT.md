@@ -8,15 +8,16 @@ A free, mobile-first web application that finds distressed properties in small U
 
 Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses — the earlier the better, the more distress signals the hotter the lead.
 
-## Current Milestone: v1.1 Data Enrichment & Court Records
+## Current Milestone: v1.2 Advanced MAO Calculator
 
-**Goal:** Enrich property data with free UGRC assessor records and unlock foreclosure/probate/code violation leads from Utah Courts XChange via agent-assisted browser workflow.
+**Goal:** Replace the simple MAO formula with a professional-grade calculator showing dual buyer/flipper and wholesaler perspectives, including hard money costs, sell-side costs, and iterative convergence.
 
 **Target features:**
-- UGRC assessor data import (sqft, year built, assessed value — free, no subscription)
-- XChange court record intake (agent-assisted browser search → parse → distress signals)
-- Court record parser for foreclosure, probate, and code violation cases
-- Distress signal pipeline matching court records to existing properties
+- Sell-side costs (buyer's agent %, selling agent %, closing costs/title %)
+- Hard money + carry costs (interest rate, points, LTV, hold time, monthly carry)
+- Buyer/flipper view with min/max profit targets and MAO range
+- Wholesaler view with assignment fee, max purchase price from seller, spread
+- Iterative convergence for loan amount (MAO × LTV)
 
 ## Requirements
 

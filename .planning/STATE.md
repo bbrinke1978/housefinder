@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Milestone v1.1 — Data Enrichment & Court Records (Phases 21-23)
+**Current focus:** Milestone v1.2 — Advanced MAO Calculator
 
 ## Current Position
 
-Phase: 23 (Scoring Rebalance)
-Plan: 1 complete
-Status: In progress
-Last activity: 2026-04-13 — 23-01 complete (deduplicateSignals() in score.ts + dry-run.ts CLI)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-13 — Milestone v1.2 started
 
-Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0% (v1.1)
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
