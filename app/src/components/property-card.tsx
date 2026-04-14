@@ -336,17 +336,17 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
           </span>
         </div>
 
-        {/* Skip trace indicator — center right, hover only */}
+        {/* Skip trace indicator — right-aligned, always visible when traced */}
         {(property.traceStatus === "traced_found" || property.traceStatus === "traced_not_found") && (
-          <div className="flex items-center justify-end mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center justify-end mt-1.5">
             {property.traceStatus === "traced_found" && (
-              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-medium">
+              <span className="inline-flex items-center gap-1 text-[10px] rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 font-medium">
                 <Search className="h-3 w-3" />
                 Traced
               </span>
             )}
             {property.traceStatus === "traced_not_found" && (
-              <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+              <span className="inline-flex items-center gap-1 text-[10px] rounded-full bg-muted text-muted-foreground border border-border px-2 py-0.5 font-medium">
                 <SearchX className="h-3 w-3" />
                 No results
               </span>
