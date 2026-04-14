@@ -268,6 +268,36 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SCORE2-02**: Hot lead threshold adjusted based on dry-run results to prevent hot lead flood
 - [x] **SCORE2-03**: NOD and lis_pendens signals deduplicated for same property within 90-day window
 
+## v1.2 Requirements — Advanced MAO Calculator
+
+### MAO Calculator Core
+
+- [ ] **MAO-01**: Calculator accepts ARV and rehab estimate as primary inputs with sell-side cost percentages
+- [ ] **MAO-02**: Sell-side costs computed from configurable buyer's agent %, selling agent %, and closing/title %
+- [ ] **MAO-03**: Net proceeds at resale displayed (ARV minus all sell-side costs)
+
+### Hard Money + Carry
+
+- [ ] **HML-01**: Hard money loan parameters configurable (annual interest rate, points, LTV %, hold time months)
+- [ ] **HML-02**: Monthly carry costs configurable (tax, insurance, utilities combined dollar amount)
+- [ ] **HML-03**: Loan amount computed iteratively via convergence (MAO × LTV)
+- [ ] **HML-04**: Total HML + carry cost displayed (interest + points + monthly carry)
+
+### Buyer/Flipper View
+
+- [ ] **FLIP-01**: Buy-side closing costs configurable as dollar amount
+- [ ] **FLIP-02**: Min and max profit targets configurable as dollar amounts
+- [ ] **FLIP-03**: MAO range displayed showing offer at min profit and max profit targets
+- [ ] **FLIP-04**: MAO as percentage of ARV displayed for quick reference
+
+### Wholesaler View
+
+- [ ] **WSALE-01**: Assignment fee configurable as dollar amount
+- [ ] **WSALE-02**: Seller-side closing costs shown (assignee pays both sides noted)
+- [ ] **WSALE-03**: Max purchase price from seller computed (end buyer MAO minus fee minus closing costs)
+- [ ] **WSALE-04**: End buyer's total out-of-pocket displayed
+- [ ] **WSALE-05**: Wholesaler's spread displayed
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -537,3 +567,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Last updated: 2026-04-10 — added Phases 21-23 (v1.1 Data Enrichment & Court Records): UGRC-01 through UGRC-04, XCHG-01 through XCHG-06, SCORE2-01 through SCORE2-03*
+
+| MAO-01 | Phase 24 | Pending |
+| MAO-02 | Phase 24 | Pending |
+| MAO-03 | Phase 24 | Pending |
+| HML-01 | Phase 24 | Pending |
+| HML-02 | Phase 24 | Pending |
+| HML-03 | Phase 24 | Pending |
+| HML-04 | Phase 24 | Pending |
+| FLIP-01 | Phase 24 | Pending |
+| FLIP-02 | Phase 24 | Pending |
+| FLIP-03 | Phase 24 | Pending |
+| FLIP-04 | Phase 24 | Pending |
+| WSALE-01 | Phase 24 | Pending |
+| WSALE-02 | Phase 24 | Pending |
+| WSALE-03 | Phase 24 | Pending |
+| WSALE-04 | Phase 24 | Pending |
+| WSALE-05 | Phase 24 | Pending |
+
+**v1.2 Coverage:**
+- v1.2 requirements: 16 total
+- Mapped to phases: 16
+- Unmapped: 0
+
+---
+*Last updated: 2026-04-12 — added Phase 24 (v1.2 Advanced MAO Calculator): MAO-01 through MAO-03, HML-01 through HML-04, FLIP-01 through FLIP-04, WSALE-01 through WSALE-05*

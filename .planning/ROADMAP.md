@@ -6,6 +6,8 @@ HouseFinder delivers a single-user lead generation tool for distressed propertie
 
 v1.1 adds three phases (21-23) that enrich existing properties with free UGRC assessor data, unlock court record signals via an agent-assisted XChange workflow, and rebalance scoring to handle the new signal types safely.
 
+v1.2 adds one phase (24) that replaces the simple ARV x 0.65 MAO formula with a professional-grade dual-view calculator covering sell-side costs, hard money and carry costs, buyer/flipper profit targets, and wholesaler spread math.
+
 ## Phases
 
 **Phase Numbering:**
@@ -23,6 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 21: UGRC Assessor Enrichment** - Enrich existing properties with sqft, year built, assessed value, and lot size from free UGRC ArcGIS data (completed 2026-04-13)
 - [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
+- [ ] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread
 
 ## Phase Details
 
@@ -141,6 +144,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 21. UGRC Assessor Enrichment | 2/2 | Complete    | 2026-04-13 |
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
+| 24. Advanced MAO Calculator | 0/2 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
@@ -475,3 +479,20 @@ Plans:
 Plans:
 - [x] 23-01-PLAN.md — 90-day dedup in scoreProperty() + dry-run CLI reporting baseline vs simulated hot counts
 - [ ] 23-02-PLAN.md — Human reviews dry-run output, chooses threshold, updates scraperConfig, runs live rescore
+
+---
+
+## Milestone v1.2 - Advanced MAO Calculator (Phase 24)
+
+### Phase 24: Advanced MAO Calculator
+
+**Goal:** The investor sees professional-grade deal math with sell-side costs, hard money carry costs, and both buyer/flipper and wholesaler perspectives in one calculator -- replacing the single-line ARV x 0.65 formula
+**Depends on:** Phase 23
+**Requirements**: MAO-01, MAO-02, MAO-03, HML-01, HML-02, HML-03, HML-04, FLIP-01, FLIP-02, FLIP-03, FLIP-04, WSALE-01, WSALE-02, WSALE-03, WSALE-04, WSALE-05
+**Success Criteria** (what must be TRUE):
+  1. User enters ARV and rehab estimate and immediately sees net proceeds at resale after configurable sell-side costs (buyer's agent %, selling agent %, closing/title %) -- replacing the old static formula
+  2. Hard money loan parameters (rate, points, LTV, hold time) and monthly carry costs (tax + insurance + utilities) are configurable, and the loan amount converges iteratively on MAO x LTV -- total HML + carry cost displayed
+  3. Buyer/flipper view shows a MAO range (offer at min profit vs offer at max profit) plus MAO as a percentage of ARV, with buy-side closing costs as a configurable input
+  4. Wholesaler view shows assignment fee, max purchase price from seller (end buyer MAO minus fee minus closing costs), end buyer's total out-of-pocket, and wholesaler's spread -- all derived from the same inputs without any additional data entry
+  5. Switching between buyer/flipper and wholesaler views updates the displayed numbers without losing entered inputs
+**Plans**: TBD
