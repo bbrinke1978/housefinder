@@ -32,3 +32,17 @@
 - Scoring rebalance (signal dedup, dry-run CLI, signal weights configured)
 
 **Last phase:** 23 (Scoring Rebalance)
+
+## v1.2 — Advanced MAO Calculator (Completed 2026-04-13)
+
+**Phases:** 24
+**Goal:** Replace simple ARV × 0.65 formula with professional dual-view calculator.
+
+**Key deliverables:**
+- Sell-side costs (buyer's agent %, selling agent %, closing/title %)
+- Hard money + carry costs with iterative convergence
+- Buyer/flipper view with MAO range at min/max profit targets
+- Wholesaler view with max purchase price, end buyer out-of-pocket, spread
+- View toggle preserves all inputs
+
+**Last phase:** 24 (Advanced MAO Calculator)

@@ -46,6 +46,7 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [x] UGRC assessor data import — 5,038 properties enriched with sqft/year-built/assessed-value
 - [x] XChange court record intake — parser + API endpoint built, awaiting XChange account
 - [x] Scoring rebalance — dedup + weights configured, threshold at 4
+- [x] Advanced MAO calculator — dual buyer/flipper + wholesaler views, HML costs, iterative convergence
 - [ ] Bridge Data Output API integration — auto-ARV, comps, property details (needs Brian's RE license + Bridge API key)
 - [ ] GitHub Actions upgrade — Azure/functions-action@v1 → v2 before June 2026
 
@@ -91,3 +92,8 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [x] CSP promoted from Report-Only to enforcing
 - [x] Azure App Service decommissioned (~$13/mo saved)
 - [x] DB migrations applied (wholesale tables + deals.leadSource)
+- [x] v1.1: UGRC enrichment (5,038 properties), XChange intake pipeline, scoring rebalance
+- [x] v1.2: Advanced MAO Calculator (buyer/flipper + wholesaler dual view, HML convergence)
+- [x] Skip trace auto-populates deal sellerPhone
+- [x] Contract PDF font file fixed (was corrupt)
+- [x] Tracerfy POST as FormData + rate limit retry
