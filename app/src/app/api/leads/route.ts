@@ -15,6 +15,9 @@ const WebLeadSchema = z.object({
   message: z.string().max(2000).optional().default(""),
   email: z.string().email().optional(),
   source: z.enum(["website", "voicemail"]).optional().default("website"),
+  condition: z.string().max(100).optional().default(""),
+  timeline: z.string().max(100).optional().default(""),
+  askingPriceRange: z.string().max(50).optional().default(""),
 });
 
 const CORS_HEADERS = {
@@ -62,7 +65,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name, phone, address, city, state, zip, message, email, source } = parsed.data;
+  const {
+    name,
+    phone,
+    address,
+    city,
+    state,
+    zip,
+    message,
+    email,
+    source,
+    condition,
+    timeline,
+    askingPriceRange,
+  } = parsed.data;
 
   // Build full address string
   const fullAddress = [address, city, state, zip].filter(Boolean).join(", ");
@@ -78,6 +94,9 @@ export async function POST(request: NextRequest) {
   if (zip) noteLines.push(`Zip: ${zip}`);
   if (message) noteLines.push(`Message: ${message}`);
   if (email) noteLines.push(`Email: ${email}`);
+  if (condition) noteLines.push(`Condition: ${condition}`);
+  if (timeline) noteLines.push(`Timeline: ${timeline}`);
+  if (askingPriceRange) noteLines.push(`Asking price: ${askingPriceRange}`);
   const noteText = noteLines.join("\n");
 
   // Insert lead + leadNote
