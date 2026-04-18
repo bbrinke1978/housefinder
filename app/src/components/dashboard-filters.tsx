@@ -40,6 +40,8 @@ const TIER_OPTIONS = [
 ];
 
 const LEAD_SOURCE_OPTIONS = [
+  { value: "website", label: "Website" },
+  { value: "voicemail", label: "Voicemail" },
   { value: "scraping", label: "Scraping Data" },
   { value: "flyer", label: "Flyer" },
   { value: "signage", label: "Signage" },
