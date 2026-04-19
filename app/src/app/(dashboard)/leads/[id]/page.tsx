@@ -4,6 +4,7 @@ import { getInboundLead } from "@/lib/queries";
 import { BackButton } from "@/components/back-button";
 import { LeadNotes } from "@/components/lead-notes";
 import { InboundLeadStatusSelect } from "@/components/inbound-lead-status-select";
+import { DeleteInboundLeadButton } from "@/components/delete-inbound-lead-button";
 import { formatDateTimeFull } from "@/lib/format-date";
 import type { LeadNote } from "@/types";
 
@@ -54,7 +55,13 @@ export default async function InboundLeadDetailPage({
             </span>
           </div>
         </div>
-        <InboundLeadStatusSelect leadId={lead.id} currentStatus={lead.status} />
+        <div className="flex items-center gap-2">
+          <InboundLeadStatusSelect leadId={lead.id} currentStatus={lead.status} />
+          <DeleteInboundLeadButton
+            leadId={lead.id}
+            leadLabel={lead.name || lead.phone || "this lead"}
+          />
+        </div>
       </div>
 
       {/* Contact Info Card */}

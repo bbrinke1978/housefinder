@@ -1,10 +1,22 @@
 "use server";
 
 import { db } from "@/db/client";
-import { leads, leadNotes, scraperConfig, ownerContacts, distressSignals } from "@/db/schema";
+import {
+  leads,
+  leadNotes,
+  scraperConfig,
+  ownerContacts,
+  distressSignals,
+  callLogs,
+  alertHistory,
+  contactEvents,
+  campaignEnrollments,
+  emailSendLog,
+} from "@/db/schema";
 import { eq, and, like } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod/v4";
 
 /**
@@ -609,4 +621,44 @@ export async function getActiveVacantFlag(
     .limit(1);
 
   return rows.length > 0;
+}
+
+/**
+ * Delete an inbound (website/voicemail) lead and all its child rows.
+ * Restricted to leads with leadSource 'website' or 'voicemail' to prevent
+ * accidentally nuking scraped property leads.
+ */
+export async function deleteInboundLead(leadId: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
+  const parsedId = z.uuid().parse(leadId);
+
+  const [existing] = await db
+    .select({ leadSource: leads.leadSource, propertyId: leads.propertyId })
+    .from(leads)
+    .where(eq(leads.id, parsedId))
+    .limit(1);
+
+  if (!existing) {
+    throw new Error("Lead not found");
+  }
+
+  if (existing.leadSource !== "website" && existing.leadSource !== "voicemail") {
+    throw new Error("Only inbound (website/voicemail) leads can be deleted from this action");
+  }
+
+  await db.delete(emailSendLog).where(eq(emailSendLog.leadId, parsedId));
+  await db.delete(campaignEnrollments).where(eq(campaignEnrollments.leadId, parsedId));
+  await db.delete(contactEvents).where(eq(contactEvents.leadId, parsedId));
+  await db.delete(alertHistory).where(eq(alertHistory.leadId, parsedId));
+  await db.delete(callLogs).where(eq(callLogs.leadId, parsedId));
+  await db.delete(leadNotes).where(eq(leadNotes.leadId, parsedId));
+  await db.delete(leads).where(eq(leads.id, parsedId));
+
+  revalidatePath("/");
+  revalidatePath("/leads");
+  redirect("/");
 }
