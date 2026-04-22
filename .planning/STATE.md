@@ -5,17 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Milestone v1.2 — Advanced MAO Calculator
+**Current focus:** Milestone v1.3 — Rose Park Pilot (urban expansion, zip 84116)
 
 ## Current Position
 
-Phase: 24 — Advanced MAO Calculator
-Plan: 03 of 3
-Status: Checkpoint — awaiting human verify on Plan 02 wholesaler view
-Last activity: 2026-04-12 — Advanced MAO Calculator Plan 02 Task 1 complete, checkpoint reached
-Stopped At: checkpoint:human-verify in 24-02-PLAN.md — visual sign-off needed on wholesaler panel
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-21 — Milestone v1.3 Rose Park Pilot started
 
-Progress: [████████████████░░░░░░░░░░░░░░░░░░░░░░░░░] 66%
+Progress: v1.3 requirements gathering
 
 ## Performance Metrics
 

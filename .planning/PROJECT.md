@@ -8,22 +8,25 @@ A free, mobile-first web application that finds distressed properties in small U
 
 Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses — the earlier the better, the more distress signals the hotter the lead.
 
-## Current Milestone: v1.2 Advanced MAO Calculator
+## Current Milestone: v1.3 Rose Park Pilot
 
-**Goal:** Replace the simple MAO formula with a professional-grade calculator showing dual buyer/flipper and wholesaler perspectives, including hard money costs, sell-side costs, and iterative convergence.
+**Goal:** Pilot urban expansion by adding Salt Lake City's Rose Park neighborhood (zip 84116) as a distress-scraping target — additive to the rural counties, not a replacement. Brian is personally familiar with the area and it is close to his homes.
 
 **Target features:**
-- Sell-side costs (buyer's agent %, selling agent %, closing costs/title %)
-- Hard money + carry costs (interest rate, points, LTV, hold time, monthly carry)
-- Buyer/flipper view with min/max profit targets and MAO range
-- Wholesaler view with assignment fee, max purchase price from seller, spread
-- Iterative convergence for loan amount (MAO × LTV)
+- Surface Rose Park (84116) properties already collected by statewide scrapers (NOD, UGRC assessor) that are currently hidden by the rural-only city filter
+- Salt Lake County tax delinquent scraper (analog of carbon-delinquent / emery-delinquent-pdf)
+- Salt Lake County recorder scraper for deed/lien/lis pendens filings (analog of carbon-recorder)
+- Rose Park–specific filter in the dashboard UI (leaning toward retagging 84116 as `city = 'Rose Park'` so the existing city filter just works)
+- Daily scraper schedule if feasible; weekly acceptable as a fallback
+- Light scoring calibration check — Rose Park density may surface different signal mixes than rural
 
 ## Requirements
 
 ### Validated
 
 - v1.0: Core platform shipped (20 phases) — scraping, scoring, deals, contracts, photos, CRM, campaigns, security
+- v1.1: Data enrichment (Phases 21-23) — UGRC assessor enrichment, XChange court record intake pipeline, scoring rebalance
+- v1.2: Advanced MAO Calculator (Phase 24) — dual buyer/flipper + wholesaler views, HML convergence
 
 ### Active
 
@@ -70,7 +73,7 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 - **Tech stack**: Next.js + TypeScript + Tailwind + shadcn/ui (frontend) + Azure PostgreSQL + Azure Functions (scraping)
 - **Hosting**: Azure App Service in West US 3, resource group `rg-housefinder`, production only. No local development — build and deploy directly to Azure from day one.
 - **DNS**: Use Azure DNS zone for the domain (no external DNS needed)
-- **Geography**: Utah small towns only, starting with ~10 cities around Price, UT
+- **Geography**: Utah — 9 rural small towns (Carbon/Emery/Sanpete/Sevier/Juab/Millard counties) + Rose Park (Salt Lake City zip 84116) as urban pilot. Rose Park is a scoped experiment; if it produces deals, expand to other SLC neighborhoods. If not, stay rural.
 - **Data sources**: Public records only — county, state, and federal databases
 - **SMS provider**: Need to identify a free/cheap SMS service for text alerts
 
@@ -83,7 +86,8 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 | Azure over Netlify | Need real database (PostgreSQL) and long-running scraper jobs (Azure Functions); Netlify's 15-min limit too tight | — Pending |
 | Single production environment | Only user is the investor; no need for dev/prod separation | — Pending |
 | West US 3 region | Consistent with existing Azure infrastructure | — Pending |
-| Start with 10 Utah small towns | Less competition, manageable scope, expand based on results | — Pending |
+| Start with 10 Utah small towns | Less competition, manageable scope, expand based on results | ✓ Good — v1.0 validated rural strategy |
+| v1.3 Rose Park urban pilot | Test urban market with a scoped zip (84116) close to Brian's homes. Augments rural; does not replace. | — Pending |
 | Mobile-first design | User needs to act on hot leads from phone — tap-to-call is critical | — Pending |
 | Distress signal stacking for scoring | Multiple indicators = higher urgency = hot lead alert | — Pending |
 | Email + SMS dual alerts | Email for details, SMS for urgency on hot leads | — Pending |
@@ -91,4 +95,4 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 | Azure DNS for domain | Keep everything in Azure — DNS zone in rg-housefinder | — Pending |
 
 ---
-*Last updated: 2026-03-17 after no-local-dev decision (all Azure from day one)*
+*Last updated: 2026-04-21 after v1.3 Rose Park Pilot milestone kickoff*
