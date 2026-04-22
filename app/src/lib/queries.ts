@@ -192,7 +192,26 @@ export interface DashboardStats {
   cool: number;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export interface GetPropertiesParams {
+  city?: string;
+  distressType?: string;
+  hot?: string;
+  status?: string;
+  sort?: string;
+  skipTrace?: string;
+  minScore?: string;
+  ownerType?: string;
+  /** Tier filter: "critical" (7+), "hot" (4+), "warm" (2+) */
+  tier?: string;
+  /** Lead source filter: comma-separated values like "scraping,website,driving" */
+  source?: string;
+  /** Search by owner name or address */
+  search?: string;
+}
+
+export async function getDashboardStats(
+  params: GetPropertiesParams = {}
+): Promise<DashboardStats> {
   // Precompute exclusion lists once
   const [hideBigOps, bigOpNames, hideVacantLand, hideEntities, hideParcelOnly, targetCities] = await Promise.all([
     shouldHideBigOperators(),
@@ -299,9 +318,115 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     )
   )`);
 
-  // Filter to target cities only
-  if (targetCities.length > 0) {
+  // Filter to target cities only (unless a specific city filter is set)
+  if (!params.city && targetCities.length > 0) {
     statsConditions.push(sql`lower(${properties.city}) IN (${sql.join(targetCities.map(c => sql`lower(${c})`), sql`, `)})`);
+  }
+
+  // --- User-selected dashboard filters ---
+
+  // City filter (comma-separated for multi-select)
+  if (params.city) {
+    const cities = params.city.split(",").map((c) => c.trim()).filter(Boolean);
+    if (cities.length === 1) {
+      statsConditions.push(ilike(properties.city, cities[0]));
+    } else if (cities.length > 1) {
+      statsConditions.push(sql`lower(${properties.city}) IN (${sql.join(cities.map(c => sql`lower(${c})`), sql`, `)})`);
+    }
+  }
+
+  // Owner type filter
+  if (params.ownerType) {
+    const ownerTypes = params.ownerType.split(",").map((t) => t.trim()).filter(Boolean);
+    if (ownerTypes.length === 1) {
+      statsConditions.push(sql`${properties.ownerType} = ${ownerTypes[0]}`);
+    } else if (ownerTypes.length > 1) {
+      statsConditions.push(sql`${properties.ownerType} IN (${sql.join(ownerTypes.map(t => sql`${t}`), sql`, `)})`);
+    }
+  }
+
+  // Distress type filter (exists in signals)
+  if (params.distressType) {
+    const distressTypes = params.distressType.split(",").map((t) => t.trim()).filter(Boolean);
+    if (distressTypes.length > 0) {
+      statsConditions.push(
+        exists(
+          db
+            .select({ one: sql`1` })
+            .from(distressSignals)
+            .where(
+              and(
+                eq(distressSignals.propertyId, properties.id),
+                sql`${distressSignals.signalType} IN (${sql.join(distressTypes.map(t => sql`${t}`), sql`, `)})`
+              )
+            )
+        )
+      );
+    }
+  }
+
+  // Lead source filter
+  if (params.source) {
+    const sources = params.source.split(",").map((s) => s.trim()).filter(Boolean);
+    if (sources.length === 1) {
+      if (sources[0] === "other") {
+        statsConditions.push(sql`(${leads.leadSource} = 'other' OR ${leads.leadSource} LIKE 'other:%')`);
+      } else {
+        statsConditions.push(eq(leads.leadSource, sources[0]));
+      }
+    } else if (sources.length > 1) {
+      const hasOther = sources.includes("other");
+      const rest = sources.filter((s) => s !== "other");
+      if (hasOther) {
+        statsConditions.push(sql`(${leads.leadSource} IN (${sql.join(rest.map(s => sql`${s}`), sql`, `)}) OR ${leads.leadSource} = 'other' OR ${leads.leadSource} LIKE 'other:%')`);
+      } else {
+        statsConditions.push(sql`${leads.leadSource} IN (${sql.join(sources.map(s => sql`${s}`), sql`, `)})`);
+      }
+    }
+  }
+
+  // Search
+  if (params.search) {
+    const term = `%${params.search}%`;
+    statsConditions.push(
+      sql`(${properties.ownerName} ILIKE ${term} OR ${properties.address} ILIKE ${term} OR ${properties.parcelId} ILIKE ${term})`
+    );
+  }
+
+  // Tier / min score filter
+  if (params.tier) {
+    const tierScoreMap: Record<string, number> = { critical: 7, hot: 4, warm: 2 };
+    const tiers = params.tier.split(",").map((t) => t.trim()).filter(Boolean);
+    const tierMins = tiers.map((t) => tierScoreMap[t]).filter((v): v is number => v !== undefined);
+    if (tierMins.length > 0) {
+      const minThreshold = Math.min(...tierMins);
+      statsConditions.push(sql`${leads.distressScore} >= ${minThreshold}`);
+    }
+  } else {
+    const minScore = params.minScore ? parseInt(params.minScore, 10) : 0;
+    if (minScore > 0) {
+      statsConditions.push(sql`${leads.distressScore} >= ${minScore}`);
+    }
+  }
+
+  // Hot leads only
+  if (params.hot === "true") {
+    statsConditions.push(eq(leads.isHot, true));
+  }
+
+  // Lead status
+  if (params.status) {
+    statsConditions.push(eq(leads.status, params.status));
+  }
+
+  // Needs skip trace
+  if (params.skipTrace === "true") {
+    statsConditions.push(
+      sql`NOT EXISTS (
+        SELECT 1 FROM owner_contacts oc
+        WHERE oc.property_id = ${properties.id} AND oc.phone IS NOT NULL
+      ) AND ${properties.ownerType} IN ('individual', 'unknown')`
+    );
   }
 
   // Only count properties that have at least one distress signal
@@ -361,23 +486,6 @@ export async function getOwnerContacts(propertyId: string): Promise<OwnerContact
 }
 
 // -- Property list with filters and sorting --
-
-export interface GetPropertiesParams {
-  city?: string;
-  distressType?: string;
-  hot?: string;
-  status?: string;
-  sort?: string;
-  skipTrace?: string;
-  minScore?: string;
-  ownerType?: string;
-  /** Tier filter: "critical" (7+), "hot" (4+), "warm" (2+) */
-  tier?: string;
-  /** Lead source filter: comma-separated values like "scraping,website,driving" */
-  source?: string;
-  /** Search by owner name or address */
-  search?: string;
-}
 
 export async function getProperties(
   params: GetPropertiesParams = {}

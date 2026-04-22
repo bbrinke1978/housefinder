@@ -52,7 +52,7 @@ export default async function DashboardPage({
   };
 
   const [stats, properties, cities, sequences, websiteLeads, overdueBuyers] = await Promise.all([
-    getDashboardStats(),
+    getDashboardStats(filterParams),
     getProperties(filterParams),
     getDistinctCities(),
     getSequences(),
