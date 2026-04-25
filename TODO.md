@@ -41,6 +41,23 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [ ] Review unmatched court records and tune address matching
 - [ ] Monitor hot lead count after first intake — threshold at 4, may need adjusting
 
+## v1.4+ Rose Park Follow-On (deferred from v1.3)
+
+Brian deferred these in v1.3 (2026-04-25) — surface signal volume from the v1.3 foundation first, then prioritize. Memory has full context (`project_rose_park_deferred.md`).
+
+- [ ] **Utah Legals SLC activation** — One-line `TARGET_COUNTIES` change + SLCo parcel-ID regex fix + 84116 zip allowlist. Cheap. Recommended as first follow-on.
+- [ ] **SLCo tax delinquent scraper** — `slco-delinquent.ts` (Playwright, carbon-delinquent.ts pattern). Annual-only schedule. Must land before April 29 of any given year for that year's list.
+- [ ] **SLCo Recorder scraper** — Highest complexity, paywalled portal. Needs `/gsd:research-phase` before any code.
+- [ ] **Proximity-to-home badge** — Haversine from Brian's homes on Rose Park lead cards.
+- [ ] **Code violations via XChange** — Zero new code; activates automatically when XChange subscription goes live (already covers SLC Third District).
+
+## Voicemail → Lead Pipeline (NOT BUILT)
+
+Current state:
+- [x] Google Voice (435) 250-3678 live, transcribes voicemails to Gmail
+- [x] Website contact form → `/api/leads` working (creates website-source leads)
+- [ ] Gmail-to-HouseFinder bridge — Apps Script that parses Google Voice transcript emails and POSTs to `/api/leads?source=voicemail`. Design scoped (Google Apps Script + Gmail label filter + time trigger), not yet built. Interim workaround: manually enter voicemail leads if needed.
+
 ## Upcoming Features (Claude Builds)
 
 - [x] UGRC assessor data import — 5,038 properties enriched with sqft/year-built/assessed-value

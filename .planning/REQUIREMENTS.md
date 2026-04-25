@@ -298,6 +298,24 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **WSALE-04**: End buyer's total out-of-pocket displayed
 - [x] **WSALE-05**: Wholesaler's spread displayed
 
+## v1.3 Requirements — Rose Park Pilot
+
+Urban expansion: surface Salt Lake City Rose Park (zip 84116) properties already collected by statewide scrapers. Foundation only — new SLCo-specific scrapers deferred to v1.4+ pending signal-volume validation.
+
+### Rose Park Data Foundation
+
+- [ ] **RP-01**: System runs UGRC assessor enrichment for Salt Lake County with `ZIP_CODE='84116'` ArcGIS WHERE filter (avoids 350k-parcel overload and Azure Function timeout)
+- [ ] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time — single normalization point for future neighborhood expansion
+- [ ] **RP-03**: One-shot SQL migration retags any existing properties stored as `city='SALT LAKE CITY'` with `zip='84116'` to `city='Rose Park'` so historical statewide-scraper data surfaces without rerun
+- [ ] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig` (Settings UI or seed update) so dashboard's existing city filter includes it
+- [ ] **RP-05**: `getProperties()` row limit raised from 100 to a value safely above expected Rose Park lead density (with paginated UI fallback if needed) so dense urban data does not silently truncate
+
+### Rose Park Display
+
+- [ ] **RP-06**: User can see "Rose Park" as a selectable city in dashboard filter dropdown
+- [ ] **RP-07**: User can see Rose Park properties (with all existing distress signals from statewide scrapers) in the dashboard property grid and stats bar
+- [ ] **RP-08**: Mapbox map clusters dense pin groups using supercluster pattern (benefits Rose Park urban density and improves all dense-area views)
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -308,6 +326,14 @@ Deferred to future release. Tracked but not in current roadmap.
 - **EXP-02**: PWA home screen installability with app-like experience
 - **EXP-03**: Export leads to CSV for manual mail campaigns
 - **EXP-04**: Scrape code violation signals (weed tickets, abandoned autos, cleanup orders) from Utah Courts XChange ($40/mo subscription) — covers all 6 target counties via justice court ordinance violation records
+
+### Rose Park v1.4+ Follow-On (deferred from v1.3 2026-04-25)
+
+- **RP-FW-01**: Activate Salt Lake County in `utah-legals.ts` `TARGET_COUNTIES` (one-line + parcel-ID regex fix for SLCo 10-digit format + 84116 zip allowlist) — cheapest new NOD signal for Rose Park
+- **RP-FW-02**: Build `slco-delinquent.ts` Playwright scraper for SLCo Auditor tax-sale page (annual-only schedule; 2026 list publishes April 29)
+- **RP-FW-03**: Build `slco-recorder.ts` for NOD/lis pendens/trustee sale documents — gated on `/gsd:research-phase` because portal is paywalled and per-parcel auto-complete required
+- **RP-FW-04**: Proximity-to-home badge on Rose Park lead cards (haversine from Brian's home coordinates)
+- **RP-FW-05**: SLC code violations via XChange court intake (zero new code; activates when XChange subscription goes live)
 
 ### Advanced Contact
 
