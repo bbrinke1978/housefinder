@@ -535,18 +535,18 @@ Plans:
 
 ### Phase 26: UGRC Salt Lake County Import
 
-**Goal:** Rose Park properties — with full assessor enrichment and any existing statewide-scraper distress signals — are visible in the dashboard property grid, city filter, and stats bar after running the UGRC import filtered to ZIP_CODE='84116'
+**Goal:** Rose Park properties — with full assessor enrichment and any existing statewide-scraper distress signals — are visible in the dashboard property grid, city filter, and stats bar after running the UGRC import filtered to PARCEL_ZIP='84116'
 **Depends on:** Phase 25
 **Requirements**: RP-01, RP-06, RP-07
 **Success Criteria** (what must be TRUE):
-  1. Running the UGRC import with a Salt Lake County + ZIP_CODE='84116' filter completes without Azure Function timeout and logs a match rate report showing how many 84116 parcels were enriched
+  1. Running the UGRC import with a Salt Lake County + PARCEL_ZIP='84116' ArcGIS WHERE filter completes without Azure Function timeout and logs a match rate report showing how many 84116 parcels were enriched
   2. "Rose Park" appears as a selectable option in the dashboard city filter dropdown — user can click it to filter to only Rose Park leads
   3. Rose Park properties appear in the dashboard property grid with their distress signals (NOD, tax lien, etc.) from statewide scrapers that were already running — zero new scrapers required for first leads
   4. Dashboard stats bar updates to reflect Rose Park properties when the Rose Park city filter is active — total count, hot leads, and new-since-last-visit all reflect 84116 data
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 26 to break down)
+- [ ] 26-01-PLAN.md — Extend import script with PARCEL_ZIP filter + run against production + verify Rose Park in dashboard
 
 ### Phase 27: Map Clustering
 
