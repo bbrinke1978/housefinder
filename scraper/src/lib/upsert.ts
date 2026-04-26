@@ -403,6 +403,7 @@ export async function upsertFromUtahLegals(
       address: notice.propertyAddress ?? "",
       city,
       ownerName: notice.ownerName,
+      zip: notice.zip,   // RP-11: '84116' for SLC notices, undefined for rural counties
     }, county);
     upserted++;
 
