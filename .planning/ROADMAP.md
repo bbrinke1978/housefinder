@@ -154,7 +154,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
-| 25. Rose Park Foundation | 2/2 | Complete   | 2026-04-26 |
+| 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 0/1 | Not started | - |
 | 27. Map Clustering | 0/1 | Not started | - |
 
