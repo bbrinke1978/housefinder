@@ -754,7 +754,7 @@ export async function getProperties(
     .innerJoin(leads, eq(leads.propertyId, properties.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(orderBy)
-    .limit(100);
+    .limit(500);
 
   if (rows.length === 0) return [];
 
