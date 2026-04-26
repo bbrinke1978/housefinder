@@ -527,10 +527,11 @@ Plans:
   2. Existing database rows that had city='SALT LAKE CITY' and zip='84116' now show city='Rose Park' — the SQL migration ran successfully and the count of affected rows is logged
   3. The Settings page (or scraperConfig seed) shows 'Rose Park' in the target cities list — the dashboard city filter will include it without any further code change
   4. The dashboard loads more than 100 properties without silent truncation — Rose Park urban density will not cause a hidden data cliff at the old 100-row limit
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 25 to break down)
+- [ ] 25-01-PLAN.md — normalizeCity() in upsert.ts, target_cities TypeScript constants (RP-02, RP-04)
+- [ ] 25-02-PLAN.md — SQL migration 0013 retag + scraper_config upsert + getProperties() limit 500 (RP-03, RP-05)
 
 ### Phase 26: UGRC Salt Lake County Import
 
