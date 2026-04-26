@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
 - [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
-- [ ] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design)
+- [x] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design) (completed 2026-04-26)
 - [ ] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 
@@ -544,7 +544,7 @@ Plans:
   2. SLC NOD notices are correctly parsed: parcel IDs match the SLCo hyphenated 5-segment format (e.g. `26-24-406-084-0000`) confirmed via Phase 25.5 research against real NOD documents, not synthetic `ul-` fallback IDs
   3. Only 84116 NOD notices are inserted — Sandy/Midvale/Holladay/Sugar House notices are excluded by zip allowlist
   4. Rose Park rows in DB have `distress_score > 0` after `scoreProperty()` runs and appear under the "Rose Park" city filter in the dashboard
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 25.5-01-PLAN.md — Code changes: TARGET_COUNTIES SLC entry, extractParcelId() Branch 4, 84116 city allowlist, zip threading (RP-09, RP-10, RP-11)
