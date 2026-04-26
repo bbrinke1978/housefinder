@@ -541,7 +541,7 @@ Plans:
 **Requirements**: RP-09, RP-10, RP-11
 **Success Criteria** (what must be TRUE):
   1. After the next scheduled `utah-legals.ts` run, `SELECT COUNT(*) FROM properties WHERE city='Rose Park'` returns > 0 (or zero with documented evidence that no SLC NODs exist for 84116 in the current Utah Legals window)
-  2. SLC NOD notices are correctly parsed: parcel IDs match the SLCo 10-digit format (e.g. `2818207018`), not synthetic `ul-` fallback IDs
+  2. SLC NOD notices are correctly parsed: parcel IDs match the SLCo hyphenated 5-segment format (e.g. `26-24-406-084-0000`) confirmed via Phase 25.5 research against real NOD documents, not synthetic `ul-` fallback IDs
   3. Only 84116 NOD notices are inserted — Sandy/Midvale/Holladay/Sugar House notices are excluded by zip allowlist
   4. Rose Park rows in DB have `distress_score > 0` after `scoreProperty()` runs and appear under the "Rose Park" city filter in the dashboard
 **Plans:** 2 plans
