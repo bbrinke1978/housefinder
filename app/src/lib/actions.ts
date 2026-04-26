@@ -152,6 +152,7 @@ const DEFAULT_TARGET_CITIES = [
   "Manti",
   "Fillmore",
   "Delta",
+  "Rose Park",
 ];
 
 /**

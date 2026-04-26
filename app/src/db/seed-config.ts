@@ -13,6 +13,7 @@ export const DEFAULT_TARGET_CITIES = [
   "Manti",
   "Fillmore",
   "Delta",
+  "Rose Park",
 ] as const;
 
 export type TargetCity = (typeof DEFAULT_TARGET_CITIES)[number];
