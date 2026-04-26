@@ -154,7 +154,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
-| 25. Rose Park Foundation | 0/2 | Not started | - |
+| 25. Rose Park Foundation | 1/2 | In Progress|  |
 | 26. UGRC Salt Lake County Import | 0/1 | Not started | - |
 | 27. Map Clustering | 0/1 | Not started | - |
 
@@ -527,7 +527,7 @@ Plans:
   2. Existing database rows that had city='SALT LAKE CITY' and zip='84116' now show city='Rose Park' — the SQL migration ran successfully and the count of affected rows is logged
   3. The Settings page (or scraperConfig seed) shows 'Rose Park' in the target cities list — the dashboard city filter will include it without any further code change
   4. The dashboard loads more than 100 properties without silent truncation — Rose Park urban density will not cause a hidden data cliff at the old 100-row limit
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 25-01-PLAN.md — normalizeCity() in upsert.ts, target_cities TypeScript constants (RP-02, RP-04)

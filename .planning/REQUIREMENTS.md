@@ -305,9 +305,9 @@ Urban expansion: surface Salt Lake City Rose Park (zip 84116) properties already
 ### Rose Park Data Foundation
 
 - [ ] **RP-01**: System runs UGRC assessor enrichment for Salt Lake County with `ZIP_CODE='84116'` ArcGIS WHERE filter (avoids 350k-parcel overload and Azure Function timeout)
-- [ ] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time — single normalization point for future neighborhood expansion
+- [x] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time — single normalization point for future neighborhood expansion
 - [ ] **RP-03**: One-shot SQL migration retags any existing properties stored as `city='SALT LAKE CITY'` with `zip='84116'` to `city='Rose Park'` so historical statewide-scraper data surfaces without rerun
-- [ ] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig` (Settings UI or seed update) so dashboard's existing city filter includes it
+- [x] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig` (Settings UI or seed update) so dashboard's existing city filter includes it
 - [ ] **RP-05**: `getProperties()` row limit raised from 100 to a value safely above expected Rose Park lead density (with paginated UI fallback if needed) so dense urban data does not silently truncate
 
 ### Rose Park Display
@@ -619,9 +619,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Last updated: 2026-04-12 — added Phase 24 (v1.2 Advanced MAO Calculator): MAO-01 through MAO-03, HML-01 through HML-04, FLIP-01 through FLIP-04, WSALE-01 through WSALE-05*
 
-| RP-02 | Phase 25 | Pending |
+| RP-02 | Phase 25 | Complete |
 | RP-03 | Phase 25 | Pending |
-| RP-04 | Phase 25 | Pending |
+| RP-04 | Phase 25 | Complete |
 | RP-05 | Phase 25 | Pending |
 | RP-01 | Phase 26 | Pending |
 | RP-06 | Phase 26 | Pending |

@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 25 — Rose Park Foundation
-Plan: —
-Status: Roadmap created, ready to plan Phase 25
-Last activity: 2026-04-17 — v1.3 roadmap created (Phases 25-27)
+Plan: 01 complete, ready for Plan 02
+Status: In Progress — normalizeCity() deployed, DB migration (Plan 02) next
+Last activity: 2026-04-26 — 25-01 complete: normalizeCity(), Rose Park in city maps and constants
 
-Progress: ░░░░░░░░░░ 0% — Phase 25 not started
+Progress: █░░░░░░░░░ 10% — Phase 25 Plan 01 of 2 complete
 
 ## Performance Metrics
 
@@ -98,6 +98,7 @@ Progress: ░░░░░░░░░░ 0% — Phase 25 not started
 | Phase 22-xchange-court-record-intake P01 | 5 | 2 tasks | 3 files |
 | Phase 22-xchange-court-record-intake P02 | 15 | 2 tasks | 2 files |
 | Phase 24-advanced-mao-calculator P01 | 4min | 2 tasks | 1 files |
+| Phase 25-rose-park-foundation P01 | 2min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -348,6 +349,7 @@ Recent decisions affecting current work:
 - [v1.3-init]: RP-06 and RP-07 are emergent outcomes of Phase 25+26 — no separate implementation work; verified via Phase 26 success criteria
 - [v1.3-init]: Map clustering (RP-08) is independent of the data pipeline; Phase 27 can be planned and executed in parallel after Phase 25 completes
 - [v1.3-init]: New SLCo scrapers (slco-delinquent, slco-recorder, utah-legals SLC activation) deferred to v1.4+ as RP-FW-01 through RP-FW-05
+- [Phase 25]: normalizeCity() in scraper/upsert.ts is single normalization point for zip-to-neighborhood city mapping; zip added to PropertyRecord schema to support call site
 
 ### Roadmap Evolution
 
