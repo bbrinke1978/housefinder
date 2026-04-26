@@ -100,6 +100,7 @@ Progress: Phase 25 ✓ | Phase 25.5 next | Phase 26 re-scoped | Phase 27 pending
 | Phase 24-advanced-mao-calculator P01 | 4min | 2 tasks | 1 files |
 | Phase 25-rose-park-foundation P01 | 2min | 2 tasks | 4 files |
 | Phase 25-rose-park-foundation P02 | 4min | 2 tasks | 3 files |
+| Phase 25.5-utah-legals-slc-activation P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -354,6 +355,8 @@ Recent decisions affecting current work:
 - [Phase 25-rose-park-foundation]: scraper_config table has no created_at column — INSERT uses (key, value, updated_at) only; migration SQL template corrected
 - [Phase 25-rose-park-foundation]: Data-only migrations run via node pg script (not psql/drizzle-kit) — psql not installed on dev machine, drizzle-kit journal only covers 0000-0007
 - [Phase 25-rose-park-foundation]: 0 rows retagged in migration is correct — production DB has no zip=84116 or SLC rows yet; Rose Park data arrives in Phase 26 UGRC import
+- [Phase 25.5-utah-legals-slc-activation]: City-name allowlist (SLC_84116_CITIES Set) used over zip-from-address extraction — zip not reliably in 300-char snippet
+- [Phase 25.5-utah-legals-slc-activation]: Dry-run as standalone script preserving scrapeUtahLegalsForeclosures() signature unchanged
 
 ### Roadmap Evolution
 

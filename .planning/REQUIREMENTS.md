@@ -311,9 +311,9 @@ Urban expansion: pull Salt Lake County Rose Park (zip 84116) into the dashboard.
 
 ### Rose Park Data Source (NEW — pulled forward from RP-FW-01, 2026-04-26)
 
-- [ ] **RP-09**: Salt Lake County added to `TARGET_COUNTIES` in `scraper/src/sources/utah-legals.ts` (live DOM inspection required to confirm checkbox index — UGRC research suggested ~17 alphabetical ordering)
-- [ ] **RP-10**: `extractParcelId()` regex in `utah-legals.ts` extended to match SLCo's all-numeric 10-digit parcel format (e.g. `2818207018`) in addition to existing rural hyphenated format (`XX-XXXX-XXXX`)
-- [ ] **RP-11**: 84116 zip allowlist filter applied to SLC NOD ingestion — only insert SLC NOD notices whose property zip resolves to 84116 (prevents Sandy/Midvale/Holladay flood)
+- [x] **RP-09**: Salt Lake County added to `TARGET_COUNTIES` in `scraper/src/sources/utah-legals.ts` (live DOM inspection required to confirm checkbox index — UGRC research suggested ~17 alphabetical ordering)
+- [x] **RP-10**: `extractParcelId()` regex in `utah-legals.ts` extended to match SLCo's all-numeric 10-digit parcel format (e.g. `2818207018`) in addition to existing rural hyphenated format (`XX-XXXX-XXXX`)
+- [x] **RP-11**: 84116 zip allowlist filter applied to SLC NOD ingestion — only insert SLC NOD notices whose property zip resolves to 84116 (prevents Sandy/Midvale/Holladay flood)
 
 ### Rose Park Enrichment
 
