@@ -618,3 +618,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Last updated: 2026-04-12 — added Phase 24 (v1.2 Advanced MAO Calculator): MAO-01 through MAO-03, HML-01 through HML-04, FLIP-01 through FLIP-04, WSALE-01 through WSALE-05*
+
+| RP-02 | Phase 25 | Pending |
+| RP-03 | Phase 25 | Pending |
+| RP-04 | Phase 25 | Pending |
+| RP-05 | Phase 25 | Pending |
+| RP-01 | Phase 26 | Pending |
+| RP-06 | Phase 26 | Pending |
+| RP-07 | Phase 26 | Pending |
+| RP-08 | Phase 27 | Pending |
+
+**v1.3 Coverage:**
+- v1.3 requirements: 8 total (RP-01 through RP-08)
+- Mapped to phases: 8
+- Unmapped: 0
+
+Note: RP-06 and RP-07 are emergent display outcomes of Phase 25+26. They require no separate implementation work — they are verified as observable success criteria of Phase 26.
+
+---
+*Last updated: 2026-04-17 — added Phases 25-27 (v1.3 Rose Park Pilot): RP-01 through RP-08*

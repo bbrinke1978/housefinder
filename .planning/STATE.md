@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 25 — Rose Park Foundation
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-21 — Milestone v1.3 Rose Park Pilot started
+Status: Roadmap created, ready to plan Phase 25
+Last activity: 2026-04-17 — v1.3 roadmap created (Phases 25-27)
 
-Progress: v1.3 requirements gathering
+Progress: ░░░░░░░░░░ 0% — Phase 25 not started
 
 ## Performance Metrics
 
@@ -341,6 +341,13 @@ Recent decisions affecting current work:
 - [Phase 24-01]: convergeMao() defined inside component body to close over all 13 state variables without parameter threading
 - [Phase 24-01]: Two convergeMao calls (minProfit, maxProfit) produce the MAO range; activeView stubbed for Plan 02 wholesaler panel
 - [Phase 24-01]: wholesaleFee key kept in handleSave FormData (mapped to assignmentFee value) to preserve DB action contract
+- [v1.3-init]: Rose Park architecture: retag city='Rose Park' for zip='84116' at upsert time via normalizeCity() — keeps city as single segmentation unit, no zip-filter dimension in getProperties()
+- [v1.3-init]: normalizeCity() in scraper/src/lib/upsert.ts is the single normalization point — future SLC neighborhood expansion (84104 Glendale, etc.) is one line here
+- [v1.3-init]: UGRC SLCo query must include ZIP_CODE='84116' WHERE clause — without filter, 350k-parcel full county download will timeout Azure Function
+- [v1.3-init]: SLCo parcel ID format is all-numeric 10-digit (inferred) — existing Carbon-format regex in extractParcelId() will produce synthetic ul- IDs and break signal stacking; must fix in Phase 25 or before
+- [v1.3-init]: RP-06 and RP-07 are emergent outcomes of Phase 25+26 — no separate implementation work; verified via Phase 26 success criteria
+- [v1.3-init]: Map clustering (RP-08) is independent of the data pipeline; Phase 27 can be planned and executed in parallel after Phase 25 completes
+- [v1.3-init]: New SLCo scrapers (slco-delinquent, slco-recorder, utah-legals SLC activation) deferred to v1.4+ as RP-FW-01 through RP-FW-05
 
 ### Roadmap Evolution
 
@@ -350,6 +357,8 @@ Recent decisions affecting current work:
 - Phase 19 added: Wholesale Leads
 - Phase 20 added: Security Review
 - Phases 21-23 added: Milestone v1.1 Data Enrichment & Court Records
+- Phase 24 added: Milestone v1.2 Advanced MAO Calculator
+- Phases 25-27 added: Milestone v1.3 Rose Park Pilot
 
 ### Pending Todos
 
@@ -362,10 +371,13 @@ None yet.
 - [Phase 5]: Utah voter roll permissible-use terms for commercial real estate unconfirmed — validate before building contact enrichment pipeline
 - [Phase 5]: Geocoding approach not yet selected — evaluate Census Geocoder, Nominatim, or county GIS data at Phase 5 planning
 - [Phase 22]: XChange $40/mo subscription must be active before court record intake workflow can be tested — confirm subscription status before planning Phase 22
+- [Phase 25]: Confirm UGRC LIR service has ZIP_CODE field before adding filter clause — run a 1-record sample query against the REST endpoint (5-minute task at plan time)
+- [Phase 25]: SLCo parcel ID format not authoritatively confirmed — inspect 10 SLC NOD notice texts from Utah Legals before writing extractParcelId() regex
+- [Phase 26]: April 29, 2026 is deadline for slco-delinquent.ts to capture 2026 tax sale data — this is a v1.4 scraper but timing is noted
 
 ## Session Continuity
 
-Last session: 2026-04-10
-Status: Milestone v1.1 roadmap created — Phases 21-23 defined, ready to plan Phase 21
-Final actions: ROADMAP.md updated with Phases 21-23, STATE.md updated for v1.1 focus
+Last session: 2026-04-17
+Status: v1.3 roadmap created — Phases 25-27 defined, ready to plan Phase 25
+Final actions: ROADMAP.md updated with Phases 25-27, STATE.md updated for v1.3 focus, REQUIREMENTS.md traceability updated
 Remaining manual: None

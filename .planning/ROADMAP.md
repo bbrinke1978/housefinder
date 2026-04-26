@@ -8,6 +8,8 @@ v1.1 adds three phases (21-23) that enrich existing properties with free UGRC as
 
 v1.2 adds one phase (24) that replaces the simple ARV x 0.65 MAO formula with a professional-grade dual-view calculator covering sell-side costs, hard money and carry costs, buyer/flipper profit targets, and wholesaler spread math.
 
+v1.3 adds three phases (25-27) that pilot Rose Park (zip 84116) as an urban expansion — surfacing existing statewide-scraper data that is currently hidden by the rural-only city filter, then importing UGRC assessor enrichment for 84116 parcels, then adding map clustering to handle urban pin density.
+
 ## Phases
 
 **Phase Numbering:**
@@ -26,6 +28,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
+- [ ] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in
+- [ ] **Phase 26: UGRC Salt Lake County Import** - Run UGRC assessor enrichment for Salt Lake County filtered to ZIP_CODE='84116', surfacing Rose Park properties in the dashboard with full distress signals and assessor data
+- [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 
 ## Phase Details
 
@@ -149,6 +154,9 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
+| 25. Rose Park Foundation | 0/2 | Not started | - |
+| 26. UGRC Salt Lake County Import | 0/1 | Not started | - |
+| 27. Map Clustering | 0/1 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
@@ -486,7 +494,7 @@ Plans:
 
 ---
 
-## Milestone v1.2 - Advanced MAO Calculator (Phase 24)
+## Milestone v1.2 — Advanced MAO Calculator (Phase 24)
 
 ### Phase 24: Advanced MAO Calculator
 
@@ -499,4 +507,57 @@ Plans:
   3. Buyer/flipper view shows a MAO range (offer at min profit vs offer at max profit) plus MAO as a percentage of ARV, with buy-side closing costs as a configurable input
   4. Wholesaler view shows assignment fee, max purchase price from seller (end buyer MAO minus fee minus closing costs), end buyer's total out-of-pocket, and wholesaler's spread -- all derived from the same inputs without any additional data entry
   5. Switching between buyer/flipper and wholesaler views updates the displayed numbers without losing entered inputs
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 24-01-PLAN.md — Math engine, sell-side costs, HML iterative convergence, buyer/flipper view
+- [x] 24-02-PLAN.md — Wholesaler view, view toggle, human verification checkpoint
+
+---
+
+## Milestone v1.3 — Rose Park Pilot (Phases 25-27)
+
+### Phase 25: Rose Park Foundation
+
+**Goal:** The dashboard is fully prepared to receive and display Rose Park (84116) data before any new imports run — normalizing city names at the upsert layer, retagging historical rows in the database, adding Rose Park to target_cities, and raising the query row limit so urban density does not silently truncate results
+**Depends on:** Phase 24
+**Requirements**: RP-02, RP-03, RP-04, RP-05
+**Success Criteria** (what must be TRUE):
+  1. Any property upserted with zip='84116' is stored with city='Rose Park' — verified by checking that a test upsert with city='SALT LAKE CITY' and zip='84116' produces a row with city='Rose Park'
+  2. Existing database rows that had city='SALT LAKE CITY' and zip='84116' now show city='Rose Park' — the SQL migration ran successfully and the count of affected rows is logged
+  3. The Settings page (or scraperConfig seed) shows 'Rose Park' in the target cities list — the dashboard city filter will include it without any further code change
+  4. The dashboard loads more than 100 properties without silent truncation — Rose Park urban density will not cause a hidden data cliff at the old 100-row limit
+**Plans:** TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 25 to break down)
+
+### Phase 26: UGRC Salt Lake County Import
+
+**Goal:** Rose Park properties — with full assessor enrichment and any existing statewide-scraper distress signals — are visible in the dashboard property grid, city filter, and stats bar after running the UGRC import filtered to ZIP_CODE='84116'
+**Depends on:** Phase 25
+**Requirements**: RP-01, RP-06, RP-07
+**Success Criteria** (what must be TRUE):
+  1. Running the UGRC import with a Salt Lake County + ZIP_CODE='84116' filter completes without Azure Function timeout and logs a match rate report showing how many 84116 parcels were enriched
+  2. "Rose Park" appears as a selectable option in the dashboard city filter dropdown — user can click it to filter to only Rose Park leads
+  3. Rose Park properties appear in the dashboard property grid with their distress signals (NOD, tax lien, etc.) from statewide scrapers that were already running — zero new scrapers required for first leads
+  4. Dashboard stats bar updates to reflect Rose Park properties when the Rose Park city filter is active — total count, hot leads, and new-since-last-visit all reflect 84116 data
+**Plans:** TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 26 to break down)
+
+### Phase 27: Map Clustering
+
+**Goal:** The map view clusters dense pin groups using the supercluster pattern so Rose Park's urban density does not produce an unusable pile of overlapping pins — improving all dense-area views, not just Rose Park
+**Depends on:** Phase 25
+**Requirements**: RP-08
+**Success Criteria** (what must be TRUE):
+  1. Zooming out on the map in an area with many properties (e.g., Rose Park urban density) shows a cluster circle with a count badge rather than dozens of overlapping pins
+  2. Tapping or clicking a cluster zooms the map into that cluster's bounding area so individual property pins become visible
+  3. Individual property pins retain their existing distress-score color coding and tap-to-detail behavior after clustering is applied
+  4. Map clustering works on mobile with touch gestures — pinch-to-zoom still separates clusters into individual pins as expected
+**Plans:** TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 27 to break down)
