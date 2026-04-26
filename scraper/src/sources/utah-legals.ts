@@ -5,12 +5,14 @@ import {
 
 // County checkbox indexes in the Utah Legals checkbox list (0-based, verified from HTML)
 // Beaver=0, Box Elder=1, Cache=2, Carbon=3, Daggett=4, Davis=5, Duchesne=6,
-// Emery=7, Garfield=8, Grand=9, Iron=10, Juab=11, Kane=12, Millard=13, ...
+// Emery=7, Garfield=8, Grand=9, Iron=10, Juab=11, Kane=12, Millard=13,
+// Morgan=14, Piute=15, Rich=16, Salt Lake=17, Salt Lake/Utah=18 (WRONG — combined, do NOT use index 18)
 const TARGET_COUNTIES: Array<{ index: number; name: string }> = [
-  { index: 3, name: "carbon" },
-  { index: 7, name: "emery" },
+  { index: 3,  name: "carbon" },
+  { index: 7,  name: "emery" },
   { index: 11, name: "juab" },
   { index: 13, name: "millard" },
+  { index: 17, name: "salt lake" }, // Salt Lake County only — NOT index 18 ("Salt Lake/Utah" combined)
 ];
 
 export interface UtahLegalsNotice {
@@ -26,6 +28,8 @@ export interface UtahLegalsNotice {
   ownerName?: string;
   /** Extracted parcel/serial number from notice snippet, if found */
   parcelId?: string;
+  /** '84116' for SLC notices that pass the 84116 zip-area city allowlist; undefined otherwise */
+  zip?: string;
 }
 
 /**
@@ -79,8 +83,18 @@ function extractParcelId(text: string): string | undefined {
   const carbonParcel = text.match(/\b(\d{2}-\d{4}-\d{4})\b/);
   if (carbonParcel) return carbonParcel[1];
 
+  // Branch 4: SLC multi-segment bare pattern (defensive fallback — Branch 2 catches labeled SLC parcels)
+  // Matches: 26-24-406-084-0000, 08-22-327-004-0000 (format: DD-DD-DDD-DDD-DDDD)
+  // Branch 2 handles labeled SLC parcels (Serial No., Tax Serial Number, etc.)
+  // Branch 4 catches any unlabeled SLC bare number not matched by Branch 3.
+  const slcParcel = text.match(/\b(\d{2}-\d{1,3}-\d{3,4}-\d{3,4}-\d{3,4})\b/);
+  if (slcParcel) return slcParcel[1];
+
   return undefined;
 }
+
+/** Cities whose Utah Legals notices indicate a property in the 84116 zip-code area (Rose Park / West SLC). */
+const SLC_84116_CITIES = new Set(['salt lake city', 'rose park', 'north salt lake']);
 
 /**
  * Scrapes Utah Legals (utahlegals.com) for trustee sale / foreclosure notices
@@ -302,6 +316,25 @@ export async function scrapeUtahLegalsForeclosures(): Promise<UtahLegalsNotice[]
           continue;
         }
 
+        // RP-11: For Salt Lake County notices, only retain those in the 84116 zip-area.
+        // SLC returns notices for ALL Salt Lake County cities (Sandy, Midvale, Holladay, etc.).
+        // Filter to city names that correspond to the 84116 area (Rose Park / West SLC).
+        // Empty city is allowed through with a warning — will receive the "Rose Park" COUNTY_CITY default.
+        if (countyLower === 'salt lake') {
+          const noticeCity = result.city.toLowerCase().trim();
+          if (noticeCity && !SLC_84116_CITIES.has(noticeCity)) {
+            console.log(
+              `${tag} SLC notice excluded (city outside 84116): "${result.city}" (ID: ${result.noticeId})`
+            );
+            continue;
+          }
+          if (!noticeCity) {
+            console.log(
+              `${tag} SLC notice: empty city field, allowing through (ID: ${result.noticeId})`
+            );
+          }
+        }
+
         // Parse notice date from dateText (e.g., "Friday, March 20, 2026" or "Wednesday, Mar 18, 2026")
         let noticeDate: string | undefined;
         if (result.dateText) {
@@ -325,6 +358,7 @@ export async function scrapeUtahLegalsForeclosures(): Promise<UtahLegalsNotice[]
           propertyAddress: extractAddress(snippet),
           ownerName: extractOwnerName(snippet),
           parcelId: extractParcelId(snippet),
+          zip: countyLower === 'salt lake' ? '84116' : undefined,  // RP-11: enables normalizeCity() retag
         };
 
         notices.push(notice);
