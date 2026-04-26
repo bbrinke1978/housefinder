@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses
-**Current focus:** Milestone v1.3 — Rose Park Pilot (urban expansion, zip 84116)
+**Current focus:** Milestone v1.3 — Rose Park Pilot (urban expansion, zip 84116). Mid-milestone re-org: Phase 25.5 inserted, Phase 26 re-scoped.
 
 ## Current Position
 
-Phase: 25 — Rose Park Foundation
-Plan: 02 complete — Phase 25 DONE, ready for Phase 26
-Status: Complete — normalizeCity() deployed, DB migration run, scraper_config seeded, query limit raised
-Last activity: 2026-04-26 — 25-02 complete: migration 0013 applied, Rose Park in target_cities, getProperties() limit 500
+Phase: 25.5 — Utah Legals SLC Activation (next to plan)
+Plan: —
+Status: Re-org complete after Phase 26 hit two false research assumptions; ready for `/gsd:plan-phase 25.5`
+Last activity: 2026-04-26 — Phase 26 attempted, found UGRC Parcels_SaltLake_LIR has no zip field and is enrichment-only (cannot create rows). Cleaned 404 misclassified Emery rows (city='SALT LAKE CITY'). Pulled RP-FW-01 forward as Phase 25.5 (RP-09/RP-10/RP-11). Phase 26 re-scoped to depend on 25.5 (UGRC enrichment by parcel_id JOIN, no zip filter).
 
-Progress: ██████████ 100% — Phase 25 both plans complete
+Progress: Phase 25 ✓ | Phase 25.5 next | Phase 26 re-scoped | Phase 27 pending
 
 ## Performance Metrics
 

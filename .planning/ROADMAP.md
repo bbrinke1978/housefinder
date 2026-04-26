@@ -29,7 +29,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
 - [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
-- [ ] **Phase 26: UGRC Salt Lake County Import** - Run UGRC assessor enrichment for Salt Lake County filtered to PARCEL_ZIP='84116' (correct UGRC LIR field name), surfacing Rose Park properties in the dashboard with full distress signals and assessor data
+- [ ] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design)
+- [ ] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 
 ## Phase Details
@@ -533,20 +534,38 @@ Plans:
 - [ ] 25-01-PLAN.md — normalizeCity() in upsert.ts, target_cities TypeScript constants (RP-02, RP-04)
 - [ ] 25-02-PLAN.md — SQL migration 0013 retag + scraper_config upsert + getProperties() limit 500 (RP-03, RP-05)
 
-### Phase 26: UGRC Salt Lake County Import
+### Phase 25.5: Utah Legals SLC Activation *(inserted 2026-04-26)*
 
-**Goal:** Rose Park properties — with full assessor enrichment and any existing statewide-scraper distress signals — are visible in the dashboard property grid, city filter, and stats bar after running the UGRC import filtered to PARCEL_ZIP='84116'
+**Goal:** Salt Lake County NOD trustee sale notices for properties in zip 84116 are scraped daily by `utah-legals.ts` and inserted into the `properties` + `distress_signals` tables, automatically tagged `city='Rose Park'` by the Phase 25 normalizeCity() function — creating the first real Rose Park rows in the DB
 **Depends on:** Phase 25
-**Requirements**: RP-01, RP-06, RP-07
+**Requirements**: RP-09, RP-10, RP-11
 **Success Criteria** (what must be TRUE):
-  1. Running the UGRC import with a Salt Lake County + PARCEL_ZIP='84116' ArcGIS WHERE filter completes without Azure Function timeout and logs a match rate report showing how many 84116 parcels were enriched
-  2. "Rose Park" appears as a selectable option in the dashboard city filter dropdown — user can click it to filter to only Rose Park leads
-  3. Rose Park properties appear in the dashboard property grid with their distress signals (NOD, tax lien, etc.) from statewide scrapers that were already running — zero new scrapers required for first leads
-  4. Dashboard stats bar updates to reflect Rose Park properties when the Rose Park city filter is active — total count, hot leads, and new-since-last-visit all reflect 84116 data
-**Plans:** 1 plan
+  1. After the next scheduled `utah-legals.ts` run, `SELECT COUNT(*) FROM properties WHERE city='Rose Park'` returns > 0 (or zero with documented evidence that no SLC NODs exist for 84116 in the current Utah Legals window)
+  2. SLC NOD notices are correctly parsed: parcel IDs match the SLCo 10-digit format (e.g. `2818207018`), not synthetic `ul-` fallback IDs
+  3. Only 84116 NOD notices are inserted — Sandy/Midvale/Holladay/Sugar House notices are excluded by zip allowlist
+  4. Rose Park rows in DB have `distress_score > 0` after `scoreProperty()` runs and appear under the "Rose Park" city filter in the dashboard
+**Plans:** TBD
 
 Plans:
-- [ ] 26-01-PLAN.md — Extend import script with PARCEL_ZIP filter + run against production + verify Rose Park in dashboard
+- [ ] TBD (run `/gsd:plan-phase 25.5` to break down)
+
+### Phase 26: UGRC Rose Park Enrichment *(re-scoped 2026-04-26)*
+
+**Goal:** Rose Park rows created by Phase 25.5 are enriched with UGRC assessor data (sqft, year built, assessed value, lot acres) so the dashboard cards and deal MAO calculator show full property details
+**Depends on:** Phase 25.5
+**Requirements**: RP-01 (re-scoped), RP-06, RP-07
+**Success Criteria** (what must be TRUE):
+  1. UGRC `Parcels_SaltLake_LIR` data fetched and JOINed against existing Rose Park rows by parcel_id — log shows match count and updated count
+  2. Rose Park property cards display assessor fields (sqft, year built, assessed value) when populated
+  3. The MAO calculator on Rose Park deals can derive ARV-related defaults from assessed_value
+  4. Stats bar updates correctly when Rose Park city filter is active
+
+**Notes from v1.3 retrospective (2026-04-26):**
+- Original Phase 26 design assumed UGRC `Parcels_SaltLake_LIR` had a `PARCEL_ZIP` field — verified against live ArcGIS schema, the field DOES NOT EXIST. Service name was also wrong (`Parcels_SaltLake_LIR`, not `Parcels_Salt_Lake_LIR`).
+- Original design also assumed UGRC could INSERT new rows. UGRC is enrichment-only: it UPDATEs existing rows by parcel_id match. This phase now correctly depends on Phase 25.5 to CREATE the rows first.
+- Recommended approach: use the `--county=salt-lake` CLI filter from rolled-back Phase 26 work, but skip the broken WHERE clause. Either fetch all SLC parcels (large but Azure Function timeout manageable since only matching parcel_ids do DB writes) OR query a separate UGRC Address Points layer first to get an 84116 parcel-ID list.
+
+**Plans:** TBD (run `/gsd:plan-phase 26` to break down — old plan 26-01 invalidated)
 
 ### Phase 27: Map Clustering
 

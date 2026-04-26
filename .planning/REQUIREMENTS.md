@@ -300,21 +300,34 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ## v1.3 Requirements — Rose Park Pilot
 
-Urban expansion: surface Salt Lake City Rose Park (zip 84116) properties already collected by statewide scrapers. Foundation only — new SLCo-specific scrapers deferred to v1.4+ pending signal-volume validation.
+Urban expansion: pull Salt Lake County Rose Park (zip 84116) into the dashboard. **Mid-milestone re-org (2026-04-26):** Phase 26 execution surfaced two false assumptions in the original research (UGRC `Parcels_SaltLake_LIR` layer has NO zip code field; UGRC is enrichment-only and does not INSERT rows). Pulled `RP-FW-01` (Utah Legals SLC activation) forward as new RP-09/RP-10/RP-11 — that scraper actually CREATES Rose Park rows, which UGRC can then enrich.
 
 ### Rose Park Data Foundation
 
-- [ ] **RP-01**: System runs UGRC assessor enrichment for Salt Lake County with `PARCEL_ZIP='84116'` ArcGIS WHERE filter (correct UGRC LIR field name confirmed in Phase 26 research; avoids 350k-parcel overload and Azure Function timeout)
-- [x] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time — single normalization point for future neighborhood expansion
-- [x] **RP-03**: One-shot SQL migration retags any existing properties stored as `city='SALT LAKE CITY'` with `zip='84116'` to `city='Rose Park'` so historical statewide-scraper data surfaces without rerun
-- [x] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig` (Settings UI or seed update) so dashboard's existing city filter includes it
-- [x] **RP-05**: `getProperties()` row limit raised from 100 to a value safely above expected Rose Park lead density (with paginated UI fallback if needed) so dense urban data does not silently truncate
+- [x] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time
+- [x] **RP-03**: One-shot SQL migration retags any existing properties stored as `city='SALT LAKE CITY'` with `zip='84116'` to `city='Rose Park'`
+- [x] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig`
+- [x] **RP-05**: `getProperties()` row limit raised from 100 to safely above expected Rose Park lead density
+
+### Rose Park Data Source (NEW — pulled forward from RP-FW-01, 2026-04-26)
+
+- [ ] **RP-09**: Salt Lake County added to `TARGET_COUNTIES` in `scraper/src/sources/utah-legals.ts` (live DOM inspection required to confirm checkbox index — UGRC research suggested ~17 alphabetical ordering)
+- [ ] **RP-10**: `extractParcelId()` regex in `utah-legals.ts` extended to match SLCo's all-numeric 10-digit parcel format (e.g. `2818207018`) in addition to existing rural hyphenated format (`XX-XXXX-XXXX`)
+- [ ] **RP-11**: 84116 zip allowlist filter applied to SLC NOD ingestion — only insert SLC NOD notices whose property zip resolves to 84116 (prevents Sandy/Midvale/Holladay flood)
+
+### Rose Park Enrichment
+
+- [ ] **RP-01** (re-scoped): System enriches existing Rose Park rows with UGRC assessor data (sqft, year built, assessed value, lot acres). UGRC `Parcels_SaltLake_LIR` is enrichment-only and has no zip field — cannot pre-filter. Strategy: enrich rows by parcel_id match after Utah Legals (RP-09/10/11) creates the source rows. Acceptable to fetch all SLC parcels and let parcel_id JOIN do the filtering; or use a follow-on UGRC Address Points layer to constrain by zip.
 
 ### Rose Park Display
 
 - [ ] **RP-06**: User can see "Rose Park" as a selectable city in dashboard filter dropdown
-- [ ] **RP-07**: User can see Rose Park properties (with all existing distress signals from statewide scrapers) in the dashboard property grid and stats bar
+- [ ] **RP-07**: User can see Rose Park properties (with distress signals from Utah Legals SLC) in the dashboard property grid and stats bar
 - [ ] **RP-08**: Mapbox map clusters dense pin groups using supercluster pattern (benefits Rose Park urban density and improves all dense-area views)
+
+### Rose Park Cleanup (mid-milestone, executed 2026-04-26)
+
+- [x] **RP-CLEAN-01**: 404 misclassified Emery County rows (city='SALT LAKE CITY' from owner-mailing contamination) cleared via `cleanup-misclassified-slc.mjs`. Address/city/zip set to empty so next Emery scrape repopulates correctly.
 
 ## v2 Requirements
 
@@ -327,9 +340,9 @@ Deferred to future release. Tracked but not in current roadmap.
 - **EXP-03**: Export leads to CSV for manual mail campaigns
 - **EXP-04**: Scrape code violation signals (weed tickets, abandoned autos, cleanup orders) from Utah Courts XChange ($40/mo subscription) — covers all 6 target counties via justice court ordinance violation records
 
-### Rose Park v1.4+ Follow-On (deferred from v1.3 2026-04-25)
+### Rose Park v1.4+ Follow-On (deferred from v1.3 2026-04-25; updated 2026-04-26)
 
-- **RP-FW-01**: Activate Salt Lake County in `utah-legals.ts` `TARGET_COUNTIES` (one-line + parcel-ID regex fix for SLCo 10-digit format + 84116 zip allowlist) — cheapest new NOD signal for Rose Park
+- ~~**RP-FW-01**~~: PULLED FORWARD into v1.3 as RP-09/RP-10/RP-11 after Phase 26 execution exposed that UGRC enrichment alone cannot create Rose Park rows — Utah Legals SLC activation is the gating dependency.
 - **RP-FW-02**: Build `slco-delinquent.ts` Playwright scraper for SLCo Auditor tax-sale page (annual-only schedule; 2026 list publishes April 29)
 - **RP-FW-03**: Build `slco-recorder.ts` for NOD/lis pendens/trustee sale documents — gated on `/gsd:research-phase` because portal is paywalled and per-parcel auto-complete required
 - **RP-FW-04**: Proximity-to-home badge on Rose Park lead cards (haversine from Brian's home coordinates)
