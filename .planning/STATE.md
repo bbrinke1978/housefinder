@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 25 — Rose Park Foundation
-Plan: 01 complete, ready for Plan 02
-Status: In Progress — normalizeCity() deployed, DB migration (Plan 02) next
-Last activity: 2026-04-26 — 25-01 complete: normalizeCity(), Rose Park in city maps and constants
+Plan: 02 complete — Phase 25 DONE, ready for Phase 26
+Status: Complete — normalizeCity() deployed, DB migration run, scraper_config seeded, query limit raised
+Last activity: 2026-04-26 — 25-02 complete: migration 0013 applied, Rose Park in target_cities, getProperties() limit 500
 
-Progress: █░░░░░░░░░ 10% — Phase 25 Plan 01 of 2 complete
+Progress: ██████████ 100% — Phase 25 both plans complete
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ Progress: █░░░░░░░░░ 10% — Phase 25 Plan 01 of 2 complete
 | Phase 22-xchange-court-record-intake P02 | 15 | 2 tasks | 2 files |
 | Phase 24-advanced-mao-calculator P01 | 4min | 2 tasks | 1 files |
 | Phase 25-rose-park-foundation P01 | 2min | 2 tasks | 4 files |
+| Phase 25-rose-park-foundation P02 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -350,6 +351,9 @@ Recent decisions affecting current work:
 - [v1.3-init]: Map clustering (RP-08) is independent of the data pipeline; Phase 27 can be planned and executed in parallel after Phase 25 completes
 - [v1.3-init]: New SLCo scrapers (slco-delinquent, slco-recorder, utah-legals SLC activation) deferred to v1.4+ as RP-FW-01 through RP-FW-05
 - [Phase 25]: normalizeCity() in scraper/upsert.ts is single normalization point for zip-to-neighborhood city mapping; zip added to PropertyRecord schema to support call site
+- [Phase 25-rose-park-foundation]: scraper_config table has no created_at column — INSERT uses (key, value, updated_at) only; migration SQL template corrected
+- [Phase 25-rose-park-foundation]: Data-only migrations run via node pg script (not psql/drizzle-kit) — psql not installed on dev machine, drizzle-kit journal only covers 0000-0007
+- [Phase 25-rose-park-foundation]: 0 rows retagged in migration is correct — production DB has no zip=84116 or SLC rows yet; Rose Park data arrives in Phase 26 UGRC import
 
 ### Roadmap Evolution
 

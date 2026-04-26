@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 22: XChange Court Record Intake** - Agent-assisted browser workflow ingests probate, code violation, and lis pendens records from Utah Courts XChange and matches them to properties as distress signals (completed 2026-04-13)
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
-- [ ] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in
+- [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
 - [ ] **Phase 26: UGRC Salt Lake County Import** - Run UGRC assessor enrichment for Salt Lake County filtered to ZIP_CODE='84116', surfacing Rose Park properties in the dashboard with full distress signals and assessor data
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 
@@ -154,7 +154,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 22. XChange Court Record Intake | 2/2 | Complete   | 2026-04-13 |
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
-| 25. Rose Park Foundation | 1/2 | In Progress|  |
+| 25. Rose Park Foundation | 2/2 | Complete   | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 0/1 | Not started | - |
 | 27. Map Clustering | 0/1 | Not started | - |
 
@@ -527,7 +527,7 @@ Plans:
   2. Existing database rows that had city='SALT LAKE CITY' and zip='84116' now show city='Rose Park' — the SQL migration ran successfully and the count of affected rows is logged
   3. The Settings page (or scraperConfig seed) shows 'Rose Park' in the target cities list — the dashboard city filter will include it without any further code change
   4. The dashboard loads more than 100 properties without silent truncation — Rose Park urban density will not cause a hidden data cliff at the old 100-row limit
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 25-01-PLAN.md — normalizeCity() in upsert.ts, target_cities TypeScript constants (RP-02, RP-04)
