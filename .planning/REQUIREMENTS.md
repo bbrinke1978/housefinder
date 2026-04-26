@@ -304,7 +304,7 @@ Urban expansion: surface Salt Lake City Rose Park (zip 84116) properties already
 
 ### Rose Park Data Foundation
 
-- [ ] **RP-01**: System runs UGRC assessor enrichment for Salt Lake County with `ZIP_CODE='84116'` ArcGIS WHERE filter (avoids 350k-parcel overload and Azure Function timeout)
+- [ ] **RP-01**: System runs UGRC assessor enrichment for Salt Lake County with `PARCEL_ZIP='84116'` ArcGIS WHERE filter (correct UGRC LIR field name confirmed in Phase 26 research; avoids 350k-parcel overload and Azure Function timeout)
 - [x] **RP-02**: `normalizeCity(city, zip)` in `scraper/src/lib/upsert.ts` retags any property with `zip='84116'` to `city='Rose Park'` at upsert time — single normalization point for future neighborhood expansion
 - [x] **RP-03**: One-shot SQL migration retags any existing properties stored as `city='SALT LAKE CITY'` with `zip='84116'` to `city='Rose Park'` so historical statewide-scraper data surfaces without rerun
 - [x] **RP-04**: `'Rose Park'` added to `target_cities` in `scraperConfig` (Settings UI or seed update) so dashboard's existing city filter includes it

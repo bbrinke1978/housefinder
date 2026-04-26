@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 23: Scoring Rebalance** - Dry-run rescore validates new signal types, threshold adjusted to prevent hot lead flood, and same-property NOD/lis_pendens signals deduplicated within 90 days (completed 2026-04-13)
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
 - [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
-- [ ] **Phase 26: UGRC Salt Lake County Import** - Run UGRC assessor enrichment for Salt Lake County filtered to ZIP_CODE='84116', surfacing Rose Park properties in the dashboard with full distress signals and assessor data
+- [ ] **Phase 26: UGRC Salt Lake County Import** - Run UGRC assessor enrichment for Salt Lake County filtered to PARCEL_ZIP='84116' (correct UGRC LIR field name), surfacing Rose Park properties in the dashboard with full distress signals and assessor data
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 
 ## Phase Details
