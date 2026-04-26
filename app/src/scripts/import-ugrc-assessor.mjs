@@ -30,19 +30,22 @@ const ARCGIS_BASE =
   "https://services1.arcgis.com/99lidPhWCzftIe9K/arcgis/rest/services";
 
 // County LIR layers for our 4 target counties
+//
+// NOTE: Salt Lake County was attempted in Phase 26 (v1.3) but rolled back —
+// the UGRC Parcels_SaltLake_LIR layer has NO zip code field at all
+// (no PARCEL_ZIP, no ZIP_CODE), and the service name was wrong (it's
+// Parcels_SaltLake_LIR, not Parcels_Salt_Lake_LIR). Adding SLC requires
+// either a different layer (Address Points) or a follow-on phase that
+// ingests by parcel-id list rather than zip filter. See ROADMAP.md
+// Phase 26 notes for the re-org.
 const COUNTIES = [
   { name: "Carbon", service: "Parcels_Carbon_LIR" },
   { name: "Emery", service: "Parcels_Emery_LIR" },
   { name: "Juab", service: "Parcels_Juab_LIR" },
   { name: "Millard", service: "Parcels_Millard_LIR" },
-  {
-    name: "Salt Lake (84116)",
-    service: "Parcels_Salt_Lake_LIR",
-    where: "PARCEL_ZIP='84116'",  // CRITICAL: field is PARCEL_ZIP, NOT ZIP_CODE
-  },
 ];
 
-const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS,PARCEL_ZIP";
+const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS";
 const PAGE_SIZE = 1000; // ArcGIS default max
 
 /**
@@ -150,11 +153,25 @@ async function main() {
   await client.connect();
   console.log("Connected to database.");
 
+  // Optional CLI filter: --county=salt-lake (or any substring match against county.name lowercased + dash-normalized)
+  const countyFilterArg = process.argv.find((a) => a.startsWith("--county="));
+  const countyFilter = countyFilterArg ? countyFilterArg.split("=")[1].toLowerCase() : null;
+
+  const countiesToRun = countyFilter
+    ? COUNTIES.filter((c) => c.name.toLowerCase().replace(/\s+/g, "-").includes(countyFilter))
+    : COUNTIES;
+
+  if (countyFilter) {
+    console.log(`County filter active: --county=${countyFilter}`);
+    console.log(`Will run: ${countiesToRun.map((c) => c.name).join(", ") || "(none — filter matched zero counties)"}`);
+    if (countiesToRun.length === 0) process.exit(1);
+  }
+
   let totalUpdated = 0;
   let totalSkipped = 0;
   let totalNoMatch = 0;
 
-  for (const county of COUNTIES) {
+  for (const county of countiesToRun) {
     console.log(`\n== ${county.name} County ==`);
     console.log(`Fetching from ${county.service}...`);
 
