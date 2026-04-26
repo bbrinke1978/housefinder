@@ -20,6 +20,8 @@ export const propertyRecordSchema = z.object({
   mortgageInfo: z.string().optional(),
   // Property type — extracted from assessor when available (e.g. "Residential", "Vacant", "Agricultural")
   propertyType: z.string().optional(),
+  // Property zip code — used by normalizeCity() to map SLC zips to neighborhoods
+  zip: z.string().optional(),
   // Mailing address fields — only populated by carbon-assessor (separate from property address)
   mailingAddress: z.string().optional(),
   mailingCity: z.string().optional(),

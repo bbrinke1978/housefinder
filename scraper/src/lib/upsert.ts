@@ -51,7 +51,19 @@ const COUNTY_DEFAULT_CITY: Record<string, string> = {
   millard: "Delta",
   sanpete: "Manti",
   sevier: "Richfield",
+  "salt lake": "Rose Park",
 };
+
+/**
+ * Normalizes city name based on zip code for multi-neighborhood urban areas.
+ * zip='84116' -> 'Rose Park' (Salt Lake City neighborhood)
+ * Future: 84104 -> 'Glendale', 84106 -> 'Sugar House', etc.
+ * Gracefully degrades: rural counties without zip pass through unchanged.
+ */
+function normalizeCity(city: string, zip?: string): string {
+  if (zip === '84116') return 'Rose Park';
+  return city;
+}
 
 /**
  * Upsert a property record using parcelId as the deduplication key.
@@ -64,7 +76,7 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
   const now = new Date();
   const ownerType = classifyOwnerType(record.ownerName);
   const resolvedCounty = county ?? record.county ?? "carbon";
-  const city = record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "";
+  const city = normalizeCity(record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "", record.zip);
   const address = normalizeAddress(record.address);
 
   // Carry propertyType through when the scraper extracted one.
@@ -380,6 +392,7 @@ export async function upsertFromUtahLegals(
       emery: "Castle Dale",
       juab: "Nephi",
       millard: "Delta",
+      "salt lake": "Rose Park",
     };
 
     // Prefer the city extracted from the notice; fall back to county default
