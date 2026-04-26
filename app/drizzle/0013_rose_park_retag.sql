@@ -13,11 +13,11 @@ WHERE county = 'salt lake'
 
 -- Statement 3: Idempotent upsert of target_cities in scraper_config
 -- Uses jsonb @> to check membership before appending — never overwrites user-customized cities
-INSERT INTO scraper_config (key, value, created_at, updated_at)
+INSERT INTO scraper_config (key, value, updated_at)
 VALUES (
   'target_cities',
   '["Price","Huntington","Castle Dale","Richfield","Nephi","Ephraim","Manti","Fillmore","Delta","Rose Park"]',
-  now(), now()
+  now()
 )
 ON CONFLICT (key) DO UPDATE
   SET value = CASE
