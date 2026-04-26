@@ -9,13 +9,16 @@ interface Props {
   dealId: string;
   address: string;
   city: string;
+  sellerName?: string | null;
 }
 
 /**
  * DealSkipTraceButton — for deals without a propertyId.
  * First finds or creates a property by address, then shows the standard SkipTraceButton.
+ * sellerName is critical: Tracerfy matches by owner name + address; without the
+ * seller name the trace returns ~0% match rate and stores a sentinel "not found".
  */
-export function DealSkipTraceButton({ dealId, address, city }: Props) {
+export function DealSkipTraceButton({ dealId, address, city, sellerName }: Props) {
   const [propertyId, setPropertyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -28,7 +31,7 @@ export function DealSkipTraceButton({ dealId, address, city }: Props) {
     setError(null);
     startTransition(async () => {
       try {
-        const result = await findOrCreatePropertyForDeal(dealId, address, city);
+        const result = await findOrCreatePropertyForDeal(dealId, address, city, sellerName);
         if ("error" in result) {
           setError(result.error);
         } else {

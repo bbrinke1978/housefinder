@@ -382,7 +382,7 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
                   hasTracerfyResult={(contacts ?? []).some((c) => c.source.startsWith("tracerfy"))}
                 />
               ) : (
-                <DealSkipTraceButton dealId={deal.id} address={deal.address} city={deal.city ?? ""} />
+                <DealSkipTraceButton dealId={deal.id} address={deal.address} city={deal.city ?? ""} sellerName={deal.sellerName ?? null} />
               )}
             </div>
           </CardContent>

@@ -815,7 +815,8 @@ export async function saveTracerfyConfig(config: {
 export async function findOrCreatePropertyForDeal(
   dealId: string,
   address: string,
-  city: string
+  city: string,
+  sellerName?: string | null
 ): Promise<{ propertyId: string } | { error: string }> {
   const session = await auth();
   if (!session?.user) return { error: "Not authenticated" };
@@ -823,20 +824,31 @@ export async function findOrCreatePropertyForDeal(
   // Try to find existing property by address
   const normalized = address.toLowerCase().trim();
   const existing = await db
-    .select({ id: properties.id })
+    .select({ id: properties.id, ownerName: properties.ownerName })
     .from(properties)
     .where(sql`lower(trim(${properties.address})) = ${normalized} AND lower(${properties.city}) = ${city.toLowerCase()}`)
     .limit(1);
 
   let propertyId: string;
+  const cleanedSeller = sellerName?.trim() || null;
 
   if (existing.length > 0) {
     propertyId = existing[0].id;
+    // Backfill ownerName if existing property has none and we now have one —
+    // critical for Tracerfy match rate (owner name + address is the matching key).
+    if (!existing[0].ownerName && cleanedSeller) {
+      await db
+        .update(properties)
+        .set({ ownerName: cleanedSeller })
+        .where(eq(properties.id, propertyId));
+    }
   } else {
-    // Create a minimal property record via raw SQL (parcelId and county are NOT NULL in schema)
+    // Create a minimal property record via raw SQL (parcelId and county are NOT NULL in schema).
+    // owner_name MUST be included — without it Tracerfy queries by address only and
+    // gets near-zero match rate, then sentinel-stores a "not found" row that blocks re-tries.
     const result = await db.execute(sql`
-      INSERT INTO properties (address, city, state, county, parcel_id)
-      VALUES (${address}, ${city || "Unknown"}, 'UT', 'unknown', ${"DEAL-" + dealId.slice(0, 8)})
+      INSERT INTO properties (address, city, state, county, parcel_id, owner_name)
+      VALUES (${address}, ${city || "Unknown"}, 'UT', 'unknown', ${"DEAL-" + dealId.slice(0, 8)}, ${cleanedSeller})
       RETURNING id
     `);
     propertyId = (result.rows[0] as { id: string }).id;

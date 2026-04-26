@@ -41,6 +41,18 @@ Brian's personal action items and upcoming tasks. Check off as completed.
 - [ ] Review unmatched court records and tune address matching
 - [ ] Monitor hot lead count after first intake — threshold at 4, may need adjusting
 
+## v1.4 candidate: Salt Lake County Urban Expansion (flagged 2026-04-26)
+
+After Phase 25.5 dry-run revealed ~145 SLC NOD notices/week across Sandy/Midvale/Holladay/Sugar House/Murray/etc., Brian flagged that he doesn't want to waste this data. Path A ("tactical capture") is being implemented as a small follow-on to Phase 25.5 — extends the parcel-allowlist concept to all SLC neighborhoods so each NOD can be tagged with its real neighborhood and shown in the dashboard.
+
+**Path B (deferred to v1.4 if Path A produces useful leads):**
+- Strategic SLC pilot — re-tune scoring threshold for urban density (rural threshold of 4 may flood with warm leads)
+- Per-neighborhood scoring weights (Sugar House signals different motivation than Sandy)
+- Per-neighborhood saved-view filters
+- Honest scope: this is full-on competition with BatchLeads users in the Salt Lake metro — different game from the rural strategy
+
+Decision gate: 2 weeks after Path A ships, evaluate whether the SLC suburb leads are worth pursuing. If yes → v1.4. If no → cut SLC neighborhoods back out and stay rural-focused.
+
 ## v1.4+ Rose Park Follow-On (deferred from v1.3)
 
 Brian deferred these in v1.3 (2026-04-25) — surface signal volume from the v1.3 foundation first, then prioritize. Memory has full context (`project_rose_park_deferred.md`).
