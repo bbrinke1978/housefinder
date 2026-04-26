@@ -35,9 +35,14 @@ const COUNTIES = [
   { name: "Emery", service: "Parcels_Emery_LIR" },
   { name: "Juab", service: "Parcels_Juab_LIR" },
   { name: "Millard", service: "Parcels_Millard_LIR" },
+  {
+    name: "Salt Lake (84116)",
+    service: "Parcels_Salt_Lake_LIR",
+    where: "PARCEL_ZIP='84116'",  // CRITICAL: field is PARCEL_ZIP, NOT ZIP_CODE
+  },
 ];
 
-const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS";
+const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS,PARCEL_ZIP";
 const PAGE_SIZE = 1000; // ArcGIS default max
 
 /**
@@ -53,15 +58,18 @@ function normalizeParcelId(raw) {
 /**
  * Fetch all features from an ArcGIS FeatureServer layer using pagination.
  * Returns an array of attribute objects.
+ *
+ * @param {string} serviceName - UGRC ArcGIS FeatureServer service name
+ * @param {string} [where="1=1"] - Optional ArcGIS WHERE clause (e.g. "PARCEL_ZIP='84116'")
  */
-async function fetchAllFeatures(serviceName) {
+async function fetchAllFeatures(serviceName, where = "1=1") {
   const url = `${ARCGIS_BASE}/${serviceName}/FeatureServer/0/query`;
   let offset = 0;
   const all = [];
 
   while (true) {
     const params = new URLSearchParams({
-      where: "1=1",
+      where,
       outFields: FIELDS,
       returnGeometry: "false",
       resultOffset: String(offset),
@@ -152,7 +160,7 @@ async function main() {
 
     let features;
     try {
-      features = await fetchAllFeatures(county.service);
+      features = await fetchAllFeatures(county.service, county.where);
     } catch (err) {
       console.error(`  ERROR fetching ${county.name}: ${err.message}`);
       continue;
