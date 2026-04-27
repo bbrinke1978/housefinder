@@ -566,11 +566,11 @@ Plans:
 - Original design also assumed UGRC could INSERT new rows. UGRC is enrichment-only: it UPDATEs existing rows by parcel_id match. This phase now correctly depends on Phase 25.5 to CREATE the rows first.
 - Recommended approach: use the `--county=salt-lake` CLI filter from rolled-back Phase 26 work, but skip the broken WHERE clause. Either fetch all SLC parcels (large but Azure Function timeout manageable since only matching parcel_ids do DB writes) OR query a separate UGRC Address Points layer first to get an 84116 parcel-ID list.
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 26-01-PLAN.md — Extend import-ugrc-assessor.mjs with fetchFromAllowlist() + --dry-run flag (Option B from research) (RP-01)
-- [ ] 26-02-PLAN.md — Dry-run shadow + production execution against live DB; match count + prefix-mismatch spot-check (RP-01)
+- [x] 26-01-PLAN.md — Extend import-ugrc-assessor.mjs with fetchFromAllowlist() + --dry-run flag (Option B from research) (RP-01)
+- [x] 26-02-PLAN.md — Dry-run shadow + production execution against live DB; match count + prefix-mismatch spot-check (RP-01) — 4 rows enriched; prefix-mismatch confirmed (26/30 rows deferred to v1.4)
 - [ ] 26-03-PLAN.md — Verify Rose Park city filter, grid, stats bar, and assessor card on deployed Netlify production (RP-06, RP-07)
 
 ### Phase 27: Map Clustering
