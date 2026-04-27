@@ -118,9 +118,10 @@ function normalizeParcelIdForAllowlist(raw: string | null | undefined): string |
   // Defensive: extractParcelId() Branch 2 (label-based) sometimes captures
   // trailing letters when the source text has no separator (e.g.
   // "Tax Serial Number: 21171790050000IMPORTANT NOTICE..." captures
-  // "21171790050000IMPORTANT"). Strip any trailing alpha sequence —
-  // valid Utah parcel IDs end in digits.
-  cleaned = cleaned.replace(/[A-Z]+$/, "");
+  // "21171790050000IMPORTANT"). Strip MULTI-letter trailing sequences only —
+  // single trailing letters are legitimate Utah parcel suffixes
+  // (e.g. Emery `01-0211-002C` is distinct from `01-0211-002`).
+  cleaned = cleaned.replace(/[A-Z]{2,}$/, "");
   return cleaned.length > 0 ? cleaned : null;
 }
 
@@ -199,17 +200,32 @@ function extractOwnerName(text: string): string | undefined {
 }
 
 /**
+ * Trim trailing MULTI-letter alpha sequences from a captured parcel ID. When
+ * source text has no separator after the parcel (e.g. "Tax Serial Number:
+ * 21171790050000IMPORTANT NOTICE..."), Branch 2's greedy `[\w-]+` pattern
+ * captures into the next word.
+ *
+ * IMPORTANT: only strip 2+ trailing letters. Single trailing letters are
+ * legitimate Utah parcel suffixes (e.g. Emery `01-0211-002C` denotes a
+ * subdivided parcel — `002`, `002A`, `002B`, `002C` are all distinct).
+ * Stripping single letters would collapse distinct properties into duplicates.
+ */
+function cleanParcelId(raw: string): string {
+  return raw.trim().replace(/[A-Za-z]{2,}$/, "");
+}
+
+/**
  * Extract parcel / serial number from notice text.
  * Supports A.P.N., Parcel No., Serial No., Tax ID formats.
  */
 function extractParcelId(text: string): string | undefined {
   // Pattern: "A.P.N.: XX-XXX-XXXX" (common in Utah trustee sale notices)
   const apn = text.match(/A\.P\.N\.?:?\s*([A-Z0-9][\w\-./]{3,})/i);
-  if (apn) return apn[1].trim();
+  if (apn) return cleanParcelId(apn[1]);
 
   // Pattern: "Parcel No." or "Serial No." or "Tax ID"
   const parcelNo = text.match(/(?:Parcel|Serial|Tax ID|Parcel No\.?|Serial No\.?)[:\s#]+([A-Z0-9][\w-]{3,})/i);
-  if (parcelNo) return parcelNo[1].trim();
+  if (parcelNo) return cleanParcelId(parcelNo[1]);
 
   // Pattern: Carbon-style parcel XX-XXXX-XXXX
   const carbonParcel = text.match(/\b(\d{2}-\d{4}-\d{4})\b/);
