@@ -317,7 +317,7 @@ Urban expansion: pull Salt Lake County Rose Park (zip 84116) into the dashboard.
 
 ### Rose Park Enrichment
 
-- [ ] **RP-01** (re-scoped): System enriches existing Rose Park rows with UGRC assessor data (sqft, year built, assessed value, lot acres). UGRC `Parcels_SaltLake_LIR` is enrichment-only and has no zip field — cannot pre-filter. Strategy: enrich rows by parcel_id match after Utah Legals (RP-09/10/11) creates the source rows. Acceptable to fetch all SLC parcels and let parcel_id JOIN do the filtering; or use a follow-on UGRC Address Points layer to constrain by zip.
+- [x] **RP-01** (re-scoped): System enriches existing Rose Park rows with UGRC assessor data (sqft, year built, assessed value, lot acres). UGRC `Parcels_SaltLake_LIR` is enrichment-only and has no zip field — cannot pre-filter. Strategy: enrich rows by parcel_id match after Utah Legals (RP-09/10/11) creates the source rows. Acceptable to fetch all SLC parcels and let parcel_id JOIN do the filtering; or use a follow-on UGRC Address Points layer to constrain by zip.
 
 ### Rose Park Display
 
@@ -636,7 +636,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RP-03 | Phase 25 | Complete |
 | RP-04 | Phase 25 | Complete |
 | RP-05 | Phase 25 | Complete |
-| RP-01 | Phase 26 | Pending |
+| RP-01 | Phase 26 | Complete |
 | RP-06 | Phase 26 | Pending |
 | RP-07 | Phase 26 | Pending |
 | RP-08 | Phase 27 | Pending |
