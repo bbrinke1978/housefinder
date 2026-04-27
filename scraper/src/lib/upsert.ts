@@ -249,6 +249,7 @@ export async function upsertFromDelinquent(
       address: record.propertyAddress ?? "",
       city: record.propertyCity ?? "",
       ownerName: record.ownerName,
+      zip: record.propertyZip,
     }, county);
     upserted++;
 

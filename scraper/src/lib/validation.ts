@@ -43,6 +43,8 @@ export const delinquentRecordSchema = z.object({
   amountDue: z.string().optional(),
   propertyAddress: z.string().optional(),
   propertyCity: z.string().optional(),
+  /** Property zip — used by upsertProperty's normalizeCity() to retag SLC zips to neighborhood names */
+  propertyZip: z.string().optional(),
 });
 
 export type DelinquentRecord = z.infer<typeof delinquentRecordSchema>;
