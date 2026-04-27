@@ -156,7 +156,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
-| 26. UGRC Salt Lake County Import | 0/1 | Not started | - |
+| 26. UGRC Salt Lake County Import | 0/3 | Planned | - |
 | 27. Map Clustering | 0/1 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
@@ -566,7 +566,12 @@ Plans:
 - Original design also assumed UGRC could INSERT new rows. UGRC is enrichment-only: it UPDATEs existing rows by parcel_id match. This phase now correctly depends on Phase 25.5 to CREATE the rows first.
 - Recommended approach: use the `--county=salt-lake` CLI filter from rolled-back Phase 26 work, but skip the broken WHERE clause. Either fetch all SLC parcels (large but Azure Function timeout manageable since only matching parcel_ids do DB writes) OR query a separate UGRC Address Points layer first to get an 84116 parcel-ID list.
 
-**Plans:** TBD (run `/gsd:plan-phase 26` to break down — old plan 26-01 invalidated)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 26-01-PLAN.md — Extend import-ugrc-assessor.mjs with fetchFromAllowlist() + --dry-run flag (Option B from research) (RP-01)
+- [ ] 26-02-PLAN.md — Dry-run shadow + production execution against live DB; match count + prefix-mismatch spot-check (RP-01)
+- [ ] 26-03-PLAN.md — Verify Rose Park city filter, grid, stats bar, and assessor card on deployed Netlify production (RP-06, RP-07)
 
 ### Phase 27: Map Clustering
 
