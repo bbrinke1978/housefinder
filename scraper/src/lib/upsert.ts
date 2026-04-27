@@ -55,13 +55,64 @@ const COUNTY_DEFAULT_CITY: Record<string, string> = {
 };
 
 /**
+ * Zip -> neighborhood name map for Salt Lake County.
+ * Mirrors ZIP_TO_NEIGHBORHOOD in build-slc-parcel-neighborhood-map.ts.
+ * Keep both in sync. Updated: Path A follow-on to Phase 25.5.
+ */
+const SLC_ZIP_TO_NEIGHBORHOOD: Record<string, string> = {
+  // Salt Lake City proper
+  "84101": "Salt Lake City",
+  "84102": "Salt Lake City",
+  "84103": "Salt Lake City",
+  "84104": "Salt Lake City",
+  "84105": "Sugar House",
+  "84106": "Sugar House",
+  "84108": "Salt Lake City",
+  "84109": "Salt Lake City",
+  "84111": "Salt Lake City",
+  "84112": "Salt Lake City",
+  "84113": "Salt Lake City",
+  "84114": "Salt Lake City",
+  "84116": "Rose Park",
+  // Independent cities / unincorporated communities
+  "84047": "Midvale",
+  "84070": "Sandy",
+  "84092": "Sandy",
+  "84093": "Sandy",
+  "84094": "Sandy",
+  "84107": "Murray",
+  "84115": "South Salt Lake",
+  "84117": "Holladay",
+  "84118": "Kearns",
+  "84119": "West Valley City",
+  "84120": "West Valley City",
+  "84121": "Cottonwood Heights",
+  "84123": "Murray",
+  "84124": "Holladay",
+  "84128": "West Valley City",
+  "84129": "Taylorsville",
+  "84084": "West Jordan",
+  "84088": "West Jordan",
+  "84095": "South Jordan",
+  "84065": "Riverton",
+  "84096": "Herriman",
+  "84020": "Draper",
+};
+
+/**
  * Normalizes city name based on zip code for multi-neighborhood urban areas.
- * zip='84116' -> 'Rose Park' (Salt Lake City neighborhood)
- * Future: 84104 -> 'Glendale', 84106 -> 'Sugar House', etc.
+ * For Salt Lake County: looks up the zip in the neighborhood map.
+ * - zip='84116' -> 'Rose Park' (unchanged from Phase 25.5)
+ * - zip='84105'/'84106' -> 'Sugar House', zip='84070'/'84092'/'84093'/'84094' -> 'Sandy', etc.
+ * - Unknown SLC zip -> 'Salt Lake County (other)'
  * Gracefully degrades: rural counties without zip pass through unchanged.
  */
 function normalizeCity(city: string, zip?: string): string {
-  if (zip === '84116') return 'Rose Park';
+  if (!zip) return city;
+  const neighborhood = SLC_ZIP_TO_NEIGHBORHOOD[zip];
+  if (neighborhood) return neighborhood;
+  // If zip is in the 840xx range (SLC metro) but not mapped, tag generically
+  if (/^84\d{3}$/.test(zip)) return "Salt Lake County (other)";
   return city;
 }
 
