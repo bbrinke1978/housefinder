@@ -604,11 +604,11 @@ Plans:
   6. A floating "Report" button appears in the bottom-right corner of every authenticated page, auto-capturing the current URL and user agent into the new-item form so context isn't lost when reporting a bug from where it was found
   7. Items optionally link to a property or deal (`property_id`, `deal_id` foreign keys) so a bug like "MAO calculator wrong on this deal" carries the link through to the report
 
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
-- [ ] 28-01-PLAN.md — DB schema + Drizzle migration: `feedback_items`, `feedback_comments`, `feedback_attachments`, `feedback_activity` tables (FB-01, FB-09, FB-10)
-- [ ] 28-02-PLAN.md — Backend: server actions + Azure Blob `feedback` container plumbing + SAS URL helper (FB-01, FB-02, FB-04, FB-09)
-- [ ] 28-03-PLAN.md — List view + filters + nav integration + floating Report button (FB-02, FB-03, FB-06)
-- [ ] 28-04-PLAN.md — Detail page: markdown render, attachments gallery, comments thread, status/assignee controls, activity timeline (FB-03, FB-04, FB-05, FB-07, FB-09)
+- [x] 28-01-PLAN.md — DB schema + Drizzle migration: `feedback_items`, `feedback_comments`, `feedback_attachments`, `feedback_activity` tables (FB-01, FB-09, FB-10)
+- [x] 28-02-PLAN.md — Backend: server actions + Azure Blob `feedback` container plumbing + SAS URL helper (FB-01, FB-02, FB-04, FB-09)
+- [x] 28-03-PLAN.md — List view + filters + nav integration + floating Report button (FB-02, FB-03, FB-06)
+- [x] 28-04-PLAN.md — Detail page: markdown render, attachments gallery, comments thread, status/assignee controls, activity timeline (FB-03, FB-04, FB-05, FB-07, FB-09)
 - [ ] 28-05-PLAN.md — Email notifications via Resend: new-item alert + status-change alert + comment notification (FB-08)

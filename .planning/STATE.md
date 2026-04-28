@@ -8,13 +8,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 28-user-feedback-system
-**Current plan:** 28-04 (next: feedback detail view + comments)
-**Status:** Active — Plan 28-03 complete
+**Current plan:** 28-05 (next: email notifications)
+**Status:** Active — Plan 28-04 complete
 
 ## Progress
 
 Phase 26: [####################] Plan 2/2 complete (checkpoint pending human verify)
-Phase 28: [############--------] Plan 3/5 complete
+Phase 28: [################----] Plan 4/5 complete
 
 ## Decisions
 
@@ -31,6 +31,9 @@ Phase 28: [############--------] Plan 3/5 complete
 - 2026-04-28 (28-03): FloatingReportButton uses @base-ui/react/dialog — no shadcn Dialog in project; base-ui already used by call-script-modal
 - 2026-04-28 (28-03): Badge count fetched server-side in async DashboardLayout and passed as prop to both nav components
 - 2026-04-28 (28-03): react-markdown deps installed in 28-03 per coordination note; usage is in Plan 04 detail view
+- 2026-04-28 (28-04): Lightbox as fixed-overlay div (not Dialog) — simpler for image-only use case in 3-user internal tool
+- 2026-04-28 (28-04): GalleryAttachment uploadedByName null in v1 — attachment query doesn't join users table; v2 can add join
+- 2026-04-28 (28-04): useOptimistic + useTransition in FeedbackStatusControls for instant feel with revert-on-error
 
 ## Performance Metrics
 
@@ -41,6 +44,7 @@ Phase 28: [############--------] Plan 3/5 complete
 | 28    | 01   | 3min     | 3     | 3     |
 | 28    | 02   | 4min     | 4     | 5     |
 | 28    | 03   | 6min     | 7     | 11    |
+| 28    | 04   | 6min     | 6     | 7     |
 
 ## Session Log
 
@@ -50,3 +54,4 @@ Phase 28: [############--------] Plan 3/5 complete
 - 2026-04-26: Plan 28-01 complete — feedback_* tables + enums in prod Postgres; Drizzle schema updated; tsc clean
 - 2026-04-28: Plan 28-02 complete — feedback server actions, queries, blob helpers, attachment API routes; tsc clean
 - 2026-04-28: Plan 28-03 complete — feedback list/create UI, 3 badge components, FeedbackForm, FloatingReportButton, nav integration; tsc clean
+- 2026-04-28: Plan 28-04 complete — feedback detail page, markdown renderer, gallery, comment thread, activity timeline, status controls; tsc clean
