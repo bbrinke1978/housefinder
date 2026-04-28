@@ -6,6 +6,7 @@ import { MobileBottomNav } from "@/components/bottom-nav";
 import { CommandMenu } from "@/components/command-menu";
 import { PhotoFab } from "@/components/photo-fab";
 import { MobileSettingsMenu } from "@/components/mobile-settings-menu";
+import { FloatingReportButton } from "@/components/feedback/floating-report-button";
 
 export default function DashboardLayout({
   children,
@@ -27,6 +28,7 @@ export default function DashboardLayout({
           </div>
         </main>
         <PhotoFab />
+        <FloatingReportButton />
         <MobileBottomNav />
       </SidebarInset>
       <CommandMenu />
