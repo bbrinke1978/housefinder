@@ -32,6 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design) (completed 2026-04-26)
 - [ ] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
+- [ ] **Phase 28: User Feedback System** *(added 2026-04-27)* - Internal Jira-style bug + feature-request tracker built into No BS Workbench. Users (Brian + team) post issues with screenshots and notes; Brian triages and ships. Replaces the "remember to write down what's broken" workflow with a queryable, attachable, threaded backlog
 
 ## Phase Details
 
@@ -158,6 +159,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
 | 27. Map Clustering | 0/1 | Not started | - |
+| 28. User Feedback System | 0/5 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
@@ -587,3 +589,26 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd:plan-phase 27 to break down)
+
+### Phase 28: User Feedback System *(added 2026-04-27)*
+
+**Goal:** A logged-in user of No BS Workbench can post a bug report or feature request from any page in <30 seconds — including paste-from-clipboard screenshots — and Brian can triage and resolve them as a queryable backlog with threaded comments, status workflow, and email notifications. Replaces the "I'll remember to mention it" workflow with a durable, searchable record so nothing falls through the cracks when Brian checks at night.
+**Depends on:** Phase 10 (auth/users), Phase 14 (Azure Blob photo pattern reused for attachments)
+**Requirements:** FB-01, FB-02, FB-03, FB-04, FB-05, FB-06, FB-07, FB-08, FB-09, FB-10
+**Success Criteria** (what must be TRUE):
+  1. Any logged-in user can navigate to `/feedback`, click "New", choose type (bug/feature/idea/question), enter title + description, paste an image from clipboard, and submit — the item appears immediately in the list view
+  2. The list view supports filtering by status (new/planned/in_progress/shipped/wontfix), type, priority, assignee, and free-text search; defaults to "open" (not-yet-shipped) sorted by priority then newest
+  3. The detail view shows the item's title, description (markdown-rendered), reporter, attachments gallery, threaded comments, status/priority/assignee dropdowns, and a chronological activity timeline of all changes
+  4. Image attachments survive page reload and display correctly via 1-hour SAS URLs from the Azure Blob `feedback` container — same pattern as existing photos/contracts/floor-plans containers
+  5. When a new item is created, Brian receives an email via Resend (already integrated) with the title, type, priority, reporter name, and a deep link to the item; when an item's status changes to "shipped", the original reporter receives an email
+  6. A floating "Report" button appears in the bottom-right corner of every authenticated page, auto-capturing the current URL and user agent into the new-item form so context isn't lost when reporting a bug from where it was found
+  7. Items optionally link to a property or deal (`property_id`, `deal_id` foreign keys) so a bug like "MAO calculator wrong on this deal" carries the link through to the report
+
+**Plans:** 5 plans (TBD by /gsd:execute-phase 28)
+
+Plans:
+- [ ] 28-01-PLAN.md — DB schema + Drizzle migration: `feedback_items`, `feedback_comments`, `feedback_attachments`, `feedback_activity` tables (FB-01, FB-09, FB-10)
+- [ ] 28-02-PLAN.md — Backend: server actions + Azure Blob `feedback` container plumbing + SAS URL helper (FB-01, FB-02, FB-04, FB-09)
+- [ ] 28-03-PLAN.md — List view + filters + nav integration + floating Report button (FB-02, FB-03, FB-06)
+- [ ] 28-04-PLAN.md — Detail page: markdown render, attachments gallery, comments thread, status/assignee controls, activity timeline (FB-03, FB-04, FB-05, FB-07, FB-09)
+- [ ] 28-05-PLAN.md — Email notifications via Resend: new-item alert + status-change alert + comment notification (FB-08)
