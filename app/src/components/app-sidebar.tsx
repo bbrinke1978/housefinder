@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2 } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2, Bug } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,18 +17,36 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Deals", href: "/deals", icon: Briefcase },
-  { label: "Contracts", href: "/contracts", icon: FileText },
-  { label: "Photos", href: "/photos/inbox", icon: ImageIcon },
-  { label: "Buyers", href: "/buyers", icon: Users },
-  { label: "Wholesale", href: "/wholesale", icon: Building2 },
-  { label: "Analytics", href: "/analytics", icon: BarChart2 },
-  { label: "Map", href: "/map", icon: MapPin },
-  { label: "Campaigns", href: "/campaigns", icon: Mail },
+  { label: "Dashboard", href: "/" },
+  { label: "Deals", href: "/deals" },
+  { label: "Contracts", href: "/contracts" },
+  { label: "Photos", href: "/photos/inbox" },
+  { label: "Buyers", href: "/buyers" },
+  { label: "Wholesale", href: "/wholesale" },
+  { label: "Analytics", href: "/analytics" },
+  { label: "Map", href: "/map" },
+  { label: "Campaigns", href: "/campaigns" },
+  { label: "Feedback", href: "/feedback" },
 ];
 
-export function AppSidebar() {
+const NAV_ICONS: Record<string, React.ElementType> = {
+  Dashboard: LayoutDashboard,
+  Deals: Briefcase,
+  Contracts: FileText,
+  Photos: ImageIcon,
+  Buyers: Users,
+  Wholesale: Building2,
+  Analytics: BarChart2,
+  Map: MapPin,
+  Campaigns: Mail,
+  Feedback: Bug,
+};
+
+interface AppSidebarProps {
+  feedbackBadgeCount?: number;
+}
+
+export function AppSidebar({ feedbackBadgeCount = 0 }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -48,10 +66,12 @@ export function AppSidebar() {
       <SidebarContent className="px-2 pt-2">
         <SidebarMenu>
           {navItems.map((item) => {
+            const Icon = NAV_ICONS[item.label] ?? LayoutDashboard;
             const isActive =
               item.href === "/"
                 ? pathname === "/"
                 : pathname.startsWith(item.href);
+            const showBadge = item.href === "/feedback" && feedbackBadgeCount > 0;
             return (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
@@ -59,7 +79,14 @@ export function AppSidebar() {
                   render={<Link href={item.href} />}
                   className="transition-all duration-200 rounded-xl"
                 >
-                  <item.icon className="h-4 w-4" />
+                  <div className="relative">
+                    <Icon className="h-4 w-4" />
+                    {showBadge && (
+                      <span className="absolute -top-1.5 -right-1.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground px-0.5">
+                        {feedbackBadgeCount > 9 ? "9+" : feedbackBadgeCount}
+                      </span>
+                    )}
+                  </div>
                   <span className="font-semibold">{item.label}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

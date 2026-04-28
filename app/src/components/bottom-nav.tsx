@@ -2,20 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users, Bug } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
-// Mobile bottom nav: 5 items — Dashboard, Deals, Buyers, Analytics, Map
-// Campaigns accessible from desktop sidebar
-const navItems = [
+// Mobile bottom nav: 6 items — Dashboard, Deals, Buyers, Analytics, Map, Feedback
+const baseNavItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
   { label: "Buyers", href: "/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
+  { label: "Feedback", href: "/feedback", icon: Bug },
 ];
 
-export function MobileBottomNav() {
+interface MobileBottomNavProps {
+  feedbackBadgeCount?: number;
+}
+
+export function MobileBottomNav({ feedbackBadgeCount = 0 }: MobileBottomNavProps) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
 
@@ -25,27 +29,35 @@ export function MobileBottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl flex items-center justify-around px-1 safe-area-bottom"
       style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {navItems.map((item) => {
+      {baseNavItems.map((item) => {
         const isActive =
           item.href === "/"
             ? pathname === "/"
             : pathname.startsWith(item.href);
+        const showBadge = item.href === "/feedback" && feedbackBadgeCount > 0;
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`relative flex min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-medium transition-all duration-200 ${
+            className={`relative flex min-h-[44px] min-w-[40px] flex-col items-center justify-center gap-0.5 rounded-xl px-1.5 py-2 text-[9px] font-medium transition-all duration-200 ${
               isActive
                 ? "text-primary"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <item.icon
-              className={`h-[22px] w-[22px] transition-transform duration-200 ${
-                isActive ? "scale-110" : ""
-              }`}
-              strokeWidth={isActive ? 2.5 : 1.8}
-            />
+            <div className="relative">
+              <item.icon
+                className={`h-[20px] w-[20px] transition-transform duration-200 ${
+                  isActive ? "scale-110" : ""
+                }`}
+                strokeWidth={isActive ? 2.5 : 1.8}
+              />
+              {showBadge && (
+                <span className="absolute -top-1 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground px-0.5">
+                  {feedbackBadgeCount > 9 ? "9+" : feedbackBadgeCount}
+                </span>
+              )}
+            </div>
             <span className="leading-none">{item.label}</span>
             {isActive && (
               <span className="absolute top-1.5 h-1 w-1 rounded-full bg-primary" />
