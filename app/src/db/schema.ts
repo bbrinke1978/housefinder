@@ -12,7 +12,9 @@ import {
   numeric,
   uniqueIndex,
   index,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
 
 // -- Enums --
@@ -1048,3 +1050,149 @@ export const wholesaleLeadNotes = pgTable(
 export type WholesalerRow = InferSelectModel<typeof wholesalers>;
 export type WholesaleLeadRow = InferSelectModel<typeof wholesaleLeads>;
 export type WholesaleLeadNoteRow = InferSelectModel<typeof wholesaleLeadNotes>;
+
+// -- Feedback System --
+
+export const feedbackTypeEnum = pgEnum("feedback_type", [
+  "bug",
+  "feature",
+  "idea",
+  "question",
+]);
+
+export const feedbackStatusEnum = pgEnum("feedback_status", [
+  "new",
+  "planned",
+  "in_progress",
+  "shipped",
+  "wontfix",
+  "duplicate",
+]);
+
+export const feedbackPriorityEnum = pgEnum("feedback_priority", [
+  "low",
+  "medium",
+  "high",
+  "critical",
+]);
+
+export const feedbackActivityActionEnum = pgEnum("feedback_activity_action", [
+  "created",
+  "status_changed",
+  "priority_changed",
+  "assigned",
+  "comment_added",
+  "attachment_added",
+  "attachment_removed",
+  "resolved",
+  "reopened",
+  "edited",
+]);
+
+export const feedbackItems = pgTable(
+  "feedback_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    type: feedbackTypeEnum("type").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    status: feedbackStatusEnum("status").notNull().default("new"),
+    priority: feedbackPriorityEnum("priority").notNull().default("medium"),
+    reporterId: uuid("reporter_id")
+      .notNull()
+      .references(() => users.id),
+    assigneeId: uuid("assignee_id").references(() => users.id),
+    propertyId: uuid("property_id").references(() => properties.id),
+    dealId: uuid("deal_id").references(() => deals.id),
+    urlContext: text("url_context"),
+    browserContext: text("browser_context"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_feedback_items_status").on(table.status),
+    index("idx_feedback_items_assignee").on(table.assigneeId),
+    index("idx_feedback_items_reporter").on(table.reporterId),
+  ]
+);
+
+export const feedbackComments = pgTable(
+  "feedback_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => feedbackItems.id),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_feedback_comments_item").on(table.itemId, table.createdAt),
+  ]
+);
+
+export const feedbackAttachments = pgTable(
+  "feedback_attachments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id").references(() => feedbackItems.id),
+    commentId: uuid("comment_id").references(() => feedbackComments.id),
+    blobName: text("blob_name").notNull().unique(),
+    mimeType: text("mime_type").notNull(),
+    sizeBytes: integer("size_bytes").notNull(),
+    uploadedBy: uuid("uploaded_by")
+      .notNull()
+      .references(() => users.id),
+    uploadedAt: timestamp("uploaded_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_feedback_attachments_item").on(table.itemId),
+    index("idx_feedback_attachments_comment").on(table.commentId),
+    check(
+      "attachments_target_check",
+      sql`${table.itemId} IS NOT NULL OR ${table.commentId} IS NOT NULL`
+    ),
+  ]
+);
+
+export const feedbackActivity = pgTable(
+  "feedback_activity",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => feedbackItems.id),
+    actorId: uuid("actor_id")
+      .notNull()
+      .references(() => users.id),
+    action: feedbackActivityActionEnum("action").notNull(),
+    oldValue: text("old_value"),
+    newValue: text("new_value"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_feedback_activity_item").on(table.itemId, table.createdAt),
+  ]
+);
+
+export type FeedbackItemRow = InferSelectModel<typeof feedbackItems>;
+export type FeedbackCommentRow = InferSelectModel<typeof feedbackComments>;
+export type FeedbackAttachmentRow = InferSelectModel<typeof feedbackAttachments>;
+export type FeedbackActivityRow = InferSelectModel<typeof feedbackActivity>;
