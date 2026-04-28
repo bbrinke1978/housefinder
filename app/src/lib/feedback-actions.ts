@@ -10,12 +10,15 @@ import {
   users,
 } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
+import type { InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import {
   notifyNewFeedbackItem,
   notifyFeedbackShipped,
 } from "@/lib/email-actions";
 import { isAdmin } from "@/lib/feedback-admin";
+
+type FeedbackItemUpdate = Partial<InferInsertModel<typeof feedbackItems>>;
 
 // -- Validation helpers --
 
@@ -176,7 +179,7 @@ export async function updateFeedbackItem(
   }
 
   await db.transaction(async (tx) => {
-    const updateValues: Record<string, unknown> = {};
+    const updateValues: FeedbackItemUpdate = {};
     const activityEntries: Array<{ action: string; oldValue: string | null; newValue: string | null }> = [];
 
     if (patch.title !== undefined && patch.title !== item.title) {
@@ -205,9 +208,8 @@ export async function updateFeedbackItem(
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = new Date();
       await tx
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(feedbackItems)
-        .set(updateValues as any)
+        .set(updateValues)
         .where(eq(feedbackItems.id, id));
 
       // Insert activity for each tracked change
