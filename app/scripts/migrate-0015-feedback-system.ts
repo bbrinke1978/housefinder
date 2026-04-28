@@ -20,12 +20,44 @@ if (!DATABASE_URL) { console.error("ERROR: DATABASE_URL not set"); process.exit(
 const sqlPath = join(dirname(fileURLToPath(import.meta.url)), "..", "drizzle", "0015_feedback_system.sql");
 const sql = readFileSync(sqlPath, "utf8");
 
-// Split on `;` at end-of-line (preserves multi-line statements like DO blocks
-// while breaking on real statement terminators).
-const statements = sql
-  .split(/;\s*\n/)
-  .map((s) => s.replace(/--.*$/gm, "").trim())
-  .filter((s) => s.length > 0);
+/**
+ * Dollar-quote-aware statement splitter.
+ * Splits a SQL string into individual statements on `;` but skips semicolons
+ * that appear inside $$ ... $$ dollar-quoted strings (used by DO blocks).
+ */
+function splitStatements(input: string): string[] {
+  const results: string[] = [];
+  let current = "";
+  let inDollarQuote = false;
+  const lines = input.split("\n");
+
+  for (const line of lines) {
+    // Strip inline comments from non-dollar-quoted lines
+    const effectiveLine = inDollarQuote ? line : line.replace(/--.*$/, "");
+
+    // Toggle dollar-quote state on $$ tokens
+    const dollarMatches = effectiveLine.match(/\$\$/g);
+    if (dollarMatches && dollarMatches.length % 2 !== 0) {
+      inDollarQuote = !inDollarQuote;
+    }
+
+    current += effectiveLine + "\n";
+
+    // Only split on statement boundary when outside a dollar-quoted block
+    if (!inDollarQuote && effectiveLine.trimEnd().endsWith(";")) {
+      const stmt = current.trim();
+      if (stmt.length > 0) results.push(stmt);
+      current = "";
+    }
+  }
+
+  const trailing = current.trim();
+  if (trailing.length > 0) results.push(trailing);
+
+  return results;
+}
+
+const statements = splitStatements(sql).filter((s) => s.length > 0);
 
 async function main() {
   const client = new Client({ connectionString: DATABASE_URL });
