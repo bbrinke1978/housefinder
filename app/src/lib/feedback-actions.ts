@@ -7,10 +7,15 @@ import {
   feedbackComments,
   feedbackAttachments,
   feedbackActivity,
+  users,
 } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { Session } from "next-auth";
+import {
+  notifyNewFeedbackItem,
+  notifyFeedbackShipped,
+} from "@/lib/email-actions";
 
 // -- Admin gate --
 
@@ -107,6 +112,29 @@ export async function createFeedbackItem(
   });
 
   revalidatePath("/feedback");
+
+  // Fire-and-forget: notify Brian of the new item — don't block the user's submit
+  const [reporter] = await db
+    .select({ name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.id, session.user!.id as string))
+    .limit(1);
+
+  if (reporter) {
+    notifyNewFeedbackItem({
+      itemId: result.id,
+      type: input.type,
+      title: input.title,
+      description: input.description ?? null,
+      priority: input.priority ?? "medium",
+      urlContext: input.urlContext ?? null,
+      reporterName: reporter.name,
+      reporterEmail: reporter.email,
+    }).catch((err) =>
+      console.error("[createFeedbackItem] email notify failed:", err)
+    );
+  }
+
   return { id: result.id };
 }
 
