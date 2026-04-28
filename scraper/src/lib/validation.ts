@@ -41,10 +41,19 @@ export const delinquentRecordSchema = z.object({
   ownerName: z.string().optional(),
   year: z.string().optional(),
   amountDue: z.string().optional(),
+  /** Property situs address (where the parcel is located). May be empty when the upstream
+   *  source only exposes the owner mailing address (e.g. SLCo TaxMQ). */
   propertyAddress: z.string().optional(),
   propertyCity: z.string().optional(),
-  /** Property zip — used by upsertProperty's normalizeCity() to retag SLC zips to neighborhood names */
+  /** Property situs zip — used by upsertProperty's normalizeCity() to retag SLC zips to neighborhood names */
   propertyZip: z.string().optional(),
+  /** Owner mailing address (where the tax notice is mailed). Often a PO Box or out-of-state. */
+  mailingAddress: z.string().optional(),
+  mailingCity: z.string().optional(),
+  mailingState: z.string().optional(),
+  mailingZip: z.string().optional(),
+  /** Raw upstream address string (preserved for traceability when the parser may have lost data). */
+  rawAddress: z.string().optional(),
 });
 
 export type DelinquentRecord = z.infer<typeof delinquentRecordSchema>;

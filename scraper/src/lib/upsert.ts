@@ -127,45 +127,65 @@ export async function upsertProperty(record: PropertyRecord, county?: string): P
   const now = new Date();
   const ownerType = classifyOwnerType(record.ownerName);
   const resolvedCounty = county ?? record.county ?? "carbon";
-  const city = normalizeCity(record.city || COUNTY_DEFAULT_CITY[resolvedCounty] || "", record.zip);
-  const address = normalizeAddress(record.address);
+  // Situs city: when zip maps to an SLC neighborhood, that wins; otherwise honor
+  // whatever the scraper extracted (rural counties), or the county default if
+  // even that's missing. Empty string means "no situs known" — backfill / UGRC fills later.
+  const rawCity = record.city ?? "";
+  const city = rawCity || record.zip
+    ? normalizeCity(rawCity || COUNTY_DEFAULT_CITY[resolvedCounty] || "", record.zip)
+    : "";
+  const address = record.address ? normalizeAddress(record.address) : "";
+  const zip = record.zip ?? null;
 
   // Carry propertyType through when the scraper extracted one.
   // Null means "not available from this source" — preserved in the DB as-is on conflict.
   const propertyTypeValue = record.propertyType ?? null;
 
+  // Owner mailing fields. Optional — only some scrapers (slco-tax-delinquent,
+  // carbon-assessor when scraping mailing columns) provide these. Stored
+  // separately from situs so out-of-state-owner queries are direct.
+  const mailingAddress = record.mailingAddress ?? null;
+  const mailingCity = record.mailingCity ?? null;
+  const mailingState = record.mailingState ?? null;
+  const mailingZip = record.mailingZip ?? null;
+
   const result = await db
     .insert(properties)
     .values({
       parcelId: record.parcelId,
-      address,
-      city,
+      address: address || null,
+      city: city || null,
+      zip,
       county: resolvedCounty,
       state: "UT",
       ownerName: record.ownerName ?? null,
       ownerType,
+      ownerMailingAddress: mailingAddress,
+      ownerMailingCity: mailingCity,
+      ownerMailingState: mailingState,
+      ownerMailingZip: mailingZip,
       propertyType: propertyTypeValue,
       updatedAt: now,
     })
     .onConflictDoUpdate({
       target: properties.parcelId,
       set: {
-        // Only overwrite address/city/ownerName if the new value is non-empty.
-        // Scrapers like emery-5year-backtax and carbon-recorder pass "" for
-        // address/city — without this guard, they wipe out good data from
-        // assessor scrapes that ran earlier.
-        address: address
-          ? address
-          : sql`${properties.address}`,
-        city: city
-          ? city
-          : sql`${properties.city}`,
-        ownerName: record.ownerName
-          ? record.ownerName
-          : sql`${properties.ownerName}`,
-        ownerType: record.ownerName
-          ? ownerType
-          : sql`${properties.ownerType}`,
+        // Only overwrite situs fields if the new value is non-empty. Scrapers
+        // like emery-5year-backtax, carbon-recorder, slco-tax-delinquent pass
+        // empty situs (because their upstream source has no situs at all) —
+        // without this guard, they would wipe out good data from assessor
+        // scrapes (or UGRC enrichment) that ran earlier.
+        address: address ? address : sql`${properties.address}`,
+        city: city ? city : sql`${properties.city}`,
+        zip: zip ? zip : sql`${properties.zip}`,
+        ownerName: record.ownerName ? record.ownerName : sql`${properties.ownerName}`,
+        ownerType: record.ownerName ? ownerType : sql`${properties.ownerType}`,
+        // Owner mailing fields follow the same don't-blank-good-data pattern.
+        // A scraper without mailing data passes null/undefined — preserve existing.
+        ownerMailingAddress: mailingAddress ? mailingAddress : sql`${properties.ownerMailingAddress}`,
+        ownerMailingCity: mailingCity ? mailingCity : sql`${properties.ownerMailingCity}`,
+        ownerMailingState: mailingState ? mailingState : sql`${properties.ownerMailingState}`,
+        ownerMailingZip: mailingZip ? mailingZip : sql`${properties.ownerMailingZip}`,
         // Only overwrite propertyType if a new value was scraped
         ...(propertyTypeValue !== null ? { propertyType: propertyTypeValue } : {}),
         updatedAt: now,
@@ -250,6 +270,13 @@ export async function upsertFromDelinquent(
       city: record.propertyCity ?? "",
       ownerName: record.ownerName,
       zip: record.propertyZip,
+      // Owner mailing address — slco-tax-delinquent passes these because the
+      // SLCo Auditor API's only address field is the mailing one. Carbon's
+      // delinquent scraper leaves them undefined (it scrapes situs only).
+      mailingAddress: record.mailingAddress,
+      mailingCity: record.mailingCity,
+      mailingState: record.mailingState,
+      mailingZip: record.mailingZip,
     }, county);
     upserted++;
 
@@ -267,6 +294,8 @@ export async function upsertFromDelinquent(
       raw: {
         year: record.year,
         amountDue: record.amountDue,
+        // Preserve raw upstream string so we can reparse later if the parser ever changes.
+        rawAddress: record.rawAddress,
       },
     });
     signals++;

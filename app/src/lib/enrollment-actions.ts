@@ -105,8 +105,8 @@ export async function enrollLeadInSequence(
 
   const mergeFields = {
     firstName,
-    address: lead.address,
-    city: lead.city,
+    address: lead.address ?? "",
+    city: lead.city ?? "",
     senderName: mailSettings.fromName || "an investor",
     phone: mailSettings.phone || "",
   };

@@ -275,8 +275,8 @@ export async function dispatchCampaignEmails(): Promise<DispatchResult> {
 
       const mergeFields = {
         firstName,
-        address: enrollment.address,
-        city: enrollment.city,
+        address: enrollment.address ?? "",
+        city: enrollment.city ?? "",
         senderName: mailSettings.fromName || "an investor",
         phone: mailSettings.phone || "",
       };

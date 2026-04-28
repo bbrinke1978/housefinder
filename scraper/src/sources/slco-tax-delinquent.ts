@@ -9,15 +9,23 @@
  *
  * No HTML scraping or Playwright needed — this is a clean JSON API.
  *
+ * IMPORTANT — TAX_SALE_ADDRESS is the OWNER MAILING ADDRESS, not the property
+ * situs. Live data inspection (2026-04-27) showed PO Boxes, out-of-state
+ * mailing addresses (Michigan, Texas, Florida), and out-of-county Utah
+ * addresses (Lehi, Ogden, Park City). The API exposes no separate situs
+ * field. Property situs comes later from UGRC enrichment by parcel_id.
+ *
  * Each row is mapped to a DelinquentRecord with:
  *   - parcelId: 14-digit numeric (the API may return 13 digits, prefixed with 0)
  *   - ownerName: trimmed
  *   - year: TSL_YEAR_CNT (the delinquency year — single year per row, not multi)
  *   - amountDue: trimmed of whitespace and commas
- *   - propertyAddress: street portion of TAX_SALE_ADDRESS
- *   - propertyCity: parsed from TAX_SALE_ADDRESS (between street and "UT")
- *   - propertyZip: 5-digit zip parsed from TAX_SALE_ADDRESS (drives the SLC
- *     neighborhood retag in upsertProperty -> normalizeCity)
+ *   - mailingAddress / mailingCity / mailingState / mailingZip: parsed from
+ *     TAX_SALE_ADDRESS (this is the owner mailing address)
+ *   - rawAddress: the raw TAX_SALE_ADDRESS string preserved for traceability
+ *
+ * propertyAddress / propertyCity / propertyZip are LEFT EMPTY — the upsert
+ * layer treats those as "no situs known yet" and UGRC fills them in later.
  *
  * Each record produces a `tax_lien` distress signal via upsertFromDelinquent.
  *
@@ -59,30 +67,73 @@ function normalizeParcel(raw: number | string): string {
 }
 
 /**
- * Parse "615 E 4030 S MURRAY UT 84107-1927-15" into:
- *   { street: "615 E 4030 S", city: "MURRAY", zip: "84107" }
+ * Parse a TAX_SALE_ADDRESS string (the OWNER MAILING ADDRESS) into components.
  *
- * Tolerates multi-word cities (WEST VALLEY CITY, SALT LAKE CITY) by greedily
- * matching everything between the last numeric segment of the street and "UT".
+ * Examples of inputs we must handle:
+ *   "615 E 4030 S MURRAY UT 84107-1927-15"     → street + city + UT + zip
+ *   "5289 W WOODASH CIR WEST VALLEY UT 84120-5628-89" → multi-word city, no internal grid digits
+ *   "PO BOX 1099 RIVERTON UT 84065-1099"       → PO Box mailing
+ *   "11898 S WEST BAY SHORE DR TRAVERSE CITY MI 49684-5257" → out-of-state
+ *   "PO BOX 13464 OGDEN UT 84412-3464"         → out-of-county Utah
  *
- * Returns nulls if parse fails.
+ * Strategy: anchor on the trailing "<STATE> <ZIP>" pattern, then walk
+ * backwards through the preceding tokens to extract the city as the trailing
+ * letters-only run. Everything before that is the street.
+ *
+ * The previous regex `^(.+?)\s+([A-Z][A-Z\s]+?)\s+UT\s+(\d{5})\b` collapsed
+ * on named-street addresses (no internal digits to anchor the street boundary)
+ * because the city group `[A-Z\s]+?` was free to absorb the entire street.
+ *
+ * Returns nulls when parsing fails (the row is skipped).
  */
 function parseTaxSaleAddress(raw: string | undefined): {
   street: string | null;
   city: string | null;
+  state: string | null;
   zip: string | null;
 } {
-  if (!raw) return { street: null, city: null, zip: null };
+  if (!raw) return { street: null, city: null, state: null, zip: null };
   const cleaned = raw.trim();
 
-  // Match: <street> <CITY (1-4 words)> UT <5-digit-zip><optional suffix>
-  const m = cleaned.match(/^(.+?)\s+([A-Z][A-Z\s]+?)\s+UT\s+(\d{5})\b/i);
-  if (!m) return { street: null, city: null, zip: null };
+  // 1. Anchor on trailing "<STATE> <ZIP>". Accept any 2-letter state code,
+  //    optionally followed by ZIP+4 and an arbitrary trailing suffix that the
+  //    SLCo data sometimes appends (e.g. -1927-15, -5628-89, -3464).
+  const tail = cleaned.match(/^(.+?)\s+([A-Z]{2})\s+(\d{5})(?:[-\s].*)?$/i);
+  if (!tail) return { street: null, city: null, state: null, zip: null };
+
+  const beforeState = tail[1].trim();
+  const state = tail[2].toUpperCase();
+  const zip = tail[3];
+
+  // 2. Walk backwards from the end of `beforeState`, accumulating tokens that
+  //    are pure letters into the city group. Stop at the first token that
+  //    contains a digit — that token is part of the street.
+  const tokens = beforeState.split(/\s+/);
+  const cityTokens: string[] = [];
+  for (let i = tokens.length - 1; i >= 0; i--) {
+    const t = tokens[i];
+    if (/^[A-Za-z][A-Za-z'.-]*$/.test(t)) {
+      cityTokens.unshift(t);
+    } else {
+      break;
+    }
+  }
+  if (cityTokens.length === 0) {
+    return { street: null, city: null, state: null, zip: null };
+  }
+  const street = tokens.slice(0, tokens.length - cityTokens.length).join(" ").trim();
+  if (!street) {
+    // Whole input was letters — e.g. "RIVERTON UT 84065" with no preceding
+    // street. Unusual but possible (PO-box-only owner with bad data). Treat
+    // as parse failure rather than silently storing an empty street.
+    return { street: null, city: null, state: null, zip: null };
+  }
 
   return {
-    street: m[1].trim(),
-    city: m[2].trim().replace(/\s+/g, " "),
-    zip: m[3],
+    street,
+    city: cityTokens.join(" "),
+    state,
+    zip,
   };
 }
 
@@ -126,17 +177,25 @@ export async function scrapeSlcoTaxDelinquent(): Promise<DelinquentRecord[]> {
       .replace(/[\s,$]/g, "")
       .trim();
 
-    const { street, city, zip } = parseTaxSaleAddress(row.TAX_SALE_ADDRESS);
+    const { street, city, state, zip } = parseTaxSaleAddress(row.TAX_SALE_ADDRESS);
+    const rawAddress = (row.TAX_SALE_ADDRESS ?? "").trim() || undefined;
 
+    // The parsed address is the OWNER MAILING address. Property situs is
+    // not available from the TaxMQ API and will be filled in later by UGRC
+    // enrichment via parcel_id. Leave property* fields undefined so the
+    // upsert layer's "don't blank good data" guard preserves any existing
+    // situs (e.g. from a prior UGRC run).
     const candidate = {
       parcelId,
       county: "salt lake",
       ownerName: ownerName || undefined,
       year: /^\d{4}$/.test(year) ? year : undefined,
       amountDue: amountDue || undefined,
-      propertyAddress: street ?? undefined,
-      propertyCity: city ?? undefined,
-      propertyZip: zip ?? undefined,
+      mailingAddress: street ?? undefined,
+      mailingCity: city ?? undefined,
+      mailingState: state ?? undefined,
+      mailingZip: zip ?? undefined,
+      rawAddress,
     };
 
     const result = delinquentRecordSchema.safeParse(candidate);

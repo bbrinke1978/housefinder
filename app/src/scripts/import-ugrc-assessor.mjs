@@ -59,7 +59,7 @@ const COUNTIES = [
   },
 ];
 
-const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS";
+const FIELDS = "PARCEL_ID,BLDG_SQFT,BUILT_YR,TOTAL_MKT_VALUE,PARCEL_ACRES,PROP_CLASS,PARCEL_ADD,PARCEL_CITY";
 const PAGE_SIZE = 1000; // ArcGIS default max
 
 /**
@@ -206,6 +206,10 @@ function aggregateByParcelId(features) {
         assessedValue:
           f.TOTAL_MKT_VALUE != null ? Math.round(f.TOTAL_MKT_VALUE) : null,
         lotAcres: f.PARCEL_ACRES ?? null,
+        // Property situs — UGRC is the canonical source for SLC parcels.
+        // Used to fill in address/city after backfill cleared mailing-as-situs.
+        address: f.PARCEL_ADD ? f.PARCEL_ADD.trim() : null,
+        city: f.PARCEL_CITY ? f.PARCEL_CITY.trim() : null,
       });
     } else {
       // Additional building record for same parcel — sum sqft
@@ -309,9 +313,11 @@ async function main() {
              year_built     = COALESCE(year_built,     $3::integer),
              assessed_value = COALESCE(assessed_value, $4::integer),
              lot_acres      = COALESCE(lot_acres,      $5::numeric),
+             address        = COALESCE(address,        $6::text),
+             city           = COALESCE(city,           $7::text),
              updated_at     = NOW()
            WHERE UPPER(REPLACE(REPLACE(parcel_id, '-', ''), ' ', '')) = $1
-           AND ($2::integer IS NOT NULL OR $3::integer IS NOT NULL OR $4::integer IS NOT NULL OR $5::numeric IS NOT NULL)
+           AND ($2::integer IS NOT NULL OR $3::integer IS NOT NULL OR $4::integer IS NOT NULL OR $5::numeric IS NOT NULL OR $6::text IS NOT NULL OR $7::text IS NOT NULL)
            RETURNING id`,
           [
             parcel.parcelId,
@@ -319,6 +325,8 @@ async function main() {
             parcel.yearBuilt,
             parcel.assessedValue,
             parcel.lotAcres,
+            parcel.address,
+            parcel.city,
           ]
         );
       }

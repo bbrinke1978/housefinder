@@ -110,8 +110,8 @@ async function getHotLeadsNotAlerted(
   return rows.map((r) => ({
     leadId: r.leadId,
     propertyId: r.propertyId,
-    address: r.address,
-    city: r.city,
+    address: r.address ?? "",
+    city: r.city ?? "",
     ownerName: r.ownerName,
     distressScore: r.distressScore,
     signals: signalMap.get(r.propertyId) ?? [],

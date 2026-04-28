@@ -48,7 +48,9 @@ export default async function PropertyDetailPage({
       </div>
 
       <div className="flex items-center gap-3">
-        <h1 className="text-xl font-bold md:text-2xl">{property.address}</h1>
+        <h1 className="text-xl font-bold md:text-2xl">
+          {property.address?.trim() || `Parcel ${property.parcelId}`}
+        </h1>
         {property.isHot && (
           <Badge variant="destructive" className="gap-1">
             <Flame className="h-3 w-3" />

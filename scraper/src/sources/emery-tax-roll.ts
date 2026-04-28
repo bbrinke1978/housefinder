@@ -108,19 +108,66 @@ export async function scrapeEmeryTaxRoll(): Promise<PropertyRecord[]> {
                 getCell("parcelnumber") ||
                 getCell("parcel #") ||
                 getCell("parcel no"),
+              // Situs address — ONLY pull from property/situs-prefixed
+              // columns. Do NOT fall back to a generic "Address" or "City"
+              // column, because in the Emery wpDataTable those generic columns
+              // hold the OWNER MAILING address (PO Boxes, out-of-state). When
+              // the table only exposes a generic Address column with mailing
+              // data, this leaves situs empty and the row's mailing fields
+              // below capture the data correctly. Same convention as
+              // carbon-assessor.ts (which uses propertyaddress/propertycity
+              // for situs and add1/add2/city for mailing).
               address:
-                getCell("address") ||
                 getCell("property address") ||
                 getCell("propertyaddress") ||
                 getCell("situs address") ||
-                getCell("address 1") ||
-                getCell("addr1") ||
-                getCell("prop address"),
+                getCell("situsaddress") ||
+                getCell("prop address") ||
+                undefined,
               city:
-                getCell("city") ||
-                getCell("propertycity") ||
                 getCell("property city") ||
-                getCell("prop city"),
+                getCell("propertycity") ||
+                getCell("situs city") ||
+                getCell("situscity") ||
+                getCell("prop city") ||
+                undefined,
+              // Owner mailing address — try Carbon-style "Add1/Add2/City"
+              // columns first (the convention Emery is cloned from), then
+              // explicit "Mailing*" / "Owner*" columns. The generic "Address"
+              // and "City" columns end up here, NOT in situs above.
+              mailingAddress:
+                getCell("add1") ||
+                getCell("address1") ||
+                getCell("address 1") ||
+                getCell("mailing address") ||
+                getCell("mailingaddress") ||
+                getCell("owner address") ||
+                getCell("owneraddress") ||
+                getCell("address") ||
+                undefined,
+              mailingCity:
+                getCell("mailing city") ||
+                getCell("mailingcity") ||
+                getCell("owner city") ||
+                getCell("ownercity") ||
+                getCell("city") ||
+                undefined,
+              mailingState:
+                getCell("mailing state") ||
+                getCell("mailingstate") ||
+                getCell("owner state") ||
+                getCell("ownerstate") ||
+                getCell("state") ||
+                undefined,
+              mailingZip:
+                getCell("mailing zip") ||
+                getCell("mailingzip") ||
+                getCell("owner zip") ||
+                getCell("ownerzip") ||
+                getCell("zip") ||
+                getCell("zipcode") ||
+                getCell("zip code") ||
+                undefined,
               ownerName:
                 getCell("owner") ||
                 getCell("name") ||

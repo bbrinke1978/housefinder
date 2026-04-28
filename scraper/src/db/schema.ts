@@ -43,13 +43,22 @@ export const properties = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     parcelId: text("parcel_id").notNull().unique(),
-    address: text("address").notNull(),
-    city: text("city").notNull(),
+    // Property situs (the actual location of the parcel). May be NULL when
+    // only an owner mailing address is known — UGRC enrichment fills this in
+    // for SLCo; assessor scrapers fill it in for rural counties.
+    address: text("address"),
+    city: text("city"),
     state: text("state").notNull().default("UT"),
     zip: text("zip"),
     county: text("county").notNull(),
     ownerName: text("owner_name"),
     ownerType: ownerTypeEnum("owner_type").default("unknown"),
+    // Owner mailing address (where the tax/NOD notice gets mailed). Often a
+    // PO Box or out-of-state address, distinct from the property situs.
+    ownerMailingAddress: text("owner_mailing_address"),
+    ownerMailingCity: text("owner_mailing_city"),
+    ownerMailingState: text("owner_mailing_state"),
+    ownerMailingZip: text("owner_mailing_zip"),
     propertyType: text("property_type"),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true })
       .notNull()

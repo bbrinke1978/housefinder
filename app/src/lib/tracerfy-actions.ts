@@ -534,8 +534,8 @@ export async function runSkipTrace(
       .select({
         id: properties.id,
         ownerName: properties.ownerName,
-        address: properties.address,
-        city: properties.city,
+        address: sql<string>`coalesce(${properties.address}, '')`,
+        city: sql<string>`coalesce(${properties.city}, '')`,
         state: properties.state,
         zip: properties.zip,
       })
@@ -548,7 +548,11 @@ export async function runSkipTrace(
     }
 
     if (!prop.address?.trim()) {
-      return { error: "Property has no address — cannot skip trace" };
+      return {
+        error:
+          "Property situs address is unknown — waiting on UGRC/assessor enrichment. " +
+          "Skip trace can be retried once the property's situs address is filled in.",
+      };
     }
 
     // Submit single-item batch
@@ -633,8 +637,8 @@ export async function runBulkSkipTrace(
       .select({
         id: properties.id,
         ownerName: properties.ownerName,
-        address: properties.address,
-        city: properties.city,
+        address: sql<string>`coalesce(${properties.address}, '')`,
+        city: sql<string>`coalesce(${properties.city}, '')`,
         state: properties.state,
         zip: properties.zip,
       })
