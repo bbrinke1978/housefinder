@@ -8,13 +8,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 28-user-feedback-system
-**Current plan:** 28-03 (next: feedback list UI)
-**Status:** Active — Plan 28-02 complete
+**Current plan:** 28-04 (next: feedback detail view + comments)
+**Status:** Active — Plan 28-03 complete
 
 ## Progress
 
 Phase 26: [####################] Plan 2/2 complete (checkpoint pending human verify)
-Phase 28: [########------------] Plan 2/5 complete
+Phase 28: [############--------] Plan 3/5 complete
 
 ## Decisions
 
@@ -28,6 +28,9 @@ Phase 28: [########------------] Plan 2/5 complete
 - 2026-04-28 (28-02): updateFeedbackItem uses `as any` for dynamic Drizzle patch — avoids over-engineering typed partial update
 - 2026-04-28 (28-02): deleteFeedbackItem activity uses 'resolved' enum value (no 'deleted' in enum); newValue='deleted' captures intent
 - 2026-04-28 (28-02): FTS splits whitespace into AND terms via to_tsquery — consistent with GitHub/Linear search defaults
+- 2026-04-28 (28-03): FloatingReportButton uses @base-ui/react/dialog — no shadcn Dialog in project; base-ui already used by call-script-modal
+- 2026-04-28 (28-03): Badge count fetched server-side in async DashboardLayout and passed as prop to both nav components
+- 2026-04-28 (28-03): react-markdown deps installed in 28-03 per coordination note; usage is in Plan 04 detail view
 
 ## Performance Metrics
 
@@ -37,6 +40,7 @@ Phase 28: [########------------] Plan 2/5 complete
 | 26    | 02   | 18min    | 2     | 1     |
 | 28    | 01   | 3min     | 3     | 3     |
 | 28    | 02   | 4min     | 4     | 5     |
+| 28    | 03   | 6min     | 7     | 11    |
 
 ## Session Log
 
@@ -45,3 +49,4 @@ Phase 28: [########------------] Plan 2/5 complete
 - 2026-04-27: Plan 26-02 complete — 4 Rose Park rows enriched; prefix-mismatch confirmed; SC #1 MET; checkpoint awaiting human-verify
 - 2026-04-26: Plan 28-01 complete — feedback_* tables + enums in prod Postgres; Drizzle schema updated; tsc clean
 - 2026-04-28: Plan 28-02 complete — feedback server actions, queries, blob helpers, attachment API routes; tsc clean
+- 2026-04-28: Plan 28-03 complete — feedback list/create UI, 3 badge components, FeedbackForm, FloatingReportButton, nav integration; tsc clean
