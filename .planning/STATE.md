@@ -8,13 +8,13 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 28-user-feedback-system
-**Current plan:** 28-05 (next: email notifications)
-**Status:** Active — Plan 28-04 complete
+**Current plan:** 28-05 complete — Phase 28 DONE
+**Status:** Complete — Phase 28 all 5 plans shipped
 
 ## Progress
 
 Phase 26: [####################] Plan 2/2 complete (checkpoint pending human verify)
-Phase 28: [################----] Plan 4/5 complete
+Phase 28: [####################] Plan 5/5 complete
 
 ## Decisions
 
@@ -34,6 +34,8 @@ Phase 28: [################----] Plan 4/5 complete
 - 2026-04-28 (28-04): Lightbox as fixed-overlay div (not Dialog) — simpler for image-only use case in 3-user internal tool
 - 2026-04-28 (28-04): GalleryAttachment uploadedByName null in v1 — attachment query doesn't join users table; v2 can add join
 - 2026-04-28 (28-04): useOptimistic + useTransition in FeedbackStatusControls for instant feel with revert-on-error
+- 2026-04-26 (28-05): Used plain-HTML builder pattern (contract-emails.tsx style) instead of react-email render() — project does not call render() anywhere
+- 2026-04-26 (28-05): getResend() returns null with warn when RESEND_API_KEY missing — safe in local dev without env var
 
 ## Performance Metrics
 
@@ -45,6 +47,7 @@ Phase 28: [################----] Plan 4/5 complete
 | 28    | 02   | 4min     | 4     | 5     |
 | 28    | 03   | 6min     | 7     | 11    |
 | 28    | 04   | 6min     | 6     | 7     |
+| 28    | 05   | 2min     | 4     | 4     |
 
 ## Session Log
 
@@ -55,3 +58,4 @@ Phase 28: [################----] Plan 4/5 complete
 - 2026-04-28: Plan 28-02 complete — feedback server actions, queries, blob helpers, attachment API routes; tsc clean
 - 2026-04-28: Plan 28-03 complete — feedback list/create UI, 3 badge components, FeedbackForm, FloatingReportButton, nav integration; tsc clean
 - 2026-04-28: Plan 28-04 complete — feedback detail page, markdown renderer, gallery, comment thread, activity timeline, status controls; tsc clean
+- 2026-04-26: Plan 28-05 complete — feedback email notifications (email-actions.ts, two email templates, wired into createFeedbackItem + updateFeedbackStatus); tsc clean; Phase 28 DONE
