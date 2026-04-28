@@ -11,25 +11,11 @@ import {
 } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import type { Session } from "next-auth";
 import {
   notifyNewFeedbackItem,
   notifyFeedbackShipped,
 } from "@/lib/email-actions";
-
-// -- Admin gate --
-
-const ADMIN_EMAILS = ["bbrinke1978@gmail.com"] as const;
-
-/**
- * isAdmin — returns true if the session user's email is in the admin list.
- * Exported so the attachment API route (Task 4) can reuse it without duplication.
- */
-export function isAdmin(session: Session | null): boolean {
-  return Boolean(
-    session?.user?.email && ADMIN_EMAILS.includes(session.user.email as typeof ADMIN_EMAILS[number])
-  );
-}
+import { isAdmin } from "@/lib/feedback-admin";
 
 // -- Validation helpers --
 

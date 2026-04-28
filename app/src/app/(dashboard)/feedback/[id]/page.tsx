@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { getFeedbackItemDetail } from "@/lib/feedback-queries";
-import { isAdmin } from "@/lib/feedback-actions";
+import { isAdmin } from "@/lib/feedback-admin";
 import { FeedbackDetail } from "@/components/feedback/feedback-detail";
 import type { Session } from "next-auth";
 

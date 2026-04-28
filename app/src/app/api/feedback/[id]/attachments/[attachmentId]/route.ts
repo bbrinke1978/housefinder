@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/db/client";
 import { feedbackAttachments, feedbackActivity } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
-import { isAdmin } from "@/lib/feedback-actions";
+import { isAdmin } from "@/lib/feedback-admin";
 
 export const runtime = "nodejs";
 
