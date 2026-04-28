@@ -10,6 +10,7 @@ const CONTAINER_NAME = "receipts";
 const CONTRACTS_CONTAINER = "contracts";
 const PHOTOS_CONTAINER = "photos";
 const FLOOR_PLANS_CONTAINER = "floor-plans";
+const FEEDBACK_CONTAINER = "feedback";
 
 function getBlobServiceClient(): BlobServiceClient {
   if (!CONNECTION_STRING) {
@@ -214,6 +215,88 @@ export function generatePhotoSasUrl(blobName: string): string {
 export async function deletePhotoBlob(blobName: string): Promise<void> {
   const client = getBlobServiceClient();
   const containerClient = client.getContainerClient(PHOTOS_CONTAINER);
+  const blobClient = containerClient.getBlockBlobClient(blobName);
+  await blobClient.deleteIfExists();
+}
+
+/**
+ * uploadFeedbackBlob — upload a feedback attachment (image) to Azure Blob Storage
+ * "feedback" container. Creates the container if it doesn't exist (idempotent first-run).
+ * Accepts contentType from the browser (PNG/JPG/WebP for clipboard paste or file picker).
+ * Returns the blob URL (not a SAS URL — container is private).
+ * @param buffer   Raw file bytes
+ * @param blobName Path within the container, e.g. "{itemId}/{attachmentId}.png"
+ * @param contentType MIME type, e.g. "image/png"
+ */
+export async function uploadFeedbackBlob(
+  buffer: Buffer,
+  blobName: string,
+  contentType: string
+): Promise<string> {
+  const client = getBlobServiceClient();
+  const containerClient = client.getContainerClient(FEEDBACK_CONTAINER);
+  await containerClient.createIfNotExists();
+  const blobClient = containerClient.getBlockBlobClient(blobName);
+
+  await blobClient.uploadData(buffer, {
+    blobHTTPHeaders: { blobContentType: contentType },
+  });
+
+  return blobClient.url;
+}
+
+/**
+ * generateFeedbackSasUrl — generate a 1-hour read-only SAS URL for a feedback attachment.
+ * Must be called server-side. Container is private; SAS URL required for browser display.
+ * @param blobName Path within the "feedback" container, e.g. "{itemId}/{attachmentId}.png"
+ */
+export function generateFeedbackSasUrl(blobName: string): string {
+  if (!CONNECTION_STRING) {
+    throw new Error("AZURE_STORAGE_CONNECTION_STRING is not set");
+  }
+
+  const accountNameMatch = CONNECTION_STRING.match(/AccountName=([^;]+)/);
+  const accountKeyMatch = CONNECTION_STRING.match(/AccountKey=([^;]+)/);
+
+  if (!accountNameMatch || !accountKeyMatch) {
+    throw new Error(
+      "AZURE_STORAGE_CONNECTION_STRING does not contain AccountName or AccountKey"
+    );
+  }
+
+  const accountName = accountNameMatch[1];
+  const accountKey = accountKeyMatch[1];
+
+  const sharedKeyCredential = new StorageSharedKeyCredential(
+    accountName,
+    accountKey
+  );
+
+  const expiresOn = new Date();
+  expiresOn.setHours(expiresOn.getHours() + 1); // 1-hour expiry — matches photos pattern
+
+  const sasParams = generateBlobSASQueryParameters(
+    {
+      containerName: FEEDBACK_CONTAINER,
+      blobName,
+      permissions: BlobSASPermissions.parse("r"),
+      expiresOn,
+    },
+    sharedKeyCredential
+  );
+
+  return `https://${accountName}.blob.core.windows.net/${FEEDBACK_CONTAINER}/${blobName}?${sasParams.toString()}`;
+}
+
+/**
+ * deleteFeedbackBlob — delete a feedback attachment from Azure Blob Storage "feedback" container.
+ * Uses deleteIfExists to be idempotent — no error if blob is already gone.
+ * Called from the soft-delete cleanup path when an attachment is removed.
+ * @param blobName Path within the "feedback" container
+ */
+export async function deleteFeedbackBlob(blobName: string): Promise<void> {
+  const client = getBlobServiceClient();
+  const containerClient = client.getContainerClient(FEEDBACK_CONTAINER);
   const blobClient = containerClient.getBlockBlobClient(blobName);
   await blobClient.deleteIfExists();
 }
