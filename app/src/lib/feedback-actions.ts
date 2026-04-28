@@ -307,6 +307,41 @@ export async function updateFeedbackStatus(
 
   revalidatePath("/feedback");
   revalidatePath(`/feedback/${id}`);
+
+  // Fire-and-forget shipped notification — only when status is 'shipped' and actor !== reporter
+  if (newStatus === "shipped") {
+    if (item.reporterId === session.user!.id as string) {
+      console.log(
+        "[updateFeedbackStatus] self-notify skipped (reporter === actor)"
+      );
+    } else {
+      const [reporter] = await db
+        .select({ name: users.name, email: users.email })
+        .from(users)
+        .where(eq(users.id, item.reporterId))
+        .limit(1);
+
+      const [actor] = await db
+        .select({ name: users.name })
+        .from(users)
+        .where(eq(users.id, session.user!.id as string))
+        .limit(1);
+
+      if (reporter && actor) {
+        notifyFeedbackShipped({
+          itemId: id,
+          title: item.title,
+          type: item.type,
+          reporterEmail: reporter.email,
+          reporterName: reporter.name,
+          actorName: actor.name,
+          shipNote,
+        }).catch((err) =>
+          console.error("[updateFeedbackStatus] shipped email failed:", err)
+        );
+      }
+    }
+  }
 }
 
 // -- createFeedbackComment --
