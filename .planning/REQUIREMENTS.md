@@ -333,7 +333,7 @@ Urban expansion: pull Salt Lake County Rose Park (zip 84116) into the dashboard.
 
 Internal Jira-style backlog so users (Brian + team) can report bugs and request features without losing context. Replaces "I'll remember to mention it" with a durable, searchable record.
 
-- [ ] **FB-01**: User can create a feedback item with type (`bug` | `feature` | `idea` | `question`), title (required, max 200 chars), and markdown description. Item is immediately persisted with `status='new'` and the current user as `reporter_id`.
+- [x] **FB-01**: User can create a feedback item with type (`bug` | `feature` | `idea` | `question`), title (required, max 200 chars), and markdown description. Item is immediately persisted with `status='new'` and the current user as `reporter_id`.
 - [ ] **FB-02**: User can list all feedback items with filters for status, type, priority, assignee, and free-text search across title + description. Default sort: open items first (not shipped/wontfix), then by priority desc, then newest first.
 - [ ] **FB-03**: User can view a feedback item's detail page showing title, type, priority, status, reporter, assignee, created/updated timestamps, markdown-rendered description, attachments gallery, comments thread, and chronological activity timeline.
 - [ ] **FB-04**: User can attach images to a feedback item — both via file picker and via paste-from-clipboard (critical for screenshots of UI bugs). Images store in Azure Blob `feedback` container; UI displays them via 1-hour SAS URLs (mirrors existing photos/contracts/floor-plans pattern).
@@ -341,8 +341,8 @@ Internal Jira-style backlog so users (Brian + team) can report bugs and request 
 - [ ] **FB-06**: A floating "Report" button appears in the bottom-right corner of every authenticated page, opening the new-item form pre-filled with the current URL and user agent so context isn't lost when reporting a bug from the page where it was observed.
 - [ ] **FB-07**: User can change an item's status (`new` → `planned` → `in_progress` → `shipped`/`wontfix`/`duplicate`), priority (`low` | `medium` | `high` | `critical`), and assignee from the detail view. All changes are recorded in the activity timeline with actor + timestamp.
 - [ ] **FB-08**: Brian receives an email (via existing Resend integration) when a new feedback item is created. The original reporter receives an email when the item's status changes to `shipped`. Both emails include a deep link to the item.
-- [ ] **FB-09**: Feedback items can optionally link to a `property_id` or `deal_id` so context-specific bugs ("the MAO calculator is wrong on deal XYZ") carry the link forward. Detail view renders the linked property/deal as a clickable badge.
-- [ ] **FB-10**: All feedback CRUD operations require authentication. Only Brian (or a future `admin` role) can change status to `shipped`/`wontfix`/`duplicate` or delete an item; comments and attachments are owned by their author and can be deleted by the author or an admin.
+- [x] **FB-09**: Feedback items can optionally link to a `property_id` or `deal_id` so context-specific bugs ("the MAO calculator is wrong on deal XYZ") carry the link forward. Detail view renders the linked property/deal as a clickable badge.
+- [x] **FB-10**: All feedback CRUD operations require authentication. Only Brian (or a future `admin` role) can change status to `shipped`/`wontfix`/`duplicate` or delete an item; comments and attachments are owned by their author and can be deleted by the author or an admin.
 
 ## v2 Requirements
 

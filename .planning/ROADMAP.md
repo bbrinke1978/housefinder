@@ -159,7 +159,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
 | 27. Map Clustering | 0/1 | Not started | - |
-| 28. User Feedback System | 0/5 | Not started | - |
+| 28. User Feedback System | 1/5 | In Progress|  |
 
 ### Phase 7: Frontend Design Polish
 
@@ -604,7 +604,7 @@ Plans:
   6. A floating "Report" button appears in the bottom-right corner of every authenticated page, auto-capturing the current URL and user agent into the new-item form so context isn't lost when reporting a bug from where it was found
   7. Items optionally link to a property or deal (`property_id`, `deal_id` foreign keys) so a bug like "MAO calculator wrong on this deal" carries the link through to the report
 
-**Plans:** 5 plans (TBD by /gsd:execute-phase 28)
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 28-01-PLAN.md — DB schema + Drizzle migration: `feedback_items`, `feedback_comments`, `feedback_attachments`, `feedback_activity` tables (FB-01, FB-09, FB-10)
