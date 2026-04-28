@@ -191,8 +191,9 @@ export async function updateFeedbackItem(
     if (Object.keys(updateValues).length > 0) {
       updateValues.updatedAt = new Date();
       await tx
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(feedbackItems)
-        .set(updateValues as Parameters<typeof tx.update>[0] extends infer T ? never : never)
+        .set(updateValues as any)
         .where(eq(feedbackItems.id, id));
 
       // Insert activity for each tracked change
