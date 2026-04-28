@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 28-user-feedback-system
 **Current plan:** 28-05 complete — Phase 28 DONE
-**Status:** Complete — Phase 28 all 5 plans shipped
+**Status:** Milestone complete
 
 ## Progress
 

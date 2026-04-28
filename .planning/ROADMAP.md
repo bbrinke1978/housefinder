@@ -159,7 +159,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
 | 27. Map Clustering | 0/1 | Not started | - |
-| 28. User Feedback System | 5/5 | Complete   | 2026-04-28 |
+| 28. User Feedback System | 5/5 | Complete    | 2026-04-28 |
 
 ### Phase 7: Frontend Design Polish
 
@@ -611,4 +611,4 @@ Plans:
 - [x] 28-02-PLAN.md — Backend: server actions + Azure Blob `feedback` container plumbing + SAS URL helper (FB-01, FB-02, FB-04, FB-09)
 - [x] 28-03-PLAN.md — List view + filters + nav integration + floating Report button (FB-02, FB-03, FB-06)
 - [x] 28-04-PLAN.md — Detail page: markdown render, attachments gallery, comments thread, status/assignee controls, activity timeline (FB-03, FB-04, FB-05, FB-07, FB-09)
-- [ ] 28-05-PLAN.md — Email notifications via Resend: new-item alert + status-change alert + comment notification (FB-08)
+- [x] 28-05-PLAN.md — Email notifications via Resend: new-item alert + status-change alert + comment notification (FB-08)
