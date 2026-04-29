@@ -95,7 +95,17 @@ function UserRowEdit({ user }: UserRowEditProps) {
     <tr className={`border-b border-border text-sm ${!isActive ? "opacity-60" : ""}`}>
       <td className="py-3 px-4">
         <div>
-          <p className="font-medium">{user.name}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium">{user.name}</p>
+            {user.roles.length === 0 && (
+              <span
+                className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold text-yellow-800"
+                title="Auto-provisioned via Google sign-in. Assign roles to grant access."
+              >
+                Pending
+              </span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">{user.email}</p>
         </div>
       </td>
@@ -202,6 +212,14 @@ export function UsersTable({ users }: UsersTableProps) {
     );
   }
 
+  // Sort: pending users (roles=[]) first, then by createdAt descending
+  const sorted = [...users].sort((a, b) => {
+    const aPending = a.roles.length === 0 ? 0 : 1;
+    const bPending = b.roles.length === 0 ? 0 : 1;
+    if (aPending !== bPending) return aPending - bPending;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
   return (
     <div className="rounded-xl border border-border overflow-x-auto">
       <table className="w-full text-sm">
@@ -215,7 +233,7 @@ export function UsersTable({ users }: UsersTableProps) {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {sorted.map((user) => (
             <UserRowEdit key={user.id} user={user} />
           ))}
         </tbody>
