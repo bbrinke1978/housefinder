@@ -13,6 +13,7 @@ import {
   uniqueIndex,
   index,
   check,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
@@ -136,6 +137,9 @@ export const leads = pgTable(
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true }),
     lastViewedAt: timestamp("last_viewed_at", { withTimezone: true }),
     lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+    // RBAC (Phase 29): assignee FKs
+    leadManagerId: uuid("lead_manager_id").references(() => users.id),
+    createdByUserId: uuid("created_by_user_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -146,6 +150,8 @@ export const leads = pgTable(
   (table) => [
     index("idx_leads_hot_status").on(table.isHot, table.status),
     index("idx_leads_new_lead_status").on(table.newLeadStatus),
+    index("idx_leads_lead_manager").on(table.leadManagerId),
+    index("idx_leads_created_by").on(table.createdByUserId),
   ]
 );
 
@@ -308,6 +314,10 @@ export const deals = pgTable(
     arvNotes: text("arv_notes"), // free-text ARV research notes
     sqft: integer("sqft"), // total sq ft from floor plans (sum of all floor plan totalSqft)
     leadSource: text("lead_source"), // "wholesale" when promoted from wholesale lead; null for direct entry
+    // RBAC (Phase 29): assignee FKs
+    acquisitionUserId: uuid("acquisition_user_id").references(() => users.id),
+    dispositionUserId: uuid("disposition_user_id").references(() => users.id),
+    coordinatorUserId: uuid("coordinator_user_id").references(() => users.id),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -319,6 +329,9 @@ export const deals = pgTable(
     index("idx_deals_status").on(table.status),
     index("idx_deals_property_id").on(table.propertyId),
     index("idx_deals_updated_at").on(table.updatedAt),
+    index("idx_deals_acquisition_user").on(table.acquisitionUserId),
+    index("idx_deals_disposition_user").on(table.dispositionUserId),
+    index("idx_deals_coordinator_user").on(table.coordinatorUserId),
   ]
 );
 
@@ -936,13 +949,22 @@ export type FloorPlanPinRow = InferSelectModel<typeof floorPlanPins>;
 
 // -- Users --
 
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  passwordHash: text("password_hash").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull(),
+    passwordHash: text("password_hash").notNull(),
+    // RBAC (Phase 29)
+    roles: text("roles").array().notNull().default([]),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_users_active").on(table.isActive),
+  ]
+);
 
 export const passwordResetTokens = pgTable("password_reset_tokens", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -1196,3 +1218,54 @@ export type FeedbackItemRow = InferSelectModel<typeof feedbackItems>;
 export type FeedbackCommentRow = InferSelectModel<typeof feedbackComments>;
 export type FeedbackAttachmentRow = InferSelectModel<typeof feedbackAttachments>;
 export type FeedbackActivityRow = InferSelectModel<typeof feedbackActivity>;
+
+// -- Audit Log (Phase 29 RBAC) --
+
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id), // nullable for system-driven actions
+    action: text("action").notNull(),         // e.g. 'lead.status_changed'
+    entityType: text("entity_type").notNull(), // 'lead', 'deal', 'property', 'buyer', 'user'
+    entityId: uuid("entity_id"),              // nullable for entity-less actions
+    oldValue: jsonb("old_value"),
+    newValue: jsonb("new_value"),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_audit_log_actor_created").on(table.actorUserId, table.createdAt),
+    index("idx_audit_log_entity").on(table.entityType, table.entityId),
+    index("idx_audit_log_action").on(table.action),
+    index("idx_audit_log_created").on(table.createdAt),
+  ]
+);
+
+// -- Audit Log Archive (rows >30 days, cold but queryable) --
+
+export const auditLogArchive = pgTable(
+  "audit_log_archive",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id"),
+    oldValue: jsonb("old_value"),
+    newValue: jsonb("new_value"),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_audit_archive_actor_created").on(table.actorUserId, table.createdAt),
+    index("idx_audit_archive_entity").on(table.entityType, table.entityId),
+    index("idx_audit_archive_action").on(table.action),
+    index("idx_audit_archive_created").on(table.createdAt),
+  ]
+);
+
+export type AuditLogRow = InferSelectModel<typeof auditLog>;
+export type AuditLogArchiveRow = InferSelectModel<typeof auditLogArchive>;

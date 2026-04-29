@@ -10,6 +10,7 @@ import {
   serial,
   uniqueIndex,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // ── Enums ──────────────────────────────────────────────────────────────────
@@ -360,5 +361,65 @@ export const alertHistory = pgTable(
       table.runDate
     ),
     index("idx_alert_history_lead_id").on(table.leadId),
+  ]
+);
+
+// ── Users (minimal — for audit FK) ───────────────────────────────────────
+
+export const users = pgTable("users", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  roles: text("roles").array().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ── Audit Log (Phase 29 RBAC) ─────────────────────────────────────────────
+
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id"),
+    oldValue: jsonb("old_value"),
+    newValue: jsonb("new_value"),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_audit_log_actor_created").on(table.actorUserId, table.createdAt),
+    index("idx_audit_log_entity").on(table.entityType, table.entityId),
+    index("idx_audit_log_action").on(table.action),
+    index("idx_audit_log_created").on(table.createdAt),
+  ]
+);
+
+// ── Audit Log Archive ─────────────────────────────────────────────────────
+
+export const auditLogArchive = pgTable(
+  "audit_log_archive",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id"),
+    oldValue: jsonb("old_value"),
+    newValue: jsonb("new_value"),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_audit_archive_actor_created").on(table.actorUserId, table.createdAt),
+    index("idx_audit_archive_entity").on(table.entityType, table.entityId),
+    index("idx_audit_archive_action").on(table.action),
+    index("idx_audit_archive_created").on(table.createdAt),
   ]
 );
