@@ -6,16 +6,37 @@ import { and, eq, inArray } from "drizzle-orm";
 import { generatePhotoSasUrl } from "@/lib/blob-storage";
 import { DealsSearchWrapper } from "@/components/deals-search-wrapper";
 import { LayoutGrid, List } from "lucide-react";
+import { auth } from "@/auth";
+import { sessionCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
 interface DealsPageProps {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; mine?: string }>;
 }
 
 export default async function DealsPage({ searchParams }: DealsPageProps) {
-  const { view = "kanban" } = await searchParams;
-  const deals = await getDeals();
+  const session = await auth();
+  const { view = "kanban", mine: mineParam } = await searchParams;
+
+  // Determine "my deals" filter:
+  // - Owner: off by default (sees everything); ?mine=true to narrow
+  // - Non-owner: on by default; ?mine=false to see all (if they have deal.view_all)
+  const roles = ((session?.user as { roles?: Role[] } | undefined)?.roles) ?? [];
+  const isOwner = roles.includes("owner");
+  const currentUserId = (session?.user as { id?: string } | undefined)?.id;
+
+  let mineFilter: { userId: string } | undefined = undefined;
+  if (currentUserId) {
+    const mineDefault = !isOwner; // non-owners default to mine=true
+    const mineOn = mineParam !== undefined ? mineParam === "true" : mineDefault;
+    if (mineOn) {
+      mineFilter = { userId: currentUserId };
+    }
+  }
+
+  const deals = await getDeals({ mine: mineFilter });
 
   // Batch-fetch cover photos for all deals (non-fatal — page works without photos)
   const dealIds = deals.map((d) => d.id);
@@ -53,10 +74,34 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* "My deals" toggle */}
+          <div className="flex rounded-xl border border-border overflow-hidden text-sm bg-muted/40">
+            <Link
+              href={`/deals?view=${view}&mine=false`}
+              className={`inline-flex items-center px-3 py-1.5 transition-colors ${
+                !mineFilter
+                  ? "bg-background text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              All
+            </Link>
+            <Link
+              href={`/deals?view=${view}&mine=true`}
+              className={`inline-flex items-center px-3 py-1.5 border-l border-border transition-colors ${
+                mineFilter
+                  ? "bg-background text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Mine
+            </Link>
+          </div>
+
           {/* View toggle */}
           <div className="flex rounded-xl border border-border overflow-hidden text-sm bg-muted/40">
             <Link
-              href="/deals?view=kanban"
+              href={`/deals?view=kanban${mineFilter ? "&mine=true" : ""}`}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 transition-colors ${
                 view === "kanban"
                   ? "bg-background text-foreground font-semibold shadow-sm"
@@ -68,7 +113,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
               <span className="hidden sm:inline">Kanban</span>
             </Link>
             <Link
-              href="/deals?view=list"
+              href={`/deals?view=list${mineFilter ? "&mine=true" : ""}`}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 border-l border-border transition-colors ${
                 view === "list"
                   ? "bg-background text-foreground font-semibold shadow-sm"

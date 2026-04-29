@@ -9,6 +9,7 @@ import {
 } from "@/lib/queries";
 import type { WebsiteLead } from "@/lib/queries";
 import { LEAD_SOURCES } from "@/types";
+import type { Role } from "@/lib/permissions";
 import { getSequences } from "@/lib/campaign-queries";
 import { getOverdueBuyerFollowups } from "@/lib/buyer-queries";
 import { StatsBar } from "@/components/stats-bar";
@@ -34,6 +35,15 @@ export default async function DashboardPage({
 
   const params = await searchParams;
 
+  // "My leads" filter — non-owners default to mine=true
+  const roles = ((session.user as { roles?: Role[] } | undefined)?.roles) ?? [];
+  const isOwner = roles.includes("owner");
+  const currentUserId = (session.user as { id?: string } | undefined)?.id;
+  const mineParam = typeof params.mine === "string" ? params.mine : undefined;
+  const mineDefault = !isOwner;
+  const mineOn = mineParam !== undefined ? mineParam === "true" : mineDefault;
+  const mineFilter = mineOn && currentUserId ? { userId: currentUserId } : undefined;
+
   const filterParams = {
     city: typeof params.city === "string" ? params.city : undefined,
     distressType:
@@ -49,6 +59,7 @@ export default async function DashboardPage({
     tier: typeof params.tier === "string" ? params.tier : undefined,
     source: typeof params.source === "string" ? params.source : undefined,
     search: typeof params.search === "string" ? params.search : undefined,
+    mine: mineFilter,
   };
 
   const [stats, properties, cities, sequences, websiteLeads, overdueBuyers] = await Promise.all([

@@ -1,12 +1,33 @@
 import { db } from "@/db/client";
 import { deals, buyers, dealNotes, ownerContacts, properties, leads } from "@/db/schema";
-import { eq, desc, gte, lte, or, isNull, and } from "drizzle-orm";
+import { eq, desc, gte, lte, or, isNull, and, sql } from "drizzle-orm";
 import type { DealWithBuyer, DealNote, Buyer, OwnerContact } from "@/types";
+
+export interface GetDealsParams {
+  /**
+   * "My deals" filter — when provided, restricts to deals where the given user
+   * is the acquisition_user_id, disposition_user_id, or coordinator_user_id.
+   */
+  mine?: { userId: string };
+}
 
 /**
  * getDeals — returns all deals joined with buyer name, newest-updated first.
  */
-export async function getDeals(): Promise<DealWithBuyer[]> {
+export async function getDeals(params: GetDealsParams = {}): Promise<DealWithBuyer[]> {
+  const conditions = [];
+
+  if (params.mine?.userId) {
+    const uid = params.mine.userId;
+    conditions.push(
+      sql`(
+        ${deals.acquisitionUserId} = ${uid}::uuid
+        OR ${deals.dispositionUserId} = ${uid}::uuid
+        OR ${deals.coordinatorUserId} = ${uid}::uuid
+      )`
+    );
+  }
+
   const rows = await db
     .select({
       id: deals.id,
@@ -42,6 +63,7 @@ export async function getDeals(): Promise<DealWithBuyer[]> {
     })
     .from(deals)
     .leftJoin(buyers, eq(deals.assignedBuyerId, buyers.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(deals.updatedAt));
 
   return rows as unknown as DealWithBuyer[];

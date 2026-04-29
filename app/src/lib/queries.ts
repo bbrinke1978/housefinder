@@ -207,6 +207,12 @@ export interface GetPropertiesParams {
   source?: string;
   /** Search by owner name or address */
   search?: string;
+  /**
+   * "My leads" filter — when provided, restricts results to properties whose
+   * lead has lead_manager_id = mine.userId. Only applies when the property has
+   * an associated lead (which is always true given the innerJoin).
+   */
+  mine?: { userId: string };
 }
 
 export async function getDashboardStats(
@@ -706,6 +712,11 @@ export async function getProperties(
         WHERE oc.property_id = ${properties.id} AND oc.phone IS NOT NULL
       ) AND ${properties.ownerType} IN ('individual', 'unknown')`
     );
+  }
+
+  // "My leads" filter — restricts to properties whose lead is assigned to this user
+  if (params.mine?.userId) {
+    conditions.push(eq(leads.leadManagerId, params.mine.userId));
   }
 
   // Sort
