@@ -7,14 +7,15 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
-**Current phase:** 28-user-feedback-system
-**Current plan:** 28-05 complete — Phase 28 DONE
-**Status:** Milestone complete
+**Current phase:** 29-rbac-foundation
+**Current plan:** 29-01 complete — Phase 29 RBAC Foundation Plan 1 DONE
+**Status:** In progress (Phase 29)
 
 ## Progress
 
 Phase 26: [####################] Plan 2/2 complete (checkpoint pending human verify)
 Phase 28: [####################] Plan 5/5 complete
+Phase 29: [####                ] Plan 1/1 complete
 
 ## Decisions
 
@@ -36,6 +37,11 @@ Phase 28: [####################] Plan 5/5 complete
 - 2026-04-28 (28-04): useOptimistic + useTransition in FeedbackStatusControls for instant feel with revert-on-error
 - 2026-04-26 (28-05): Used plain-HTML builder pattern (contract-emails.tsx style) instead of react-email render() — project does not call render() anywhere
 - 2026-04-26 (28-05): getResend() returns null with warn when RESEND_API_KEY missing — safe in local dev without env var
+- 2026-04-26 (29-01): ROLE_GRANTS matrix in permissions.ts owns all permission definitions; server actions call userCan() directly
+- 2026-04-26 (29-01): logAudit() wraps its DB write in try/catch — audit failure never blocks user action
+- 2026-04-26 (29-01): Auth domain+active+roles gates all return null (not error) to avoid user existence leakage
+- 2026-04-26 (29-01): feedback-admin.isAdmin() re-routed through userCan(roles, 'feedback.triage') — backward compat preserved
+- 2026-04-26 (29-01): admin@no-bshomes.com kept active with owner role per Brian correction (password reset URL issued separately)
 
 ## Performance Metrics
 
@@ -48,6 +54,7 @@ Phase 28: [####################] Plan 5/5 complete
 | 28    | 03   | 6min     | 7     | 11    |
 | 28    | 04   | 6min     | 6     | 7     |
 | 28    | 05   | 2min     | 4     | 4     |
+| 29    | 01   | 45min    | 6     | 16    |
 
 ## Session Log
 
@@ -59,3 +66,4 @@ Phase 28: [####################] Plan 5/5 complete
 - 2026-04-28: Plan 28-03 complete — feedback list/create UI, 3 badge components, FeedbackForm, FloatingReportButton, nav integration; tsc clean
 - 2026-04-28: Plan 28-04 complete — feedback detail page, markdown renderer, gallery, comment thread, activity timeline, status controls; tsc clean
 - 2026-04-26: Plan 28-05 complete — feedback email notifications (email-actions.ts, two email templates, wired into createFeedbackItem + updateFeedbackStatus); tsc clean; Phase 28 DONE
+- 2026-04-26: Plan 29-01 complete — RBAC foundation (schema migration 0016 applied to prod, day-1 seed 3339 leads backfilled, permissions.ts + audit-log.ts, NextAuth domain+active+roles gates, ~30 server actions gated + audited, auditLogArchive cron); tsc clean both app + scraper
