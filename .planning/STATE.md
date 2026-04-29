@@ -7,8 +7,8 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
-**Current phase:** 30-rbac-ui-admin
-**Current plan:** 30-01 complete — RBAC UI + Admin surfaces shipped
+**Current phase:** 30.1-google-oauth
+**Current plan:** 30.1-01 complete — Google OAuth + pending-approval flow shipped
 **Status:** Milestone complete
 
 ## Progress
@@ -17,6 +17,7 @@ Phase 26: [####################] Plan 2/2 complete (checkpoint pending human ver
 Phase 28: [####################] Plan 5/5 complete
 Phase 29: [####                ] Plan 1/1 complete
 Phase 30: [####################] Plan 1/1 complete
+Phase 30.1: [####################] Plan 1/1 complete
 
 ## Decisions
 
@@ -47,6 +48,9 @@ Phase 30: [####################] Plan 1/1 complete
 - 2026-04-28 (30-01): Buttons hidden (not disabled) for role-gated actions; absent from DOM keeps UX clean
 - 2026-04-28 (30-01): canReassignOwn covers disposition+coordinator only (not acquisition — management-level assignment)
 - 2026-04-28 (30-01): Auto-fill inactive user fallthrough: transition succeeds, assignee stays null, deal.auto_assign_failed logged
+- [Phase 30.1-01]: Login page is client component — used next-auth/react signIn('google') instead of server action wrapper
+- [Phase 30.1-01]: .env.local.example unblocked via !.env.local.example negation in app/.gitignore
+- [Phase 30.1-01]: auto-provision inserts users with roles=[] + password_hash=''; middleware redirects them to /pending-approval rather than blocking login outright (Option B per context)
 
 ## Performance Metrics
 
@@ -61,6 +65,7 @@ Phase 30: [####################] Plan 1/1 complete
 | 28    | 05   | 2min     | 4     | 4     |
 | 29    | 01   | 45min    | 6     | 16    |
 | 30    | 01   | 4h       | 5     | 25    |
+| Phase 30.1 P01 | 7min | 6 tasks | 7 files |
 
 ## Session Log
 
@@ -74,3 +79,4 @@ Phase 30: [####################] Plan 1/1 complete
 - 2026-04-26: Plan 28-05 complete — feedback email notifications (email-actions.ts, two email templates, wired into createFeedbackItem + updateFeedbackStatus); tsc clean; Phase 28 DONE
 - 2026-04-26: Plan 29-01 complete — RBAC foundation (schema migration 0016 applied to prod, day-1 seed 3339 leads backfilled, permissions.ts + audit-log.ts, NextAuth domain+active+roles gates, ~30 server actions gated + audited, auditLogArchive cron); tsc clean both app + scraper
 - 2026-04-28: Plan 30-01 complete — RBAC UI surfaces: Mine/All toggles, 17-gate gates.ts, hide-by-role buttons, DealTeamPanel + auto-fill, /admin/users console, /admin/audit log viewer; tsc clean; Phase 30 DONE
+- 2026-04-26: Plan 30.1-01 complete — Google OAuth (next-auth/providers/google) + domain gate + auto-provision + /pending-approval middleware + /pending-approval page + Google button on /login + Pending badge in /admin/users; tsc clean; Phase 30.1 DONE
