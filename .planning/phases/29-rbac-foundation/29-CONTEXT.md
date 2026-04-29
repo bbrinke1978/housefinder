@@ -35,7 +35,7 @@ Stored as `users.roles text[] NOT NULL DEFAULT '{}'`. Permission checks return t
 
 - `brian@no-bshomes.com` → `['owner']`
 - `shawn@no-bshomes.com` → `['owner']`
-- `admin@no-bshomes.com` → `[]` (no roles) + `is_active = false` (already locked at password level via admin-lock-account.ts)
+- `admin@no-bshomes.com` → `['owner']`, `is_active = true` (kept active per Brian's correction 2026-04-28; password reset URL issued separately so the account is recoverable)
 - Stacee (created in Phase 30 UI or seeded) → `['lead_manager']`
 - Chris (created in Phase 30 UI or seeded) → `['sales']`
 
@@ -48,7 +48,7 @@ Stored as `users.roles text[] NOT NULL DEFAULT '{}'`. Permission checks return t
 
 ### Deal & lead assignment
 
-Three new FKs on `deals`, one on `leads`:
+Three new FKs on `deals`, two on `leads`:
 
 | Column | Phase responsibility |
 |---|---|
@@ -56,8 +56,17 @@ Three new FKs on `deals`, one on `leads`:
 | `deals.disposition_user_id` | Marketing → Assigned. Auto-set on transition to `marketing` status. |
 | `deals.coordinator_user_id` | Under Contract → Closed. Auto-set on transition to `under_contract` status. |
 | `leads.lead_manager_id` | Inbound qualification. Defaults to first user with `lead_manager` role. |
+| `leads.created_by_user_id` | Whoever first created the lead (NULL for scraper-created legacy leads). Drives the Sales role's "edit my own creations" permission. |
 
 Reassignment is allowed by Owner at any time. Acquisition Managers can reassign their own deals' coordinator/disposition slots.
+
+### Sales role permission model
+
+Sales people drive for dollars and create leads from the field. They should be able to edit:
+- Leads where they are the `lead_manager_id` (assigned), AND
+- Leads where they are the `created_by_user_id` (their own creations)
+
+Implemented via an entity-scoped helper `canEditLead(session, lead)` in permissions.ts (alongside the action-only `userCan(roles, action)` helper). The Sales role's `lead.edit` permission requires this entity check; broader roles (owner, acquisition_manager, lead_manager) get an unconditional pass.
 
 ### Auto-assignment defaults
 
@@ -71,8 +80,9 @@ Reassignment is allowed by Owner at any time. Acquisition Managers can reassign 
 |---|---|
 | Coverage | Writes only. Every mutating server action calls `logAudit(...)`. Reads are NOT logged (too noisy). |
 | Entities tracked | `leads`, `deals`, `properties` (specifically address / owner_name / owner_mailing_*), `buyers`, `users` (role grants, deactivations, password resets), `owner_contacts` (skip-trace runs, manual entries), `distress_signals` (re-scoring). |
-| Storage | `audit_log` table for active 30-day window. Daily Azure Function timer copies rows older than 30 days into `audit_log_archive` table (same DB). DELETE source row after copy. |
-| Volume | ~100-300 entries/day at current usage. ~30 MB/year total. Negligible. |
+| Retention | **30 / 60 / drop** (per Brian 2026-04-28). Active 30-day window in `audit_log`. Daily cron copies rows aged 30 days into `audit_log_archive`. Same cron deletes archived rows aged 60+ days from creation. Net: maximum 60 days of audit history retained anywhere. |
+| Storage | `audit_log` table (active) + `audit_log_archive` table (cold, 30-60 day band) — both in the same Postgres DB. |
+| Volume | ~100-300 entries/day at current usage. With 60-day cap: ~12,000 rows / ~6 MB peak. Negligible. |
 | Schema | id, actor_user_id, action (e.g. `lead.status_changed`), entity_type, entity_id, old_value (jsonb), new_value (jsonb), ip_address, user_agent, created_at |
 
 ### Out of scope (deferred)
@@ -84,9 +94,15 @@ Reassignment is allowed by Owner at any time. Acquisition Managers can reassign 
 - Read-action logging
 - External-account exceptions to the @no-bshomes.com domain rule
 
-## Open questions for Brian (flagged in 29-RESEARCH.md)
+## Brian's locked decisions (2026-04-28)
 
-None blocking — defaults are documented above. Brian can amend before /gsd:execute-phase 29 runs, or live with the defaults and adjust via the admin console after Phase 30 ships.
+All open questions resolved:
+
+1. **Sales role** — `canEditLead` returns true if `lead_manager_id = me OR created_by_user_id = me`. Confirmed.
+2. **Assistant** — read-only baseline; Owner grants additional roles to layer write access (multi-role union of permissions). Confirmed.
+3. **Default disposition + coordinator** — Stacee on day 1. Configurable in `scraper_config`. Confirmed.
+4. **Existing-lead backfill** — assign `lead_manager_id` to Brian on every existing lead at Phase 29 seed time. The "carve out leads Stacee touched" rule from Brian's instruction is forward-looking and irrelevant for the initial backfill (Stacee hasn't existed as a user yet, so nothing in the DB can be attributed to her). Phase 30 admin console gets a "reassign by query" tool that Brian can use later to bulk-shift specific leads to Stacee once she's been working.
+5. **admin@no-bshomes.com** — Owner role, active. Reset URL issued; whoever owns it sets a new password.
 
 ---
 

@@ -37,11 +37,13 @@ CREATE INDEX IF NOT EXISTS idx_deals_acquisition_user ON deals (acquisition_user
 CREATE INDEX IF NOT EXISTS idx_deals_disposition_user ON deals (disposition_user_id);
 CREATE INDEX IF NOT EXISTS idx_deals_coordinator_user ON deals (coordinator_user_id);
 
--- leads gain lead manager FK
+-- leads gain lead manager FK + creator FK
 ALTER TABLE leads
-  ADD COLUMN IF NOT EXISTS lead_manager_id uuid REFERENCES users(id);
+  ADD COLUMN IF NOT EXISTS lead_manager_id uuid REFERENCES users(id),
+  ADD COLUMN IF NOT EXISTS created_by_user_id uuid REFERENCES users(id);
 
 CREATE INDEX IF NOT EXISTS idx_leads_lead_manager ON leads (lead_manager_id);
+CREATE INDEX IF NOT EXISTS idx_leads_created_by ON leads (created_by_user_id);
 
 -- audit log (active 30-day window)
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -85,9 +87,10 @@ export type Role =
 
 export type Action =
   // leads
-  | "lead.view_all"           // read all leads
-  | "lead.edit_status"        // change lead status
-  | "lead.edit_assigned_only" // can only edit leads where you're the lead_manager
+  | "lead.view_all"                       // read all leads
+  | "lead.create"                         // create a new lead from scratch (Sales / D4D)
+  | "lead.edit_status"                    // change lead status (broad — any lead)
+  | "lead.edit_assigned_or_self_created"  // can edit leads where assigned OR created by self (Sales)
   // deals
   | "deal.view_all"
   | "deal.create"
@@ -136,8 +139,8 @@ const ROLE_GRANTS: Record<Role, Action[]> = {
     "campaign.send", "analytics.view_own"],
   transaction_coordinator: ["deal.view_all", "contract.generate", "contract.sign_as_agent",
     "deal.edit_closing_logistics", "analytics.view_own"],
-  sales: ["lead.view_all", "lead.edit_assigned_only", "deal.view_all", "tracerfy.run",
-    "campaign.send", "analytics.view_own"],
+  sales: ["lead.view_all", "lead.edit_assigned_or_self_created", "lead.create",
+    "deal.view_all", "tracerfy.run", "campaign.send", "analytics.view_own"],
   assistant: ["lead.view_all", "deal.view_all", "buyer.view_all"],
 };
 
@@ -149,6 +152,25 @@ export function userCan(roles: Role[] | undefined, action: Action): boolean {
 // Convenience: pull roles off the session
 export function sessionCan(session: Session | null, action: Action): boolean {
   return userCan(session?.user?.roles as Role[] | undefined, action);
+}
+
+// Entity-scoped helper: can this user edit this specific lead?
+// Owner / Acquisition Manager / Lead Manager → unconditional yes.
+// Sales → only if assigned (lead_manager_id) OR creator (created_by_user_id).
+// Everyone else → no.
+export function canEditLead(
+  session: Session | null,
+  lead: { leadManagerId: string | null; createdByUserId: string | null }
+): boolean {
+  const roles = (session?.user?.roles as Role[] | undefined) ?? [];
+  const userId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  if (roles.includes("owner")) return true;
+  if (roles.includes("acquisition_manager")) return true;
+  if (roles.includes("lead_manager")) return true;
+  if (roles.includes("sales") && userId) {
+    return lead.leadManagerId === userId || lead.createdByUserId === userId;
+  }
+  return false;
 }
 ```
 
@@ -258,17 +280,24 @@ import { lt } from "drizzle-orm";
 app.timer("auditLogArchive", {
   schedule: "0 0 3 * * *",
   handler: async (timer, context) => {
-    const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const old = await db.select().from(auditLog).where(lt(auditLog.createdAt, cutoff));
-    if (old.length === 0) {
-      context.log(`[auditLogArchive] nothing to archive`);
-      return;
+    const archiveCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days
+    const dropCutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);    // 60 days
+
+    // Step 1: copy >30-day rows from active to archive, then delete from active.
+    const toArchive = await db.select().from(auditLog).where(lt(auditLog.createdAt, archiveCutoff));
+    if (toArchive.length > 0) {
+      await db.transaction(async (tx) => {
+        await tx.insert(auditLogArchive).values(toArchive);
+        await tx.delete(auditLog).where(lt(auditLog.createdAt, archiveCutoff));
+      });
     }
-    await db.transaction(async (tx) => {
-      await tx.insert(auditLogArchive).values(old);
-      await tx.delete(auditLog).where(lt(auditLog.createdAt, cutoff));
-    });
-    context.log(`[auditLogArchive] archived ${old.length} rows`);
+
+    // Step 2: drop >60-day rows from archive entirely (Brian's 30/60/drop policy).
+    const { rowCount: droppedCount } = await db
+      .delete(auditLogArchive)
+      .where(lt(auditLogArchive.createdAt, dropCutoff));
+
+    context.log(`[auditLogArchive] archived ${toArchive.length}, dropped ${droppedCount ?? 0}`);
   },
 });
 ```
@@ -282,13 +311,8 @@ app.timer("auditLogArchive", {
 | Locking yourself out via the domain restriction | Low | Brian + Shawn already have `@no-bshomes.com` accounts. The script `admin-reset-password.ts` works regardless of login state. |
 | Auto-assignment fires but the default user is inactive | Medium | The Phase 30 admin console is a settings UI for these defaults. Server-side fallback: if the configured default is inactive, fall through to `null` (unassigned). |
 
-## Open questions for Brian (non-blocking)
+## Brian's locked decisions (2026-04-28)
 
-These are baked into the plan as defaults; he can amend before execution or adjust via the admin console post-Phase 30:
-
-1. **Sales role permissions** — proposed has `lead.edit_assigned_only` (Sales can only edit leads where they're the lead_manager). Should they be able to edit any lead after creating one via "driving for dollars"? Or only their own pipeline?
-2. **Assistant scope** — currently read-only across the app. Brian said "give them additional access as needed" — supported via multi-role (give them `assistant + lead_manager` etc.). Confirm that's the model.
-3. **Stacee's auto-assignment** — defaulting `default_disposition_user_id` and `default_coordinator_user_id` to her even though she's a Lead Manager. OK for now, or default to Brian's user_id until a real DM/TC is hired?
-4. **Existing data backfill** — the 5,000+ existing leads have no `lead_manager_id`. Backfill them all to Stacee, or leave NULL and assign as she touches them?
+All open questions resolved (see 29-CONTEXT.md "Brian's locked decisions"). No remaining research blockers.
 
 ## RESEARCH COMPLETE

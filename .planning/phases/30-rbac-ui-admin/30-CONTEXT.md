@@ -80,11 +80,13 @@ Owner-only routes. Server component layout. Two sub-pages:
 - Granular per-row ACLs ("share this one deal with Chris").
 - A user can BE the actor in an audit-log row but their NAME shows as "deactivated" if they're later deactivated. The viewer still surfaces their email + the actor_user_id link for forensics.
 
-## Open questions for Brian (non-blocking)
+## Brian's locked decisions (2026-04-28)
 
-1. **Hide vs disable** — confirm hide-not-disable on role-gated buttons. (My recommendation: hide.)
-2. **Admin console auth** — do you want the `/admin/*` routes also gated by URL (404 unless `userCan('user.manage')`)? Or just hide the nav link? (My recommendation: gate at both URL + nav.)
-3. **Audit log retention** — 30-day active + archive forever, vs 30-day active + 90-day archive + drop after that?
+1. **Hide vs disable** — hide. Confirmed.
+2. **Admin console route gating** — split decision per Brian:
+   - `/admin/users` (and any user-management mutation routes) → URL-gated. Direct nav returns 404 for non-Owner. Nav link also hidden. Creating/deactivating users is destructive enough that defense-in-depth is warranted.
+   - `/admin/audit` → nav-hide ONLY. No URL-level 404. Anyone who knows the URL can read the audit log. Brian's call — read-only forensics, low risk in a small trusted team.
+3. **Audit retention** — 30 / 60 / drop. 30-day active in `audit_log`, then archived to `audit_log_archive` for an additional 30 days (60 total), then deleted. Phase 29 implements this in the cron.
 
 ---
 
