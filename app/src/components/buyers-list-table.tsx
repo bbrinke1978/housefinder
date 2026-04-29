@@ -26,6 +26,8 @@ import type { BuyerWithTags } from "@/types";
 interface BuyersListTableProps {
   buyers: BuyerWithTags[];
   tags: string[];
+  /** When false, Add Buyer / CSV import buttons are hidden. Default true for backward compat. */
+  canCreateOrEditBuyer?: boolean;
 }
 
 function fundingLabel(v: string | null): string {
@@ -42,7 +44,7 @@ function formatPrice(n: number | null): string {
   return `$${n}`;
 }
 
-export function BuyersListTable({ buyers, tags }: BuyersListTableProps) {
+export function BuyersListTable({ buyers, tags, canCreateOrEditBuyer = true }: BuyersListTableProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -179,8 +181,8 @@ export function BuyersListTable({ buyers, tags }: BuyersListTableProps) {
             </Button>
           </a>
 
-          {/* Import CSV */}
-          <Dialog.Root open={importOpen} onOpenChange={setImportOpen}>
+          {/* Import CSV — gated by buyer.create_or_edit */}
+          {canCreateOrEditBuyer && <Dialog.Root open={importOpen} onOpenChange={setImportOpen}>
             <Dialog.Trigger
               render={
                 <Button variant="outline" size="sm" className="gap-1.5">
@@ -207,10 +209,10 @@ export function BuyersListTable({ buyers, tags }: BuyersListTableProps) {
                 </div>
               </Dialog.Popup>
             </Dialog.Portal>
-          </Dialog.Root>
+          </Dialog.Root>}
 
-          {/* Add Buyer */}
-          <Dialog.Root open={addOpen} onOpenChange={setAddOpen}>
+          {/* Add Buyer — gated by buyer.create_or_edit */}
+          {canCreateOrEditBuyer && <Dialog.Root open={addOpen} onOpenChange={setAddOpen}>
             <Dialog.Trigger
               render={
                 <Button size="sm" className="gap-1.5">
@@ -237,7 +239,7 @@ export function BuyersListTable({ buyers, tags }: BuyersListTableProps) {
                 </div>
               </Dialog.Popup>
             </Dialog.Portal>
-          </Dialog.Root>
+          </Dialog.Root>}
         </div>
       </div>
 

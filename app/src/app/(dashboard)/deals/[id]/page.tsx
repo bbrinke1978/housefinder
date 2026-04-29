@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@/lib/deal-queries';
 import { getMatchingBuyersForDeal, getInteractionsForDeal } from '@/lib/buyer-queries';
+import { auth } from '@/auth';
+import { sessionCan } from '@/lib/permissions';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
@@ -61,6 +63,9 @@ export default async function DealDetailPage({
   const { id } = await params;
   const { tab } = await searchParams;
 
+  // Session for permission checks
+  const session = await auth();
+
   // Map legacy tab names to new consolidated tabs
   const tabMap: Record<string, string> = {
     overview: 'overview',
@@ -116,6 +121,21 @@ export default async function DealDetailPage({
   if (!deal) {
     notFound();
   }
+
+  // Permission gates — based on deal status for the Edit Deal button
+  const dispositionStatuses = ['marketing', 'assigned'];
+  const closingStatuses = ['under_contract', 'closing', 'closed'];
+  let canEditDeal = false;
+  if (closingStatuses.includes(deal.status)) {
+    canEditDeal = sessionCan(session, 'deal.edit_closing_logistics');
+  } else if (dispositionStatuses.includes(deal.status)) {
+    canEditDeal = sessionCan(session, 'deal.edit_disposition');
+  } else {
+    canEditDeal = sessionCan(session, 'deal.edit_terms');
+  }
+  const canRunTracerfy = sessionCan(session, 'tracerfy.run');
+  const canSendBlast = sessionCan(session, 'blast.send');
+  const canCreateOrEditBuyer = sessionCan(session, 'buyer.create_or_edit');
 
   return (
     <div className='space-y-4'>
@@ -204,8 +224,8 @@ export default async function DealDetailPage({
         {/* OVERVIEW: Deal details + blast generator + matched buyers */}
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
-            <DealOverview deal={deal} contacts={contacts} />
-            <DealBlastGenerator deal={deal} dealId={id} matchingBuyers={matchingBuyers} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />
+            <DealOverview deal={deal} contacts={contacts} canEditDeal={canEditDeal} canRunTracerfy={canRunTracerfy} />
+            {canSendBlast && <DealBlastGenerator deal={deal} dealId={id} matchingBuyers={matchingBuyers} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />}
             <div className='space-y-3'>
               <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
                 Matched Buyers ({matchingBuyers.length})

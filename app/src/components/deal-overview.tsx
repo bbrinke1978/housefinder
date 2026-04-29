@@ -17,6 +17,10 @@ import { CONDITION_OPTIONS, TIMELINE_OPTIONS, MOTIVATION_OPTIONS } from "@/types
 interface DealOverviewProps {
   deal: DealWithBuyer;
   contacts?: OwnerContact[];
+  /** When false, Edit Deal button is hidden. Default true for backward compat. */
+  canEditDeal?: boolean;
+  /** When false, skip trace buttons are hidden. Default true for backward compat. */
+  canRunTracerfy?: boolean;
 }
 
 function fmt(n: number | null | undefined): string {
@@ -79,7 +83,7 @@ function isHotSeller(deal: DealWithBuyer): boolean {
   );
 }
 
-export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
+export function DealOverview({ deal, contacts = [], canEditDeal = true, canRunTracerfy = true }: DealOverviewProps) {
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -374,17 +378,19 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
                 <span className="font-medium">{fmt(deal.askingPrice)}</span>
               </p>
             )}
-            {/* Skip Trace button */}
-            <div className="pt-2 border-t border-border mt-2">
-              {deal.propertyId ? (
-                <SkipTraceButton
-                  propertyId={deal.propertyId}
-                  hasTracerfyResult={(contacts ?? []).some((c) => c.source.startsWith("tracerfy"))}
-                />
-              ) : (
-                <DealSkipTraceButton dealId={deal.id} address={deal.address} city={deal.city ?? ""} sellerName={deal.sellerName ?? null} />
-              )}
-            </div>
+            {/* Skip Trace button — hidden when tracerfy.run not permitted */}
+            {canRunTracerfy && (
+              <div className="pt-2 border-t border-border mt-2">
+                {deal.propertyId ? (
+                  <SkipTraceButton
+                    propertyId={deal.propertyId}
+                    hasTracerfyResult={(contacts ?? []).some((c) => c.source.startsWith("tracerfy"))}
+                  />
+                ) : (
+                  <DealSkipTraceButton dealId={deal.id} address={deal.address} city={deal.city ?? ""} sellerName={deal.sellerName ?? null} />
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -508,10 +514,13 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
         </Card>
       )}
 
-      <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-        <Pencil className="h-4 w-4 mr-1" />
-        Edit Deal
-      </Button>
+      {/* Edit Deal — hidden when user lacks the relevant deal.edit_* permission */}
+      {canEditDeal && (
+        <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+          <Pencil className="h-4 w-4 mr-1" />
+          Edit Deal
+        </Button>
+      )}
     </div>
   );
 }

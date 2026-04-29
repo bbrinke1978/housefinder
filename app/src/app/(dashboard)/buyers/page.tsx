@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getBuyersForList, getAllBuyerTags } from "@/lib/buyer-queries";
 import { BuyersListTable } from "@/components/buyers-list-table";
 import { Users } from "lucide-react";
+import { sessionCan } from "@/lib/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export default async function BuyersPage({ searchParams }: BuyersPageProps) {
         </div>
       </div>
 
-      <BuyersListTable buyers={buyers} tags={tags} />
+      <BuyersListTable buyers={buyers} tags={tags} canCreateOrEditBuyer={sessionCan(session, "buyer.create_or_edit")} />
     </div>
   );
 }

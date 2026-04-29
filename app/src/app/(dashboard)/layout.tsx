@@ -7,6 +7,7 @@ import { MobileSettingsMenu } from "@/components/mobile-settings-menu";
 import { FloatingReportButton } from "@/components/feedback/floating-report-button";
 import { auth } from "@/auth";
 import { countOpenFeedbackForUser } from "@/lib/feedback-queries";
+import { sessionCan } from "@/lib/permissions";
 
 export default async function DashboardLayout({
   children,
@@ -15,8 +16,8 @@ export default async function DashboardLayout({
 }) {
   // Fetch feedback badge count server-side so the nav can display it without a client fetch
   let feedbackBadgeCount = 0;
+  const session = await auth();
   try {
-    const session = await auth();
     if (session?.user?.id) {
       feedbackBadgeCount = await countOpenFeedbackForUser(session.user.id as string);
     }
@@ -24,9 +25,16 @@ export default async function DashboardLayout({
     // Non-fatal — nav badge will just show 0
   }
 
+  // Compute nav gates for role-based nav hiding
+  const navGates = {
+    canViewAllLeads: sessionCan(session, "lead.view_all"),
+    canSendCampaign: sessionCan(session, "campaign.send"),
+    canManageUsers: sessionCan(session, "user.manage"),
+  };
+
   return (
     <SidebarProvider>
-      <AppSidebar feedbackBadgeCount={feedbackBadgeCount} />
+      <AppSidebar feedbackBadgeCount={feedbackBadgeCount} navGates={navGates} />
       <SidebarInset>
         {/* Mobile-only top bar with Settings gear */}
         <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-30">

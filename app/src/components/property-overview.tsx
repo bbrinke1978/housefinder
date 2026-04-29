@@ -14,6 +14,8 @@ import type { PropertyWithLead, DistressSignalRow } from "@/types";
 interface PropertyOverviewProps {
   property: PropertyWithLead;
   signals?: DistressSignalRow[];
+  /** When false, the "Start Deal" button is hidden (deal.create gate). Default true for backward compat. */
+  canCreateDeal?: boolean;
 }
 
 function scoreColor(score: number): string {
@@ -45,7 +47,7 @@ function deriveTaxStatus(signals?: DistressSignalRow[]): { taxStatus: string; ha
   return { taxStatus: "Current (no active distress signals)", hasLien, hasNod, hasLisPendens };
 }
 
-export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
+export function PropertyOverview({ property, signals, canCreateDeal = true }: PropertyOverviewProps) {
   const { taxStatus, hasLien, hasNod, hasLisPendens } = deriveTaxStatus(signals);
 
   return (
@@ -224,16 +226,18 @@ export function PropertyOverview({ property, signals }: PropertyOverviewProps) {
       )}
     </div>
 
-    {/* Start Deal CTA */}
-    <div>
-      <Link
-        href={`/deals/new?propertyId=${property.id}`}
-        className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-      >
-        <Briefcase className="h-4 w-4" />
-        Start Deal
-      </Link>
-    </div>
+    {/* Start Deal CTA — hidden when user lacks deal.create */}
+    {canCreateDeal && (
+      <div>
+        <Link
+          href={`/deals/new?propertyId=${property.id}`}
+          className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+        >
+          <Briefcase className="h-4 w-4" />
+          Start Deal
+        </Link>
+      </div>
+    )}
     </div>
   );
 }

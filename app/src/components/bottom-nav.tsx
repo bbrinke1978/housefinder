@@ -7,7 +7,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 
 // Mobile bottom nav: 6 items — Dashboard, Deals, Buyers, Analytics, Map, Bugs/Features
 // (Mobile uses the short "Bugs" label so all 6 items fit; the route stays /feedback)
-const baseNavItems = [
+const bottomNavItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
   { label: "Buyers", href: "/buyers", icon: Users },
@@ -18,6 +18,8 @@ const baseNavItems = [
 
 interface MobileBottomNavProps {
   feedbackBadgeCount?: number;
+  /** canManageUsers — when false, suppress any admin indicator (mobile nav has no admin link currently) */
+  canManageUsers?: boolean;
 }
 
 export function MobileBottomNav({ feedbackBadgeCount = 0 }: MobileBottomNavProps) {
@@ -30,7 +32,7 @@ export function MobileBottomNav({ feedbackBadgeCount = 0 }: MobileBottomNavProps
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl flex items-center justify-around px-1 safe-area-bottom"
       style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {baseNavItems.map((item) => {
+      {bottomNavItems.map((item) => {
         const isActive =
           item.href === "/"
             ? pathname === "/"

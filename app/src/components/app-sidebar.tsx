@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2, Bug } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2, Bug, ShieldCheck } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,17 +16,23 @@ import {
 } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const navItems = [
+// Base nav items — visible to all authenticated users
+const baseNavItems = [
   { label: "Dashboard", href: "/" },
   { label: "Deals", href: "/deals" },
   { label: "Contracts", href: "/contracts" },
   { label: "Photos", href: "/photos/inbox" },
   { label: "Buyers", href: "/buyers" },
-  { label: "Wholesale", href: "/wholesale" },
   { label: "Analytics", href: "/analytics" },
   { label: "Map", href: "/map" },
-  { label: "Campaigns", href: "/campaigns" },
   { label: "Bugs/Feature Request", href: "/feedback" },
+];
+
+// Nav items gated by permission
+const gatedNavItems = [
+  { label: "Wholesale", href: "/wholesale", gate: "canViewAllLeads" as const },
+  { label: "Campaigns", href: "/campaigns", gate: "canSendCampaign" as const },
+  { label: "Admin", href: "/admin/users", gate: "canManageUsers" as const },
 ];
 
 const NAV_ICONS: Record<string, React.ElementType> = {
@@ -40,14 +46,30 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   Map: MapPin,
   Campaigns: Mail,
   "Bugs/Feature Request": Bug,
+  Admin: ShieldCheck,
 };
+
+export interface NavGates {
+  canViewAllLeads: boolean;
+  canSendCampaign: boolean;
+  canManageUsers: boolean;
+}
 
 interface AppSidebarProps {
   feedbackBadgeCount?: number;
+  navGates?: NavGates;
 }
 
-export function AppSidebar({ feedbackBadgeCount = 0 }: AppSidebarProps) {
+export function AppSidebar({ feedbackBadgeCount = 0, navGates }: AppSidebarProps) {
   const pathname = usePathname();
+
+  // Build visible nav items: base items always shown + gated items when permitted
+  // Default navGates to all-true so that server components not yet updated still show everything
+  const resolvedGates: NavGates = navGates ?? { canViewAllLeads: true, canSendCampaign: true, canManageUsers: true };
+  const allNavItems = [
+    ...baseNavItems,
+    ...gatedNavItems.filter((item) => resolvedGates[item.gate]),
+  ];
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -65,7 +87,7 @@ export function AppSidebar({ feedbackBadgeCount = 0 }: AppSidebarProps) {
       <SidebarSeparator />
       <SidebarContent className="px-2 pt-2">
         <SidebarMenu>
-          {navItems.map((item) => {
+          {allNavItems.map((item) => {
             const Icon = NAV_ICONS[item.label] ?? LayoutDashboard;
             const isActive =
               item.href === "/"

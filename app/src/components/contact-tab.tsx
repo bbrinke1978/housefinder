@@ -42,6 +42,8 @@ interface ContactTabProps {
   activeEnrollment?: EnrollmentWithDetails | null;
   /** Available sequences for enrollment */
   sequences?: EmailSequenceSummary[];
+  /** When false, skip trace button is hidden (tracerfy.run gate). Default true for backward compat. */
+  canRunTracerfy?: boolean;
 }
 
 export function ContactTab({
@@ -55,6 +57,7 @@ export function ContactTab({
   timeline,
   activeEnrollment = null,
   sequences = [],
+  canRunTracerfy = true,
 }: ContactTabProps) {
   const [phone, setPhone] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -163,17 +166,19 @@ export function ContactTab({
               </a>
             </div>
           )}
-          <div className="mt-2">
-            <SkipTraceButton
-              propertyId={propertyId}
-              hasTracerfyResult={hasTracerfyResult}
-            />
-          </div>
+          {canRunTracerfy && (
+            <div className="mt-2">
+              <SkipTraceButton
+                propertyId={propertyId}
+                hasTracerfyResult={hasTracerfyResult}
+              />
+            </div>
+          )}
         </div>
       )}
 
       {/* Skip trace button when no "needs skip trace" flag but also no tracerfy result (or already traced) */}
-      {!showSkipTrace && !isEntity && (
+      {!showSkipTrace && !isEntity && canRunTracerfy && (
         <div className="flex items-center">
           <SkipTraceButton
             propertyId={propertyId}

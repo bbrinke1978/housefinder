@@ -12,6 +12,8 @@ import { LeadNotes } from "@/components/lead-notes";
 import { ContactTab } from "@/components/contact-tab";
 import { FieldObservations } from "@/components/field-observations";
 import { BackButton } from "@/components/back-button";
+import { auth } from "@/auth";
+import { sessionCan } from "@/lib/permissions";
 
 export default async function PropertyDetailPage({
   params,
@@ -20,12 +22,16 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params;
 
-  const [property, signals, contacts, vacantFlag] = await Promise.all([
+  const [session, property, signals, contacts, vacantFlag] = await Promise.all([
+    auth(),
     getPropertyDetail(id),
     getPropertySignals(id),
     getOwnerContacts(id),
     getActiveVacantFlag(id),
   ]);
+
+  const canCreateDeal = sessionCan(session, "deal.create");
+  const canRunTracerfy = sessionCan(session, "tracerfy.run");
 
   if (!property) {
     notFound();
@@ -86,7 +92,7 @@ export default async function PropertyDetailPage({
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <PropertyOverview property={property} signals={signals} />
+          <PropertyOverview property={property} signals={signals} canCreateDeal={canCreateDeal} />
         </TabsContent>
 
         <TabsContent value="signals" className="mt-4">
@@ -110,6 +116,7 @@ export default async function PropertyDetailPage({
             timeline={timeline}
             activeEnrollment={activeEnrollment}
             sequences={sequences}
+            canRunTracerfy={canRunTracerfy}
           />
         </TabsContent>
       </Tabs>
