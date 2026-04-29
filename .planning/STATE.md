@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 30-rbac-ui-admin
 **Current plan:** 30-01 complete — RBAC UI + Admin surfaces shipped
-**Status:** Ready to plan
+**Status:** Milestone complete
 
 ## Progress
 
