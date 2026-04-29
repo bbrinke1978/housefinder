@@ -34,6 +34,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
 - [x] **Phase 28: User Feedback System** *(added 2026-04-27)* - Internal Jira-style bug + feature-request tracker built into No BS Workbench. Users (Brian + team) post issues with screenshots and notes; Brian triages and ships. Replaces the "remember to write down what's broken" workflow with a queryable, attachable, threaded backlog (completed 2026-04-28)
 
+## v1.4 — Team & Access *(added 2026-04-28)*
+
+Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). The platform needs role-based access control, deal/lead assignment to specific team members, and an audit log so Brian can verify nobody is gaming the lead pipeline. Login is restricted to `@no-bshomes.com` accounts. Two phases:
+
+- [ ] **Phase 29: RBAC Foundation + Audit Log** *(added 2026-04-28)* - Multi-role schema (`users.roles text[]`), `is_active` flag, six built-in roles (owner / acquisition_manager / disposition_manager / lead_manager / transaction_coordinator / sales / assistant), domain-restricted login, deal & lead assignee FKs, audit-log table with 30-day rolling archive, server-side permission helpers + audit-log helper wrapped around every mutating server action
+- [ ] **Phase 30: RBAC UI Gates + Admin Console + Assignment UX** *(added 2026-04-28)* - "My deals" / "My leads" filters scoped by role + assignment, hide-by-role buttons across the app, admin user-management page (create / assign roles / deactivate), audit-log viewer page, deal detail "Team" panel with three assignee slots + reassign dropdowns, auto-assignment on status transitions
+
 ## Phase Details
 
 ### Phase 1: Data Foundation
@@ -160,6 +167,8 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
 | 27. Map Clustering | 0/1 | Not started | - |
 | 28. User Feedback System | 5/5 | Complete    | 2026-04-28 |
+| 29. RBAC Foundation + Audit Log | 0/1 | Not started | - |
+| 30. RBAC UI + Admin Console | 0/1 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
