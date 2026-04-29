@@ -245,6 +245,10 @@ export interface DealWithBuyer {
   leadSource: string | null; // "wholesale" when promoted from wholesale lead
   createdAt: Date;
   updatedAt: Date;
+  // RBAC (Phase 29): deal assignee FKs
+  acquisitionUserId?: string | null;
+  dispositionUserId?: string | null;
+  coordinatorUserId?: string | null;
   // from joins
   buyerName?: string | null;
   // assessor data from linked property

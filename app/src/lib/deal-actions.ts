@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes, buyers, ownerContacts, propertyPhotos, floorPlans, floorPlanPins } from "@/db/schema";
+import { deals, dealNotes, buyers, ownerContacts, propertyPhotos, floorPlans, floorPlanPins, scraperConfig, users } from "@/db/schema";
 import { eq, desc, and, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { auth } from "@/auth";
@@ -354,6 +354,119 @@ export async function updateDealStatus(
     newValue: { status: parsed.status },
   });
 
+  // --- Auto-fill assignees on status transitions ---
+  // When transitioning to "marketing" and disposition_user_id is null, attempt to
+  // auto-fill from scraper_config['default_disposition_user_id'].
+  // When transitioning to "under_contract" and coordinator_user_id is null, attempt to
+  // auto-fill from scraper_config['default_coordinator_user_id'].
+  // If the configured default user is inactive or not found, fall through to NULL (unassigned).
+  // Per Brian's locked decision (30-CONTEXT.md).
+
+  if (previousStatus !== parsed.status) {
+    const autoFillTargets: Array<{
+      triggerStatus: string;
+      configKey: string;
+      column: "dispositionUserId" | "coordinatorUserId";
+      slotName: string;
+    }> = [
+      {
+        triggerStatus: "marketing",
+        configKey: "default_disposition_user_id",
+        column: "dispositionUserId",
+        slotName: "disposition",
+      },
+      {
+        triggerStatus: "under_contract",
+        configKey: "default_coordinator_user_id",
+        column: "coordinatorUserId",
+        slotName: "coordinator",
+      },
+    ];
+
+    for (const target of autoFillTargets) {
+      if (parsed.status !== target.triggerStatus) continue;
+
+      // Check if the slot is already assigned
+      const [currentDeal] = await db
+        .select({
+          dispositionUserId: deals.dispositionUserId,
+          coordinatorUserId: deals.coordinatorUserId,
+        })
+        .from(deals)
+        .where(eq(deals.id, parsed.dealId))
+        .limit(1);
+
+      const currentValue =
+        target.column === "dispositionUserId"
+          ? currentDeal?.dispositionUserId
+          : currentDeal?.coordinatorUserId;
+
+      if (currentValue != null) continue; // already assigned — skip
+
+      // Look up the default user ID from scraper_config
+      const [configRow] = await db
+        .select({ value: scraperConfig.value })
+        .from(scraperConfig)
+        .where(eq(scraperConfig.key, target.configKey))
+        .limit(1);
+
+      if (!configRow?.value) {
+        // No default configured — leave unassigned
+        await logAudit({
+          actorUserId: null,
+          action: "deal.auto_assign_skipped",
+          entityType: "deal",
+          entityId: parsed.dealId,
+          newValue: { slot: target.slotName, reason: "no_default_configured" },
+        });
+        continue;
+      }
+
+      const defaultUserId = configRow.value;
+
+      // Verify the default user is active
+      const [defaultUser] = await db
+        .select({ id: users.id, isActive: users.isActive, name: users.name })
+        .from(users)
+        .where(eq(users.id, defaultUserId))
+        .limit(1);
+
+      if (!defaultUser || !defaultUser.isActive) {
+        // Configured default is inactive or not found — fall through to NULL (unassigned)
+        await logAudit({
+          actorUserId: null,
+          action: "deal.auto_assign_failed",
+          entityType: "deal",
+          entityId: parsed.dealId,
+          newValue: {
+            slot: target.slotName,
+            reason: defaultUser ? "user_inactive" : "user_not_found",
+            configuredUserId: defaultUserId,
+          },
+        });
+        continue;
+      }
+
+      // Assign the default user to the slot
+      await db
+        .update(deals)
+        .set({ [target.column]: defaultUserId, updatedAt: new Date() })
+        .where(eq(deals.id, parsed.dealId));
+
+      await logAudit({
+        actorUserId: null, // system-driven auto-assignment
+        action: "deal.auto_assigned",
+        entityType: "deal",
+        entityId: parsed.dealId,
+        newValue: {
+          slot: target.slotName,
+          assignedUserId: defaultUserId,
+          assignedUserName: defaultUser.name,
+        },
+      });
+    }
+  }
+
   revalidatePath("/deals");
   revalidatePath(`/deals/${parsed.dealId}`);
 }
@@ -540,6 +653,90 @@ export async function updateDealComps(
 
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);
+}
+
+// -- Update Deal Assignment (Team panel) --
+
+/**
+ * updateDealAssignment — reassign one of the three team slots on a deal.
+ *
+ * Permission: owner can reassign any slot (deal.reassign_any).
+ *             Acquisition Manager can reassign own deals' disposition + coordinator (deal.reassign_own,
+ *             and the current user must be the acquisition_user_id for that deal).
+ */
+export async function updateDealAssignment(
+  dealId: string,
+  slot: "acquisition" | "disposition" | "coordinator",
+  userId: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  const currentUserId = (session.user as any).id as string | null;
+
+  const canReassignAny = userCan(roles, "deal.reassign_any");
+  const canReassignOwn = userCan(roles, "deal.reassign_own");
+
+  if (!canReassignAny && !canReassignOwn) {
+    return { success: false, error: "Forbidden: insufficient role" };
+  }
+
+  // Fetch the current deal to check existing assignees
+  const [existingDeal] = await db
+    .select({
+      acquisitionUserId: deals.acquisitionUserId,
+      dispositionUserId: deals.dispositionUserId,
+      coordinatorUserId: deals.coordinatorUserId,
+    })
+    .from(deals)
+    .where(eq(deals.id, dealId))
+    .limit(1);
+
+  if (!existingDeal) {
+    return { success: false, error: "Deal not found" };
+  }
+
+  // Reassign-own check: Acquisition Managers can only reassign on deals where they are
+  // the acquisition assignee.
+  if (!canReassignAny && canReassignOwn) {
+    if (existingDeal.acquisitionUserId !== currentUserId) {
+      return { success: false, error: "Forbidden: you are not the acquisition manager for this deal" };
+    }
+    // Acquisition managers can only touch disposition + coordinator, not acquisition itself
+    if (slot === "acquisition") {
+      return { success: false, error: "Forbidden: cannot reassign acquisition slot" };
+    }
+  }
+
+  const columnMap: Record<string, "acquisitionUserId" | "dispositionUserId" | "coordinatorUserId"> = {
+    acquisition: "acquisitionUserId",
+    disposition: "dispositionUserId",
+    coordinator: "coordinatorUserId",
+  };
+  const column = columnMap[slot];
+
+  const oldValue = existingDeal[column];
+
+  await db
+    .update(deals)
+    .set({ [column]: userId ?? null, updatedAt: new Date() })
+    .where(eq(deals.id, dealId));
+
+  await logAudit({
+    actorUserId: currentUserId,
+    action: "deal.assignee_changed",
+    entityType: "deal",
+    entityId: dealId,
+    oldValue: { slot, userId: oldValue },
+    newValue: { slot, userId },
+  });
+
+  revalidatePath("/deals");
+  revalidatePath(`/deals/${dealId}`);
+  return { success: true };
 }
 
 // -- Add Deal Note --

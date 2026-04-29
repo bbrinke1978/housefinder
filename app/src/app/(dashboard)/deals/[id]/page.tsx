@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId } from '@/lib/deal-queries';
+import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId, getActiveUsers } from '@/lib/deal-queries';
 import { getMatchingBuyersForDeal, getInteractionsForDeal } from '@/lib/buyer-queries';
 import { auth } from '@/auth';
 import { sessionCan } from '@/lib/permissions';
+import { DealTeamPanel } from '@/components/deal-team-panel';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
@@ -84,7 +85,7 @@ export default async function DealDetailPage({
   // Non-essential fetches are wrapped to prevent one failure from crashing the whole page
   const safe = <T,>(p: Promise<T>, fallback: T): Promise<T> => p.catch(() => fallback);
 
-  const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto, floorPlans, floorPlanCount] = await Promise.all([
+  const [deal, notes, budget, contacts, contracts, contractCount, photos, coverPhoto, floorPlans, floorPlanCount, activeUsers] = await Promise.all([
     getDeal(id),
     getDealNotes(id),
     getBudgetByDealId(id),
@@ -95,6 +96,7 @@ export default async function DealDetailPage({
     safe(getDealCoverPhoto(id), null),
     safe(getFloorPlansByDeal(id), []),
     safe(getFloorPlanCount(id), 0),
+    safe(getActiveUsers(), []),
   ]);
 
   // Fetch matching buyers and their interaction status for this deal
@@ -136,6 +138,10 @@ export default async function DealDetailPage({
   const canRunTracerfy = sessionCan(session, 'tracerfy.run');
   const canSendBlast = sessionCan(session, 'blast.send');
   const canCreateOrEditBuyer = sessionCan(session, 'buyer.create_or_edit');
+  const canReassignAny = sessionCan(session, 'deal.reassign_any');
+  const canReassignOwn = sessionCan(session, 'deal.reassign_own');
+  const currentUserId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  const isOwnDeal = deal.acquisitionUserId === currentUserId;
 
   return (
     <div className='space-y-4'>
@@ -225,6 +231,17 @@ export default async function DealDetailPage({
         <TabsContent value='overview' className='mt-4'>
           <div className='space-y-4'>
             <DealOverview deal={deal} contacts={contacts} canEditDeal={canEditDeal} canRunTracerfy={canRunTracerfy} />
+            <DealTeamPanel
+              dealId={deal.id}
+              acquisitionUserId={deal.acquisitionUserId ?? null}
+              dispositionUserId={deal.dispositionUserId ?? null}
+              coordinatorUserId={deal.coordinatorUserId ?? null}
+              users={activeUsers}
+              currentUserId={currentUserId}
+              canReassignAny={canReassignAny}
+              canReassignOwn={canReassignOwn}
+              isOwnDeal={isOwnDeal}
+            />
             {canSendBlast && <DealBlastGenerator deal={deal} dealId={id} matchingBuyers={matchingBuyers} coverPhotoSasUrl={coverPhoto?.sasUrl ?? null} />}
             <div className='space-y-3'>
               <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>

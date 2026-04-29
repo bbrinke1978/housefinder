@@ -1,5 +1,5 @@
 import { db } from "@/db/client";
-import { deals, buyers, dealNotes, ownerContacts, properties, leads } from "@/db/schema";
+import { deals, buyers, dealNotes, ownerContacts, properties, leads, users } from "@/db/schema";
 import { eq, desc, gte, lte, or, isNull, and, sql } from "drizzle-orm";
 import type { DealWithBuyer, DealNote, Buyer, OwnerContact } from "@/types";
 
@@ -106,6 +106,10 @@ export async function getDeal(id: string): Promise<DealWithBuyer | null> {
       createdAt: deals.createdAt,
       updatedAt: deals.updatedAt,
       sqft: deals.sqft,
+      // RBAC (Phase 30): assignee FKs for Team panel
+      acquisitionUserId: deals.acquisitionUserId,
+      dispositionUserId: deals.dispositionUserId,
+      coordinatorUserId: deals.coordinatorUserId,
       buyerName: buyers.name,
       // Assessor data from linked property
       buildingSqft: properties.buildingSqft,
@@ -233,6 +237,34 @@ export async function getLeadIdByPropertyId(
     .limit(1);
 
   return row?.id ?? null;
+}
+
+// ---- Active users (for Team panel assignee dropdowns) ----
+
+export interface ActiveUser {
+  id: string;
+  name: string;
+  email: string;
+  roles: string[];
+}
+
+/**
+ * getActiveUsers — returns all active users, sorted by name.
+ * Used by the DealTeamPanel dropdown to pick assignees.
+ */
+export async function getActiveUsers(): Promise<ActiveUser[]> {
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      roles: users.roles,
+    })
+    .from(users)
+    .where(eq(users.isActive, true))
+    .orderBy(users.name);
+
+  return rows as ActiveUser[];
 }
 
 /**
