@@ -30,6 +30,9 @@ import {
   type TracerfyStatus,
   type TracerfyConfig,
 } from "@/types/index";
+import { userCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit-log";
 
 // -- Constants --
 
@@ -523,6 +526,11 @@ export async function runSkipTrace(
     return { error: "Not authenticated" };
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "tracerfy.run")) {
+    return { error: "Forbidden: insufficient role" };
+  }
+
   const apiKey = process.env.TRACERFY_API_KEY;
   if (!apiKey) {
     return { error: "TRACERFY_API_KEY is not configured" };
@@ -589,6 +597,14 @@ export async function runSkipTrace(
       creditsUsed: credits_deducted ?? COST_PER_TRACE,
     });
 
+    await logAudit({
+      actorUserId: (session.user as any).id ?? null,
+      action: "tracerfy.skip_trace_run",
+      entityType: "property",
+      entityId: propertyId,
+      newValue: { found: found > 0, phoneCount, emailCount },
+    });
+
     revalidatePath(`/properties/${propertyId}`);
 
     // Update any linked deal's sellerPhone if it was empty and we found a phone
@@ -620,6 +636,11 @@ export async function runBulkSkipTrace(
   const session = await auth();
   if (!session?.user) {
     return { error: "Not authenticated" };
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "tracerfy.run")) {
+    return { error: "Forbidden: insufficient role" };
   }
 
   const apiKey = process.env.TRACERFY_API_KEY;
@@ -671,6 +692,14 @@ export async function runBulkSkipTrace(
       found,
       notFound,
       creditsUsed: credits_deducted ?? validProps.length * COST_PER_TRACE,
+    });
+
+    await logAudit({
+      actorUserId: (session.user as any).id ?? null,
+      action: "tracerfy.bulk_skip_trace_run",
+      entityType: "property",
+      entityId: null,
+      newValue: { count: validProps.length, found, notFound },
     });
 
     revalidatePath("/");
@@ -824,6 +853,11 @@ export async function findOrCreatePropertyForDeal(
 ): Promise<{ propertyId: string } | { error: string }> {
   const session = await auth();
   if (!session?.user) return { error: "Not authenticated" };
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "tracerfy.run")) {
+    return { error: "Forbidden: insufficient role" };
+  }
 
   // Try to find existing property by address
   const normalized = address.toLowerCase().trim();

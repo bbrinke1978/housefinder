@@ -9,6 +9,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod/v4";
 import { DEAL_STATUSES } from "@/types";
+import { userCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit-log";
 
 // -- Create Deal --
 
@@ -38,6 +41,11 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.create")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const raw = {
@@ -252,6 +260,14 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
     }
   }
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.created",
+    entityType: "deal",
+    entityId: inserted.id,
+    newValue: { address: parsed.address, city: parsed.city, offerPrice: parsed.arv, mao },
+  });
+
   revalidatePath("/deals");
   redirect(`/deals/${inserted.id}`);
 }
@@ -276,6 +292,17 @@ export async function updateDealStatus(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  // Gate based on destination status
+  const dispositionStatuses = ["marketing", "assigned"];
+  const closingStatuses = ["under_contract", "closing", "closed"];
+  let requiredAction: "deal.edit_terms" | "deal.edit_disposition" | "deal.edit_closing_logistics" = "deal.edit_terms";
+  if (dispositionStatuses.includes(status)) requiredAction = "deal.edit_disposition";
+  if (closingStatuses.includes(status)) requiredAction = "deal.edit_closing_logistics";
+  if (!userCan(roles, requiredAction)) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const parsed = updateDealStatusSchema.parse({ dealId, status, note });
@@ -318,6 +345,15 @@ export async function updateDealStatus(
     });
   }
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.status_changed",
+    entityType: "deal",
+    entityId: parsed.dealId,
+    oldValue: { status: previousStatus },
+    newValue: { status: parsed.status },
+  });
+
   revalidatePath("/deals");
   revalidatePath(`/deals/${parsed.dealId}`);
 }
@@ -359,6 +395,11 @@ export async function updateDeal(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const parseOptionalInt = (key: string) => {
@@ -452,6 +493,14 @@ export async function updateDeal(
 
   await db.update(deals).set(updateFields).where(eq(deals.id, dealId));
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.terms_updated",
+    entityType: "deal",
+    entityId: dealId,
+    newValue: { arv: parsed.arv, offerPrice: parsed.offerPrice, mao: updateFields.mao },
+  });
+
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);
 }
@@ -471,10 +520,23 @@ export async function updateDealComps(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   await db
     .update(deals)
     .set({ comps, arvNotes, updatedAt: new Date() })
     .where(eq(deals.id, dealId));
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.comps_updated",
+    entityType: "deal",
+    entityId: dealId,
+    newValue: { arvNotesLength: arvNotes.length },
+  });
 
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);
@@ -499,12 +561,25 @@ export async function addDealNote(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = addDealNoteSchema.parse({ dealId, noteText });
 
   await db.insert(dealNotes).values({
     dealId: parsed.dealId,
     noteText: parsed.noteText,
     noteType: "user",
+  });
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.note_added",
+    entityType: "deal",
+    entityId: parsed.dealId,
+    newValue: { noteText: parsed.noteText },
   });
 
   revalidatePath(`/deals/${parsed.dealId}`);
@@ -559,10 +634,15 @@ export async function createBuyer(formData: FormData): Promise<void> {
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "buyer.create_or_edit")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const raw = parseBuyerFormData(formData);
   const parsed = buyerSchema.parse(raw);
 
-  await db.insert(buyers).values({
+  const [inserted] = await db.insert(buyers).values({
     name: parsed.name,
     phone: parsed.phone ?? null,
     email: parsed.email ?? null,
@@ -573,6 +653,14 @@ export async function createBuyer(formData: FormData): Promise<void> {
     targetAreas: parsed.targetAreas ?? null,
     rehabTolerance: parsed.rehabTolerance ?? null,
     notes: parsed.notes ?? null,
+  }).returning({ id: buyers.id });
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "buyer.created",
+    entityType: "buyer",
+    entityId: inserted.id,
+    newValue: { name: parsed.name, email: parsed.email },
   });
 
   revalidatePath("/deals/buyers");
@@ -588,6 +676,11 @@ export async function updateBuyer(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "buyer.create_or_edit")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const raw = parseBuyerFormData(formData);
@@ -610,6 +703,14 @@ export async function updateBuyer(
     })
     .where(eq(buyers.id, buyerId));
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "buyer.updated",
+    entityType: "buyer",
+    entityId: buyerId,
+    newValue: { name: parsed.name },
+  });
+
   revalidatePath("/deals/buyers");
 }
 
@@ -622,10 +723,22 @@ export async function deactivateBuyer(buyerId: string): Promise<void> {
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "buyer.create_or_edit")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   await db
     .update(buyers)
     .set({ isActive: false, updatedAt: new Date() })
     .where(eq(buyers.id, buyerId));
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "buyer.deactivated",
+    entityType: "buyer",
+    entityId: buyerId,
+  });
 
   revalidatePath("/deals/buyers");
 }
@@ -642,6 +755,11 @@ export async function assignBuyerToDeal(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_disposition")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const [existing] = await db
@@ -676,6 +794,14 @@ export async function assignBuyerToDeal(
       newStatus,
     });
   }
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.buyer_assigned",
+    entityType: "deal",
+    entityId: dealId,
+    newValue: { buyerId, assignmentFee, status: newStatus },
+  });
 
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);

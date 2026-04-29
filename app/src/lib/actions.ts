@@ -18,6 +18,9 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod/v4";
+import { userCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit-log";
 
 /**
  * Mark a lead as viewed (updates lastViewedAt timestamp).
@@ -56,12 +59,25 @@ export async function addLeadNote(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = addNoteSchema.parse({ leadId, noteText });
 
   await db.insert(leadNotes).values({
     leadId: parsed.leadId,
     noteText: parsed.noteText,
     noteType: "user",
+  });
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "lead.note_added",
+    entityType: "lead",
+    entityId: parsed.leadId,
+    newValue: { noteText: parsed.noteText },
   });
 
   revalidatePath("/properties");
@@ -88,6 +104,11 @@ export async function updateLeadStatus(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const parsed = updateLeadStatusSchema.parse({ leadId, status, note });
@@ -135,6 +156,15 @@ export async function updateLeadStatus(
       noteType: "user",
     });
   }
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "lead.status_changed",
+    entityType: "lead",
+    entityId: parsed.leadId,
+    oldValue: { status: previousStatus },
+    newValue: { status: parsed.status },
+  });
 
   revalidatePath("/pipeline");
   revalidatePath("/leads");
@@ -213,6 +243,11 @@ export async function updateTargetCities(cities: string[]): Promise<void> {
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "scraper_config.manage")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = updateTargetCitiesSchema.parse({ cities });
 
   const value = JSON.stringify(parsed.cities);
@@ -266,6 +301,11 @@ export async function saveOwnerPhone(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = saveOwnerPhoneSchema.parse({ propertyId, phone });
 
   // Find the next available manual-N source for this property.
@@ -305,6 +345,14 @@ export async function saveOwnerPhone(
     source: nextSource,
     isManual: true,
     needsSkipTrace: false,
+  });
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "lead.phone_added",
+    entityType: "property",
+    entityId: parsed.propertyId,
+    newValue: { phone: parsed.phone, source: nextSource },
   });
 
   revalidatePath(`/properties/${parsed.propertyId}`);
@@ -369,6 +417,11 @@ export async function updateAlertSettings(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "scraper_config.manage")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = updateAlertSettingsSchema.parse(settings);
 
   const entries: Array<{ key: string; value: string; description: string }> = [
@@ -417,6 +470,11 @@ export async function setVacantFlag(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   if (isVacant) {
     await db
       .insert(distressSignals)
@@ -445,6 +503,14 @@ export async function setVacantFlag(
       );
   }
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: isVacant ? "lead.vacant_flag_set" : "lead.vacant_flag_cleared",
+    entityType: "property",
+    entityId: propertyId,
+    newValue: { isVacant },
+  });
+
   revalidatePath(`/properties/${propertyId}`);
 }
 
@@ -467,6 +533,11 @@ export async function addManualSignal(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   addManualSignalSchema.parse({ propertyId, signalType, rawData });
 
   await db
@@ -480,6 +551,14 @@ export async function addManualSignal(
       sourceUrl: null,
     })
     .onConflictDoNothing();
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "lead.signal_added",
+    entityType: "property",
+    entityId: propertyId,
+    newValue: { signalType, rawData: rawData ?? "Manual entry" },
+  });
 
   revalidatePath(`/properties/${propertyId}`);
 }
@@ -548,6 +627,11 @@ export async function updateDashboardSettings(
   const session = await auth();
   if (!session?.user) {
     throw new Error("Not authenticated");
+  }
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "scraper_config.manage")) {
+    throw new Error("Forbidden: insufficient role");
   }
 
   const parsed = updateDashboardSettingsSchema.parse(settings);
@@ -633,6 +717,11 @@ export async function updateLeadSource(
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsed = updateLeadSourceSchema.parse({ leadId, source, otherText });
 
   await db
@@ -680,6 +769,11 @@ export async function deleteInboundLead(leadId: string): Promise<void> {
     throw new Error("Not authenticated");
   }
 
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "user.manage")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
   const parsedId = z.uuid().parse(leadId);
 
   const [existing] = await db
@@ -703,6 +797,14 @@ export async function deleteInboundLead(leadId: string): Promise<void> {
   await db.delete(callLogs).where(eq(callLogs.leadId, parsedId));
   await db.delete(leadNotes).where(eq(leadNotes.leadId, parsedId));
   await db.delete(leads).where(eq(leads.id, parsedId));
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "lead.deleted",
+    entityType: "lead",
+    entityId: parsedId,
+    oldValue: { leadSource: existing.leadSource },
+  });
 
   revalidatePath("/");
   revalidatePath("/leads");

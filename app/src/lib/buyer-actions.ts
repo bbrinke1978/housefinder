@@ -13,6 +13,10 @@ import { z } from "zod/v4";
 import { Resend } from "resend";
 import { getMailSettings } from "@/lib/mail-settings-actions";
 import { getDeal } from "@/lib/deal-queries";
+import { auth } from "@/auth";
+import { userCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit-log";
 
 const BUYER_COMM_EVENT_TYPES = [
   "called_buyer",
@@ -295,6 +299,14 @@ export async function sendDealBlast(
     return { error: "dealId, buyerId, and buyerEmail are required" };
   }
 
+  const session = await auth();
+  if (!session?.user) return { error: "Not authenticated" };
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "blast.send")) {
+    return { error: "Forbidden: insufficient role" };
+  }
+
   const mailSettings = await getMailSettings();
   const resendApiKey = mailSettings.resendApiKey;
 
@@ -328,6 +340,14 @@ export async function sendDealBlast(
   } catch {
     // Non-fatal: email was sent; log failure is acceptable
   }
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "deal.blast_sent",
+    entityType: "deal",
+    entityId: dealId,
+    newValue: { buyerId, buyerEmail },
+  });
 
   revalidatePath(`/deals/${dealId}`);
   revalidatePath(`/buyers/${buyerId}`);

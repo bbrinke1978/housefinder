@@ -15,6 +15,9 @@ import { z } from "zod/v4";
 import { computeWholesaleScore } from "@/lib/wholesale-score";
 import { parseWholesaleEmail, normalizeAddress, splitMultiPropertyEmail } from "@/lib/wholesale-parser";
 import { getWholesaleLead } from "@/lib/wholesale-queries";
+import { userCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit-log";
 
 // -- Zod schemas --
 
@@ -92,6 +95,11 @@ export async function createWholesaleLead(
 ): Promise<{ id: string }> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.create")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const raw = {
     address: formData.get("address") as string,
@@ -181,6 +189,14 @@ export async function createWholesaleLead(
     })
     .returning({ id: wholesaleLeads.id });
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "wholesale_lead.created",
+    entityType: "wholesale_lead",
+    entityId: lead.id,
+    newValue: { address: parsed.address, verdict, dealScore },
+  });
+
   revalidatePath("/wholesale");
   return { id: lead.id };
 }
@@ -193,6 +209,11 @@ export async function createWholesaleLead(
 export async function updateWholesaleLead(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const id = formData.get("id") as string;
   if (!id) throw new Error("Missing lead id");
@@ -284,6 +305,14 @@ export async function updateWholesaleLead(formData: FormData): Promise<void> {
     })
     .where(eq(wholesaleLeads.id, id));
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "wholesale_lead.updated",
+    entityType: "wholesale_lead",
+    entityId: id,
+    newValue: { address: parsed.address, verdict, dealScore },
+  });
+
   revalidatePath("/wholesale");
 }
 
@@ -299,6 +328,11 @@ export async function updateWholesaleLeadStatus(
 ): Promise<void> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const existing = await db
     .select({ status: wholesaleLeads.status })
@@ -323,6 +357,15 @@ export async function updateWholesaleLeadStatus(
     newStatus,
   });
 
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "wholesale_lead.status_changed",
+    entityType: "wholesale_lead",
+    entityId: wholesaleLeadId,
+    oldValue: { status: previousStatus },
+    newValue: { status: newStatus },
+  });
+
   revalidatePath("/wholesale");
 }
 
@@ -339,6 +382,11 @@ const addNoteSchema = z.object({
 export async function addWholesaleNote(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const parsed = addNoteSchema.parse({
     wholesaleLeadId: formData.get("wholesaleLeadId"),
@@ -367,6 +415,11 @@ export async function promoteToDeal(
 ): Promise<{ dealId: string }> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.create")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const lead = await getWholesaleLead(wholesaleLeadId);
   if (!lead) throw new Error("Wholesale lead not found");
@@ -418,6 +471,14 @@ export async function promoteToDeal(
     noteType: "status_change",
     previousStatus: lead.status,
     newStatus: "promoted",
+  });
+
+  await logAudit({
+    actorUserId: (session.user as any).id ?? null,
+    action: "wholesale_lead.promoted_to_deal",
+    entityType: "wholesale_lead",
+    entityId: wholesaleLeadId,
+    newValue: { dealId },
   });
 
   revalidatePath("/wholesale");
@@ -524,6 +585,11 @@ export async function createWholesaleLeadsFromPaste(
 ): Promise<{ leads: PastedLeadResult[] }> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = ((session.user as any).roles ?? []) as Role[];
+  if (!userCan(roles, "deal.create")) {
+    throw new Error("Forbidden: insufficient role");
+  }
 
   const blocks = splitMultiPropertyEmail(bodyText);
   const results: PastedLeadResult[] = [];

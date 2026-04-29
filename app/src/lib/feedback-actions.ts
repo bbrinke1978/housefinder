@@ -17,6 +17,7 @@ import {
   notifyFeedbackShipped,
 } from "@/lib/email-actions";
 import { isAdmin } from "@/lib/feedback-admin";
+import { logAudit } from "@/lib/audit-log";
 
 type FeedbackItemUpdate = Partial<InferInsertModel<typeof feedbackItems>>;
 
@@ -98,6 +99,14 @@ export async function createFeedbackItem(
     });
 
     return item;
+  });
+
+  await logAudit({
+    actorUserId: session.user!.id as string,
+    action: "feedback.created",
+    entityType: "feedback",
+    entityId: result.id,
+    newValue: { type: input.type, title: input.title, priority: input.priority ?? "medium" },
   });
 
   revalidatePath("/feedback");
@@ -293,6 +302,15 @@ export async function updateFeedbackStatus(
     });
   });
 
+  await logAudit({
+    actorUserId: session.user!.id as string,
+    action: "feedback.status_changed",
+    entityType: "feedback",
+    entityId: id,
+    oldValue: { status: item.status },
+    newValue: { status: newStatus },
+  });
+
   revalidatePath("/feedback");
   revalidatePath(`/feedback/${id}`);
 
@@ -482,6 +500,13 @@ export async function deleteFeedbackItem(id: string): Promise<void> {
       oldValue: null,
       newValue: "deleted",
     });
+  });
+
+  await logAudit({
+    actorUserId: session.user!.id as string,
+    action: "feedback.deleted",
+    entityType: "feedback",
+    entityId: id,
   });
 
   revalidatePath("/feedback");
