@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
 **Current phase:** 29-rbac-foundation
 **Current plan:** 29-01 complete — Phase 29 RBAC Foundation Plan 1 DONE
-**Status:** In progress (Phase 29)
+**Status:** Ready to plan
 
 ## Progress
 
