@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users, Bug } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
-// Mobile bottom nav: 6 items — Dashboard, Deals, Buyers, Analytics, Map, Feedback
+// Mobile bottom nav: 6 items — Dashboard, Deals, Buyers, Analytics, Map, Bugs/Features
+// (Mobile uses the short "Bugs" label so all 6 items fit; the route stays /feedback)
 const baseNavItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Deals", href: "/deals", icon: Briefcase },
   { label: "Buyers", href: "/buyers", icon: Users },
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Map", href: "/map", icon: MapPin },
-  { label: "Feedback", href: "/feedback", icon: Bug },
+  { label: "Bugs", href: "/feedback", icon: Bug },
 ];
 
 interface MobileBottomNavProps {

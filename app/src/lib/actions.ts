@@ -143,6 +143,7 @@ export async function updateLeadStatus(
 // -- Target Cities --
 
 const DEFAULT_TARGET_CITIES = [
+  // Rural counties (Carbon, Emery, Sanpete, Sevier, Juab, Millard)
   "Price",
   "Huntington",
   "Castle Dale",
@@ -152,7 +153,25 @@ const DEFAULT_TARGET_CITIES = [
   "Manti",
   "Fillmore",
   "Delta",
+  // Salt Lake County — neighborhoods derived from UGRC zip mapping (Path A, 2026-04-17)
   "Rose Park",
+  "Salt Lake City",
+  "Sugar House",
+  "Midvale",
+  "Sandy",
+  "Murray",
+  "Holladay",
+  "Kearns",
+  "West Valley City",
+  "Cottonwood Heights",
+  "Taylorsville",
+  "West Jordan",
+  "South Jordan",
+  "Riverton",
+  "Herriman",
+  "Draper",
+  "South Salt Lake",
+  "Salt Lake County (other)",
 ];
 
 /**
@@ -230,7 +249,13 @@ const saveOwnerPhoneSchema = z.object({
 
 /**
  * Save a manually-entered phone number for a property owner.
- * Upserts into ownerContacts with source='manual'.
+ *
+ * Each manual entry gets a unique source like 'manual-1', 'manual-2', so
+ * adding a second number does NOT overwrite the first. The existing
+ * unique index on (property_id, source) treats each as a distinct row,
+ * mirroring how Tracerfy stores additional phones via 'tracerfy-mobile-2'
+ * etc. The bare 'manual' source is preserved for any rows that pre-date
+ * this change — they're treated as the original entry and aren't disturbed.
  */
 export async function saveOwnerPhone(
   propertyId: string,
@@ -243,24 +268,44 @@ export async function saveOwnerPhone(
 
   const parsed = saveOwnerPhoneSchema.parse({ propertyId, phone });
 
-  // Upsert: insert or update on unique(propertyId, source) conflict
-  await db
-    .insert(ownerContacts)
-    .values({
-      propertyId: parsed.propertyId,
-      phone: parsed.phone,
-      source: "manual",
-      isManual: true,
-      needsSkipTrace: false,
-    })
-    .onConflictDoUpdate({
-      target: [ownerContacts.propertyId, ownerContacts.source],
-      set: {
-        phone: parsed.phone,
-        needsSkipTrace: false,
-        updatedAt: new Date(),
-      },
-    });
+  // Find the next available manual-N source for this property.
+  // Counts existing 'manual' (legacy bare source) and 'manual-N' rows.
+  const existing = await db
+    .select({ source: ownerContacts.source })
+    .from(ownerContacts)
+    .where(
+      and(
+        eq(ownerContacts.propertyId, parsed.propertyId),
+        like(ownerContacts.source, "manual%")
+      )
+    );
+
+  // Determine the highest N already in use; default to 0 if none.
+  let maxN = 0;
+  let hasBareManual = false;
+  for (const row of existing) {
+    if (row.source === "manual") {
+      hasBareManual = true;
+      continue;
+    }
+    const m = row.source.match(/^manual-(\d+)$/);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n > maxN) maxN = n;
+    }
+  }
+  // If a bare 'manual' exists, treat it as slot 1 (so the next is at least 2).
+  if (hasBareManual && maxN < 1) maxN = 1;
+
+  const nextSource = `manual-${maxN + 1}`;
+
+  await db.insert(ownerContacts).values({
+    propertyId: parsed.propertyId,
+    phone: parsed.phone,
+    source: nextSource,
+    isManual: true,
+    needsSkipTrace: false,
+  });
 
   revalidatePath(`/properties/${parsed.propertyId}`);
   revalidatePath("/");

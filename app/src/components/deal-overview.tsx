@@ -352,7 +352,7 @@ export function DealOverview({ deal, contacts = [] }: DealOverviewProps) {
                 >
                   <Phone className="h-3 w-3" />
                   {c.phone}
-                  {c.source !== "manual" && (
+                  {!c.source.startsWith("manual") && (
                     <span className="text-xs text-muted-foreground">({c.source})</span>
                   )}
                 </a>

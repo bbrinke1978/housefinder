@@ -106,7 +106,7 @@ function TimelineItem({ entry }: { entry: TimelineEntry }) {
 
         {hasNotes && (
           <div className="mt-1">
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap">
               {displayNotes}
             </p>
             {isLong && (

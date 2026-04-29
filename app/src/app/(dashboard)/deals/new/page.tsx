@@ -18,6 +18,7 @@ export default async function NewDealPage({ searchParams }: NewDealPageProps) {
     address?: string;
     city?: string;
     sellerName?: string;
+    sellerPhone?: string;
     propertyId?: string;
   } | undefined;
 
@@ -33,23 +34,39 @@ export default async function NewDealPage({ searchParams }: NewDealPageProps) {
     tracerfyConfigured = tracerfyStatus.configured;
 
     if (property) {
-      prefill = {
-        address: property.address,
-        city: property.city,
-        sellerName: property.ownerName ?? undefined,
-        propertyId: property.id,
-      };
-
-      // Check if this property has any real phone or email contacts
-      // (exclude MAILING: prefixed emails and null values)
+      // Pre-fill the seller phone from owner_contacts so the form shows
+      // the same number that createDeal would auto-resolve on submit.
+      // Manual entries (source 'manual', 'manual-1', 'manual-2', ...) win
+      // over Tracerfy results, then fall back to the most recent record.
       const contacts = await db
-        .select({ phone: ownerContacts.phone, email: ownerContacts.email })
+        .select({
+          phone: ownerContacts.phone,
+          email: ownerContacts.email,
+          source: ownerContacts.source,
+          isManual: ownerContacts.isManual,
+          createdAt: ownerContacts.createdAt,
+        })
         .from(ownerContacts)
         .where(eq(ownerContacts.propertyId, propertyId));
 
-      const hasPhone = contacts.some(
-        (c) => c.phone && c.phone.trim() !== "" && !c.phone.startsWith("MAILING:")
-      );
+      const realPhones = contacts
+        .filter((c) => c.phone && c.phone.trim() !== "" && !c.phone.startsWith("MAILING:"));
+      // Prefer manual (most-recent first), then any other real phone.
+      const sortedPhones = realPhones.sort((a, b) => {
+        if (a.isManual !== b.isManual) return a.isManual ? -1 : 1;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
+      const primaryPhone = sortedPhones[0]?.phone ?? undefined;
+
+      prefill = {
+        address: property.address ?? undefined,
+        city: property.city ?? undefined,
+        sellerName: property.ownerName ?? undefined,
+        sellerPhone: primaryPhone,
+        propertyId: property.id,
+      };
+
+      const hasPhone = realPhones.length > 0;
       const hasEmail = contacts.some(
         (c) => c.email && c.email.trim() !== "" && !c.email.startsWith("MAILING:")
       );

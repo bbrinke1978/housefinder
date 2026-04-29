@@ -17,6 +17,7 @@ interface NewDealFormProps {
     address?: string;
     city?: string;
     sellerName?: string;
+    sellerPhone?: string;
     propertyId?: string;
   };
   /** Whether the property already has phone/email contacts */
@@ -224,6 +225,7 @@ export function NewDealForm({ prefill, hasContacts = true, tracerfyConfigured = 
                 id="sellerPhone"
                 name="sellerPhone"
                 type="tel"
+                defaultValue={prefill?.sellerPhone}
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 placeholder="(801) 555-1234"
               />

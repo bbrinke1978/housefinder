@@ -26,7 +26,7 @@ const navItems = [
   { label: "Analytics", href: "/analytics" },
   { label: "Map", href: "/map" },
   { label: "Campaigns", href: "/campaigns" },
-  { label: "Feedback", href: "/feedback" },
+  { label: "Bugs/Feature Request", href: "/feedback" },
 ];
 
 const NAV_ICONS: Record<string, React.ElementType> = {
@@ -39,7 +39,7 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   Analytics: BarChart2,
   Map: MapPin,
   Campaigns: Mail,
-  Feedback: Bug,
+  "Bugs/Feature Request": Bug,
 };
 
 interface AppSidebarProps {

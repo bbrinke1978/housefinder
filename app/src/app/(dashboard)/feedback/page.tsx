@@ -35,7 +35,7 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold tracking-tight">Feedback</h1>
+          <h1 className="text-2xl font-display font-bold tracking-tight">Bugs / Feature Request</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             Bug reports, feature requests, and ideas for No BS Workbench
           </p>

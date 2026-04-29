@@ -29,7 +29,7 @@ export default async function FeedbackNewPage({ searchParams }: FeedbackNewPageP
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
-        Back to feedback
+        Back to Bugs / Feature Request
       </Link>
 
       {/* Form — no onSuccess prop so it redirects to /feedback/[id] on submit */}
