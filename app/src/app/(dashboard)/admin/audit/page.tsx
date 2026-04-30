@@ -20,24 +20,25 @@ interface AuditPageSearchParams {
 export default async function AdminAuditPage({
   searchParams,
 }: {
-  searchParams: AuditPageSearchParams;
+  searchParams: Promise<AuditPageSearchParams>;
 }) {
   // NO URL gate — discoverability via nav-hide only (Brian's decision, 2026-04-28)
   // Page is read-only; team is small and trusted
   await auth(); // still need session for display, but don't gate on role
 
-  const archive = searchParams.archive === "true";
-  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10));
+  const params = await searchParams;
+  const archive = params.archive === "true";
+  const page = Math.max(1, parseInt(params.page ?? "1", 10));
   const limit = 50;
   const offset = (page - 1) * limit;
 
   const filters: AuditFilters = {};
-  if (searchParams.actorUserId) filters.actorUserId = searchParams.actorUserId;
-  if (searchParams.action) filters.action = searchParams.action;
-  if (searchParams.entityType) filters.entityType = searchParams.entityType;
-  if (searchParams.entityId) filters.entityId = searchParams.entityId;
-  if (searchParams.since) filters.since = new Date(searchParams.since);
-  if (searchParams.until) filters.until = new Date(searchParams.until);
+  if (params.actorUserId) filters.actorUserId = params.actorUserId;
+  if (params.action) filters.action = params.action;
+  if (params.entityType) filters.entityType = params.entityType;
+  if (params.entityId) filters.entityId = params.entityId;
+  if (params.since) filters.since = new Date(params.since);
+  if (params.until) filters.until = new Date(params.until);
 
   const [entries, total, actorUsers] = await Promise.all([
     listAuditEntries({ filters, archive, limit, offset }),
