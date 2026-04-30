@@ -43,7 +43,7 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.create")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -261,7 +261,7 @@ export async function createDeal(formData: FormData): Promise<{ id: string }> {
   }
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.created",
     entityType: "deal",
     entityId: inserted.id,
@@ -294,7 +294,7 @@ export async function updateDealStatus(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   // Gate based on destination status
   const dispositionStatuses = ["marketing", "assigned"];
   const closingStatuses = ["under_contract", "closing", "closed"];
@@ -346,7 +346,7 @@ export async function updateDealStatus(
   }
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.status_changed",
     entityType: "deal",
     entityId: parsed.dealId,
@@ -510,7 +510,7 @@ export async function updateDeal(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -607,7 +607,7 @@ export async function updateDeal(
   await db.update(deals).set(updateFields).where(eq(deals.id, dealId));
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.terms_updated",
     entityType: "deal",
     entityId: dealId,
@@ -633,7 +633,7 @@ export async function updateDealComps(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -644,7 +644,7 @@ export async function updateDealComps(
     .where(eq(deals.id, dealId));
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.comps_updated",
     entityType: "deal",
     entityId: dealId,
@@ -674,8 +674,8 @@ export async function updateDealAssignment(
     return { success: false, error: "Not authenticated" };
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
-  const currentUserId = (session.user as any).id as string | null;
+  const roles = (session.user.roles ?? []) as Role[];
+  const currentUserId = session.user.id as string | null;
 
   const canReassignAny = userCan(roles, "deal.reassign_any");
   const canReassignOwn = userCan(roles, "deal.reassign_own");
@@ -758,7 +758,7 @@ export async function addDealNote(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -772,7 +772,7 @@ export async function addDealNote(
   });
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.note_added",
     entityType: "deal",
     entityId: parsed.dealId,
@@ -831,7 +831,7 @@ export async function createBuyer(formData: FormData): Promise<void> {
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "buyer.create_or_edit")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -853,7 +853,7 @@ export async function createBuyer(formData: FormData): Promise<void> {
   }).returning({ id: buyers.id });
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "buyer.created",
     entityType: "buyer",
     entityId: inserted.id,
@@ -875,7 +875,7 @@ export async function updateBuyer(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "buyer.create_or_edit")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -901,7 +901,7 @@ export async function updateBuyer(
     .where(eq(buyers.id, buyerId));
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "buyer.updated",
     entityType: "buyer",
     entityId: buyerId,
@@ -920,7 +920,7 @@ export async function deactivateBuyer(buyerId: string): Promise<void> {
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "buyer.create_or_edit")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -931,7 +931,7 @@ export async function deactivateBuyer(buyerId: string): Promise<void> {
     .where(eq(buyers.id, buyerId));
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "buyer.deactivated",
     entityType: "buyer",
     entityId: buyerId,
@@ -954,7 +954,7 @@ export async function assignBuyerToDeal(
     throw new Error("Not authenticated");
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_disposition")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -993,7 +993,7 @@ export async function assignBuyerToDeal(
   }
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.buyer_assigned",
     entityType: "deal",
     entityId: dealId,

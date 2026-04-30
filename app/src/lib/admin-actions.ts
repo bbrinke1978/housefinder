@@ -24,9 +24,9 @@ import { Resend } from "resend";
 async function requireUserManage() {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "user.manage")) throw new Error("Forbidden: insufficient role");
-  return { session, roles, actorUserId: (session.user as any).id as string | null };
+  return { session, roles, actorUserId: session.user.id as string | null };
 }
 
 // ---- createUser ----

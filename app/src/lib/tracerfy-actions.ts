@@ -526,7 +526,7 @@ export async function runSkipTrace(
     return { error: "Not authenticated" };
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "tracerfy.run")) {
     return { error: "Forbidden: insufficient role" };
   }
@@ -598,7 +598,7 @@ export async function runSkipTrace(
     });
 
     await logAudit({
-      actorUserId: (session.user as any).id ?? null,
+      actorUserId: session.user.id ?? null,
       action: "tracerfy.skip_trace_run",
       entityType: "property",
       entityId: propertyId,
@@ -638,7 +638,7 @@ export async function runBulkSkipTrace(
     return { error: "Not authenticated" };
   }
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "tracerfy.run")) {
     return { error: "Forbidden: insufficient role" };
   }
@@ -695,7 +695,7 @@ export async function runBulkSkipTrace(
     });
 
     await logAudit({
-      actorUserId: (session.user as any).id ?? null,
+      actorUserId: session.user.id ?? null,
       action: "tracerfy.bulk_skip_trace_run",
       entityType: "property",
       entityId: null,
@@ -854,7 +854,7 @@ export async function findOrCreatePropertyForDeal(
   const session = await auth();
   if (!session?.user) return { error: "Not authenticated" };
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "tracerfy.run")) {
     return { error: "Forbidden: insufficient role" };
   }

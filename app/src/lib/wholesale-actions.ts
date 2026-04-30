@@ -96,7 +96,7 @@ export async function createWholesaleLead(
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.create")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -190,7 +190,7 @@ export async function createWholesaleLead(
     .returning({ id: wholesaleLeads.id });
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "wholesale_lead.created",
     entityType: "wholesale_lead",
     entityId: lead.id,
@@ -210,7 +210,7 @@ export async function updateWholesaleLead(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -306,7 +306,7 @@ export async function updateWholesaleLead(formData: FormData): Promise<void> {
     .where(eq(wholesaleLeads.id, id));
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "wholesale_lead.updated",
     entityType: "wholesale_lead",
     entityId: id,
@@ -329,7 +329,7 @@ export async function updateWholesaleLeadStatus(
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -358,7 +358,7 @@ export async function updateWholesaleLeadStatus(
   });
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "wholesale_lead.status_changed",
     entityType: "wholesale_lead",
     entityId: wholesaleLeadId,
@@ -383,7 +383,7 @@ export async function addWholesaleNote(formData: FormData): Promise<void> {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.edit_terms")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -416,7 +416,7 @@ export async function promoteToDeal(
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.create")) {
     throw new Error("Forbidden: insufficient role");
   }
@@ -474,7 +474,7 @@ export async function promoteToDeal(
   });
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "wholesale_lead.promoted_to_deal",
     entityType: "wholesale_lead",
     entityId: wholesaleLeadId,
@@ -586,7 +586,7 @@ export async function createWholesaleLeadsFromPaste(
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "deal.create")) {
     throw new Error("Forbidden: insufficient role");
   }

@@ -302,7 +302,7 @@ export async function sendDealBlast(
   const session = await auth();
   if (!session?.user) return { error: "Not authenticated" };
 
-  const roles = ((session.user as any).roles ?? []) as Role[];
+  const roles = (session.user.roles ?? []) as Role[];
   if (!userCan(roles, "blast.send")) {
     return { error: "Forbidden: insufficient role" };
   }
@@ -342,7 +342,7 @@ export async function sendDealBlast(
   }
 
   await logAudit({
-    actorUserId: (session.user as any).id ?? null,
+    actorUserId: session.user.id ?? null,
     action: "deal.blast_sent",
     entityType: "deal",
     entityId: dealId,
