@@ -9,6 +9,8 @@ import { updateLeadSource } from "@/lib/actions";
 import { TouchpointBadge } from "@/components/touchpoint-badge";
 import { SwipeCard } from "@/components/swipe-card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ActivityCardIndicator } from "@/components/activity-card-indicator";
+import { ActivityLogModal } from "@/components/activity-log-modal";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
@@ -235,6 +237,7 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
   const isEntity = property.ownerType === "llc" || property.ownerType === "trust" || property.ownerType === "estate";
   const tier = getTier(property.distressScore);
   const isMobile = useIsMobile();
+  const [activityModalOpen, setActivityModalOpen] = useState(false);
 
   const handleSwipeRight = useCallback(() => {
     // Right swipe → navigate to property detail to initiate a call
@@ -373,22 +376,46 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
             <ArrowRight className="h-3 w-3" />
           </span>
         </div>
+
+        {/* Activity indicator row */}
+        <ActivityCardIndicator
+          lastActivity={property.lastActivity ?? null}
+          totalCount={property.activityCount ?? 0}
+          onLogClick={() => setActivityModalOpen(true)}
+        />
       </div>
     </Link>
   );
 
+  const modal = (
+    <ActivityLogModal
+      open={activityModalOpen}
+      onOpenChange={setActivityModalOpen}
+      propertyId={property.id}
+      leadId={property.leadId}
+    />
+  );
+
   if (isMobile) {
     return (
-      <SwipeCard
-        onSwipeRight={handleSwipeRight}
-        onSwipeLeft={handleSwipeLeft}
-        rightLabel="Call"
-        leftLabel="Status"
-      >
-        {cardContent}
-      </SwipeCard>
+      <>
+        <SwipeCard
+          onSwipeRight={handleSwipeRight}
+          onSwipeLeft={handleSwipeLeft}
+          rightLabel="Call"
+          leftLabel="Status"
+        >
+          {cardContent}
+        </SwipeCard>
+        {modal}
+      </>
     );
   }
 
-  return cardContent;
+  return (
+    <>
+      {cardContent}
+      {modal}
+    </>
+  );
 }

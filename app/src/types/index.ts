@@ -55,6 +55,9 @@ export interface PropertyWithLead {
   yearBuilt: number | null;
   assessedValue: number | null;
   lotAcres: string | null;
+  // Phase 31: unified activity feed card indicator data (fetched in dashboard page)
+  lastActivity?: import("@/lib/activity-queries").ActivityEntry | null;
+  activityCount?: number;
 }
 
 /** Map view: includes coordinates and aggregated signal types */
