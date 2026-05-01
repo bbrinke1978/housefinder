@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
 - [x] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design) (completed 2026-04-26)
 - [ ] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all
-- [ ] **Phase 27: Map Clustering** - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views
+- [~] **Phase 27: Map Clustering** *(deferred 2026-05-01)* - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views. Not blocking anything; revisit when SLC pin density actually becomes a problem on the dashboard.
 - [x] **Phase 28: User Feedback System** *(added 2026-04-27)* - Internal Jira-style bug + feature-request tracker built into No BS Workbench. Users (Brian + team) post issues with screenshots and notes; Brian triages and ships. Replaces the "remember to write down what's broken" workflow with a queryable, attachable, threaded backlog (completed 2026-04-28)
 
 ## v1.4 — Team & Access *(added 2026-04-28)*
@@ -166,7 +166,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
 | 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
-| 27. Map Clustering | 0/1 | Not started | - |
+| 27. Map Clustering | 0/1 | Deferred    | 2026-05-01 |
 | 28. User Feedback System | 5/5 | Complete    | 2026-04-28 |
 | 29. RBAC Foundation + Audit Log | 0/1 | Complete    | 2026-04-29 |
 | 30. RBAC UI + Admin Console | 0/1 | Complete    | 2026-04-29 |
