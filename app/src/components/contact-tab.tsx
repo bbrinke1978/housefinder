@@ -23,8 +23,10 @@ import {
 } from "lucide-react";
 import { saveOwnerPhone } from "@/lib/actions";
 import type { OwnerContact, TimelineEntry, EmailSequenceSummary, EnrollmentWithDetails } from "@/types";
+import type { ActivityEntry } from "@/lib/activity-queries";
 import { ContactEventForm } from "@/components/contact-event-form";
 import { ActivityTimeline } from "@/components/activity-timeline";
+import { ActivityFeed } from "@/components/activity-feed";
 import { CallScriptModal } from "@/components/call-script-modal";
 import { EnrollButton } from "@/components/campaigns/enroll-button";
 import { SkipTraceButton } from "@/components/skip-trace-button";
@@ -44,6 +46,8 @@ interface ContactTabProps {
   sequences?: EmailSequenceSummary[];
   /** When false, skip trace button is hidden (tracerfy.run gate). Default true for backward compat. */
   canRunTracerfy?: boolean;
+  /** Phase 31: unified activity feed — if provided, replaces the legacy ActivityTimeline display */
+  activityFeed?: ActivityEntry[];
 }
 
 export function ContactTab({
@@ -58,6 +62,7 @@ export function ContactTab({
   activeEnrollment = null,
   sequences = [],
   canRunTracerfy = true,
+  activityFeed,
 }: ContactTabProps) {
   const [phone, setPhone] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -418,23 +423,32 @@ export function ContactTab({
         </CardContent>
       </Card>
 
-      {/* Activity timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-muted-foreground" />
-            Activity Timeline
-            {timeline.length > 0 && (
-              <span className="ml-auto text-xs font-normal text-muted-foreground">
-                {timeline.length} event{timeline.length === 1 ? "" : "s"}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ActivityTimeline entries={timeline} />
-        </CardContent>
-      </Card>
+      {/* Activity timeline — unified feed (comms only) when available, legacy timeline as fallback */}
+      {activityFeed ? (
+        <ActivityFeed
+          propertyId={propertyId}
+          leadId={leadId}
+          initialEntries={activityFeed}
+          filter="comms_only"
+        />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              Activity Timeline
+              {timeline.length > 0 && (
+                <span className="ml-auto text-xs font-normal text-muted-foreground">
+                  {timeline.length} event{timeline.length === 1 ? "" : "s"}
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ActivityTimeline entries={timeline} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

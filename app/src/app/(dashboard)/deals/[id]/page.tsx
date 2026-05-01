@@ -9,6 +9,7 @@ import { auth } from '@/auth';
 import { sessionCan } from '@/lib/permissions';
 import { DealTeamPanel } from '@/components/deal-team-panel';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
+import { getActivityFeed } from '@/lib/activity-queries';
 import { getBudgetByDealId, getExpenses } from '@/lib/budget-queries';
 import { getDealContracts, getContractCountByDealId } from '@/lib/contract-queries';
 import { getDealPhotos, getDealCoverPhoto } from '@/lib/photo-queries';
@@ -23,6 +24,7 @@ import { BudgetTab } from '@/components/budget-tab';
 import { ContractTab } from '@/components/contract-tab';
 import { PhotoTab } from '@/components/photo-tab';
 import { ActivityTimeline } from '@/components/activity-timeline';
+import { ActivityFeed } from '@/components/activity-feed';
 import { FloorPlanTab } from '@/components/floor-plan-tab';
 import type { TimelineEntry } from '@/types';
 import { BuyerList } from '@/components/buyer-list';
@@ -113,10 +115,15 @@ export default async function DealDetailPage({
 
   // Load activity timeline if deal is linked to a property (has a lead)
   let contactTimeline: TimelineEntry[] = [];
+  let dealLeadId: string | null = null;
+  let unifiedActivityFeed: import('@/lib/activity-queries').ActivityEntry[] = [];
   if (deal?.propertyId) {
-    const leadId = await getLeadIdByPropertyId(deal.propertyId);
-    if (leadId) {
-      contactTimeline = await getLeadTimeline(leadId);
+    dealLeadId = await getLeadIdByPropertyId(deal.propertyId);
+    if (dealLeadId) {
+      [contactTimeline, unifiedActivityFeed] = await Promise.all([
+        getLeadTimeline(dealLeadId),
+        getActivityFeed(deal.propertyId),
+      ]);
     }
   }
 
@@ -283,17 +290,31 @@ export default async function DealDetailPage({
           <PhotoTab photos={photos} dealId={id} />
         </TabsContent>
 
-        {/* ACTIVITY: Notes + Contact Timeline */}
+        {/* ACTIVITY: Deal notes write form + unified activity feed */}
         <TabsContent value='activity' className='mt-4'>
-          <DealNotes dealId={deal.id} initialNotes={notes} />
-          {contactTimeline.length > 0 && (
-            <div className='mt-6 space-y-3'>
-              <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
-                Contact History
-              </h3>
-              <ActivityTimeline entries={contactTimeline} />
-            </div>
-          )}
+          <div className='space-y-6'>
+            {/* Keep DealNotes form for note entry */}
+            <DealNotes dealId={deal.id} initialNotes={notes} />
+
+            {/* Unified activity feed — all sources from pre-deal lead through current deal */}
+            {deal.propertyId && dealLeadId ? (
+              <div className='border-t border-border pt-6'>
+                <ActivityFeed
+                  propertyId={deal.propertyId}
+                  leadId={dealLeadId}
+                  initialEntries={unifiedActivityFeed}
+                  filter='all'
+                />
+              </div>
+            ) : contactTimeline.length > 0 ? (
+              <div className='mt-6 space-y-3'>
+                <h3 className='text-sm font-semibold text-muted-foreground uppercase tracking-wider'>
+                  Contact History
+                </h3>
+                <ActivityTimeline entries={contactTimeline} />
+              </div>
+            ) : null}
+          </div>
         </TabsContent>
 
         {/* FLOOR PLANS: Upload, viewer, pin annotations */}

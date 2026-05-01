@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getPropertyDetail, getPropertySignals, getPropertyNotes, getOwnerContacts } from "@/lib/queries";
 import { getLeadTimeline } from "@/lib/contact-event-queries";
+import { getActivityFeed } from "@/lib/activity-queries";
 import { getLeadActiveEnrollment, getSequences } from "@/lib/campaign-queries";
 import { markLeadViewed, getActiveVacantFlag } from "@/lib/actions";
 import { PropertyOverview } from "@/components/property-overview";
@@ -12,6 +13,7 @@ import { LeadNotes } from "@/components/lead-notes";
 import { ContactTab } from "@/components/contact-tab";
 import { FieldObservations } from "@/components/field-observations";
 import { BackButton } from "@/components/back-button";
+import { ActivityFeed } from "@/components/activity-feed";
 import { auth } from "@/auth";
 import { sessionCan } from "@/lib/permissions";
 
@@ -37,11 +39,12 @@ export default async function PropertyDetailPage({
     notFound();
   }
 
-  const [notes, timeline, activeEnrollment, sequences] = await Promise.all([
+  const [notes, timeline, activeEnrollment, sequences, activityFeed] = await Promise.all([
     getPropertyNotes(property.leadId),
     getLeadTimeline(property.leadId),
     getLeadActiveEnrollment(property.leadId),
     getSequences(),
+    getActivityFeed(id),
   ]);
 
   // Mark lead as viewed (clears "new" badge on dashboard)
@@ -70,13 +73,21 @@ export default async function PropertyDetailPage({
       </p>
 
       <Tabs defaultValue="overview">
-        <TabsList className="!flex !w-full !h-auto rounded-lg bg-muted p-1 gap-1 overflow-hidden">
+        <TabsList className="!flex !w-full !h-auto rounded-lg bg-muted p-1 gap-1 overflow-hidden flex-wrap">
           <TabsTrigger value="overview" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">Overview</TabsTrigger>
           <TabsTrigger value="signals" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">
             Signals
             {signals.length > 0 && (
               <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0">
                 {signals.length > 9 ? "9+" : signals.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="!h-auto !flex-1 rounded-md text-xs sm:text-sm py-2 px-2">
+            Activity
+            {activityFeed.length > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] font-bold min-w-[18px] h-[18px] px-1 flex-shrink-0">
+                {activityFeed.length > 9 ? "9+" : activityFeed.length}
               </span>
             )}
           </TabsTrigger>
@@ -100,8 +111,31 @@ export default async function PropertyDetailPage({
           <FieldObservations propertyId={id} isVacant={vacantFlag} signals={signals} />
         </TabsContent>
 
+        {/* Activity tab — unified feed (all sources) */}
+        <TabsContent value="activity" className="mt-4">
+          <ActivityFeed
+            propertyId={id}
+            leadId={property.leadId}
+            initialEntries={activityFeed}
+            filter="all"
+          />
+        </TabsContent>
+
+        {/* Notes tab — write form retained; display filtered to notes only */}
         <TabsContent value="notes" className="mt-4">
-          <LeadNotes leadId={property.leadId} initialNotes={notes} />
+          <div className="space-y-6">
+            <LeadNotes leadId={property.leadId} initialNotes={notes} />
+            {activityFeed.filter((e) => e.source === "lead_note" || e.source === "deal_note").length > 0 && (
+              <div className="border-t border-border pt-4">
+                <ActivityFeed
+                  propertyId={id}
+                  leadId={property.leadId}
+                  initialEntries={activityFeed}
+                  filter="notes_only"
+                />
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="contact" className="mt-4">
@@ -117,6 +151,7 @@ export default async function PropertyDetailPage({
             activeEnrollment={activeEnrollment}
             sequences={sequences}
             canRunTracerfy={canRunTracerfy}
+            activityFeed={activityFeed}
           />
         </TabsContent>
       </Tabs>

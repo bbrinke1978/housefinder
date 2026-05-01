@@ -419,3 +419,119 @@ export async function getActivityCount(propertyId: string): Promise<number> {
   const feed = await getActivityFeed(propertyId);
   return feed.length;
 }
+
+// ---------------------------------------------------------------------------
+// getActivityFeedForLead — for leads WITHOUT a propertyId (inbound leads)
+// Queries only contact_events + lead_notes + audit_log scoped to the leadId.
+// ---------------------------------------------------------------------------
+
+export async function getActivityFeedForLead(leadId: string): Promise<ActivityEntry[]> {
+  const [contactEventRows, leadNoteRows, auditRows] = await Promise.all([
+    db
+      .select({
+        id: contactEvents.id,
+        eventType: contactEvents.eventType,
+        notes: contactEvents.notes,
+        outcome: contactEvents.outcome,
+        actorUserId: contactEvents.actorUserId,
+        actorName: users.name,
+        occurredAt: contactEvents.occurredAt,
+      })
+      .from(contactEvents)
+      .leftJoin(users, eq(contactEvents.actorUserId, users.id))
+      .where(eq(contactEvents.leadId, leadId)),
+
+    db
+      .select({
+        id: leadNotes.id,
+        noteText: leadNotes.noteText,
+        noteType: leadNotes.noteType,
+        newStatus: leadNotes.newStatus,
+        createdAt: leadNotes.createdAt,
+      })
+      .from(leadNotes)
+      .where(eq(leadNotes.leadId, leadId)),
+
+    db
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        entityType: auditLog.entityType,
+        entityId: auditLog.entityId,
+        oldValue: auditLog.oldValue,
+        newValue: auditLog.newValue,
+        actorUserId: auditLog.actorUserId,
+        actorName: users.name,
+        createdAt: auditLog.createdAt,
+      })
+      .from(auditLog)
+      .leftJoin(users, eq(auditLog.actorUserId, users.id))
+      .where(
+        and(
+          inArray(auditLog.action, [...MATERIAL_AUDIT_ACTIONS]),
+          eq(auditLog.entityId, leadId)
+        )
+      ),
+  ]);
+
+  const entries: ActivityEntry[] = [];
+
+  for (const e of contactEventRows) {
+    const type = EVENT_TYPE_TO_TYPE[e.eventType] ?? e.eventType;
+    let description = EVENT_TYPE_TO_VERB[e.eventType] ?? e.eventType;
+    if (e.actorName) description = `${e.actorName} — ${description.toLowerCase()}`;
+    if (e.outcome) description += ` (${e.outcome.replace(/_/g, " ")})`;
+    entries.push({
+      id: e.id,
+      source: "contact_event",
+      type,
+      occurredAt: e.occurredAt,
+      actorUserId: e.actorUserId ?? null,
+      actorName: e.actorName ?? null,
+      description,
+      body: e.notes ?? null,
+      metadata: e.outcome ? { outcome: e.outcome } : undefined,
+    });
+  }
+
+  for (const n of leadNoteRows) {
+    const isStatus = n.noteType === "status_change";
+    entries.push({
+      id: n.id,
+      source: "lead_note",
+      type: isStatus ? "status_changed" : "note",
+      occurredAt: n.createdAt,
+      actorUserId: null,
+      actorName: null,
+      description: isStatus
+        ? `Lead status changed to ${n.newStatus ?? "unknown"}`
+        : "Note added",
+      body: n.noteText,
+    });
+  }
+
+  for (const a of auditRows) {
+    const actionLabel = a.action.replace(/\./g, " ").replace(/_/g, " ");
+    const description = a.actorName ? `${a.actorName} — ${actionLabel}` : actionLabel;
+    let body: string | null = null;
+    if (a.oldValue || a.newValue) {
+      const parts: string[] = [];
+      if (a.oldValue) parts.push(`Before: ${JSON.stringify(a.oldValue)}`);
+      if (a.newValue) parts.push(`After: ${JSON.stringify(a.newValue)}`);
+      body = parts.join("\n");
+    }
+    entries.push({
+      id: a.id,
+      source: "audit",
+      type: a.action,
+      occurredAt: a.createdAt,
+      actorUserId: a.actorUserId ?? null,
+      actorName: a.actorName ?? null,
+      description,
+      body,
+    });
+  }
+
+  entries.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+  return entries.slice(0, 100);
+}

@@ -5,6 +5,8 @@ import { BackButton } from "@/components/back-button";
 import { LeadNotes } from "@/components/lead-notes";
 import { InboundLeadStatusSelect } from "@/components/inbound-lead-status-select";
 import { DeleteInboundLeadButton } from "@/components/delete-inbound-lead-button";
+import { ActivityFeed } from "@/components/activity-feed";
+import { getActivityFeedForLead } from "@/lib/activity-queries";
 import { formatDateTimeFull } from "@/lib/format-date";
 import type { LeadNote } from "@/types";
 
@@ -16,7 +18,10 @@ export default async function InboundLeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const lead = await getInboundLead(id);
+  const [lead, activityFeed] = await Promise.all([
+    getInboundLead(id),
+    getActivityFeedForLead(id).catch(() => []),
+  ]);
 
   if (!lead) {
     notFound();
@@ -97,11 +102,21 @@ export default async function InboundLeadDetailPage({
         </div>
       )}
 
-      {/* Notes & Activity */}
+      {/* Notes write form */}
       <div className="rounded-xl border bg-card p-5">
         <LeadNotes
           leadId={lead.id}
           initialNotes={lead.notes as LeadNote[]}
+        />
+      </div>
+
+      {/* Unified Activity Feed */}
+      <div className="rounded-xl border bg-card p-5">
+        <ActivityFeed
+          propertyId=""
+          leadId={lead.id}
+          initialEntries={activityFeed}
+          filter="all"
         />
       </div>
     </div>
