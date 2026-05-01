@@ -628,6 +628,9 @@ export const contactEvents = pgTable(
       .references(() => leads.id),
     eventType: contactEventTypeEnum("event_type").notNull(),
     notes: text("notes"),
+    // Phase 31: actor tracking + outcome column (nullable for legacy rows)
+    actorUserId: uuid("actor_user_id").references(() => users.id),
+    outcome: text("outcome"),
     occurredAt: timestamp("occurred_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -638,6 +641,7 @@ export const contactEvents = pgTable(
   (table) => [
     index("idx_contact_events_lead_id").on(table.leadId),
     index("idx_contact_events_occurred_at").on(table.occurredAt),
+    index("idx_contact_events_actor").on(table.actorUserId),
   ]
 );
 
