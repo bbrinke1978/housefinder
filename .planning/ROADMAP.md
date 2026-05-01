@@ -172,7 +172,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 29. RBAC Foundation + Audit Log | 0/1 | Complete    | 2026-04-29 |
 | 30. RBAC UI + Admin Console | 0/1 | Complete    | 2026-04-29 |
 | 30.1. Google Workspace OAuth Login | 1/1 | Complete   | 2026-04-29 |
-| 31. Unified Activity Feed | 0/1 | Not started | - |
+| 31. Unified Activity Feed | 1/1 | Complete    | 2026-05-01 |
 
 ### Phase 7: Frontend Design Polish
 

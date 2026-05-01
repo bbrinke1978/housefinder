@@ -7,8 +7,8 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
-**Current phase:** 30.1-google-oauth
-**Current plan:** 30.1-01 complete — Google OAuth + pending-approval flow shipped
+**Current phase:** 31-unified-activity-feed
+**Current plan:** 31-01 complete — Unified activity feed shipped end-to-end
 **Status:** Milestone complete
 
 ## Progress
@@ -18,6 +18,7 @@ Phase 28: [####################] Plan 5/5 complete
 Phase 29: [####                ] Plan 1/1 complete
 Phase 30: [####################] Plan 1/1 complete
 Phase 30.1: [####################] Plan 1/1 complete
+Phase 31: [####################] Plan 1/1 complete
 
 ## Decisions
 
@@ -51,6 +52,9 @@ Phase 30.1: [####################] Plan 1/1 complete
 - [Phase 30.1-01]: Login page is client component — used next-auth/react signIn('google') instead of server action wrapper
 - [Phase 30.1-01]: .env.local.example unblocked via !.env.local.example negation in app/.gitignore
 - [Phase 30.1-01]: auto-provision inserts users with roles=[] + password_hash=''; middleware redirects them to /pending-approval rather than blocking login outright (Option B per context)
+- [Phase 31-01]: getActivityFeedForLead(leadId) added for inbound leads (propertyId=NULL) — separate from getActivityFeed(propertyId)
+- [Phase 31-01]: Dashboard uses simple N+1 parallel Promise.all for activity card data — LATERAL join deferred unless perf degrades
+- [Phase 31-01]: contact-tab.tsx accepts optional activityFeed prop for backward compat — falls back to legacy ActivityTimeline if not provided
 
 ## Performance Metrics
 
@@ -66,6 +70,7 @@ Phase 30.1: [####################] Plan 1/1 complete
 | 29    | 01   | 45min    | 6     | 16    |
 | 30    | 01   | 4h       | 5     | 25    |
 | Phase 30.1 P01 | 7min | 6 tasks | 7 files |
+| 31    | 01   | 11min    | 7     | 13    |
 
 ## Session Log
 
@@ -80,3 +85,4 @@ Phase 30.1: [####################] Plan 1/1 complete
 - 2026-04-26: Plan 29-01 complete — RBAC foundation (schema migration 0016 applied to prod, day-1 seed 3339 leads backfilled, permissions.ts + audit-log.ts, NextAuth domain+active+roles gates, ~30 server actions gated + audited, auditLogArchive cron); tsc clean both app + scraper
 - 2026-04-28: Plan 30-01 complete — RBAC UI surfaces: Mine/All toggles, 17-gate gates.ts, hide-by-role buttons, DealTeamPanel + auto-fill, /admin/users console, /admin/audit log viewer; tsc clean; Phase 30 DONE
 - 2026-04-26: Plan 30.1-01 complete — Google OAuth (next-auth/providers/google) + domain gate + auto-provision + /pending-approval middleware + /pending-approval page + Google button on /login + Pending badge in /admin/users; tsc clean; Phase 30.1 DONE
+- 2026-05-01: Plan 31-01 complete — unified activity feed end-to-end: schema 0017, getActivityFeed (7 sources), logActivity server action, ActivityLogModal, ActivityFeed, ActivityCardIndicator, dashboard + 3 detail pages; tsc clean; Phase 31 DONE
