@@ -293,7 +293,7 @@ export async function getActivityFeed(propertyId: string): Promise<ActivityEntry
   // -- 4. audit_log --
   for (const a of auditRows) {
     const actionLabel = a.action.replace(/\./g, " ").replace(/_/g, " ");
-    let description = a.actorName
+    const description = a.actorName
       ? `${a.actorName} — ${actionLabel}`
       : actionLabel;
 
