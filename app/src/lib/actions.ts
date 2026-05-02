@@ -12,13 +12,15 @@ import {
   contactEvents,
   campaignEnrollments,
   emailSendLog,
+  dismissedParcels,
+  properties,
 } from "@/db/schema";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, like, isNull } from "drizzle-orm";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod/v4";
-import { userCan } from "@/lib/permissions";
+import { userCan, canEditLead } from "@/lib/permissions";
 import type { Role } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit-log";
 
@@ -756,6 +758,246 @@ export async function getActiveVacantFlag(
     .limit(1);
 
   return rows.length > 0;
+}
+
+// -- Dismiss / Un-dismiss Lead --
+
+const VALID_DISMISS_REASONS = [
+  "wrong_owner",
+  "already_sold",
+  "not_in_target",
+  "duplicate",
+  "other",
+] as const;
+
+const dismissLeadSchema = z.object({
+  leadId: z.uuid(),
+  reason: z.enum(VALID_DISMISS_REASONS),
+  notes: z.string().max(2000).optional(),
+});
+
+/**
+ * dismissLead — soft-marks a lead as dismissed and adds the parcel_id to the
+ * dismissed_parcels suppression list so the next scrape skips it.
+ *
+ * Gate: lead.edit_status (owner/acq_mgr/lead_mgr). Sales additionally requires
+ * canEditLead check (assigned or created by self).
+ */
+export async function dismissLead(
+  leadId: string,
+  reason: string,
+  notes?: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    // Sales role uses entity-scoped check
+    if (!userCan(roles, "lead.edit_assigned_or_self_created")) {
+      throw new Error("Forbidden: insufficient role");
+    }
+    // Fetch lead to check entity ownership for sales role
+    const [leadRow] = await db
+      .select({ leadManagerId: leads.leadManagerId, createdByUserId: leads.createdByUserId })
+      .from(leads)
+      .where(eq(leads.id, leadId))
+      .limit(1);
+    if (!leadRow || !canEditLead(session, leadRow)) {
+      throw new Error("Forbidden: insufficient role");
+    }
+  }
+
+  const parsed = dismissLeadSchema.parse({ leadId, reason, notes });
+
+  // Validate notes required when reason = 'other'
+  if (parsed.reason === "other" && (!parsed.notes || parsed.notes.trim().length < 5)) {
+    throw new Error("Notes required (min 5 chars) when reason is 'other'");
+  }
+
+  // Fetch the parcel_id for the suppression list
+  const [leadWithProperty] = await db
+    .select({
+      propertyId: leads.propertyId,
+      parcelId: properties.parcelId,
+    })
+    .from(leads)
+    .leftJoin(properties, eq(properties.id, leads.propertyId))
+    .where(eq(leads.id, parsed.leadId))
+    .limit(1);
+
+  if (!leadWithProperty) throw new Error("Lead not found");
+
+  const now = new Date();
+
+  await db
+    .update(leads)
+    .set({
+      dismissedAt: now,
+      dismissedByUserId: session.user.id ?? null,
+      dismissedReason: parsed.reason,
+      dismissedNotes: parsed.notes ?? null,
+      updatedAt: now,
+    })
+    .where(eq(leads.id, parsed.leadId));
+
+  // Add to suppression list if parcel_id is available
+  if (leadWithProperty.parcelId) {
+    await db
+      .insert(dismissedParcels)
+      .values({
+        parcelId: leadWithProperty.parcelId,
+        dismissedByUserId: session.user.id ?? null,
+        reason: parsed.reason,
+        notes: parsed.notes ?? null,
+      })
+      .onConflictDoNothing();
+  }
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "lead.dismissed",
+    entityType: "lead",
+    entityId: parsed.leadId,
+    newValue: { reason: parsed.reason, notes: parsed.notes ?? null },
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/properties/${leadWithProperty.propertyId ?? ""}`);
+}
+
+/**
+ * undismissLead — clears dismissed_* fields and removes from suppression list.
+ */
+export async function undismissLead(leadId: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "lead.edit_status")) {
+    if (!userCan(roles, "lead.edit_assigned_or_self_created")) {
+      throw new Error("Forbidden: insufficient role");
+    }
+    const [leadRow] = await db
+      .select({ leadManagerId: leads.leadManagerId, createdByUserId: leads.createdByUserId })
+      .from(leads)
+      .where(eq(leads.id, leadId))
+      .limit(1);
+    if (!leadRow || !canEditLead(session, leadRow)) {
+      throw new Error("Forbidden: insufficient role");
+    }
+  }
+
+  const parsedId = z.uuid().parse(leadId);
+
+  const [leadWithProperty] = await db
+    .select({
+      propertyId: leads.propertyId,
+      parcelId: properties.parcelId,
+    })
+    .from(leads)
+    .leftJoin(properties, eq(properties.id, leads.propertyId))
+    .where(eq(leads.id, parsedId))
+    .limit(1);
+
+  if (!leadWithProperty) throw new Error("Lead not found");
+
+  await db
+    .update(leads)
+    .set({
+      dismissedAt: null,
+      dismissedByUserId: null,
+      dismissedReason: null,
+      dismissedNotes: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(leads.id, parsedId));
+
+  // Remove from suppression list
+  if (leadWithProperty.parcelId) {
+    await db
+      .delete(dismissedParcels)
+      .where(eq(dismissedParcels.parcelId, leadWithProperty.parcelId));
+  }
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "lead.undismissed",
+    entityType: "lead",
+    entityId: parsedId,
+  });
+
+  revalidatePath("/");
+  revalidatePath(`/properties/${leadWithProperty.propertyId ?? ""}`);
+}
+
+/**
+ * permanentDeleteLead — hard-deletes a lead and all child rows (Owner only).
+ * Requires addressConfirmation to match the property address (case-insensitive).
+ * Suppression list entry survives (parcel stays dismissed after hard delete).
+ */
+export async function permanentDeleteLead(
+  leadId: string,
+  addressConfirmation: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "user.manage")) {
+    throw new Error("Forbidden: Owner only");
+  }
+
+  const parsedId = z.uuid().parse(leadId);
+
+  if (!addressConfirmation || addressConfirmation.trim().length === 0) {
+    throw new Error("Address confirmation is required");
+  }
+
+  // Fetch lead + property for address match
+  const [row] = await db
+    .select({
+      leadSource: leads.leadSource,
+      propertyId: leads.propertyId,
+      address: properties.address,
+      parcelId: properties.parcelId,
+    })
+    .from(leads)
+    .leftJoin(properties, eq(properties.id, leads.propertyId))
+    .where(eq(leads.id, parsedId))
+    .limit(1);
+
+  if (!row) throw new Error("Lead not found");
+
+  // Normalize and compare: trim + collapse whitespace + lowercase
+  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+  const expectedAddress = normalize(row.address ?? row.parcelId ?? "");
+  const provided = normalize(addressConfirmation);
+
+  if (!expectedAddress || provided !== expectedAddress) {
+    throw new Error("Address confirmation does not match");
+  }
+
+  // Cascade: delete child rows in dependency order (mirrors deleteInboundLead)
+  await db.delete(emailSendLog).where(eq(emailSendLog.leadId, parsedId));
+  await db.delete(campaignEnrollments).where(eq(campaignEnrollments.leadId, parsedId));
+  await db.delete(contactEvents).where(eq(contactEvents.leadId, parsedId));
+  await db.delete(alertHistory).where(eq(alertHistory.leadId, parsedId));
+  await db.delete(callLogs).where(eq(callLogs.leadId, parsedId));
+  await db.delete(leadNotes).where(eq(leadNotes.leadId, parsedId));
+  await db.delete(leads).where(eq(leads.id, parsedId));
+  // NOTE: suppression list entry (dismissed_parcels) intentionally preserved
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "lead.hard_deleted",
+    entityType: "lead",
+    entityId: parsedId,
+    oldValue: { address: row.address, parcelId: row.parcelId },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/leads");
 }
 
 /**

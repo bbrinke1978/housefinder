@@ -1,8 +1,26 @@
 "use server";
 
 import { db } from "@/db/client";
-import { deals, dealNotes, buyers, ownerContacts, propertyPhotos, floorPlans, floorPlanPins, scraperConfig, users } from "@/db/schema";
-import { eq, desc, and, isNull } from "drizzle-orm";
+import {
+  deals,
+  dealNotes,
+  buyers,
+  ownerContacts,
+  propertyPhotos,
+  floorPlans,
+  floorPlanPins,
+  scraperConfig,
+  users,
+  contracts,
+  contractSigners,
+  buyerDealInteractions,
+  buyerCommunicationEvents,
+  receipts,
+  expenses,
+  budgets,
+  budgetCategories,
+} from "@/db/schema";
+import { eq, desc, and, isNull, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -1002,4 +1020,190 @@ export async function assignBuyerToDeal(
 
   revalidatePath("/deals");
   revalidatePath(`/deals/${dealId}`);
+}
+
+// -- Archive / Un-archive Deal --
+
+const archiveDealSchema = z.object({
+  dealId: z.uuid(),
+  reason: z.string().max(500).optional(),
+});
+
+/**
+ * archiveDeal — soft-archive a deal (deal.edit_terms gate).
+ */
+export async function archiveDeal(dealId: string, reason?: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
+  const parsed = archiveDealSchema.parse({ dealId, reason });
+  const now = new Date();
+
+  await db
+    .update(deals)
+    .set({
+      archivedAt: now,
+      archivedByUserId: session.user.id ?? null,
+      archivedReason: parsed.reason ?? null,
+      updatedAt: now,
+    })
+    .where(eq(deals.id, parsed.dealId));
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "deal.archived",
+    entityType: "deal",
+    entityId: parsed.dealId,
+    newValue: { reason: parsed.reason ?? null },
+  });
+
+  revalidatePath("/deals");
+  revalidatePath(`/deals/${parsed.dealId}`);
+}
+
+/**
+ * unarchiveDeal — clears archived_* fields.
+ */
+export async function unarchiveDeal(dealId: string): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "deal.edit_terms")) {
+    throw new Error("Forbidden: insufficient role");
+  }
+
+  const parsedId = z.uuid().parse(dealId);
+
+  await db
+    .update(deals)
+    .set({
+      archivedAt: null,
+      archivedByUserId: null,
+      archivedReason: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(deals.id, parsedId));
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "deal.unarchived",
+    entityType: "deal",
+    entityId: parsedId,
+  });
+
+  revalidatePath("/deals");
+  revalidatePath(`/deals/${parsedId}`);
+}
+
+/**
+ * permanentDeleteDeal — hard-deletes a deal + all child rows (Owner only).
+ * Requires addressConfirmation to match deal.address (case-insensitive).
+ */
+export async function permanentDeleteDeal(
+  dealId: string,
+  addressConfirmation: string
+): Promise<void> {
+  const session = await auth();
+  if (!session?.user) throw new Error("Not authenticated");
+
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "user.manage")) {
+    throw new Error("Forbidden: Owner only");
+  }
+
+  const parsedId = z.uuid().parse(dealId);
+
+  if (!addressConfirmation || addressConfirmation.trim().length === 0) {
+    throw new Error("Address confirmation is required");
+  }
+
+  const [deal] = await db
+    .select({ address: deals.address, city: deals.city })
+    .from(deals)
+    .where(eq(deals.id, parsedId))
+    .limit(1);
+
+  if (!deal) throw new Error("Deal not found");
+
+  const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+  const expectedAddress = normalize(deal.address);
+  const provided = normalize(addressConfirmation);
+
+  if (!expectedAddress || provided !== expectedAddress) {
+    throw new Error("Address confirmation does not match");
+  }
+
+  // Cascade: delete child rows in dependency order
+
+  // Delete contract signers first (depend on contracts)
+  const contractRows = await db
+    .select({ id: contracts.id })
+    .from(contracts)
+    .where(eq(contracts.dealId, parsedId));
+  if (contractRows.length > 0) {
+    const contractIds = contractRows.map((c) => c.id);
+    await db.delete(contractSigners).where(inArray(contractSigners.contractId, contractIds));
+    await db.delete(contracts).where(eq(contracts.dealId, parsedId));
+  }
+
+  // Delete buyer-deal interactions
+  await db.delete(buyerDealInteractions).where(eq(buyerDealInteractions.dealId, parsedId));
+
+  // Delete buyer communication events linked to this deal
+  await db.delete(buyerCommunicationEvents).where(eq(buyerCommunicationEvents.dealId, parsedId));
+
+  // Delete budgets + categories + expenses + receipts
+  const budgetRows = await db
+    .select({ id: budgets.id })
+    .from(budgets)
+    .where(eq(budgets.dealId, parsedId));
+  if (budgetRows.length > 0) {
+    const budgetIds = budgetRows.map((b) => b.id);
+    const catRows = await db
+      .select({ id: budgetCategories.id })
+      .from(budgetCategories)
+      .where(inArray(budgetCategories.budgetId, budgetIds));
+    if (catRows.length > 0) {
+      const catIds = catRows.map((c) => c.id);
+      await db.delete(expenses).where(inArray(expenses.categoryId, catIds));
+    }
+    await db.delete(receipts).where(inArray(receipts.budgetId, budgetIds));
+    await db.delete(budgetCategories).where(inArray(budgetCategories.budgetId, budgetIds));
+    await db.delete(budgets).where(eq(budgets.dealId, parsedId));
+  }
+
+  // Floor plan pins + floor plans
+  const planRows = await db
+    .select({ id: floorPlans.id })
+    .from(floorPlans)
+    .where(eq(floorPlans.dealId, parsedId));
+  if (planRows.length > 0) {
+    const planIds = planRows.map((p) => p.id);
+    await db.delete(floorPlanPins).where(inArray(floorPlanPins.floorPlanId, planIds));
+  }
+  await db.delete(floorPlans).where(eq(floorPlans.dealId, parsedId));
+
+  // Photos + deal notes
+  await db.delete(propertyPhotos).where(eq(propertyPhotos.dealId, parsedId));
+  await db.delete(dealNotes).where(eq(dealNotes.dealId, parsedId));
+
+  // Finally the deal itself
+  await db.delete(deals).where(eq(deals.id, parsedId));
+
+  await logAudit({
+    actorUserId: session.user.id ?? null,
+    action: "deal.hard_deleted",
+    entityType: "deal",
+    entityId: parsedId,
+    oldValue: { address: deal.address, city: deal.city },
+  });
+
+  revalidatePath("/deals");
+  redirect("/deals");
 }
