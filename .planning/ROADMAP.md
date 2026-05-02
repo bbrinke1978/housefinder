@@ -42,6 +42,7 @@ Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). T
 - [x] **Phase 30: RBAC UI Gates + Admin Console + Assignment UX** *(added 2026-04-28)* - "My deals" / "My leads" filters scoped by role + assignment, hide-by-role buttons across the app, admin user-management page (create / assign roles / deactivate), audit-log viewer page, deal detail "Team" panel with three assignee slots + reassign dropdowns, auto-assignment on status transitions (completed 2026-04-29)
 - [x] **Phase 30.1: Google Workspace OAuth Login** *(inserted 2026-04-29)* - "Sign in with Google" via NextAuth google provider. Auto-provisions new users with empty roles on first login from a `@no-bshomes.com` Workspace account; Owner approves via /admin/users. Eliminates the temp-password dance for new hires. Existing email/password login kept as a fallback. (completed 2026-04-29)
 - [x] **Phase 31: Unified Activity Feed** *(added 2026-05-01)* - One activity stream per property that follows it through dashboard → leads → deals. Compact "last action · N events" indicator on every property card; full timeline on each detail page; unified Log Activity modal (Call / Email / Text / Meeting / Voicemail / Note) reachable from anywhere. Replaces the fragmented lead_notes / deal_notes / contact_events / audit_log views with one continuous feed. (completed 2026-05-01)
+- [ ] **Phase 32: Dismiss Leads + Archive Deals + Outreach Form Fix** *(added 2026-05-01)* - Soft-delete on dashboard property cards (dismiss with reason; suppresses re-scrapes via dismissed_parcels list) and on deals (archive with optional reason). Owner-only permanent delete behind a confirm-by-typing-address modal. "Show dismissed/archived" toggles. Plus: fix the broken empty Property/Lead dropdown on /analytics/outreach Log-a-call form; scope it to active deals only, add typeahead search, drop the redundant Source field.
 
 ## Phase Details
 
@@ -173,6 +174,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 30. RBAC UI + Admin Console | 0/1 | Complete    | 2026-04-29 |
 | 30.1. Google Workspace OAuth Login | 1/1 | Complete   | 2026-04-29 |
 | 31. Unified Activity Feed | 1/1 | Complete    | 2026-05-01 |
+| 32. Dismiss Leads + Archive Deals | 0/1 | Not started | - |
 
 ### Phase 7: Frontend Design Polish
 
