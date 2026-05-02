@@ -253,27 +253,30 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
   }, [property.id]);
 
   const cardContent = (
-    <Link href={`/properties/${property.id}`} className="group block">
-      <div
-        className={`relative bg-card rounded-xl p-3 md:p-4 border transition-all duration-200 hover:border-primary/30 ${
-          hot ? "hot-pulse" : ""
-        } ${selected ? "border-primary/50 ring-1 ring-primary/20" : "border-border"} ${isDismissed ? "opacity-60" : ""}`}
-        style={{ boxShadow: "var(--shadow-card)" }}
-      >
+    <div
+      className={`group relative bg-card rounded-xl p-3 md:p-4 border transition-all duration-200 hover:border-primary/30 ${
+        hot ? "hot-pulse" : ""
+      } ${selected ? "border-primary/50 ring-1 ring-primary/20" : "border-border"} ${isDismissed ? "opacity-60" : ""}`}
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
+      {/* Stretched link covers card click area; siblings sit above so nested-button-in-anchor hydration crashes don't happen */}
+      <Link
+        href={`/properties/${property.id}`}
+        className="absolute inset-0 z-0 rounded-xl"
+        aria-label={`View ${property.address || property.parcelId}`}
+      />
+
+      <div className="relative z-10 pointer-events-none">
         {/* Dismissed ribbon */}
         {isDismissed && (
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between rounded-t-xl bg-muted/80 px-3 py-1 z-10">
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between rounded-t-xl bg-muted/80 px-3 py-1">
             <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
               Dismissed{property.dismissedReason ? ` · ${property.dismissedReason.replace("_", " ")}` : ""}
             </span>
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setDismissModalOpen(true);
-              }}
-              className="text-[10px] text-primary underline hover:no-underline"
+              onClick={() => setDismissModalOpen(true)}
+              className="pointer-events-auto text-[10px] text-primary underline hover:no-underline"
             >
               Dismiss
             </button>
@@ -284,12 +287,8 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
         {!isDismissed && (
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setDismissModalOpen(true);
-            }}
-            className="absolute top-2 right-2 z-10 rounded-full p-0.5 text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors"
+            onClick={() => setDismissModalOpen(true)}
+            className="pointer-events-auto absolute top-0 right-0 rounded-full p-0.5 text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors"
             title="Dismiss lead"
             aria-label="Dismiss lead"
           >
@@ -309,8 +308,7 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${property.address || property.parcelId}, ${property.city}, ${property.state}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="hover:underline hover:text-foreground transition-colors"
+                className="pointer-events-auto hover:underline hover:text-foreground transition-colors"
               >
                 {property.city}, {property.state}
               </a>
@@ -403,10 +401,12 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
               {property.leadStatus.replace("_", " ")}
             </span>
-            <LeadSourceSelector
-              leadId={property.leadId}
-              currentSource={property.leadSource ?? null}
-            />
+            <div className="pointer-events-auto">
+              <LeadSourceSelector
+                leadId={property.leadId}
+                currentSource={property.leadSource ?? null}
+              />
+            </div>
             {(property.touchpointCount ?? 0) > 0 && (
               <TouchpointBadge count={property.touchpointCount ?? 0} />
             )}
@@ -418,13 +418,15 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
         </div>
 
         {/* Activity indicator row */}
-        <ActivityCardIndicator
-          lastActivity={property.lastActivity ?? null}
-          totalCount={property.activityCount ?? 0}
-          onLogClick={() => setActivityModalOpen(true)}
-        />
+        <div className="pointer-events-auto">
+          <ActivityCardIndicator
+            lastActivity={property.lastActivity ?? null}
+            totalCount={property.activityCount ?? 0}
+            onLogClick={() => setActivityModalOpen(true)}
+          />
+        </div>
       </div>
-    </Link>
+    </div>
   );
 
   const modal = (
