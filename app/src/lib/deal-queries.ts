@@ -9,6 +9,11 @@ export interface GetDealsParams {
    * is the acquisition_user_id, disposition_user_id, or coordinator_user_id.
    */
   mine?: { userId: string };
+  /**
+   * When true, include archived deals (archived_at IS NOT NULL).
+   * Default: false (only show active/non-archived deals).
+   */
+  showArchived?: boolean;
 }
 
 /**
@@ -26,6 +31,11 @@ export async function getDeals(params: GetDealsParams = {}): Promise<DealWithBuy
         OR ${deals.coordinatorUserId} = ${uid}::uuid
       )`
     );
+  }
+
+  // Archive filter — by default exclude archived deals
+  if (!params.showArchived) {
+    conditions.push(isNull(deals.archivedAt));
   }
 
   const rows = await db
@@ -59,6 +69,8 @@ export async function getDeals(params: GetDealsParams = {}): Promise<DealWithBuy
       leadSource: deals.leadSource,
       createdAt: deals.createdAt,
       updatedAt: deals.updatedAt,
+      archivedAt: deals.archivedAt,
+      archivedReason: deals.archivedReason,
       buyerName: buyers.name,
     })
     .from(deals)
@@ -110,6 +122,10 @@ export async function getDeal(id: string): Promise<DealWithBuyer | null> {
       acquisitionUserId: deals.acquisitionUserId,
       dispositionUserId: deals.dispositionUserId,
       coordinatorUserId: deals.coordinatorUserId,
+      // Phase 32: archive fields
+      archivedAt: deals.archivedAt,
+      archivedByUserId: deals.archivedByUserId,
+      archivedReason: deals.archivedReason,
       buyerName: buyers.name,
       // Assessor data from linked property
       buildingSqft: properties.buildingSqft,

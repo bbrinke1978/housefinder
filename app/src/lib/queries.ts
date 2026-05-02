@@ -213,6 +213,11 @@ export interface GetPropertiesParams {
    * an associated lead (which is always true given the innerJoin).
    */
   mine?: { userId: string };
+  /**
+   * When true, include dismissed leads (dismissed_at IS NOT NULL).
+   * Default: false (only show active/non-dismissed leads).
+   */
+  showDismissed?: boolean;
 }
 
 export async function getDashboardStats(
@@ -433,6 +438,11 @@ export async function getDashboardStats(
         WHERE oc.property_id = ${properties.id} AND oc.phone IS NOT NULL
       ) AND ${properties.ownerType} IN ('individual', 'unknown')`
     );
+  }
+
+  // Dismiss filter — by default exclude dismissed leads
+  if (!params.showDismissed) {
+    statsConditions.push(isNull(leads.dismissedAt));
   }
 
   // Only count properties that have at least one distress signal
@@ -719,6 +729,11 @@ export async function getProperties(
     conditions.push(eq(leads.leadManagerId, params.mine.userId));
   }
 
+  // Dismiss filter — by default exclude dismissed leads; ?show_dismissed=true includes them
+  if (!params.showDismissed) {
+    conditions.push(isNull(leads.dismissedAt));
+  }
+
   // Sort
   let orderBy;
   switch (params.sort) {
@@ -760,6 +775,8 @@ export async function getProperties(
       yearBuilt: properties.yearBuilt,
       assessedValue: properties.assessedValue,
       lotAcres: properties.lotAcres,
+      dismissedAt: leads.dismissedAt,
+      dismissedReason: leads.dismissedReason,
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))

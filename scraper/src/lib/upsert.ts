@@ -1,5 +1,5 @@
 import { db } from "../db/client.js";
-import { properties, distressSignals } from "../db/schema.js";
+import { properties, distressSignals, dismissedParcels } from "../db/schema.js";
 import { eq, and, sql } from "drizzle-orm";
 import { classifyOwnerType } from "./scraper-utils.js";
 import type { PropertyRecord, DelinquentRecord, RecorderRecord } from "./validation.js";
@@ -123,7 +123,18 @@ function normalizeCity(city: string, zip?: string): string {
  *
  * @returns The property UUID id
  */
-export async function upsertProperty(record: PropertyRecord, county?: string): Promise<string> {
+export async function upsertProperty(record: PropertyRecord, county?: string): Promise<string | null> {
+  // Suppression check: skip parcels that have been dismissed by a user
+  const [suppressed] = await db
+    .select({ parcelId: dismissedParcels.parcelId })
+    .from(dismissedParcels)
+    .where(eq(dismissedParcels.parcelId, record.parcelId))
+    .limit(1);
+  if (suppressed) {
+    console.log(`[upsert] Skipping suppressed parcel ${record.parcelId}`);
+    return null;
+  }
+
   const now = new Date();
   const ownerType = classifyOwnerType(record.ownerName);
   const resolvedCounty = county ?? record.county ?? "carbon";
@@ -238,8 +249,8 @@ export async function upsertFromAssessor(
   let upserted = 0;
 
   for (const record of records) {
-    await upsertProperty(record, county);
-    upserted++;
+    const result = await upsertProperty(record, county);
+    if (result !== null) upserted++;
   }
 
   return { upserted };
@@ -278,6 +289,7 @@ export async function upsertFromDelinquent(
       mailingState: record.mailingState,
       mailingZip: record.mailingZip,
     }, county);
+    if (propertyId === null) continue; // suppressed — skip signal insert
     upserted++;
 
     // If a year is present, use Jan 1 of that year as recorded_date so
@@ -332,6 +344,7 @@ export async function upsertFromEmery5Year(
       city: "",
       ownerName: record.ownerName,
     }, "emery");
+    if (propertyId === null) continue; // suppressed — skip signal insert
     upserted++;
 
     // Create a signal for each year with a non-zero amount
@@ -393,6 +406,7 @@ export async function upsertFromRecorder(
       address: "",
       city: "",
     });
+    if (propertyId === null) continue; // suppressed — skip signal insert
     upserted++;
 
     await upsertSignal(propertyId, {
@@ -486,6 +500,7 @@ export async function upsertFromUtahLegals(
       ownerName: notice.ownerName,
       zip: notice.zip,   // RP-11: '84116' for SLC notices, undefined for rural counties
     }, county);
+    if (propertyId === null) continue; // suppressed — skip signal insert
     upserted++;
 
     // Skip if we already inserted an NOD for this property this run
