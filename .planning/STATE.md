@@ -7,9 +7,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v1.3 — Rose Park / SLC Enrichment
-**Current phase:** 31-unified-activity-feed
-**Current plan:** 31-01 complete — Unified activity feed shipped end-to-end
-**Status:** Milestone complete
+**Current phase:** 32-dismiss-archive
+**Current plan:** 32-01 complete — Dismiss leads, archive deals, permanent delete, outreach form fix shipped
+**Status:** Phase complete
 
 ## Progress
 
@@ -19,6 +19,7 @@ Phase 29: [####                ] Plan 1/1 complete
 Phase 30: [####################] Plan 1/1 complete
 Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
+Phase 32: [####################] Plan 1/1 complete
 
 ## Decisions
 
@@ -55,6 +56,11 @@ Phase 31: [####################] Plan 1/1 complete
 - [Phase 31-01]: getActivityFeedForLead(leadId) added for inbound leads (propertyId=NULL) — separate from getActivityFeed(propertyId)
 - [Phase 31-01]: Dashboard uses simple N+1 parallel Promise.all for activity card data — LATERAL join deferred unless perf degrades
 - [Phase 31-01]: contact-tab.tsx accepts optional activityFeed prop for backward compat — falls back to legacy ActivityTimeline if not provided
+- 2026-04-26 (32-01): Nullable upsertProperty return (null = suppressed) instead of throwing — 5 callers add simple continue
+- 2026-04-26 (32-01): dismissed_parcels preserved on hard delete — scraper suppression survives lead deletion
+- 2026-04-26 (32-01): Log-a-call writes to contact_events not callLogs — unified activity feed shows call history
+- 2026-04-26 (32-01): Active deals combobox (not all leads) for call log — only in-progress deals need calling
+- 2026-04-26 (32-01): DealArchiveBanner composite client component — cleaner than passing isOwner through 3 server+client layers
 
 ## Performance Metrics
 
@@ -71,6 +77,7 @@ Phase 31: [####################] Plan 1/1 complete
 | 30    | 01   | 4h       | 5     | 25    |
 | Phase 30.1 P01 | 7min | 6 tasks | 7 files |
 | 31    | 01   | 11min    | 7     | 13    |
+| 32    | 01   | ~3h      | 6     | 27    |
 
 ## Session Log
 
@@ -86,3 +93,4 @@ Phase 31: [####################] Plan 1/1 complete
 - 2026-04-28: Plan 30-01 complete — RBAC UI surfaces: Mine/All toggles, 17-gate gates.ts, hide-by-role buttons, DealTeamPanel + auto-fill, /admin/users console, /admin/audit log viewer; tsc clean; Phase 30 DONE
 - 2026-04-26: Plan 30.1-01 complete — Google OAuth (next-auth/providers/google) + domain gate + auto-provision + /pending-approval middleware + /pending-approval page + Google button on /login + Pending badge in /admin/users; tsc clean; Phase 30.1 DONE
 - 2026-05-01: Plan 31-01 complete — unified activity feed end-to-end: schema 0017, getActivityFeed (7 sources), logActivity server action, ActivityLogModal, ActivityFeed, ActivityCardIndicator, dashboard + 3 detail pages; tsc clean; Phase 31 DONE
+- 2026-04-26: Plan 32-01 complete — dismiss leads (soft-delete + parcel suppression), archive deals, owner permanent-delete (address confirm modal), fixed Log-a-call (active deals combobox + contact_events); migration 0018 applied; tsc clean; Phase 32 DONE
