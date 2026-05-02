@@ -1,13 +1,21 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { logCall, type LogCallResult } from "@/lib/analytics-actions";
+import { ChevronDown, X } from "lucide-react";
+
+interface DealOption {
+  dealId: string;
+  leadId: string | null;
+  address: string;
+  sellerName: string | null;
+  city: string;
+}
 
 interface CallLogFormProps {
-  leads: { id: string; address: string }[];
+  deals: DealOption[];
 }
 
 const INITIAL_STATE: LogCallResult | null = null;
@@ -19,41 +27,115 @@ const OUTCOME_OPTIONS = [
   { value: "wrong_number", label: "Wrong Number" },
 ];
 
-export function CallLogForm({ leads }: CallLogFormProps) {
+export function CallLogForm({ deals }: CallLogFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [query, setQuery] = useState("");
+  const [selectedDeal, setSelectedDeal] = useState<DealOption | null>(null);
+  const [comboOpen, setComboOpen] = useState(false);
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    if (!q) return deals.slice(0, 50);
+    return deals
+      .filter(
+        (d) =>
+          d.address.toLowerCase().includes(q) ||
+          (d.sellerName?.toLowerCase().includes(q) ?? false) ||
+          d.city.toLowerCase().includes(q)
+      )
+      .slice(0, 50);
+  }, [deals, query]);
 
   const [state, formAction, isPending] = useActionState<LogCallResult | null, FormData>(
     async (_prevState, formData) => {
       const result = await logCall(formData);
       if ("success" in result && result.success) {
         formRef.current?.reset();
+        setSelectedDeal(null);
+        setQuery("");
       }
       return result;
     },
     INITIAL_STATE
   );
 
+  function handleSelect(deal: DealOption) {
+    setSelectedDeal(deal);
+    setQuery(deal.address);
+    setComboOpen(false);
+  }
+
+  function handleClear() {
+    setSelectedDeal(null);
+    setQuery("");
+    setComboOpen(false);
+  }
+
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
-      {/* Lead select */}
+      {/* Hidden leadId */}
+      <input type="hidden" name="leadId" value={selectedDeal?.leadId ?? ""} />
+
+      {/* Deal combobox */}
       <div className="space-y-1.5">
-        <Label htmlFor="leadId">Property / Lead</Label>
-        <select
-          id="leadId"
-          name="leadId"
-          required
-          className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          defaultValue=""
-        >
-          <option value="" disabled>
-            Select a property...
-          </option>
-          {leads.map((lead) => (
-            <option key={lead.id} value={lead.id}>
-              {lead.address}
-            </option>
-          ))}
-        </select>
+        <Label htmlFor="deal-search">Deal / Property</Label>
+        <div className="relative">
+          <div className="flex items-center rounded-xl border border-input bg-background px-3 py-2 gap-2 focus-within:ring-2 focus-within:ring-ring">
+            <input
+              id="deal-search"
+              type="text"
+              value={query}
+              autoComplete="off"
+              placeholder="Search by address, seller, or city..."
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSelectedDeal(null);
+                setComboOpen(true);
+              }}
+              onFocus={() => setComboOpen(true)}
+              onBlur={() => setTimeout(() => setComboOpen(false), 150)}
+            />
+            {selectedDeal ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Clear selection"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            )}
+          </div>
+
+          {comboOpen && filtered.length > 0 && (
+            <ul className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-popover shadow-lg max-h-60 overflow-y-auto">
+              {filtered.map((deal) => (
+                <li key={deal.dealId}>
+                  <button
+                    type="button"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+                    onMouseDown={() => handleSelect(deal)}
+                  >
+                    <span className="font-medium">{deal.address}</span>
+                    <span className="ml-1.5 text-xs text-muted-foreground">
+                      {deal.city}
+                      {deal.sellerName ? ` · ${deal.sellerName}` : ""}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {comboOpen && query.length > 0 && filtered.length === 0 && (
+            <div className="absolute z-50 mt-1 w-full rounded-xl border border-border bg-popover shadow-lg px-3 py-2 text-sm text-muted-foreground">
+              No deals match &quot;{query}&quot;
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Outcome */}
@@ -73,32 +155,6 @@ export function CallLogForm({ leads }: CallLogFormProps) {
             </label>
           ))}
         </div>
-      </div>
-
-      {/* Source */}
-      <div className="space-y-1.5">
-        <Label htmlFor="source">Source</Label>
-        <Input
-          id="source"
-          name="source"
-          placeholder="manual"
-          defaultValue="manual"
-          className="rounded-xl"
-        />
-      </div>
-
-      {/* Duration */}
-      <div className="space-y-1.5">
-        <Label htmlFor="durationMinutes">Duration (minutes)</Label>
-        <Input
-          id="durationMinutes"
-          name="durationMinutes"
-          type="number"
-          min="0"
-          step="0.5"
-          placeholder="e.g. 3.5"
-          className="rounded-xl"
-        />
       </div>
 
       {/* Notes */}
@@ -123,7 +179,11 @@ export function CallLogForm({ leads }: CallLogFormProps) {
         <p className="text-sm text-red-500 font-medium">{state.error}</p>
       )}
 
-      <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
+      <Button
+        type="submit"
+        disabled={isPending || !selectedDeal?.leadId}
+        className="w-full sm:w-auto"
+      >
         {isPending ? "Saving..." : "Log Call"}
       </Button>
     </form>

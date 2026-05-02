@@ -425,6 +425,49 @@ export async function getLeadsForCallLog(): Promise<{ id: string; address: strin
   }));
 }
 
+/**
+ * Active deals for the call log form combobox.
+ * Returns deals that are not closed/dead and not archived.
+ * Joins to properties → leads to get leadId for contact_events insertion.
+ */
+export async function getActiveDealsForCallForm(): Promise<{
+  dealId: string;
+  leadId: string | null;
+  address: string;
+  sellerName: string | null;
+  city: string;
+}[]> {
+  const rows = await db.execute<{
+    deal_id: string;
+    lead_id: string | null;
+    address: string;
+    seller_name: string | null;
+    city: string;
+  }>(sql`
+    SELECT
+      d.id::text AS deal_id,
+      l.id::text AS lead_id,
+      d.address,
+      d.seller_name,
+      d.city
+    FROM deals d
+    LEFT JOIN properties p ON p.id = d.property_id
+    LEFT JOIN leads l ON l.property_id = p.id
+    WHERE d.status NOT IN ('closed', 'dead')
+      AND d.archived_at IS NULL
+    ORDER BY d.address
+    LIMIT 500
+  `);
+
+  return (rows.rows ?? []).map((r) => ({
+    dealId: r.deal_id,
+    leadId: r.lead_id ?? null,
+    address: r.address,
+    sellerName: r.seller_name ?? null,
+    city: r.city,
+  }));
+}
+
 // -- Export queries --
 
 /**

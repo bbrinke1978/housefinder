@@ -8,7 +8,7 @@ import {
   getScraperHealthData,
   getOutreachStats,
   getRecentActivityLog,
-  getLeadsForCallLog,
+  getActiveDealsForCallForm,
 } from "@/lib/analytics-queries";
 import { ActivityLog } from "@/components/analytics-activity-log";
 import { AnalyticsFunnel } from "@/components/analytics-funnel";
@@ -65,11 +65,11 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       break;
     }
     case "outreach": {
-      const [outreachStats, leadsForForm] = await Promise.all([
+      const [outreachStats, dealsForForm] = await Promise.all([
         getOutreachStats(),
-        getLeadsForCallLog(),
+        getActiveDealsForCallForm(),
       ]);
-      data = { outreachStats, leadsForForm };
+      data = { outreachStats, dealsForForm };
       break;
     }
     case "activity": {
@@ -158,9 +158,9 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
       )}
 
       {activeTab === "outreach" && (() => {
-        const { outreachStats, leadsForForm } = data as {
+        const { outreachStats, dealsForForm } = data as {
           outreachStats: Awaited<ReturnType<typeof getOutreachStats>>;
-          leadsForForm: { id: string; address: string }[];
+          dealsForForm: Awaited<ReturnType<typeof getActiveDealsForCallForm>>;
         };
         return (
           <div className="space-y-6">
@@ -171,7 +171,7 @@ export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps
             </div>
             <div className="rounded-xl border bg-card p-4 md:p-6">
               <h2 className="text-base font-semibold mb-4">Log a Call</h2>
-              <CallLogForm leads={leadsForForm} />
+              <CallLogForm deals={dealsForForm} />
             </div>
           </div>
         );

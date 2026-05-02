@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/db/client";
-import { callLogs } from "@/db/schema";
+import { contactEvents } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
+import { auth } from "@/auth";
 
 const VALID_OUTCOMES = ["answered", "voicemail", "no_answer", "wrong_number"] as const;
 type CallOutcome = (typeof VALID_OUTCOMES)[number];
@@ -11,38 +12,27 @@ type CallOutcome = (typeof VALID_OUTCOMES)[number];
 const logCallSchema = z.object({
   leadId: z.uuid(),
   outcome: z.enum(VALID_OUTCOMES),
-  source: z.string().min(1).max(100).optional(),
-  durationSeconds: z.number().int().nonnegative().optional(),
   notes: z.string().max(2000).optional(),
 });
 
 export type LogCallResult = { success: true } | { error: string };
 
 /**
- * Log a call outcome for a lead.
+ * Log a call outcome as a contact_event (event_type='called_client').
  * Accepts FormData from call-log-form.tsx.
  */
 export async function logCall(formData: FormData): Promise<LogCallResult> {
+  const session = await auth();
+  if (!session?.user) return { error: "Not authenticated" };
+  const actorUserId = (session.user as { id?: string } | undefined)?.id ?? null;
+
   const leadId = formData.get("leadId");
   const outcome = formData.get("outcome");
-  const source = formData.get("source") || "manual";
-  const durationMinutesRaw = formData.get("durationMinutes");
   const notes = formData.get("notes");
-
-  // Convert duration from minutes to seconds
-  let durationSeconds: number | undefined;
-  if (durationMinutesRaw && String(durationMinutesRaw).trim() !== "") {
-    const mins = parseFloat(String(durationMinutesRaw));
-    if (!isNaN(mins) && mins >= 0) {
-      durationSeconds = Math.round(mins * 60);
-    }
-  }
 
   const parsed = logCallSchema.safeParse({
     leadId: String(leadId ?? ""),
     outcome: String(outcome ?? "") as CallOutcome,
-    source: source ? String(source) : undefined,
-    durationSeconds,
     notes: notes ? String(notes) : undefined,
   });
 
@@ -52,12 +42,12 @@ export async function logCall(formData: FormData): Promise<LogCallResult> {
   }
 
   try {
-    await db.insert(callLogs).values({
+    await db.insert(contactEvents).values({
       leadId: parsed.data.leadId,
+      eventType: "called_client",
       outcome: parsed.data.outcome,
-      source: parsed.data.source ?? "manual",
-      durationSeconds: parsed.data.durationSeconds ?? null,
       notes: parsed.data.notes ?? null,
+      actorUserId: actorUserId ?? undefined,
     });
 
     revalidatePath("/analytics");
