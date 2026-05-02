@@ -5,6 +5,7 @@ import { propertyPhotos } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { generatePhotoSasUrl } from "@/lib/blob-storage";
 import { DealsSearchWrapper } from "@/components/deals-search-wrapper";
+import { ShowArchivedToggle } from "@/components/show-archived-toggle";
 import { LayoutGrid, List } from "lucide-react";
 import { auth } from "@/auth";
 import { sessionCan } from "@/lib/permissions";
@@ -13,12 +14,13 @@ import type { Role } from "@/lib/permissions";
 export const dynamic = "force-dynamic";
 
 interface DealsPageProps {
-  searchParams: Promise<{ view?: string; mine?: string }>;
+  searchParams: Promise<{ view?: string; mine?: string; showArchived?: string }>;
 }
 
 export default async function DealsPage({ searchParams }: DealsPageProps) {
   const session = await auth();
-  const { view = "kanban", mine: mineParam } = await searchParams;
+  const { view = "kanban", mine: mineParam, showArchived: showArchivedParam } = await searchParams;
+  const showArchived = showArchivedParam === "true";
 
   // Determine "my deals" filter:
   // - Owner: off by default (sees everything); ?mine=true to narrow
@@ -36,7 +38,7 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
     }
   }
 
-  const deals = await getDeals({ mine: mineFilter });
+  const deals = await getDeals({ mine: mineFilter, showArchived });
 
   // Batch-fetch cover photos for all deals (non-fatal — page works without photos)
   const dealIds = deals.map((d) => d.id);
@@ -125,6 +127,9 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
               <span className="hidden sm:inline">List</span>
             </Link>
           </div>
+
+          {/* Show archived toggle */}
+          <ShowArchivedToggle active={showArchived} view={view} mineOn={!!mineFilter} />
 
           {/* New deal button */}
           <Link

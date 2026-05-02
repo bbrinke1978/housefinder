@@ -14,8 +14,10 @@ import { ContactTab } from "@/components/contact-tab";
 import { FieldObservations } from "@/components/field-observations";
 import { BackButton } from "@/components/back-button";
 import { ActivityFeed } from "@/components/activity-feed";
+import { DismissLeadControls } from "@/components/dismiss-lead-controls";
 import { auth } from "@/auth";
 import { sessionCan } from "@/lib/permissions";
+import type { Role } from "@/lib/permissions";
 
 export default async function PropertyDetailPage({
   params,
@@ -34,6 +36,8 @@ export default async function PropertyDetailPage({
 
   const canCreateDeal = sessionCan(session, "deal.create");
   const canRunTracerfy = sessionCan(session, "tracerfy.run");
+  const roles = ((session?.user as { roles?: Role[] } | undefined)?.roles) ?? [];
+  const isOwner = roles.includes("owner");
 
   if (!property) {
     notFound();
@@ -71,6 +75,15 @@ export default async function PropertyDetailPage({
       <p className="text-sm text-muted-foreground">
         {property.city}, {property.state} {property.zip ?? ""}
       </p>
+
+      {/* Dismiss / un-dismiss / permanent delete controls */}
+      <DismissLeadControls
+        leadId={property.leadId}
+        propertyAddress={property.address ?? property.parcelId}
+        dismissedAt={property.dismissedAt}
+        dismissedReason={property.dismissedReason}
+        isOwner={isOwner}
+      />
 
       <Tabs defaultValue="overview">
         <TabsList className="!flex !w-full !h-auto rounded-lg bg-muted p-1 gap-1 overflow-hidden flex-wrap">

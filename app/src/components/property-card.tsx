@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown, Search, SearchX } from "lucide-react";
+import { Flame, MapPin, User, Building2, ArrowRight, ChevronDown, Search, SearchX, X } from "lucide-react";
 import { useState, useRef, useEffect, useTransition, useCallback } from "react";
 import type { PropertyWithLead } from "@/types";
 import { LEAD_SOURCES } from "@/types";
@@ -11,6 +11,7 @@ import { SwipeCard } from "@/components/swipe-card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivityCardIndicator } from "@/components/activity-card-indicator";
 import { ActivityLogModal } from "@/components/activity-log-modal";
+import { DismissLeadModal } from "@/components/dismiss-lead-modal";
 
 interface PropertyCardProps {
   property: PropertyWithLead;
@@ -238,6 +239,8 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
   const tier = getTier(property.distressScore);
   const isMobile = useIsMobile();
   const [activityModalOpen, setActivityModalOpen] = useState(false);
+  const [dismissModalOpen, setDismissModalOpen] = useState(false);
+  const isDismissed = !!property.dismissedAt;
 
   const handleSwipeRight = useCallback(() => {
     // Right swipe → navigate to property detail to initiate a call
@@ -254,11 +257,48 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
       <div
         className={`relative bg-card rounded-xl p-3 md:p-4 border transition-all duration-200 hover:border-primary/30 ${
           hot ? "hot-pulse" : ""
-        } ${selected ? "border-primary/50 ring-1 ring-primary/20" : "border-border"}`}
+        } ${selected ? "border-primary/50 ring-1 ring-primary/20" : "border-border"} ${isDismissed ? "opacity-60" : ""}`}
         style={{ boxShadow: "var(--shadow-card)" }}
       >
+        {/* Dismissed ribbon */}
+        {isDismissed && (
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between rounded-t-xl bg-muted/80 px-3 py-1 z-10">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+              Dismissed{property.dismissedReason ? ` · ${property.dismissedReason.replace("_", " ")}` : ""}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setDismissModalOpen(true);
+              }}
+              className="text-[10px] text-primary underline hover:no-underline"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Dismiss × button (top-right, only when not dismissed) */}
+        {!isDismissed && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setDismissModalOpen(true);
+            }}
+            className="absolute top-2 right-2 z-10 rounded-full p-0.5 text-muted-foreground/40 hover:text-muted-foreground hover:bg-muted transition-colors"
+            title="Dismiss lead"
+            aria-label="Dismiss lead"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+
         {/* Header: address + badges */}
-        <div className="flex items-start justify-between gap-2 mb-2.5">
+        <div className={`flex items-start justify-between gap-2 mb-2.5 ${isDismissed ? "mt-5" : ""}`}>
           <div className="min-w-0 flex-1">
             <p className="truncate font-bold text-foreground group-hover:text-primary transition-colors">
               {property.address || property.parcelId}
@@ -388,12 +428,20 @@ export function PropertyCard({ property, selected }: PropertyCardProps) {
   );
 
   const modal = (
-    <ActivityLogModal
-      open={activityModalOpen}
-      onOpenChange={setActivityModalOpen}
-      propertyId={property.id}
-      leadId={property.leadId}
-    />
+    <>
+      <ActivityLogModal
+        open={activityModalOpen}
+        onOpenChange={setActivityModalOpen}
+        propertyId={property.id}
+        leadId={property.leadId}
+      />
+      <DismissLeadModal
+        open={dismissModalOpen}
+        onOpenChange={setDismissModalOpen}
+        leadId={property.leadId}
+        propertyAddress={property.address ?? property.parcelId}
+      />
+    </>
   );
 
   if (isMobile) {

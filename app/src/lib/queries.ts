@@ -123,6 +123,8 @@ export async function getPropertyDetail(
       yearBuilt: properties.yearBuilt,
       assessedValue: properties.assessedValue,
       lotAcres: properties.lotAcres,
+      dismissedAt: leads.dismissedAt,
+      dismissedReason: leads.dismissedReason,
     })
     .from(properties)
     .innerJoin(leads, eq(leads.propertyId, properties.id))

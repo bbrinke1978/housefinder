@@ -17,6 +17,7 @@ import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
 import { BuyerFollowupWidget } from "@/components/buyer-followup-widget";
+import { ShowDismissedToggle } from "@/components/show-dismissed-toggle";
 import Link from "next/link";
 import { MapPin, Globe, Phone, MessageSquare } from "lucide-react";
 import { formatDateTime } from "@/lib/format-date";
@@ -45,6 +46,8 @@ export default async function DashboardPage({
   const mineOn = mineParam !== undefined ? mineParam === "true" : mineDefault;
   const mineFilter = mineOn && currentUserId ? { userId: currentUserId } : undefined;
 
+  const showDismissed = params.showDismissed === "true";
+
   const filterParams = {
     city: typeof params.city === "string" ? params.city : undefined,
     distressType:
@@ -61,6 +64,7 @@ export default async function DashboardPage({
     source: typeof params.source === "string" ? params.source : undefined,
     search: typeof params.search === "string" ? params.search : undefined,
     mine: mineFilter,
+    showDismissed,
   };
 
   const [stats, properties, cities, sequences, websiteLeads, overdueBuyers] = await Promise.all([
@@ -113,18 +117,21 @@ export default async function DashboardPage({
         </Suspense>
       </div>
 
-      {/* Filtered count */}
-      <div className="text-sm text-muted-foreground animate-fade-in-up stagger-3">
-        {Object.values(filterParams).some(Boolean) ? (
-          <span>
-            Showing <span className="font-semibold text-foreground">{properties.length}</span> of{" "}
-            <span className="font-semibold text-foreground">{stats.total}</span> properties
-          </span>
-        ) : (
-          <span>
-            <span className="font-semibold text-foreground">{stats.total}</span> properties
-          </span>
-        )}
+      {/* Filtered count + dismissed toggle */}
+      <div className="flex items-center justify-between gap-2 animate-fade-in-up stagger-3">
+        <div className="text-sm text-muted-foreground">
+          {Object.values(filterParams).some(Boolean) ? (
+            <span>
+              Showing <span className="font-semibold text-foreground">{properties.length}</span> of{" "}
+              <span className="font-semibold text-foreground">{stats.total}</span> properties
+            </span>
+          ) : (
+            <span>
+              <span className="font-semibold text-foreground">{stats.total}</span> properties
+            </span>
+          )}
+        </div>
+        <ShowDismissedToggle active={showDismissed} />
       </div>
 
       {/* Buyer Follow-Up Reminders */}

@@ -7,6 +7,7 @@ import { getDeal, getDealNotes, getDealContacts, getLeadIdByPropertyId, getActiv
 import { getMatchingBuyersForDeal, getInteractionsForDeal } from '@/lib/buyer-queries';
 import { auth } from '@/auth';
 import { sessionCan } from '@/lib/permissions';
+import type { Role } from '@/lib/permissions';
 import { DealTeamPanel } from '@/components/deal-team-panel';
 import { getLeadTimeline } from '@/lib/contact-event-queries';
 import { getActivityFeed } from '@/lib/activity-queries';
@@ -28,6 +29,7 @@ import { ActivityFeed } from '@/components/activity-feed';
 import { FloorPlanTab } from '@/components/floor-plan-tab';
 import type { TimelineEntry } from '@/types';
 import { BuyerList } from '@/components/buyer-list';
+import { DealArchiveBanner } from '@/components/deal-archive-banner';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,6 +151,8 @@ export default async function DealDetailPage({
   const canReassignOwn = sessionCan(session, 'deal.reassign_own');
   const currentUserId = (session?.user as { id?: string } | undefined)?.id ?? null;
   const isOwnDeal = deal.acquisitionUserId === currentUserId;
+  const roles = ((session?.user as { roles?: Role[] } | undefined)?.roles) ?? [];
+  const isOwner = roles.includes('owner');
 
   return (
     <div className='space-y-4'>
@@ -187,6 +191,15 @@ export default async function DealDetailPage({
           {statusLabel(deal.status)}
         </Badge>
       </div>
+
+      {/* Archive banner + controls */}
+      <DealArchiveBanner
+        dealId={deal.id}
+        dealAddress={deal.address}
+        archivedAt={deal.archivedAt}
+        archivedReason={deal.archivedReason ?? null}
+        isOwner={isOwner}
+      />
 
       {/* Guide panel stays at top, outside tabs */}
       <DealGuidePanel status={deal.status} />
