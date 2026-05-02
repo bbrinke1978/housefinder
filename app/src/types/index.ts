@@ -58,6 +58,9 @@ export interface PropertyWithLead {
   // Phase 31: unified activity feed card indicator data (fetched in dashboard page)
   lastActivity?: import("@/lib/activity-queries").ActivityEntry | null;
   activityCount?: number;
+  // Phase 32: dismiss state (populated by getProperties)
+  dismissedAt?: Date | null;
+  dismissedReason?: string | null;
 }
 
 /** Map view: includes coordinates and aggregated signal types */
@@ -261,6 +264,10 @@ export interface DealWithBuyer {
   lotAcres?: string | null;
   // from floor plans: sum of all floor plan totalSqft
   sqft?: number | null;
+  // Phase 32: archive fields
+  archivedAt?: Date | null;
+  archivedByUserId?: string | null;
+  archivedReason?: string | null;
 }
 
 export interface DealNote {
