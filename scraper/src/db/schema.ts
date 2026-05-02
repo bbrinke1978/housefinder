@@ -400,6 +400,18 @@ export const auditLog = pgTable(
   ]
 );
 
+// ── Dismissed Parcels (Phase 32: suppress re-scraping dismissed leads) ────
+
+export const dismissedParcels = pgTable("dismissed_parcels", {
+  parcelId: text("parcel_id").primaryKey(),
+  dismissedByUserId: uuid("dismissed_by_user_id").references(() => users.id),
+  dismissedAt: timestamp("dismissed_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  reason: text("reason").notNull(),
+  notes: text("notes"),
+});
+
 // ── Audit Log Archive ─────────────────────────────────────────────────────
 
 export const auditLogArchive = pgTable(

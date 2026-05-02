@@ -140,6 +140,11 @@ export const leads = pgTable(
     // RBAC (Phase 29): assignee FKs
     leadManagerId: uuid("lead_manager_id").references(() => users.id),
     createdByUserId: uuid("created_by_user_id").references(() => users.id),
+    // Phase 32: soft-dismiss
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
+    dismissedByUserId: uuid("dismissed_by_user_id").references(() => users.id),
+    dismissedReason: text("dismissed_reason"),
+    dismissedNotes: text("dismissed_notes"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -152,6 +157,7 @@ export const leads = pgTable(
     index("idx_leads_new_lead_status").on(table.newLeadStatus),
     index("idx_leads_lead_manager").on(table.leadManagerId),
     index("idx_leads_created_by").on(table.createdByUserId),
+    index("idx_leads_dismissed_at").on(table.dismissedAt),
   ]
 );
 
@@ -318,6 +324,10 @@ export const deals = pgTable(
     acquisitionUserId: uuid("acquisition_user_id").references(() => users.id),
     dispositionUserId: uuid("disposition_user_id").references(() => users.id),
     coordinatorUserId: uuid("coordinator_user_id").references(() => users.id),
+    // Phase 32: soft-archive
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    archivedByUserId: uuid("archived_by_user_id").references(() => users.id),
+    archivedReason: text("archived_reason"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -332,6 +342,7 @@ export const deals = pgTable(
     index("idx_deals_acquisition_user").on(table.acquisitionUserId),
     index("idx_deals_disposition_user").on(table.dispositionUserId),
     index("idx_deals_coordinator_user").on(table.coordinatorUserId),
+    index("idx_deals_archived_at").on(table.archivedAt),
   ]
 );
 
@@ -1273,3 +1284,20 @@ export const auditLogArchive = pgTable(
 
 export type AuditLogRow = InferSelectModel<typeof auditLog>;
 export type AuditLogArchiveRow = InferSelectModel<typeof auditLogArchive>;
+
+// -- Dismissed Parcels (Phase 32: suppress re-scraping dismissed leads) --
+
+export const dismissedParcels = pgTable(
+  "dismissed_parcels",
+  {
+    parcelId: text("parcel_id").primaryKey(),
+    dismissedByUserId: uuid("dismissed_by_user_id").references(() => users.id),
+    dismissedAt: timestamp("dismissed_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    reason: text("reason").notNull(),
+    notes: text("notes"),
+  }
+);
+
+export type DismissedParcelRow = InferSelectModel<typeof dismissedParcels>;
