@@ -648,7 +648,7 @@ Plans:
   7. `next lint` and `tsc --noEmit` clean before the commit lands (per `feedback_lint_before_commit.md`)
   8. Existing `getActivityFeed(propertyId)` and `getActivityFeedForLead(leadId)` continue to work unchanged — detail pages (properties/leads/deals) still load full feeds correctly
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 33-01-PLAN.md — Batched dashboard activity query (PERF-01) + pg pool revert (PERF-02) + orphaned seed-config commit (OPS-07), all in one atomic shipping unit
