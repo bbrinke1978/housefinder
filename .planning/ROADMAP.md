@@ -30,8 +30,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 24: Advanced MAO Calculator** - Replace simple ARV x 0.65 formula with professional dual-view calculator (buyer/flipper + wholesaler) including sell-side costs, hard money carry, iterative loan convergence, and wholesaler spread (completed 2026-04-14)
 - [x] **Phase 25: Rose Park Foundation** - Add normalizeCity() retag, SQL migration for existing rows, Rose Park in target_cities, and raise getProperties() limit so the dashboard is ready before any 84116 data floods in (completed 2026-04-26)
 - [x] **Phase 25.5: Utah Legals SLC Activation** *(inserted 2026-04-26)* - Add Salt Lake County to utah-legals.ts TARGET_COUNTIES, extend extractParcelId() regex for SLCo 10-digit numeric format, and apply 84116 zip allowlist filter. This is the first phase that actually CREATES Rose Park rows in the DB (UGRC was wrongly assumed to do this in original v1.3 design) (completed 2026-04-26)
-- [ ] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all
-- [~] **Phase 27: Map Clustering** *(deferred 2026-05-01)* - Supercluster-based Mapbox pin clustering handles Rose Park urban density and improves all dense-area map views. Not blocking anything; revisit when SLC pin density actually becomes a problem on the dashboard.
+- [x] **Phase 26: UGRC Rose Park Enrichment** *(re-scoped 2026-04-26)* - Enrich existing Rose Park rows (created by Phase 25.5) with UGRC assessor data via parcel_id JOIN. Original `PARCEL_ZIP='84116'` filter strategy was abandoned — UGRC Parcels_SaltLake_LIR layer has no zip code field at all (completed 2026-05-03)
+- [x] **Phase 27: Map Clustering** *(closed 2026-05-03)* - Supercluster-based Mapbox pin clustering. Closed without implementation — SLC pin density never became a real problem on the dashboard, and no further v1.3 work is gated by it. Revisit only if a future market surge in a single zip makes the map unusable.
 - [x] **Phase 28: User Feedback System** *(added 2026-04-27)* - Internal Jira-style bug + feature-request tracker built into No BS Workbench. Users (Brian + team) post issues with screenshots and notes; Brian triages and ships. Replaces the "remember to write down what's broken" workflow with a queryable, attachable, threaded backlog (completed 2026-04-28)
 
 ## v1.4 — Team & Access *(added 2026-04-28)*
@@ -168,8 +168,8 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 23. Scoring Rebalance | 1/2 | Complete    | 2026-04-13 |
 | 24. Advanced MAO Calculator | 2/2 | Complete    | 2026-04-14 |
 | 25. Rose Park Foundation | 2/2 | Complete    | 2026-04-26 |
-| 26. UGRC Salt Lake County Import | 1/3 | In Progress|  |
-| 27. Map Clustering | 0/1 | Deferred    | 2026-05-01 |
+| 26. UGRC Rose Park Enrichment | 3/3 | Complete   | 2026-05-03 |
+| 27. Map Clustering | 0/0 | Complete (descoped)   | 2026-05-03 |
 | 28. User Feedback System | 5/5 | Complete    | 2026-04-28 |
 | 29. RBAC Foundation + Audit Log | 0/1 | Complete    | 2026-04-29 |
 | 30. RBAC UI + Admin Console | 0/1 | Complete    | 2026-04-29 |
@@ -583,27 +583,20 @@ Plans:
 - Original design also assumed UGRC could INSERT new rows. UGRC is enrichment-only: it UPDATEs existing rows by parcel_id match. This phase now correctly depends on Phase 25.5 to CREATE the rows first.
 - Recommended approach: use the `--county=salt-lake` CLI filter from rolled-back Phase 26 work, but skip the broken WHERE clause. Either fetch all SLC parcels (large but Azure Function timeout manageable since only matching parcel_ids do DB writes) OR query a separate UGRC Address Points layer first to get an 84116 parcel-ID list.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 26-01-PLAN.md — Extend import-ugrc-assessor.mjs with fetchFromAllowlist() + --dry-run flag (Option B from research) (RP-01)
 - [x] 26-02-PLAN.md — Dry-run shadow + production execution against live DB; match count + prefix-mismatch spot-check (RP-01) — 4 rows enriched; prefix-mismatch confirmed (26/30 rows deferred to v1.4)
-- [ ] 26-03-PLAN.md — Verify Rose Park city filter, grid, stats bar, and assessor card on deployed Netlify production (RP-06, RP-07)
+- [x] 26-03-PLAN.md — Verify Rose Park city filter, grid, stats bar, and assessor card on deployed Netlify production (RP-06, RP-07) — verified 2026-05-03
 
-### Phase 27: Map Clustering
+### Phase 27: Map Clustering *(closed without implementation 2026-05-03)*
 
 **Goal:** The map view clusters dense pin groups using the supercluster pattern so Rose Park's urban density does not produce an unusable pile of overlapping pins — improving all dense-area views, not just Rose Park
 **Depends on:** Phase 25
 **Requirements**: RP-08
-**Success Criteria** (what must be TRUE):
-  1. Zooming out on the map in an area with many properties (e.g., Rose Park urban density) shows a cluster circle with a count badge rather than dozens of overlapping pins
-  2. Tapping or clicking a cluster zooms the map into that cluster's bounding area so individual property pins become visible
-  3. Individual property pins retain their existing distress-score color coding and tap-to-detail behavior after clustering is applied
-  4. Map clustering works on mobile with touch gestures — pinch-to-zoom still separates clusters into individual pins as expected
-**Plans:** TBD
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 27 to break down)
+**Resolution:** Closed without implementation. SLC pin density never became a real problem on the deployed dashboard, and no other phase is gated by clustering. RP-08 is descoped from v1.3; revisit only if a future market surge in a single zip makes the map unusable.
+**Plans:** 0/0 (no plans produced; phase closed before /gsd:plan-phase ran)
 
 ### Phase 28: User Feedback System *(added 2026-04-27)*
 
@@ -630,7 +623,93 @@ Plans:
 
 ## Milestone v1.4 — Team & Access (Phases 29-33)
 
-> Note: Phases 29 (RBAC Foundation), 30 (RBAC UI Surfaces), 30.1 (Google OAuth), 31 (Unified Activity Feed), and 32 (Dismiss/Archive + Outreach Form Fix) were executed against the project but their detail entries were never back-filled into this roadmap. See STATE.md and git history for completion records. Back-filling those entries is a future docs cleanup.
+### Phase 29: RBAC Foundation + Audit Log *(added 2026-04-28)*
+
+**Goal:** Multi-role access control with full audit logging is enforced at the auth/server-action layer so Brian can bring on hires (Stacee, Chris) without granting blanket access — and can verify after the fact that nobody is gaming the lead pipeline
+**Depends on:** Phase 10 (auth/users)
+**Requirements:** RBAC-01, RBAC-02, RBAC-03, RBAC-04, RBAC-05
+**Success Criteria** (what must be TRUE):
+  1. `users` table has `roles text[]` and `is_active boolean` columns; existing users (brian@, shawn@, admin@) backfilled with `roles=['owner']` and `is_active=true`
+  2. Six built-in roles defined in a `ROLE_GRANTS` permission matrix: `owner`, `acquisition_manager`, `disposition_manager`, `lead_manager`, `transaction_coordinator`, `sales`, `assistant`
+  3. Auth callback rejects logins from non-`@no-bshomes.com` emails AND from valid-domain users with `is_active=false` or `roles=[]` — all return null without leaking user existence
+  4. `audit_log` + `audit_log_archive` tables exist; every mutating server action wraps writes with `logAudit(actor, action, entity, old, new)`; an Azure Function timer trigger runs daily at 3am UTC to archive >30-day rows and drop >60-day rows
+  5. `userCan(roles, action)` helper returns true iff at least one role grants the action; `feedback-admin.isAdmin()` re-routed through `userCan(roles, 'feedback.triage')` (backward compatible for Brian)
+  6. Deals gain `acquisition_user_id`, `disposition_user_id`, `coordinator_user_id` nullable FKs; leads gain `lead_manager_id` and `created_by_user_id` — populated by future assignment flows
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 29-01-PLAN.md — Schema migration 0016, day-1 backfill, permissions matrix, audit-log helpers, ~30 server actions wrapped with userCan + logAudit, auditLogArchive Azure Function (RBAC-01..05)
+
+### Phase 30: RBAC UI Gates + Admin Console + Assignment UX *(added 2026-04-28)*
+
+**Goal:** The role-based gates established in Phase 29 are enforced at the UI surface — non-owners cannot see admin pages, role-restricted buttons are hidden (not just disabled), and Brian has an admin console to manage users + an audit-log viewer to investigate after-the-fact
+**Depends on:** Phase 29
+**Requirements:** RBAC-06, RBAC-07, RBAC-08, RBAC-09, RBAC-10
+**Success Criteria** (what must be TRUE):
+  1. "My deals" / "My leads" toggles on dashboard, leads, and deals pages filter by current-user assignment; default scope respects role (sales sees only their own, owner sees all)
+  2. `gates.ts` enforces 17 role-restricted UI gates (Add Buyer, Tracerfy, Skip Trace, Deal Blast Generator, Reassign, etc.) — buttons absent from DOM for users without grant, not greyed out
+  3. `/admin/users` route is URL-gated: non-owners get a 404 server-side; the nav link is also hidden. Owner can create users, set roles, deactivate
+  4. `/admin/audit` is nav-hidden but accessible by URL (read-only audit-log viewer with pagination + actor + entity filters) — small trusted team, no need for harder gating
+  5. Deal detail "Team" panel shows three assignee slots (acquisition / disposition / coordinator) with role-filtered reassignment dropdowns; auto-fill on status transitions populates the right slot from the right role pool
+  6. `canReassignOwn` permits dispositions and coordinators to reassign themselves on their own deals; acquisition stays management-level
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 30-01-PLAN.md — Mine/All toggles, gates.ts, hide-by-role buttons, DealTeamPanel + auto-fill, /admin/users console, /admin/audit log viewer (RBAC-06..10)
+
+### Phase 30.1: Google Workspace OAuth Login *(inserted 2026-04-29)*
+
+**Goal:** New hires can sign in to No BS Workbench with their `@no-bshomes.com` Google Workspace account on first try — no temp-password dance — and Brian gets visibility into pending users so he can grant roles in one click
+**Depends on:** Phase 29 (users.roles + is_active), Phase 30 (/admin/users console)
+**Requirements:** AUTH-04, AUTH-05
+**Success Criteria** (what must be TRUE):
+  1. NextAuth `auth.ts` configures Google provider alongside the existing Credentials provider; both flows work; tsc clean
+  2. Google sign-in with an `@no-bshomes.com` email creates (or reuses) a `users` row and returns a session; non-domain emails are rejected at the `signIn` callback
+  3. Auto-provisioned users (roles=[]) are redirected to `/pending-approval` on every protected route via middleware until an Owner grants roles via `/admin/users`
+  4. Existing users (Brian, Shawn, admin@, Stacee) signing in via Google reuse their existing row — no duplicates created; their `roles` and `id` flow through `session.user`
+  5. Login page shows the Google button on top, then a divider, then the existing email/password form. Both flows work
+  6. `/admin/users` surfaces pending users (roles=[]) with a yellow "Pending" badge sorted to the top
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 30.1-01-PLAN.md — Google provider + signIn domain gate + auto-provision + middleware redirect + /pending-approval page + login page button + Pending badge in admin users (AUTH-04, AUTH-05)
+
+### Phase 31: Unified Activity Feed *(added 2026-05-01)*
+
+**Goal:** A single chronological activity stream follows every property through dashboard → leads → deals so the team never has to hunt across three views to reconstruct what happened. Replaces the fragmented `lead_notes` / `deal_notes` / `contact_events` / `audit_log` views with one continuous feed
+**Depends on:** Phase 28 (feedback activity timeline pattern reused)
+**Requirements:** ACT-01, ACT-02, ACT-03, ACT-04, ACT-05
+**Success Criteria** (what must be TRUE):
+  1. Schema migration 0017 adds `contact_events.actor_user_id` + `contact_events.outcome` (nullable for legacy rows)
+  2. `getActivityFeed(propertyId)` returns a unified chronological list pulling from 7 sources: `contact_events`, `lead_notes`, `deal_notes`, deal status changes, `audit_log` (material edits only — chatty actions like comments-added and feedback-* excluded), `property_photos`, `deal_contracts`, and skip-trace `owner_contacts` entries. `getActivityFeedForLead(leadId)` exists for inbound (propertyId=NULL) leads
+  3. Every property card on the dashboard shows a compact indicator: `<icon> <last action> · N events` (or "No activity")
+  4. Property cards have a small ✚ affordance that opens the Log Activity modal in place — no navigation away. After submit the card refreshes via `revalidatePath('/')`
+  5. The Log Activity modal has a type selector (Call / Email / Text / Meeting / Voicemail / Note); per-type fields render below; submit writes to `contact_events` (most types) or `lead_notes` (note type)
+  6. `/properties/[id]`, `/leads/[id]`, and `/deals/[id]` all show the same unified feed component with a Log Activity button at top; the deal detail Activity tab uses it (replacing the partial implementation); `/properties/[id]` Notes and Contact tabs continue as filtered views (notes-only and comms-only) of the same feed
+  7. Activity entries display with consistent formatting across all sources: actor avatar (initials), action verb, target, relative time, expandable detail row
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 31-01-PLAN.md — Schema 0017, getActivityFeed (7 sources) + getActivityFeedForLead, logActivity server action, ActivityLogModal, ActivityFeed, ActivityCardIndicator, dashboard + 3 detail pages wired (ACT-01..05)
+
+### Phase 32: Dismiss Leads + Archive Deals + Outreach Form Fix *(added 2026-05-01)*
+
+**Goal:** The team can clear noise from the dashboard without losing data — soft-delete leads with reason capture, archive deals when they go quiet, owner-only permanent delete for true junk — and the broken Log-a-call form on `/analytics/outreach` is fixed so call logging works again
+**Depends on:** Phase 29 (userCan gates), Phase 31 (activity feed surfaces deletions)
+**Requirements:** MGMT-01, MGMT-02, MGMT-03, MGMT-04, MGMT-05
+**Success Criteria** (what must be TRUE):
+  1. Schema migration 0018 adds `leads.dismissed_at + dismissed_by_user_id + dismissed_reason`, `deals.archived_at + archived_by_user_id + archived_reason`, and `dismissed_parcels` table (parcel_id PK)
+  2. Dashboard property cards have a × icon top-right that opens a Dismiss modal with required reason dropdown (`wrong_owner` / `already_sold` / `not_in_target` / `duplicate` / `other`); default dashboard query excludes dismissed leads; `?show_dismissed=true` toggle brings them back
+  3. When a lead is dismissed, parcel_id is added to `dismissed_parcels` (idempotent INSERT ON CONFLICT DO NOTHING); `scraper/src/lib/upsert.ts` checks `dismissed_parcels` before INSERT and skips suppressed parcels with a console log — so re-scrapes don't recreate dismissed leads
+  4. Property detail header shows "Dismiss this lead" when not dismissed; shows "Dismissed by {name} {timeAgo} — {reason}" + Un-dismiss button when dismissed
+  5. Deal detail has an "Archive Deal" button in status controls; archived deals show a gray banner; default deals query excludes archived; "Show archived" toggle brings them back
+  6. Owner-only Permanent Delete button on property and deal detail behind a confirm modal that requires typing the address (case-insensitive) before the Delete button enables; `dismissed_parcels` row is preserved on hard delete so scraper suppression survives
+  7. All dismiss / archive / un-dismiss / un-archive / hard-delete actions are audit-logged and gated by `userCan` checks
+  8. `/analytics/outreach` Log-a-call form: Property/Lead dropdown is populated (was broken — empty), filters to deals NOT in closed/dead/archived statuses, supports typeahead search via combobox, redundant Source field removed (deals already carry `lead_source`)
+**Plans:** 1/1 plans complete
+
+Plans:
+- [x] 32-01-PLAN.md — Schema 0018, dismiss/archive server actions + queries, scraper upsert suppression, dismiss/archive/permanent-delete modals, dashboard + property/deal detail wiring, Log-a-call combobox fix (MGMT-01..05)
 
 ### Phase 33: Activity Feed Batch Refactor *(added 2026-05-03)*
 

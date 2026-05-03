@@ -13,9 +13,10 @@ See: .planning/PROJECT.md
 
 ## Progress
 
-Phase 26: [####################] Plan 2/2 complete (checkpoint pending human verify)
+Phase 26: [####################] Plan 3/3 complete (verified 2026-05-03)
+Phase 27: [####################] Closed without implementation 2026-05-03 (RP-08 descoped)
 Phase 28: [####################] Plan 5/5 complete
-Phase 29: [####                ] Plan 1/1 complete
+Phase 29: [####################] Plan 1/1 complete
 Phase 30: [####################] Plan 1/1 complete
 Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
@@ -85,7 +86,8 @@ Phase 33: [####################] Plan 1/1 complete
 
 ## Roadmap Evolution
 
-- 2026-05-03: Phase 33 (Activity Feed Batch Refactor) added under v1.4 milestone — eliminate dashboard N+1 that drove 2026-05-02 connection-storm outage. Note: ROADMAP.md still missing detail entries for completed Phases 29-32 (executed but never back-filled into the roadmap doc); deferred as a future docs cleanup.
+- 2026-05-03: Phase 33 (Activity Feed Batch Refactor) added under v1.4 milestone — eliminate dashboard N+1 that drove 2026-05-02 connection-storm outage.
+- 2026-05-03: Roadmap docs gap closed — Phase 26 verified + closed (RP-06/RP-07 marked Complete, 26-03-PLAN signed off), Phase 27 closed without implementation (RP-08 descoped, SLC pin density never became a problem), Phases 29-32 detail sections back-filled into ROADMAP.md, v1.4 requirements (RBAC-01..10, AUTH-04..05, ACT-01..05, MGMT-01..05, PERF-01..02, OPS-07) added to REQUIREMENTS.md with full traceability.
 
 ## Session Log
 

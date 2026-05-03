@@ -344,11 +344,48 @@ Internal Jira-style backlog so users (Brian + team) can report bugs and request 
 - [x] **FB-09**: Feedback items can optionally link to a `property_id` or `deal_id` so context-specific bugs ("the MAO calculator is wrong on deal XYZ") carry the link forward. Detail view renders the linked property/deal as a clickable badge.
 - [x] **FB-10**: All feedback CRUD operations require authentication. Only Brian (or a future `admin` role) can change status to `shipped`/`wontfix`/`duplicate` or delete an item; comments and attachments are owned by their author and can be deleted by the author or an admin.
 
-## v1.4 Requirements — Team & Access (and Phase 33 Hotfix)
+## v1.4 Requirements — Team & Access
 
-Note: v1.4 RBAC requirements (Phases 29-32) were defined inline in ROADMAP.md and shipped without a back-fill into this document. Only the Phase 33 hotfix requirements (PERF / OPS, defined 2026-05-03 after the connection-storm post-mortem) are tracked here. Back-filling the RBAC requirements is a deferred docs cleanup tracked in STATE.md.
+Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). The platform needs role-based access control, deal/lead assignment to specific team members, and an audit log so Brian can verify nobody is gaming the lead pipeline. Login is restricted to `@no-bshomes.com` accounts. Plus: unified activity feed across the property → lead → deal funnel, lead dismissal / deal archival to clear noise, and the Phase 33 perf hotfix that closed the post-mortem on the 2026-05-02 connection-storm outage.
 
-### Performance & Operations (added 2026-05-03, Phase 33)
+### RBAC Foundation + Audit Log (Phase 29)
+
+- [x] **RBAC-01**: `users` table has `roles text[]` and `is_active boolean` columns; existing users (brian@, shawn@, admin@) are backfilled with `roles=['owner']` and `is_active=true`. Deals gain `acquisition_user_id`, `disposition_user_id`, `coordinator_user_id` nullable FKs; leads gain `lead_manager_id` and `created_by_user_id`.
+- [x] **RBAC-02**: A `ROLE_GRANTS` matrix in `permissions.ts` defines six built-in roles — `owner`, `acquisition_manager`, `disposition_manager`, `lead_manager`, `transaction_coordinator`, `sales`, `assistant` — with explicit per-action grants. `userCan(roles, action)` returns true iff at least one role grants the action.
+- [x] **RBAC-03**: Auth callback rejects logins from non-`@no-bshomes.com` emails AND from valid-domain users with `is_active=false` or `roles=[]` — all return null without leaking user existence. `session.user.roles` is exposed as `string[]` readable from server components.
+- [x] **RBAC-04**: `audit_log` and `audit_log_archive` tables exist; every mutating server action (~30 files: actions.ts, deal-actions.ts, wholesale-actions.ts, buyer-actions.ts, tracerfy-actions.ts, feedback-actions.ts) wraps DB writes with `logAudit(actor, action, entity, old, new)`. An Azure Function timer trigger `auditLogArchive` runs daily at 3am UTC archiving >30-day rows and dropping >60-day rows. `logAudit()` failures never block user actions.
+- [x] **RBAC-05**: `feedback-admin.isAdmin()` re-routed through `userCan(roles, 'feedback.triage')` — backward compatible for Brian's existing access. Entity-scoped helpers like `canEditLead(session, lead)` exist for ownership checks (sales-role can edit only their own leads).
+
+### RBAC UI + Admin Console + Assignment UX (Phase 30)
+
+- [x] **RBAC-06**: "My deals" / "My leads" toggles on dashboard, leads, and deals pages filter by current-user assignment; default scope respects role (sales sees only their own, owner sees all).
+- [x] **RBAC-07**: `gates.ts` enforces 17 role-restricted UI gates (Add Buyer, Tracerfy, Skip Trace, Deal Blast Generator, Reassign, etc.). Restricted buttons are absent from the DOM for users without the grant — not greyed out — keeping UX clean.
+- [x] **RBAC-08**: `/admin/users` route is URL-gated server-side: non-owners get a 404; the nav link is also hidden. Owner can create users, set roles, and deactivate from this console.
+- [x] **RBAC-09**: `/admin/audit` is nav-hidden but accessible by URL — read-only audit-log viewer with pagination + actor + entity filters. Small trusted team, no need for harder gating.
+- [x] **RBAC-10**: Deal detail "Team" panel shows three assignee slots (acquisition / disposition / coordinator) with role-filtered reassignment dropdowns. Auto-fill on status transitions populates the right slot from the right role pool. `canReassignOwn` permits dispositions and coordinators to reassign themselves on their own deals; acquisition stays management-level. Auto-fill fallthrough (no eligible active user) leaves assignee null and logs `deal.auto_assign_failed`.
+
+### Google Workspace OAuth Login (Phase 30.1)
+
+- [x] **AUTH-04**: NextAuth `auth.ts` adds the Google provider alongside the existing Credentials provider; both flows work; `signIn` callback rejects non-`@no-bshomes.com` emails. Google sign-in creates (or reuses) a `users` row and returns a session.
+- [x] **AUTH-05**: Auto-provisioned users (roles=[]) are redirected to `/pending-approval` on every protected route via middleware until an Owner grants roles via `/admin/users`. The login page shows the Google button on top, divider, then existing email/password form. `/admin/users` surfaces pending users with a yellow "Pending" badge sorted to the top.
+
+### Unified Activity Feed (Phase 31)
+
+- [x] **ACT-01**: Schema migration 0017 adds `contact_events.actor_user_id` and `contact_events.outcome` columns (nullable for legacy rows).
+- [x] **ACT-02**: `getActivityFeed(propertyId)` returns a unified chronological list pulling from 7 sources: `contact_events`, `lead_notes`, `deal_notes`, deal status changes, `audit_log` (material edits only — chatty actions like comments-added and feedback-* excluded), `property_photos`, `deal_contracts`, skip-trace `owner_contacts`. `getActivityFeedForLead(leadId)` provides equivalent shape for inbound (propertyId=NULL) leads.
+- [x] **ACT-03**: Every property card on the dashboard shows a compact indicator: `<icon> <last action> · N events` (or "No activity" for fresh leads). Cards have a small ✚ affordance that opens the Log Activity modal in place — no navigation away. After submit, the card refreshes via `revalidatePath('/')`.
+- [x] **ACT-04**: The Log Activity modal has a type selector (Call / Email / Text / Meeting / Voicemail / Note); per-type fields render below; submit writes to `contact_events` (most types) or `lead_notes` (note type). `logActivity()` server action enforces gates + audit-log via Phase 29 helpers.
+- [x] **ACT-05**: `/properties/[id]`, `/leads/[id]`, and `/deals/[id]` all show the same unified feed component with a Log Activity button at top. The deal detail Activity tab uses it (replacing the partial implementation). `/properties/[id]` Notes and Contact tabs continue as filtered views (notes-only and comms-only) of the same feed. Entries display with consistent formatting across sources: actor avatar (initials), action verb, target, relative time, expandable detail row.
+
+### Dismiss Leads + Archive Deals + Outreach Form Fix (Phase 32)
+
+- [x] **MGMT-01**: Schema migration 0018 adds `leads.dismissed_at + dismissed_by_user_id + dismissed_reason`, `deals.archived_at + archived_by_user_id + archived_reason`, and `dismissed_parcels` table (parcel_id PK). Default queries exclude soft-deleted/archived rows; `?show_dismissed=true` and "Show archived" toggles bring them back.
+- [x] **MGMT-02**: Dashboard property cards have a × icon top-right that opens a Dismiss modal with required reason dropdown (`wrong_owner` / `already_sold` / `not_in_target` / `duplicate` / `other`). When a lead is dismissed, the parcel_id is added to `dismissed_parcels` (idempotent INSERT ON CONFLICT DO NOTHING). Property detail shows "Dismissed by {name} {timeAgo} — {reason}" + Un-dismiss button.
+- [x] **MGMT-03**: `scraper/src/lib/upsert.ts` `upsertProperty` checks `dismissed_parcels` before INSERT and skips suppressed parcels with a console log. Suppression survives lead hard-delete (`dismissed_parcels` row preserved). `upsertProperty` returns nullable (null = suppressed) instead of throwing — 5 callers add a simple `continue`.
+- [x] **MGMT-04**: Owner-only Permanent Delete button on property and deal detail behind a confirm modal that requires typing the address (case-insensitive match) before the Delete button enables. All dismiss / archive / un-dismiss / un-archive / hard-delete actions are audit-logged and gated by `userCan` checks. Deal detail has "Archive Deal" button in status controls; archived deals show a gray banner.
+- [x] **MGMT-05**: `/analytics/outreach` Log-a-call form: Property/Lead dropdown is populated (was broken — empty due to a bug), filters to deals NOT in closed/dead/archived statuses, supports typeahead search via combobox (not plain select), and the redundant Source field is removed since deals already carry `lead_source`. Log-a-call writes to `contact_events` (not `callLogs`) so the unified activity feed picks it up.
+
+### Performance & Operations (Phase 33, added 2026-05-03)
 
 - [x] **PERF-01**: Dashboard route issues exactly **one** SQL round-trip for activity-card data (last activity description + activity count per property) regardless of how many property cards are rendered. Implementation pattern: `getDashboardActivityCards(propertyIds[])` returning `Map<propertyId, ActivityCardData>` via a single CTE+UNION ALL+ROW_NUMBER query.
 - [x] **PERF-02**: pg connection pool config in `app/src/db/client.ts` returns to serverless-safe defaults (`max:3, idleTimeoutMillis:10000`) — the emergency `max:20/idle:300000` hotfix from commit `e092480` is reverted in the same commit as the N+1 elimination so the system never lives in a half-state.
@@ -662,28 +699,51 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RP-04 | Phase 25 | Complete |
 | RP-05 | Phase 25 | Complete |
 | RP-01 | Phase 26 | Complete |
-| RP-06 | Phase 26 | Pending |
-| RP-07 | Phase 26 | Pending |
-| RP-08 | Phase 27 | Pending |
+| RP-06 | Phase 26 | Complete |
+| RP-07 | Phase 26 | Complete |
+| RP-08 | Phase 27 | Descoped |
 
 **v1.3 Coverage:**
 - v1.3 requirements: 8 total (RP-01 through RP-08)
 - Mapped to phases: 8
 - Unmapped: 0
 
-Note: RP-06 and RP-07 are emergent display outcomes of Phase 25+26. They require no separate implementation work — they are verified as observable success criteria of Phase 26.
+Note: RP-06 and RP-07 are emergent display outcomes of Phase 25+26 — verified observable on the deployed dashboard 2026-05-03. RP-08 (map clustering) is descoped via Phase 27 closure 2026-05-03 — SLC pin density never became a dashboard problem.
 
 ---
 *Last updated: 2026-04-17 — added Phases 25-27 (v1.3 Rose Park Pilot): RP-01 through RP-08*
+*Updated 2026-05-03 — Phase 26 RP-06/RP-07 marked Complete; Phase 27 RP-08 marked Descoped*
 
+| RBAC-01 | Phase 29 | Complete |
+| RBAC-02 | Phase 29 | Complete |
+| RBAC-03 | Phase 29 | Complete |
+| RBAC-04 | Phase 29 | Complete |
+| RBAC-05 | Phase 29 | Complete |
+| RBAC-06 | Phase 30 | Complete |
+| RBAC-07 | Phase 30 | Complete |
+| RBAC-08 | Phase 30 | Complete |
+| RBAC-09 | Phase 30 | Complete |
+| RBAC-10 | Phase 30 | Complete |
+| AUTH-04 | Phase 30.1 | Complete |
+| AUTH-05 | Phase 30.1 | Complete |
+| ACT-01 | Phase 31 | Complete |
+| ACT-02 | Phase 31 | Complete |
+| ACT-03 | Phase 31 | Complete |
+| ACT-04 | Phase 31 | Complete |
+| ACT-05 | Phase 31 | Complete |
+| MGMT-01 | Phase 32 | Complete |
+| MGMT-02 | Phase 32 | Complete |
+| MGMT-03 | Phase 32 | Complete |
+| MGMT-04 | Phase 32 | Complete |
+| MGMT-05 | Phase 32 | Complete |
 | PERF-01 | Phase 33 | Complete |
 | PERF-02 | Phase 33 | Complete |
 | OPS-07 | Phase 33 | Complete |
 
-**v1.4 Phase-33 Coverage:**
-- v1.4 Phase-33 requirements: 3 total (PERF-01, PERF-02, OPS-07)
-- Mapped to phases: 3
+**v1.4 Coverage:**
+- v1.4 requirements: 25 total (RBAC-01..10, AUTH-04, AUTH-05, ACT-01..05, MGMT-01..05, PERF-01, PERF-02, OPS-07)
+- Mapped to phases: 25
 - Unmapped: 0
 
 ---
-*Last updated: 2026-05-03 — added Phase 33 (v1.4 hotfix): PERF-01, PERF-02, OPS-07*
+*Last updated: 2026-05-03 — back-filled v1.4 requirements (Phases 29-33): RBAC-01..10, AUTH-04..05, ACT-01..05, MGMT-01..05, PERF-01..02, OPS-07*
