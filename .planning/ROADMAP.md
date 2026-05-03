@@ -531,8 +531,6 @@ Plans:
 - [x] 24-01-PLAN.md — Math engine, sell-side costs, HML iterative convergence, buyer/flipper view
 - [x] 24-02-PLAN.md — Wholesaler view, view toggle, human verification checkpoint
 
----
-
 ## Milestone v1.3 — Rose Park Pilot (Phases 25-27)
 
 ### Phase 25: Rose Park Foundation
@@ -627,3 +625,31 @@ Plans:
 - [x] 28-03-PLAN.md — List view + filters + nav integration + floating Report button (FB-02, FB-03, FB-06)
 - [x] 28-04-PLAN.md — Detail page: markdown render, attachments gallery, comments thread, status/assignee controls, activity timeline (FB-03, FB-04, FB-05, FB-07, FB-09)
 - [x] 28-05-PLAN.md — Email notifications via Resend: new-item alert + status-change alert + comment notification (FB-08)
+
+## Milestone v1.4 — Team & Access (Phases 29-33)
+
+> Note: Phases 29 (RBAC Foundation), 30 (RBAC UI Surfaces), 30.1 (Google OAuth), 31 (Unified Activity Feed), and 32 (Dismiss/Archive + Outreach Form Fix) were executed against the project but their detail entries were never back-filled into this roadmap. See STATE.md and git history for completion records. Back-filling those entries is a future docs cleanup.
+
+### Phase 33: Activity Feed Batch Refactor *(added 2026-05-03)*
+
+**Goal:** The dashboard renders activity-card data (last activity + activity count per property) using a single batched query instead of N+1 per-property fan-out, eliminating the connection-storm failure mode that took both `finder.no-bshomes.com` and `no-bshomes.com` offline on 2026-05-02 and allowing the pg pool to return to safe serverless defaults (`max:3`, `idleTimeoutMillis:10000`).
+
+**Depends on:** Phase 31 (Unified Activity Feed — defines the source-of-truth `getActivityFeed` shape and 7-source UNION pattern that this phase batches)
+
+**Requirements:** PERF-01 (single-query dashboard activity), PERF-02 (pool config returns to serverless-safe defaults), OPS-07 (commit orphaned `seed-config.ts` SLC neighborhood-list edit)
+
+**Success Criteria** (what must be TRUE):
+  1. The dashboard route (`src/app/(dashboard)/page.tsx`) issues exactly **one** SQL query for activity-feed-on-card data, regardless of how many property cards are rendered (verified by query log or `pg_stat_statements`)
+  2. `pg_stat_activity` shows ~3 sustained connections during sustained dashboard reload (5+ reloads back-to-back) — no spike past 10 connections from this app
+  3. Visible `lastActivity` description and `activityCount` value for each rendered property card is **identical** to pre-refactor output for the same dataset (compare against a sample of 5+ properties before/after)
+  4. Both `finder.no-bshomes.com` and `no-bshomes.com` remain reachable under repeated dashboard navigation — no server-side exception digests appear
+  5. `app/src/db/client.ts` is reverted to `max: 3, idleTimeoutMillis: 10000` and that change is in the same shipped commit as the LATERAL refactor (no half-state where pool stays at `max:20` after the N+1 is fixed)
+  6. `app/src/db/seed-config.ts` SLC-neighborhoods edit (currently uncommitted) is committed as part of this phase — `git status` clean after merge per the post-Phase-32 hygiene rule
+  7. `next lint` and `tsc --noEmit` clean before the commit lands (per `feedback_lint_before_commit.md`)
+  8. Existing `getActivityFeed(propertyId)` and `getActivityFeedForLead(leadId)` continue to work unchanged — detail pages (properties/leads/deals) still load full feeds correctly
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] 33-01-PLAN.md — Batched dashboard activity query (PERF-01) + pg pool revert (PERF-02) + orphaned seed-config commit (OPS-07), all in one atomic shipping unit
+
