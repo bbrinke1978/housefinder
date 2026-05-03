@@ -8,44 +8,24 @@ A free, mobile-first web application that finds distressed properties in small U
 
 Surface pre-foreclosure and distressed properties with enough lead time to contact the owner before the bank forecloses — the earlier the better, the more distress signals the hotter the lead.
 
-## Current Milestone: v1.3 Rose Park Pilot
+## Current Milestone: v1.4 Team & Access *(extending with Phase 34: JV Partner Lead Pipeline)*
 
-**Goal:** Pilot urban expansion by adding Salt Lake City's Rose Park neighborhood (zip 84116) as a distress-scraping target — additive to the rural counties, not a replacement. Brian is personally familiar with the area and it is close to his homes.
-
-**Target features:**
-- Surface Rose Park (84116) properties already collected by statewide scrapers (NOD, UGRC assessor) that are currently hidden by the rural-only city filter
-- Salt Lake County tax delinquent scraper (analog of carbon-delinquent / emery-delinquent-pdf)
-- Salt Lake County recorder scraper for deed/lien/lis pendens filings (analog of carbon-recorder)
-- Rose Park–specific filter in the dashboard UI (leaning toward retagging 84116 as `city = 'Rose Park'` so the existing city filter just works)
-- Daily scraper schedule if feasible; weekly acceptable as a fallback
-- Light scoring calibration check — Rose Park density may surface different signal mixes than rural
+v1.3 (Rose Park Pilot + User Feedback System) shipped 2026-05-03 — see [.planning/milestones/v1.3-ROADMAP.md](milestones/v1.3-ROADMAP.md). v1.4 RBAC + audit + activity feed shipped Phases 29-33 between 2026-04-29 and 2026-05-03. v1.4 stays open to absorb **Phase 34 — JV Partner Lead Pipeline**: external JV "driver" partners (modeled as internal `@no-bshomes.com` sales-role users) submit motivated-seller leads with photo + condition notes; Brian triages; system tracks the qualified → active follow-up → closed pipeline and produces a per-partner monthly payment ledger ($10 / $15 / $500 milestones per the JV Partner Lead Referral Agreement).
 
 ## Requirements
 
 ### Validated
 
-- v1.0: Core platform shipped (20 phases) — scraping, scoring, deals, contracts, photos, CRM, campaigns, security
-- v1.1: Data enrichment (Phases 21-23) — UGRC assessor enrichment, XChange court record intake pipeline, scoring rebalance
-- v1.2: Advanced MAO Calculator (Phase 24) — dual buyer/flipper + wholesaler views, HML convergence
+- ✓ v1.0: Core platform shipped (20 phases) — scraping, scoring, deals, contracts, photos, CRM, campaigns, security
+- ✓ v1.1: Data enrichment (Phases 21-23) — UGRC assessor enrichment, XChange court record intake pipeline, scoring rebalance
+- ✓ v1.2: Advanced MAO Calculator (Phase 24) — dual buyer/flipper + wholesaler views, HML convergence
+- ✓ v1.3: Rose Park Pilot + User Feedback System (Phases 25, 25.5, 26, 27 closed without impl, 28) — 84116 surfaced via Utah Legals SLC + UGRC enrichment; internal Jira-style backlog with paste-screenshot attachments + Resend notifications
+- ✓ v1.4 (Phases 29-33): RBAC foundation + audit log; admin console + assignment UX; Google Workspace OAuth login; unified activity feed; dismiss leads + archive deals + outreach form fix; activity-feed N+1 batch refactor (post-mortem hotfix)
 
 ### Active
 
-- [ ] Daily scraping of public records for distressed property indicators (NOD, tax liens, lis pendens, probate)
-- [ ] Property search focused on Price, UT + ~10 similar small Utah towns by population demographics
-- [ ] Distress signal scoring — properties with 2+ indicators flagged as hot leads
-- [ ] Mobile-first responsive dashboard to browse leads, filter, and take action
-- [ ] Tap-to-call from mobile — phone numbers clickable on hot lead alerts
-- [ ] Email alerts (via Resend) for hot leads with multiple distress signals
-- [ ] SMS/text alerts for urgent hot leads
-- [ ] Map-based property view for geographic browsing
-- [ ] Lead status tracking — new, contacted, follow-up, closed, dead
-- [ ] Property detail pages with all available public data (owner name, address, tax status, mortgage info, equity estimate)
-- [ ] Owner contact information sourced from free/public data (county assessor, voter rolls, public records)
-- [ ] Hot lead flagging for manual skip tracing when free sources don't have contact info
-- [ ] Configurable target cities/counties — start with 10, expand as needed
-- [ ] Vacant/neglected property detection from code violations and utility shutoff records
-- [ ] Probate/estate lead detection from court filings
-- [ ] Notes and follow-up tracking per lead (mini-CRM)
+- [ ] **Phase 34 — JV Partner Lead Pipeline** (in v1.4): lead intake form (address + front-of-property photo + condition notes), Brian's triage queue with dedup vs existing properties + prior submissions, status pipeline → per-partner payment ledger ($10 qualified / $15 active follow-up / $500 closed), monthly payment-run report (1st-of-month batch)
+- [ ] Re-run UGRC SLCo enrichment against the v1.4 wider SLC neighborhood map to flush the 26 unenriched Rose Park rows (parcel prefixes 14/21/22/33/15) deferred from Phase 26
 
 ### Out of Scope
 
@@ -54,9 +34,9 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 - Direct mail campaigns — focus on phone contact
 - Markets outside Utah — start small, expand later
 - Native mobile app — responsive web app is sufficient
-- OAuth/social login — simple auth is fine
 - Real-time chat or messaging features
 - Video content or virtual tours
+- External (non-`@no-bshomes.com`) auth surface for JV partners — Brian provisions them with internal Workspace accounts instead
 
 ## Context
 
@@ -95,4 +75,4 @@ Surface pre-foreclosure and distressed properties with enough lead time to conta
 | Azure DNS for domain | Keep everything in Azure — DNS zone in rg-housefinder | — Pending |
 
 ---
-*Last updated: 2026-04-21 after v1.3 Rose Park Pilot milestone kickoff*
+*Last updated: 2026-05-03 after v1.3 milestone completion (Rose Park Pilot + User Feedback System shipped)*

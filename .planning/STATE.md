@@ -9,7 +9,7 @@ See: .planning/PROJECT.md
 **Milestone:** v1.4 — Team & Access (Phase 33 complete)
 **Current phase:** 33-activity-feed-batch-refactor
 **Current plan:** Plan 1/1 complete — see `.planning/phases/33-activity-feed-batch-refactor/33-01-SUMMARY.md`
-**Status:** Milestone complete
+**Status:** v1.3 milestone complete
 
 ## Progress
 
