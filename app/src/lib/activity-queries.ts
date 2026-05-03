@@ -5,6 +5,7 @@
  *   getActivityFeed(propertyId)  — all sources, sorted by occurredAt desc, max 100
  *   getLastActivity(propertyId) — most recent entry (for card indicator)
  *   getActivityCount(propertyId) — total count across all sources
+ *   getDashboardActivityCards(propertyIds[]) — Phase 33: batched single-query card data
  *
  * TODO: If a property accumulates 1000+ events, switch source queries to
  * source-specific aggregations rather than JS post-sort.
@@ -534,4 +535,235 @@ export async function getActivityFeedForLead(leadId: string): Promise<ActivityEn
 
   entries.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
   return entries.slice(0, 100);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 33: getDashboardActivityCards — batched single-query card data
+// ---------------------------------------------------------------------------
+
+/**
+ * ActivityCardData — shape returned per property by getDashboardActivityCards().
+ *
+ * Intentionally minimal: the card consumer (activity-card-indicator.tsx)
+ * only reads lastActivity.type, lastActivity.description, lastActivity.occurredAt,
+ * lastActivity.source, and activityCount. Full ActivityEntry shape (body, actorName,
+ * metadata, etc.) is NOT required and is stubbed to keep the SQL light.
+ */
+export interface ActivityCardData {
+  /** Most-recent activity entry, or null if no activity exists */
+  lastActivity: ActivityEntry | null;
+  /** Total count of activity entries across all 7 sources for this property */
+  activityCount: number;
+}
+
+/**
+ * Phase 33: Batched activity-card data for the dashboard.
+ *
+ * Replaces the N+1 fan-out of getActivityFeed(propertyId) per card.
+ * Returns ONE row per propertyId (or null entry if no activity).
+ *
+ * SINGLE QUERY GUARANTEE: Issues exactly one db.execute() round-trip
+ * regardless of input size. Verified by toggling drizzle logger.
+ *
+ * Shape note: This intentionally does NOT use the rich ActivityEntry
+ * shape from getActivityFeed(). The card consumer
+ * (components/activity-card-indicator.tsx) only reads type, description,
+ * occurredAt, source — so we keep the SQL light.
+ */
+export async function getDashboardActivityCards(
+  propertyIds: string[]
+): Promise<Map<string, ActivityCardData>> {
+  if (propertyIds.length === 0) return new Map();
+
+  const idList = sql.join(
+    propertyIds.map((id) => sql`${id}::uuid`),
+    sql`, `
+  );
+
+  const rows = await db.execute<{
+    property_id: string;
+    source: ActivitySource;
+    type: string;
+    description: string;
+    occurred_at: Date;
+    rn: number;
+    total_count: number;
+  }>(sql`
+    WITH activity_union AS (
+      -- 1. contact_events (joined to leads.property_id, with users.name)
+      SELECT
+        l.property_id::text AS property_id,
+        'contact_event'::text AS source,
+        CASE ce.event_type
+          WHEN 'called_client' THEN 'call'
+          WHEN 'left_voicemail' THEN 'voicemail'
+          WHEN 'emailed_client' THEN 'email'
+          WHEN 'sent_text' THEN 'text'
+          WHEN 'met_in_person' THEN 'meeting'
+          WHEN 'received_email' THEN 'email_received'
+          ELSE ce.event_type::text
+        END AS type,
+        TRIM(
+          COALESCE(u.name || ' — ', '') ||
+          CASE ce.event_type
+            WHEN 'called_client' THEN 'called owner'
+            WHEN 'left_voicemail' THEN 'left voicemail'
+            WHEN 'emailed_client' THEN 'emailed owner'
+            WHEN 'sent_text' THEN 'sent text'
+            WHEN 'met_in_person' THEN 'met in person'
+            WHEN 'received_email' THEN 'received email from owner'
+            ELSE ce.event_type::text
+          END ||
+          COALESCE(' (' || REPLACE(ce.outcome, '_', ' ') || ')', '')
+        ) AS description,
+        ce.occurred_at AS occurred_at
+      FROM contact_events ce
+      JOIN leads l ON l.id = ce.lead_id
+      LEFT JOIN users u ON u.id = ce.actor_user_id
+      WHERE l.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 2. lead_notes
+      SELECT
+        l.property_id::text,
+        'lead_note'::text,
+        CASE WHEN ln.note_type = 'status_change' THEN 'status_changed' ELSE 'note' END,
+        CASE WHEN ln.note_type = 'status_change'
+             THEN 'Lead status changed to ' || COALESCE(ln.new_status, 'unknown')
+             ELSE 'Note added'
+        END,
+        ln.created_at
+      FROM lead_notes ln
+      JOIN leads l ON l.id = ln.lead_id
+      WHERE l.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 3. deal_notes (multiple deals per property possible)
+      SELECT
+        d.property_id::text,
+        'deal_note'::text,
+        CASE WHEN dn.note_type = 'status_change' THEN 'status_changed' ELSE 'note' END,
+        CASE WHEN dn.note_type = 'status_change'
+             THEN 'Deal status changed to ' || COALESCE(dn.new_status, 'unknown')
+             ELSE 'Deal note added'
+        END,
+        dn.created_at
+      FROM deal_notes dn
+      JOIN deals d ON d.id = dn.deal_id
+      WHERE d.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 4. audit_log — material actions only, scoped via lead entity
+      SELECT
+        l.property_id::text,
+        'audit'::text,
+        al.action,
+        TRIM(COALESCE(u.name || ' — ', '') || REPLACE(REPLACE(al.action, '.', ' '), '_', ' ')),
+        al.created_at
+      FROM audit_log al
+      JOIN leads l ON l.id = al.entity_id
+      LEFT JOIN users u ON u.id = al.actor_user_id
+      WHERE al.entity_type = 'lead'
+        AND al.action IN (
+          'deal.terms_updated', 'lead.status_changed', 'deal.assignee_changed',
+          'deal.status_changed', 'property.address_edited', 'lead.assignee_changed'
+        )
+        AND l.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 4b. audit_log — material actions only, scoped via deal entity
+      SELECT
+        d.property_id::text,
+        'audit'::text,
+        al.action,
+        TRIM(COALESCE(u.name || ' — ', '') || REPLACE(REPLACE(al.action, '.', ' '), '_', ' ')),
+        al.created_at
+      FROM audit_log al
+      JOIN deals d ON d.id = al.entity_id
+      LEFT JOIN users u ON u.id = al.actor_user_id
+      WHERE al.entity_type = 'deal'
+        AND al.action IN (
+          'deal.terms_updated', 'lead.status_changed', 'deal.assignee_changed',
+          'deal.status_changed', 'property.address_edited', 'lead.assignee_changed'
+        )
+        AND d.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 5. property_photos (no day-grouping at card scope — show most-recent individual upload)
+      SELECT
+        pp.property_id::text,
+        'photo_upload'::text,
+        'photo_added'::text,
+        'Photo uploaded'::text,
+        pp.created_at
+      FROM property_photos pp
+      WHERE pp.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 6. contracts via deals
+      SELECT
+        d.property_id::text,
+        'contract_generated'::text,
+        'contract_generated'::text,
+        CASE c.contract_type
+          WHEN 'purchase_agreement' THEN 'Purchase agreement generated'
+          ELSE 'Assignment contract generated'
+        END,
+        c.created_at
+      FROM contracts c
+      JOIN deals d ON d.id = c.deal_id
+      WHERE d.property_id IN (${idList})
+
+      UNION ALL
+
+      -- 7. owner_contacts skip-trace runs (filter to tracerfy% only)
+      SELECT
+        oc.property_id::text,
+        'skip_trace'::text,
+        'skip_trace'::text,
+        'Skip-traced'::text,
+        oc.created_at
+      FROM owner_contacts oc
+      WHERE oc.source LIKE 'tracerfy%'
+        AND oc.property_id IN (${idList})
+    ),
+    ranked AS (
+      SELECT
+        property_id,
+        source,
+        type,
+        description,
+        occurred_at,
+        ROW_NUMBER() OVER (PARTITION BY property_id ORDER BY occurred_at DESC) AS rn,
+        COUNT(*) OVER (PARTITION BY property_id)::int AS total_count
+      FROM activity_union
+    )
+    SELECT property_id, source, type, description, occurred_at, rn, total_count
+    FROM ranked
+    WHERE rn = 1
+  `);
+
+  const map = new Map<string, ActivityCardData>();
+  for (const r of rows.rows ?? []) {
+    map.set(r.property_id, {
+      lastActivity: {
+        id: "",
+        source: r.source,
+        type: r.type,
+        occurredAt: new Date(r.occurred_at),
+        actorUserId: null,
+        actorName: null,
+        description: r.description,
+        body: null,
+      } satisfies ActivityEntry,
+      activityCount: r.total_count,
+    });
+  }
+  return map;
 }

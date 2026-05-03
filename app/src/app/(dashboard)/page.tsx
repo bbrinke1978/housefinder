@@ -12,7 +12,7 @@ import { LEAD_SOURCES } from "@/types";
 import type { Role } from "@/lib/permissions";
 import { getSequences } from "@/lib/campaign-queries";
 import { getOverdueBuyerFollowups } from "@/lib/buyer-queries";
-import { getActivityFeed } from "@/lib/activity-queries";
+import { getDashboardActivityCards, type ActivityCardData } from "@/lib/activity-queries";
 import { StatsBar } from "@/components/stats-bar";
 import { DashboardFilters } from "@/components/dashboard-filters";
 import { DashboardPropertyGrid } from "@/components/dashboard-property-grid";
@@ -76,23 +76,17 @@ export default async function DashboardPage({
     getOverdueBuyerFollowups().catch(() => []),
   ]);
 
-  // Fetch activity feed data for each property card in parallel (simple N+1 approach).
-  // At ~50 cards/page + simple queries, this is fine at our scale.
-  // TODO: switch to LATERAL join if dashboard load slows with 100+ cards.
-  const activityDataList = await Promise.all(
-    properties.map(async (p) => {
-      try {
-        const feed = await getActivityFeed(p.id);
-        return { propertyId: p.id, lastActivity: feed[0] ?? null, activityCount: feed.length };
-      } catch {
-        return { propertyId: p.id, lastActivity: null, activityCount: 0 };
-      }
-    })
-  );
-  const activityByPropertyId = new Map(activityDataList.map((a) => [a.propertyId, a]));
+  const activityByPropertyId = await getDashboardActivityCards(
+    properties.map((p) => p.id)
+  ).catch(() => new Map<string, ActivityCardData>());
+
   const propertiesWithActivity = properties.map((p) => {
     const a = activityByPropertyId.get(p.id);
-    return { ...p, lastActivity: a?.lastActivity ?? null, activityCount: a?.activityCount ?? 0 };
+    return {
+      ...p,
+      lastActivity: a?.lastActivity ?? null,
+      activityCount: a?.activityCount ?? 0,
+    };
   });
 
   return (
