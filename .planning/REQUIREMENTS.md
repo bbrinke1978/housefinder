@@ -344,6 +344,16 @@ Internal Jira-style backlog so users (Brian + team) can report bugs and request 
 - [x] **FB-09**: Feedback items can optionally link to a `property_id` or `deal_id` so context-specific bugs ("the MAO calculator is wrong on deal XYZ") carry the link forward. Detail view renders the linked property/deal as a clickable badge.
 - [x] **FB-10**: All feedback CRUD operations require authentication. Only Brian (or a future `admin` role) can change status to `shipped`/`wontfix`/`duplicate` or delete an item; comments and attachments are owned by their author and can be deleted by the author or an admin.
 
+## v1.4 Requirements — Team & Access (and Phase 33 Hotfix)
+
+Note: v1.4 RBAC requirements (Phases 29-32) were defined inline in ROADMAP.md and shipped without a back-fill into this document. Only the Phase 33 hotfix requirements (PERF / OPS, defined 2026-05-03 after the connection-storm post-mortem) are tracked here. Back-filling the RBAC requirements is a deferred docs cleanup tracked in STATE.md.
+
+### Performance & Operations (added 2026-05-03, Phase 33)
+
+- [x] **PERF-01**: Dashboard route issues exactly **one** SQL round-trip for activity-card data (last activity description + activity count per property) regardless of how many property cards are rendered. Implementation pattern: `getDashboardActivityCards(propertyIds[])` returning `Map<propertyId, ActivityCardData>` via a single CTE+UNION ALL+ROW_NUMBER query.
+- [x] **PERF-02**: pg connection pool config in `app/src/db/client.ts` returns to serverless-safe defaults (`max:3, idleTimeoutMillis:10000`) — the emergency `max:20/idle:300000` hotfix from commit `e092480` is reverted in the same commit as the N+1 elimination so the system never lives in a half-state.
+- [x] **OPS-07**: Orphaned working-tree edits in `app/src/db/seed-config.ts` (17 SLC neighborhood entries from 2026-04-17) are committed alongside the Phase 33 fix per the post-Phase-32 hygiene rule (`git status` clean after every phase).
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -665,3 +675,15 @@ Note: RP-06 and RP-07 are emergent display outcomes of Phase 25+26. They require
 
 ---
 *Last updated: 2026-04-17 — added Phases 25-27 (v1.3 Rose Park Pilot): RP-01 through RP-08*
+
+| PERF-01 | Phase 33 | Complete |
+| PERF-02 | Phase 33 | Complete |
+| OPS-07 | Phase 33 | Complete |
+
+**v1.4 Phase-33 Coverage:**
+- v1.4 Phase-33 requirements: 3 total (PERF-01, PERF-02, OPS-07)
+- Mapped to phases: 3
+- Unmapped: 0
+
+---
+*Last updated: 2026-05-03 — added Phase 33 (v1.4 hotfix): PERF-01, PERF-02, OPS-07*

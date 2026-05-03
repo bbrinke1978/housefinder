@@ -43,6 +43,7 @@ Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). T
 - [x] **Phase 30.1: Google Workspace OAuth Login** *(inserted 2026-04-29)* - "Sign in with Google" via NextAuth google provider. Auto-provisions new users with empty roles on first login from a `@no-bshomes.com` Workspace account; Owner approves via /admin/users. Eliminates the temp-password dance for new hires. Existing email/password login kept as a fallback. (completed 2026-04-29)
 - [x] **Phase 31: Unified Activity Feed** *(added 2026-05-01)* - One activity stream per property that follows it through dashboard → leads → deals. Compact "last action · N events" indicator on every property card; full timeline on each detail page; unified Log Activity modal (Call / Email / Text / Meeting / Voicemail / Note) reachable from anywhere. Replaces the fragmented lead_notes / deal_notes / contact_events / audit_log views with one continuous feed. (completed 2026-05-01)
 - [x] **Phase 32: Dismiss Leads + Archive Deals + Outreach Form Fix** *(added 2026-05-01)* - Soft-delete on dashboard property cards (dismiss with reason; suppresses re-scrapes via dismissed_parcels list) and on deals (archive with optional reason). Owner-only permanent delete behind a confirm-by-typing-address modal. "Show dismissed/archived" toggles. Plus: fix the broken empty Property/Lead dropdown on /analytics/outreach Log-a-call form; scope it to active deals only, add typeahead search, drop the redundant Source field. (completed 2026-05-01)
+- [x] **Phase 33: Activity Feed Batch Refactor** *(added 2026-05-03)* - Eliminate the dashboard N+1 activity-feed fan-out that caused the 2026-05-02 connection-storm outage. Single batched CTE+UNION ALL+ROW_NUMBER query (`getDashboardActivityCards`) replaces per-property `Promise.all` over `getActivityFeed`, pg pool reverted from emergency `max:20/idle:300000` back to safe `max:3/idle:10000`, and the orphaned `seed-config.ts` SLC neighborhood edit folded into the same atomic commit. (completed 2026-05-03)
 
 ## Phase Details
 
@@ -175,6 +176,7 @@ Note: Phase 4 depends on Phase 1 only (not Phase 3). Phases 2 and 3 can be compl
 | 30.1. Google Workspace OAuth Login | 1/1 | Complete   | 2026-04-29 |
 | 31. Unified Activity Feed | 1/1 | Complete    | 2026-05-01 |
 | 32. Dismiss Leads + Archive Deals | 1/1 | Complete    | 2026-04-26 |
+| 33. Activity Feed Batch Refactor | 1/1 | Complete    | 2026-05-03 |
 
 ### Phase 7: Frontend Design Polish
 
@@ -651,5 +653,5 @@ Plans:
 **Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 33-01-PLAN.md — Batched dashboard activity query (PERF-01) + pg pool revert (PERF-02) + orphaned seed-config commit (OPS-07), all in one atomic shipping unit
+- [x] 33-01-PLAN.md — Batched dashboard activity query (PERF-01) + pg pool revert (PERF-02) + orphaned seed-config commit (OPS-07), all in one atomic shipping unit
 
