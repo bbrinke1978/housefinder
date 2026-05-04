@@ -677,7 +677,7 @@ Plans:
   9. Submissions, accepts, rejects, status transitions, and payments are all written to the unified activity feed (Phase 31) and the audit log (Phase 29).
   10. `next lint` and `tsc --noEmit` clean before commit (per `feedback_lint_before_commit.md`); `git status` clean per the post-Phase-32 hygiene rule.
 
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 34-01-PLAN.md — DB schema + migration 0019 + jv_partner role + jv-milestones helpers + jv-leads blob container + admin role-picker option (JV-01, JV-02, JV-15)

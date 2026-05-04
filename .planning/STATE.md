@@ -6,10 +6,10 @@ See: .planning/PROJECT.md
 
 ## Position
 
-**Milestone:** v1.4 — Team & Access (Phase 33 complete)
-**Current phase:** 33-activity-feed-batch-refactor
-**Current plan:** Plan 1/1 complete — see `.planning/phases/33-activity-feed-batch-refactor/33-01-SUMMARY.md`
-**Status:** v1.3 milestone complete
+**Milestone:** v1.4 — Team & Access
+**Current phase:** 34-jv-partner-lead-pipeline
+**Current plan:** Plan 1/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-01-SUMMARY.md`
+**Status:** active
 
 ## Progress
 
@@ -22,6 +22,7 @@ Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
 Phase 32: [####################] Plan 1/1 complete
 Phase 33: [####################] Plan 1/1 complete
+Phase 34: [####                ] Plan 1/5 complete
 
 ## Decisions
 
@@ -65,6 +66,9 @@ Phase 33: [####################] Plan 1/1 complete
 - 2026-04-26 (32-01): DealArchiveBanner composite client component — cleaner than passing isOwner through 3 server+client layers
 - [Phase 33]: getDashboardActivityCards() additive — existing getActivityFeed/getActivityFeedForLead untouched; pool revert atomic with N+1 fix
 - [Phase 33]: ActivityCardData satisfies ActivityEntry shim (stub unused fields) avoids touching types/index.ts
+- [Phase 34]: jv_partner ROLE_GRANTS is exactly [jv.submit_lead, jv.view_own_ledger] — no lead/deal/buyer access per 34-CONTEXT.md
+- [Phase 34]: jv.triage is owner-only — not granted to acquisition_manager or lead_manager (Brian's explicit choice per 34-CONTEXT.md)
+- [Phase 34]: jv_lead_milestones uniqueIndex (not uniqueConstraint) enables Drizzle onConflictDoNothing({ target: [...] }) API; milestone creators return { created: boolean } so Plan 05 notifier fires once only
 
 ## Performance Metrics
 
@@ -83,11 +87,14 @@ Phase 33: [####################] Plan 1/1 complete
 | 31    | 01   | 11min    | 7     | 13    |
 | 32    | 01   | ~3h      | 6     | 27    |
 | Phase 33 P01 | 15min | 2 tasks | 4 files |
+| Phase 34 P01 | 25min | 3 tasks | 7 files |
 
 ## Roadmap Evolution
 
 - 2026-05-03: Phase 33 (Activity Feed Batch Refactor) added under v1.4 milestone — eliminate dashboard N+1 that drove 2026-05-02 connection-storm outage.
 - 2026-05-03: Roadmap docs gap closed — Phase 26 verified + closed (RP-06/RP-07 marked Complete, 26-03-PLAN signed off), Phase 27 closed without implementation (RP-08 descoped, SLC pin density never became a problem), Phases 29-32 detail sections back-filled into ROADMAP.md, v1.4 requirements (RBAC-01..10, AUTH-04..05, ACT-01..05, MGMT-01..05, PERF-01..02, OPS-07) added to REQUIREMENTS.md with full traceability.
+- 2026-05-03: v1.3 milestone audit passed (21/21 reqs satisfied, RP-08 descoped) → v1.3 archived to `.planning/milestones/v1.3-*.md` (ROADMAP, REQUIREMENTS, MILESTONE-AUDIT, INTEGRATION-CHECK), ROADMAP.md collapsed v1.3 phases under a `<details>` block, PROJECT.md updated to mark v1.3 + v1.4 as Validated, git tagged `v1.3` (commit 5dcb100, tag local-only — not pushed).
+- 2026-05-03: Phase 34 (JV Partner Lead Pipeline) added to end of v1.4 — implements the No-BS Homes JV Partner Lead Referral Agreement. Driver partners (1-2 people) modeled as internal `@no-bshomes.com` users with a NEW `jv_partner` role separate from `sales`. Mobile lead-submission form (address + front-photo + condition notes) → Brian's triage queue → existing property/lead pipeline → automatic per-partner payment ledger ($10 qualified / $15 active follow-up / $500 closed) → monthly payment-run report (1st-of-month batch). Account provisioning unchanged (manual via /admin/users). Phase context captured in `.planning/phases/34-jv-partner-lead-pipeline/34-CONTEXT.md`.
 
 ## Session Log
 
@@ -106,3 +113,4 @@ Phase 33: [####################] Plan 1/1 complete
 - 2026-05-01: Plan 31-01 complete — unified activity feed end-to-end: schema 0017, getActivityFeed (7 sources), logActivity server action, ActivityLogModal, ActivityFeed, ActivityCardIndicator, dashboard + 3 detail pages; tsc clean; Phase 31 DONE
 - 2026-04-26: Plan 32-01 complete — dismiss leads (soft-delete + parcel suppression), archive deals, owner permanent-delete (address confirm modal), fixed Log-a-call (active deals combobox + contact_events); migration 0018 applied; tsc clean; Phase 32 DONE
 - 2026-05-03: Plan 33-01 complete — batch dashboard activity feed (CTE+UNION ALL+ROW_NUMBER), revert pg pool max:3/idle:10000, commit orphaned seed-config.ts SLC neighborhoods; commit 0e76ce4; tsc clean; Phase 33 DONE
+- 2026-05-03: Plan 34-01 complete — migration 0019 (jv_leads + jv_lead_milestones + users.jv_payment_method) applied to prod; jv_partner RBAC role + 3 jv.* actions; gates.ts 3 new booleans; blob-storage jv-leads container; jv-milestones.ts 3 idempotent creators; admin role picker; commits d5c6e37, 8e0c765, b939785; tsc clean
