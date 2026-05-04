@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users, Bug } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, BarChart2, Users, Bug, Plus } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 
 // Mobile bottom nav: 6 items — Dashboard, Deals, Buyers, Analytics, Map, Bugs/Features
@@ -16,23 +16,33 @@ const bottomNavItems = [
   { label: "Bugs", href: "/feedback", icon: Bug },
 ];
 
+// JV partner bottom nav: 2 items only
+const jvBottomNavItems = [
+  { label: "Submit", href: "/jv-submit", icon: Plus },
+  { label: "Ledger", href: "/jv-ledger", icon: BarChart2 },
+];
+
 interface MobileBottomNavProps {
   feedbackBadgeCount?: number;
   /** canManageUsers — when false, suppress any admin indicator (mobile nav has no admin link currently) */
   canManageUsers?: boolean;
+  /** isJvPartner — when true, render the 2-item JV nav instead of the full 6-item nav */
+  isJvPartner?: boolean;
 }
 
-export function MobileBottomNav({ feedbackBadgeCount = 0 }: MobileBottomNavProps) {
+export function MobileBottomNav({ feedbackBadgeCount = 0, isJvPartner = false }: MobileBottomNavProps) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
 
   if (!isMobile) return null;
 
+  const navItems = isJvPartner ? jvBottomNavItems : bottomNavItems;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl flex items-center justify-around px-1 safe-area-bottom"
       style={{ height: "calc(56px + env(safe-area-inset-bottom, 0px))", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
-      {bottomNavItems.map((item) => {
+      {navItems.map((item) => {
         const isActive =
           item.href === "/"
             ? pathname === "/"

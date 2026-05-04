@@ -33,6 +33,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/pending-approval", req.url));
   }
 
+  // jv_partner (without owner) lands on /jv-ledger, not the dashboard
+  if (
+    roles.includes("jv_partner") &&
+    !roles.includes("owner") &&
+    path === "/"
+  ) {
+    return NextResponse.redirect(new URL("/jv-ledger", req.url));
+  }
+
   return NextResponse.next();
 }
 

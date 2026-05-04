@@ -32,9 +32,12 @@ export default async function DashboardLayout({
     canManageUsers: sessionCan(session, "user.manage"),
   };
 
+  const roles = ((session?.user as { roles?: string[] } | undefined)?.roles ?? []);
+  const isJvPartner = roles.includes("jv_partner") && !roles.includes("owner");
+
   return (
     <SidebarProvider>
-      <AppSidebar feedbackBadgeCount={feedbackBadgeCount} navGates={navGates} />
+      <AppSidebar feedbackBadgeCount={feedbackBadgeCount} navGates={navGates} isJvPartner={isJvPartner} />
       <SidebarInset>
         {/* Mobile-only top bar with Settings gear */}
         <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-30">
@@ -48,7 +51,7 @@ export default async function DashboardLayout({
         </main>
         <PhotoFab />
         <FloatingReportButton />
-        <MobileBottomNav feedbackBadgeCount={feedbackBadgeCount} />
+        <MobileBottomNav feedbackBadgeCount={feedbackBadgeCount} isJvPartner={isJvPartner} />
       </SidebarInset>
       <CommandMenu />
     </SidebarProvider>

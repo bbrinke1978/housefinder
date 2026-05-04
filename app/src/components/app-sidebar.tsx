@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2, Bug, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, MapPin, Briefcase, Users, BarChart2, Settings, LogOut, Mail, FileText, ImageIcon, Search, Building2, Bug, ShieldCheck, Plus } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -35,6 +35,12 @@ const gatedNavItems = [
   { label: "Admin", href: "/admin/users", gate: "canManageUsers" as const },
 ];
 
+// JV partner nav items: 2 items only — no access to full workbench
+const jvBaseNavItems = [
+  { label: "Submit Lead", href: "/jv-submit" },
+  { label: "My Ledger", href: "/jv-ledger" },
+];
+
 const NAV_ICONS: Record<string, React.ElementType> = {
   Dashboard: LayoutDashboard,
   Deals: Briefcase,
@@ -47,6 +53,8 @@ const NAV_ICONS: Record<string, React.ElementType> = {
   Campaigns: Mail,
   "Bugs/Feature Request": Bug,
   Admin: ShieldCheck,
+  "Submit Lead": Plus,
+  "My Ledger": BarChart2,
 };
 
 export interface NavGates {
@@ -58,18 +66,22 @@ export interface NavGates {
 interface AppSidebarProps {
   feedbackBadgeCount?: number;
   navGates?: NavGates;
+  /** isJvPartner — when true, render the 2-item JV nav instead of the full workbench nav */
+  isJvPartner?: boolean;
 }
 
-export function AppSidebar({ feedbackBadgeCount = 0, navGates }: AppSidebarProps) {
+export function AppSidebar({ feedbackBadgeCount = 0, navGates, isJvPartner = false }: AppSidebarProps) {
   const pathname = usePathname();
 
   // Build visible nav items: base items always shown + gated items when permitted
   // Default navGates to all-true so that server components not yet updated still show everything
   const resolvedGates: NavGates = navGates ?? { canViewAllLeads: true, canSendCampaign: true, canManageUsers: true };
-  const allNavItems = [
-    ...baseNavItems,
-    ...gatedNavItems.filter((item) => resolvedGates[item.gate]),
-  ];
+  const allNavItems = isJvPartner
+    ? jvBaseNavItems
+    : [
+        ...baseNavItems,
+        ...gatedNavItems.filter((item) => resolvedGates[item.gate]),
+      ];
 
   return (
     <Sidebar className="border-r border-sidebar-border">
