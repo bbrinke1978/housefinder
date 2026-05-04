@@ -8,8 +8,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.4 — Team & Access
 **Current phase:** 34-jv-partner-lead-pipeline
-**Current plan:** Plan 4/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-04-SUMMARY.md`
-**Status:** active
+**Current plan:** Plan 5/5 — Tasks 1+2 deployed, Task 3 (human-verify checkpoint) deferred. See `.planning/phases/34-jv-partner-lead-pipeline/34-05-SUMMARY.md`
+**Status:** parked-pending-human-verify (paused to address bugs; resume with smoke test then `/gsd:execute-phase 34`)
 
 ## Progress
 
@@ -22,7 +22,7 @@ Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
 Phase 32: [####################] Plan 1/1 complete
 Phase 33: [####################] Plan 1/1 complete
-Phase 34: [################    ] Plan 4/5 complete
+Phase 34: [##################  ] Plan 5/5 deployed — human-verify deferred
 
 ## Decisions
 
