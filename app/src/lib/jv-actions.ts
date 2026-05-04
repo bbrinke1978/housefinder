@@ -2,13 +2,18 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/client";
-import { jvLeads, properties, leads } from "@/db/schema";
+import { jvLeads, properties, leads, users } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
 import { userCan, type Role } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit-log";
 import { createQualifiedMilestone } from "@/lib/jv-milestones";
 import { eq, and } from "drizzle-orm";
+import {
+  notifyJvLeadSubmitted,
+  notifyJvLeadAccepted,
+  notifyJvLeadRejected,
+} from "@/lib/email-actions";
 
 function normalizeAddress(address: string): string {
   return address
@@ -53,10 +58,16 @@ export async function submitJvLead(
     newValue: { address: parsed.address },
   });
 
-  // TODO(34-05): notifyNewJvLeadSubmission(row.id)
-
   revalidatePath("/jv-leads");
   revalidatePath("/jv-ledger");
+
+  await notifyJvLeadSubmitted({
+    submitterName: session.user.name ?? "?",
+    submitterEmail: session.user.email ?? "",
+    address: parsed.address,
+    conditionNotes: parsed.conditionNotes ?? null,
+  });
+
   return { id: row.id };
 }
 
@@ -200,7 +211,24 @@ export async function acceptJvLead(
   revalidatePath("/jv-ledger");
   revalidatePath(`/properties/${propertyId}`);
 
-  // TODO(34-05): notifyJvLeadAccepted({ jvLeadId, partnerEmail: lead.submitterUserId, address: lead.address, amountCents: 1000 })
+  // 7. Notify partner (fire-and-forget)
+  try {
+    const [partnerUser] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, lead.submitterUserId))
+      .limit(1);
+    if (partnerUser) {
+      await notifyJvLeadAccepted({
+        partnerEmail: partnerUser.email,
+        address: lead.address,
+        conditionNotes: lead.conditionNotes,
+      });
+    }
+  } catch (emailErr) {
+    console.error("[acceptJvLead] email notify failed:", emailErr);
+  }
+
   return { jvLeadId, propertyId, leadId, milestoneCreated, alreadyAccepted: false };
 }
 
@@ -261,7 +289,24 @@ export async function rejectJvLead(
   revalidatePath("/jv-leads");
   revalidatePath("/jv-ledger");
 
-  // TODO(34-05): notifyJvLeadRejected({ jvLeadId, partnerEmail: lead.submitterUserId, address: lead.address, reason })
+  // Notify partner (fire-and-forget)
+  try {
+    const [partnerUser] = await db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, lead.submitterUserId))
+      .limit(1);
+    if (partnerUser) {
+      await notifyJvLeadRejected({
+        partnerEmail: partnerUser.email,
+        address: lead.address,
+        reason,
+      });
+    }
+  } catch (emailErr) {
+    console.error("[rejectJvLead] email notify failed:", emailErr);
+  }
+
   return { jvLeadId, alreadyRejected: false };
 }
 

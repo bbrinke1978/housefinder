@@ -3,8 +3,10 @@
 // Each function is idempotent via UNIQUE(jv_lead_id, milestone_type) + onConflictDoNothing().
 
 import { db } from "@/db/client";
-import { jvLeadMilestones } from "@/db/schema";
+import { jvLeadMilestones, jvLeads, users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit-log";
+import { notifyJvMilestoneEarned } from "@/lib/email-actions";
 
 const QUALIFIED_CENTS = 1000;        // $10
 const ACTIVE_FOLLOW_UP_CENTS = 1500; // $15
@@ -71,6 +73,26 @@ export async function createActiveFollowUpMilestone(
       entityId: jvLeadId,
       newValue: { milestone: "active_follow_up", amountCents: ACTIVE_FOLLOW_UP_CENTS },
     });
+
+    // Notify partner — fetch their email from the jv_lead → submitter join
+    try {
+      const [partnerRow] = await db
+        .select({ email: users.email, address: jvLeads.address })
+        .from(jvLeads)
+        .innerJoin(users, eq(users.id, jvLeads.submitterUserId))
+        .where(eq(jvLeads.id, jvLeadId))
+        .limit(1);
+      if (partnerRow) {
+        await notifyJvMilestoneEarned({
+          partnerEmail: partnerRow.email,
+          milestoneType: "active_follow_up",
+          amountCents: ACTIVE_FOLLOW_UP_CENTS,
+          address: partnerRow.address,
+        });
+      }
+    } catch (emailErr) {
+      console.error("[createActiveFollowUpMilestone] email notify failed:", emailErr);
+    }
   }
   return { created };
 }
@@ -103,6 +125,26 @@ export async function createDealClosedMilestone(
       entityId: jvLeadId,
       newValue: { milestone: "deal_closed", amountCents: DEAL_CLOSED_CENTS },
     });
+
+    // Notify partner — fetch their email from the jv_lead → submitter join
+    try {
+      const [partnerRow] = await db
+        .select({ email: users.email, address: jvLeads.address })
+        .from(jvLeads)
+        .innerJoin(users, eq(users.id, jvLeads.submitterUserId))
+        .where(eq(jvLeads.id, jvLeadId))
+        .limit(1);
+      if (partnerRow) {
+        await notifyJvMilestoneEarned({
+          partnerEmail: partnerRow.email,
+          milestoneType: "deal_closed",
+          amountCents: DEAL_CLOSED_CENTS,
+          address: partnerRow.address,
+        });
+      }
+    } catch (emailErr) {
+      console.error("[createDealClosedMilestone] email notify failed:", emailErr);
+    }
   }
   return { created };
 }
