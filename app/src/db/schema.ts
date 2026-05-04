@@ -975,6 +975,8 @@ export const users = pgTable(
     roles: text("roles").array().notNull().default([]),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // JV Partner (Phase 34)
+    jvPaymentMethod: text("jv_payment_method"),
   },
   (table) => [
     index("idx_users_active").on(table.isActive),
@@ -1301,3 +1303,58 @@ export const dismissedParcels = pgTable(
 );
 
 export type DismissedParcelRow = InferSelectModel<typeof dismissedParcels>;
+
+// -- JV Partner Lead Pipeline (Phase 34) --
+
+export const jvLeads = pgTable(
+  "jv_leads",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    submitterUserId: uuid("submitter_user_id")
+      .notNull()
+      .references(() => users.id),
+    address: text("address").notNull(),
+    addressNormalized: text("address_normalized").notNull(),
+    conditionNotes: text("condition_notes"),
+    photoBlobName: text("photo_blob_name"),
+    status: text("status").notNull().default("pending"),
+    propertyId: uuid("property_id").references(() => properties.id),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    acceptedByUserId: uuid("accepted_by_user_id").references(() => users.id),
+    rejectedAt: timestamp("rejected_at", { withTimezone: true }),
+    rejectedByUserId: uuid("rejected_by_user_id").references(() => users.id),
+    rejectedReason: text("rejected_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_jv_leads_submitter").on(table.submitterUserId),
+    index("idx_jv_leads_status").on(table.status),
+    index("idx_jv_leads_property_id").on(table.propertyId),
+    index("idx_jv_leads_address_normalized").on(table.addressNormalized),
+  ]
+);
+
+export const jvLeadMilestones = pgTable(
+  "jv_lead_milestones",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    jvLeadId: uuid("jv_lead_id")
+      .notNull()
+      .references(() => jvLeads.id),
+    milestoneType: text("milestone_type").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    earnedAt: timestamp("earned_at", { withTimezone: true }).notNull().defaultNow(),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    paidByUserId: uuid("paid_by_user_id").references(() => users.id),
+    paymentMethod: text("payment_method"),
+  },
+  (table) => [
+    uniqueIndex("uq_jv_lead_milestone").on(table.jvLeadId, table.milestoneType),
+    index("idx_jv_milestones_jv_lead_id").on(table.jvLeadId),
+    index("idx_jv_milestones_unpaid").on(table.paidAt),
+  ]
+);
+
+export type JvLeadRow = InferSelectModel<typeof jvLeads>;
+export type JvLeadMilestoneRow = InferSelectModel<typeof jvLeadMilestones>;
