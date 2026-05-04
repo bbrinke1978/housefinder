@@ -3,8 +3,8 @@
 // Callable from server components and server actions.
 
 import { db } from "@/db/client";
-import { jvLeads, properties, users } from "@/db/schema";
-import { eq, asc, ne } from "drizzle-orm";
+import { jvLeads, jvLeadMilestones, properties, users } from "@/db/schema";
+import { eq, asc, ne, desc, inArray, sql } from "drizzle-orm";
 import { generateJvLeadSasUrl } from "@/lib/blob-storage";
 
 // ---------------------------------------------------------------------------
@@ -124,4 +124,112 @@ export async function getJvLeadById(id: string) {
     .where(eq(jvLeads.id, id))
     .limit(1);
   return row ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// JvLedgerLead — shape returned by getJvLedgerForUser
+// ---------------------------------------------------------------------------
+
+export interface JvLedgerLead {
+  jvLeadId: string;
+  address: string;
+  submittedAt: Date;
+  status: "pending" | "accepted" | "rejected";
+  rejectedReason: string | null;
+  photoSasUrl: string | null;
+  milestones: {
+    id: string;
+    type: "qualified" | "active_follow_up" | "deal_closed";
+    amountCents: number;
+    earnedAt: Date;
+    paidAt: Date | null;
+    paymentMethod: string | null;
+  }[];
+  earnedTotalCents: number;
+  paidTotalCents: number;
+  currentMonthOwedCents: number; // earned in current calendar month, not yet paid
+}
+
+// ---------------------------------------------------------------------------
+// listJvPartners — Owner-only: list all jv_partner users for the partner picker.
+// Includes deactivated users (Section 7: deactivated partners must still be auditable).
+// ---------------------------------------------------------------------------
+
+export async function listJvPartners(): Promise<
+  { id: string; name: string; email: string; isActive: boolean }[]
+> {
+  return db
+    .select({ id: users.id, name: users.name, email: users.email, isActive: users.isActive })
+    .from(users)
+    .where(sql`${users.roles} @> ARRAY['jv_partner']::text[]`)
+    .orderBy(asc(users.name));
+}
+
+// ---------------------------------------------------------------------------
+// getJvLedgerForUser — returns all jv_leads for a user with milestone details.
+// Used by both jv_partner self-view and owner-as-overseer view.
+// ---------------------------------------------------------------------------
+
+export async function getJvLedgerForUser(userId: string): Promise<JvLedgerLead[]> {
+  // 1. Fetch user's jv_leads, newest first
+  const leadsRows = await db
+    .select()
+    .from(jvLeads)
+    .where(eq(jvLeads.submitterUserId, userId))
+    .orderBy(desc(jvLeads.createdAt));
+
+  if (leadsRows.length === 0) return [];
+
+  const leadIds = leadsRows.map((r) => r.id);
+
+  // 2. Fetch all milestones for these leads in a single round-trip
+  const milestonesRows = await db
+    .select()
+    .from(jvLeadMilestones)
+    .where(inArray(jvLeadMilestones.jvLeadId, leadIds));
+
+  // 3. Compute calendar-month bounds for "current month owed" calculation
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  // 4. Group milestones by lead and compute per-lead totals
+  return leadsRows.map((lead) => {
+    const ms = milestonesRows
+      .filter((m) => m.jvLeadId === lead.id)
+      .map((m) => ({
+        id: m.id,
+        type: m.milestoneType as "qualified" | "active_follow_up" | "deal_closed",
+        amountCents: m.amountCents,
+        earnedAt: m.earnedAt,
+        paidAt: m.paidAt,
+        paymentMethod: m.paymentMethod,
+      }));
+
+    const earnedTotalCents = ms.reduce((sum, m) => sum + m.amountCents, 0);
+    const paidTotalCents = ms
+      .filter((m) => m.paidAt !== null)
+      .reduce((sum, m) => sum + m.amountCents, 0);
+    const currentMonthOwedCents = ms
+      .filter(
+        (m) =>
+          m.paidAt === null &&
+          m.earnedAt >= monthStart &&
+          m.earnedAt < monthEnd
+      )
+      .reduce((sum, m) => sum + m.amountCents, 0);
+
+    return {
+      jvLeadId: lead.id,
+      address: lead.address,
+      submittedAt: lead.createdAt,
+      status: lead.status as "pending" | "accepted" | "rejected",
+      rejectedReason: lead.rejectedReason,
+      photoSasUrl: lead.photoBlobName ? generateJvLeadSasUrl(lead.photoBlobName) : null,
+      milestones: ms,
+      earnedTotalCents,
+      paidTotalCents,
+      currentMonthOwedCents,
+    };
+  });
 }
