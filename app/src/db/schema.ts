@@ -1132,6 +1132,9 @@ export const feedbackItems = pgTable(
   "feedback_items",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    displayNumber: integer("display_number")
+      .notNull()
+      .default(sql`nextval('feedback_items_display_number_seq')`),
     type: feedbackTypeEnum("type").notNull(),
     title: text("title").notNull(),
     description: text("description"),

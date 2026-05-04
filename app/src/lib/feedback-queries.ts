@@ -13,6 +13,7 @@ import { generateFeedbackSasUrl } from "@/lib/blob-storage";
 
 export interface FeedbackListItem {
   id: string;
+  displayNumber: number;
   type: string;
   title: string;
   status: string;
@@ -69,40 +70,47 @@ export interface FeedbackItemDetail extends FeedbackListItem {
   activity: FeedbackActivityEntry[];
 }
 
-// Resolved statuses (terminal states)
-const RESOLVED_STATUSES = ["shipped", "wontfix", "duplicate"] as const;
-
 // -- listFeedbackItems --
 
+type FeedbackStatus = "new" | "planned" | "in_progress" | "shipped" | "wontfix" | "duplicate";
+type FeedbackType = "bug" | "feature" | "idea" | "question";
+type FeedbackPriority = "low" | "medium" | "high" | "critical";
+
+const ARCHIVED_STATUSES: FeedbackStatus[] = ["shipped", "wontfix", "duplicate"];
+
 export interface FeedbackListFilters {
-  status?: string;
-  type?: string;
-  priority?: string;
+  /** Comma-separated values supported via parseCsvFilter; arrays applied as inArray */
+  status?: string[];
+  type?: string[];
+  priority?: string[];
   assigneeId?: string;
   reporterId?: string;
   search?: string;
   includeDeleted?: boolean;
+  /**
+   * archive: undefined → hide shipped/wontfix/duplicate (default)
+   *          true       → show ONLY shipped/wontfix/duplicate
+   *          false      → no archive filter at all (legacy/all-statuses)
+   */
+  archive?: boolean;
 }
 
 /**
  * listFeedbackItems — returns filtered feedback items joined with reporter + assignee names.
  * FTS search via Postgres to_tsquery on title + description if search param provided.
- * Sort: open items first (not shipped/wontfix/duplicate), then priority desc, then created_at desc.
+ * Sort: priority desc, then created_at desc.
+ * Default scope: hides shipped/wontfix/duplicate (auto-archived). Pass archive:true to view those.
  * Excludes soft-deleted items unless includeDeleted is true. Capped at 200 rows.
  */
 export async function listFeedbackItems(
   filters: FeedbackListFilters = {}
 ): Promise<FeedbackListItem[]> {
-  const { status, type, priority, assigneeId, reporterId, search, includeDeleted } = filters;
-
-  // Reporter alias
-  const reporter = db._.schema?.users
-    ? users
-    : users;
+  const { status, type, priority, assigneeId, reporterId, search, includeDeleted, archive } = filters;
 
   const rows = await db
     .select({
       id: feedbackItems.id,
+      displayNumber: feedbackItems.displayNumber,
       type: feedbackItems.type,
       title: feedbackItems.title,
       status: feedbackItems.status,
@@ -128,12 +136,22 @@ export async function listFeedbackItems(
       and(
         // Soft-delete filter
         includeDeleted ? undefined : isNull(feedbackItems.deletedAt),
-        // Status filter
-        status ? eq(feedbackItems.status, status as "new" | "planned" | "in_progress" | "shipped" | "wontfix" | "duplicate") : undefined,
+        // Archive scope: when an explicit status[] filter is set, honor it instead of the archive scope
+        status && status.length > 0
+          ? inArray(feedbackItems.status, status as FeedbackStatus[])
+          : archive === true
+            ? inArray(feedbackItems.status, ARCHIVED_STATUSES)
+            : archive === false
+              ? undefined
+              : notInArray(feedbackItems.status, ARCHIVED_STATUSES),
         // Type filter
-        type ? eq(feedbackItems.type, type as "bug" | "feature" | "idea" | "question") : undefined,
+        type && type.length > 0
+          ? inArray(feedbackItems.type, type as FeedbackType[])
+          : undefined,
         // Priority filter
-        priority ? eq(feedbackItems.priority, priority as "low" | "medium" | "high" | "critical") : undefined,
+        priority && priority.length > 0
+          ? inArray(feedbackItems.priority, priority as FeedbackPriority[])
+          : undefined,
         // Assignee filter
         assigneeId ? eq(feedbackItems.assigneeId, assigneeId) : undefined,
         // Reporter filter
@@ -145,8 +163,6 @@ export async function listFeedbackItems(
       )
     )
     .orderBy(
-      // Open items first (not in resolved statuses)
-      sql`CASE WHEN ${feedbackItems.status} NOT IN ('shipped','wontfix','duplicate') THEN 0 ELSE 1 END`,
       // Priority desc: critical > high > medium > low
       sql`CASE ${feedbackItems.priority} WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'medium' THEN 2 WHEN 'low' THEN 1 ELSE 0 END DESC`,
       desc(feedbackItems.createdAt)
@@ -173,6 +189,7 @@ export async function getFeedbackItemDetail(
     db
       .select({
         id: feedbackItems.id,
+        displayNumber: feedbackItems.displayNumber,
         type: feedbackItems.type,
         title: feedbackItems.title,
         description: feedbackItems.description,
@@ -266,6 +283,7 @@ export async function getFeedbackItemDetail(
 
   return {
     id: item.id,
+    displayNumber: item.displayNumber,
     type: item.type,
     title: item.title,
     description: item.description,

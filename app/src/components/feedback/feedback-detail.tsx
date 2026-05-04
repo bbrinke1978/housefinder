@@ -28,6 +28,7 @@ interface DetailAttachment extends GalleryAttachment {
 
 interface FeedbackDetailData {
   id: string;
+  displayNumber: number;
   type: string;
   title: string;
   description: string | null;
@@ -156,6 +157,9 @@ export function FeedbackDetail({
             </div>
 
             <h1 className="text-2xl font-display font-bold tracking-tight">
+              <span className="text-muted-foreground font-mono text-base mr-2 align-middle">
+                #{String(data.displayNumber).padStart(6, "0")}
+              </span>
               {data.title}
             </h1>
 

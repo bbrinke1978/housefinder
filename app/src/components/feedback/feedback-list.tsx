@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Bug } from "lucide-react";
+import { Bug, ChevronDown, Check } from "lucide-react";
 import type { FeedbackListItem, FeedbackListFilters } from "@/lib/feedback-queries";
 import { FeedbackTypeBadge } from "@/components/feedback/feedback-type-badge";
 import { FeedbackStatusBadge } from "@/components/feedback/feedback-status-badge";
@@ -13,12 +13,11 @@ import { FeedbackPriorityBadge } from "@/components/feedback/feedback-priority-b
 interface FeedbackListProps {
   items: FeedbackListItem[];
   filters: FeedbackListFilters;
-  currentUserId: string;
   isMine: boolean;
+  isArchive: boolean;
 }
 
 const STATUS_OPTIONS = [
-  { value: "", label: "All statuses" },
   { value: "new", label: "New" },
   { value: "planned", label: "Planned" },
   { value: "in_progress", label: "In Progress" },
@@ -28,7 +27,6 @@ const STATUS_OPTIONS = [
 ];
 
 const TYPE_OPTIONS = [
-  { value: "", label: "All types" },
   { value: "bug", label: "Bug" },
   { value: "feature", label: "Feature" },
   { value: "idea", label: "Idea" },
@@ -36,14 +34,115 @@ const TYPE_OPTIONS = [
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: "", label: "All priorities" },
   { value: "critical", label: "Critical" },
   { value: "high", label: "High" },
   { value: "medium", label: "Medium" },
   { value: "low", label: "Low" },
 ];
 
-export function FeedbackList({ items, filters, currentUserId, isMine }: FeedbackListProps) {
+// -- MultiSelect popover (mirrors dashboard-filters.tsx MultiSelect) --
+
+interface MultiSelectOption {
+  value: string;
+  label: string;
+}
+
+interface MultiSelectProps {
+  label: string;
+  options: MultiSelectOption[];
+  selected: string[];
+  onChange: (values: string[]) => void;
+  placeholder: string;
+  className?: string;
+}
+
+function MultiSelect({ label, options, selected, onChange, placeholder, className }: MultiSelectProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  function toggle(value: string) {
+    if (selected.includes(value)) {
+      onChange(selected.filter((v) => v !== value));
+    } else {
+      onChange([...selected, value]);
+    }
+  }
+
+  const displayLabel =
+    selected.length === 0
+      ? placeholder
+      : selected.length === 1
+      ? options.find((o) => o.value === selected[0])?.label ?? selected[0]
+      : `${label} (${selected.length})`;
+
+  return (
+    <div ref={ref} className={`relative ${className ?? ""}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-colors"
+      >
+        <span className={selected.length === 0 ? "text-muted-foreground" : ""}>{displayLabel}</span>
+        <ChevronDown className={`h-4 w-4 opacity-50 shrink-0 ml-2 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full min-w-[160px] rounded-md border border-border bg-popover shadow-md">
+          <div className="p-1 max-h-64 overflow-y-auto">
+            {options.map((opt) => {
+              const isSelected = selected.includes(opt.value);
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggle(opt.value)}
+                  className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${isSelected ? "bg-primary border-primary" : "border-input"}`}>
+                    {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </div>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {selected.length > 0 && (
+            <div className="border-t border-border p-1">
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Clear selection
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -- Helpers --
+
+/** 6-digit zero-padded display ID — e.g. 23 → "#000023" */
+function formatDisplayNumber(n: number): string {
+  return `#${String(n).padStart(6, "0")}`;
+}
+
+// -- Main component --
+
+export function FeedbackList({ items, filters, isMine, isArchive }: FeedbackListProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -55,6 +154,19 @@ export function FeedbackList({ items, filters, currentUserId, isMine }: Feedback
       const params = new URLSearchParams(searchParams.toString());
       if (value) {
         params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      router.replace(`${pathname}?${params.toString()}`);
+    },
+    [pathname, router, searchParams]
+  );
+
+  const updateMultiParam = useCallback(
+    (key: string, values: string[]) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (values.length > 0) {
+        params.set(key, values.join(","));
       } else {
         params.delete(key);
       }
@@ -75,6 +187,10 @@ export function FeedbackList({ items, filters, currentUserId, isMine }: Feedback
     updateParam("mine", isMine ? "" : "true");
   }
 
+  function handleArchiveToggle() {
+    updateParam("archive", isArchive ? "" : "true");
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* Filter bar */}
@@ -88,38 +204,37 @@ export function FeedbackList({ items, filters, currentUserId, isMine }: Feedback
           className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring w-full sm:w-56"
         />
 
-        {/* Status filter */}
-        <select
-          value={filters.status ?? ""}
-          onChange={(e) => updateParam("status", e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        {/* Status multi-select (hidden in archive view — already filtered to terminal statuses) */}
+        {!isArchive && (
+          <MultiSelect
+            label="Statuses"
+            options={STATUS_OPTIONS}
+            selected={filters.status ?? []}
+            onChange={(v) => updateMultiParam("status", v)}
+            placeholder="All Statuses"
+            className="w-full sm:w-44"
+          />
+        )}
 
-        {/* Type filter */}
-        <select
-          value={filters.type ?? ""}
-          onChange={(e) => updateParam("type", e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-        >
-          {TYPE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        {/* Type multi-select */}
+        <MultiSelect
+          label="Types"
+          options={TYPE_OPTIONS}
+          selected={filters.type ?? []}
+          onChange={(v) => updateMultiParam("type", v)}
+          placeholder="All Types"
+          className="w-full sm:w-40"
+        />
 
-        {/* Priority filter */}
-        <select
-          value={filters.priority ?? ""}
-          onChange={(e) => updateParam("priority", e.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-        >
-          {PRIORITY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        {/* Priority multi-select */}
+        <MultiSelect
+          label="Priorities"
+          options={PRIORITY_OPTIONS}
+          selected={filters.priority ?? []}
+          onChange={(v) => updateMultiParam("priority", v)}
+          placeholder="All Priorities"
+          className="w-full sm:w-44"
+        />
 
         {/* Mine toggle */}
         <button
@@ -134,6 +249,19 @@ export function FeedbackList({ items, filters, currentUserId, isMine }: Feedback
           Mine
         </button>
 
+        {/* Archive toggle */}
+        <button
+          type="button"
+          onClick={handleArchiveToggle}
+          className={`h-9 rounded-md border px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-ring ${
+            isArchive
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-input bg-background text-foreground hover:bg-muted"
+          }`}
+        >
+          Archive
+        </button>
+
         {/* Result count */}
         <span className="text-sm text-muted-foreground ml-auto">
           {items.length} item{items.length !== 1 ? "s" : ""}
@@ -144,14 +272,18 @@ export function FeedbackList({ items, filters, currentUserId, isMine }: Feedback
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16 text-center">
           <Bug className="h-8 w-8 text-muted-foreground mb-3" />
-          <p className="text-sm font-medium text-muted-foreground">No feedback yet.</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Click{" "}
-            <Link href="/feedback/new" className="underline underline-offset-4 hover:text-foreground">
-              New
-            </Link>{" "}
-            to create the first item, or adjust your filters.
+          <p className="text-sm font-medium text-muted-foreground">
+            {isArchive ? "Archive is empty." : "No feedback yet."}
           </p>
+          {!isArchive && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Click{" "}
+              <Link href="/feedback/new" className="underline underline-offset-4 hover:text-foreground">
+                New
+              </Link>{" "}
+              to create the first item, or adjust your filters.
+            </p>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
@@ -174,7 +306,10 @@ function FeedbackListCard({ item }: { item: FeedbackListItem }) {
     >
       {/* Title + context */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
+        <p className="text-sm font-semibold text-foreground truncate">
+          <span className="text-muted-foreground font-mono mr-2">{formatDisplayNumber(item.displayNumber)}</span>
+          {item.title}
+        </p>
         {item.urlContext && (
           <p className="text-xs text-muted-foreground truncate mt-0.5">
             From: {item.urlContext}
