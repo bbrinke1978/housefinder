@@ -677,11 +677,11 @@ Plans:
   9. Submissions, accepts, rejects, status transitions, and payments are all written to the unified activity feed (Phase 31) and the audit log (Phase 29).
   10. `next lint` and `tsc --noEmit` clean before commit (per `feedback_lint_before_commit.md`); `git status` clean per the post-Phase-32 hygiene rule.
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
-- [ ] 34-01-PLAN.md — DB schema + migration 0019 + jv_partner role + jv-milestones helpers + jv-leads blob container + admin role-picker option (JV-01, JV-02, JV-15)
-- [ ] 34-02-PLAN.md — submitJvLead server action + photo upload API + mobile submission form + bottom-nav/sidebar/middleware role gates + redirect to /jv-ledger (JV-03, JV-04, JV-13, JV-14, JV-15)
+- [x] 34-01-PLAN.md — DB schema + migration 0019 + jv_partner role + jv-milestones helpers + jv-leads blob container + admin role-picker option (JV-01, JV-02, JV-15)
+- [x] 34-02-PLAN.md — submitJvLead server action + photo upload API + mobile submission form + bottom-nav/sidebar/middleware role gates + redirect to /jv-ledger (JV-03, JV-04, JV-13, JV-14, JV-15)
 - [ ] 34-03-PLAN.md — Triage queue at /jv-leads with dedup hints + acceptJvLead/rejectJvLead actions + property+lead upsert + qualified milestone trigger (JV-05, JV-06, JV-15)
 - [ ] 34-04-PLAN.md — active_follow_up + deal_closed milestone hooks into logActivity + updateDealStatus + per-partner ledger at /jv-ledger (JV-07, JV-08, JV-11, JV-15)
 - [ ] 34-05-PLAN.md — Payment-run admin page + race-safe markMilestonesPaid + 5 Resend notifications + end-to-end production human-verify checkpoint (JV-09, JV-10, JV-11, JV-12, JV-15)

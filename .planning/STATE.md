@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.4 — Team & Access
 **Current phase:** 34-jv-partner-lead-pipeline
-**Current plan:** Plan 1/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-01-SUMMARY.md`
+**Current plan:** Plan 2/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-02-SUMMARY.md`
 **Status:** active
 
 ## Progress
@@ -22,7 +22,7 @@ Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
 Phase 32: [####################] Plan 1/1 complete
 Phase 33: [####################] Plan 1/1 complete
-Phase 34: [####                ] Plan 1/5 complete
+Phase 34: [########            ] Plan 2/5 complete
 
 ## Decisions
 
@@ -69,6 +69,9 @@ Phase 34: [####                ] Plan 1/5 complete
 - [Phase 34]: jv_partner ROLE_GRANTS is exactly [jv.submit_lead, jv.view_own_ledger] — no lead/deal/buyer access per 34-CONTEXT.md
 - [Phase 34]: jv.triage is owner-only — not granted to acquisition_manager or lead_manager (Brian's explicit choice per 34-CONTEXT.md)
 - [Phase 34]: jv_lead_milestones uniqueIndex (not uniqueConstraint) enables Drizzle onConflictDoNothing({ target: [...] }) API; milestone creators return { created: boolean } so Plan 05 notifier fires once only
+- [Phase 34-02]: Two-step submit: server action creates jv_leads row first (returns id), client then POSTs photo to /api/jv-leads/{id}/photo — keeps server actions free of multipart complexity
+- [Phase 34-02]: isJvPartner computed in DashboardLayout (single source), passed as prop to both nav components; owner-role users bypass jv_partner nav even if also assigned jv_partner
+- [Phase 34-02]: TODO(34-05) marker at notifyNewJvLeadSubmission insertion point in jv-actions.ts; Plan 05 executor greps this marker
 
 ## Performance Metrics
 
@@ -88,6 +91,7 @@ Phase 34: [####                ] Plan 1/5 complete
 | 32    | 01   | ~3h      | 6     | 27    |
 | Phase 33 P01 | 15min | 2 tasks | 4 files |
 | Phase 34 P01 | 25min | 3 tasks | 7 files |
+| Phase 34 P02 | 3min  | 3 tasks | 8 files |
 
 ## Roadmap Evolution
 
@@ -114,3 +118,4 @@ Phase 34: [####                ] Plan 1/5 complete
 - 2026-04-26: Plan 32-01 complete — dismiss leads (soft-delete + parcel suppression), archive deals, owner permanent-delete (address confirm modal), fixed Log-a-call (active deals combobox + contact_events); migration 0018 applied; tsc clean; Phase 32 DONE
 - 2026-05-03: Plan 33-01 complete — batch dashboard activity feed (CTE+UNION ALL+ROW_NUMBER), revert pg pool max:3/idle:10000, commit orphaned seed-config.ts SLC neighborhoods; commit 0e76ce4; tsc clean; Phase 33 DONE
 - 2026-05-03: Plan 34-01 complete — migration 0019 (jv_leads + jv_lead_milestones + users.jv_payment_method) applied to prod; jv_partner RBAC role + 3 jv.* actions; gates.ts 3 new booleans; blob-storage jv-leads container; jv-milestones.ts 3 idempotent creators; admin role picker; commits d5c6e37, 8e0c765, b939785; tsc clean
+- 2026-05-03: Plan 34-02 complete — submitJvLead server action, photo upload API route (row-level ownership), JvSubmitForm (photo-first mobile layout, resizeImage, two-step submit), /jv-submit page, isJvPartner nav (2-item bottom nav + sidebar), middleware redirect / → /jv-ledger for jv_partner; commits 3693e93, 6a8811f, 61f7ac8; tsc clean
