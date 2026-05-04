@@ -40,6 +40,7 @@ Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). T
 - [x] **Phase 31: Unified Activity Feed** *(added 2026-05-01)* - One activity stream per property that follows it through dashboard → leads → deals. Compact "last action · N events" indicator on every property card; full timeline on each detail page; unified Log Activity modal (Call / Email / Text / Meeting / Voicemail / Note) reachable from anywhere. Replaces the fragmented lead_notes / deal_notes / contact_events / audit_log views with one continuous feed. (completed 2026-05-01)
 - [x] **Phase 32: Dismiss Leads + Archive Deals + Outreach Form Fix** *(added 2026-05-01)* - Soft-delete on dashboard property cards (dismiss with reason; suppresses re-scrapes via dismissed_parcels list) and on deals (archive with optional reason). Owner-only permanent delete behind a confirm-by-typing-address modal. "Show dismissed/archived" toggles. Plus: fix the broken empty Property/Lead dropdown on /analytics/outreach Log-a-call form; scope it to active deals only, add typeahead search, drop the redundant Source field. (completed 2026-05-01)
 - [x] **Phase 33: Activity Feed Batch Refactor** *(added 2026-05-03)* - Eliminate the dashboard N+1 activity-feed fan-out that caused the 2026-05-02 connection-storm outage. Single batched CTE+UNION ALL+ROW_NUMBER query (`getDashboardActivityCards`) replaces per-property `Promise.all` over `getActivityFeed`, pg pool reverted from emergency `max:20/idle:300000` back to safe `max:3/idle:10000`, and the orphaned `seed-config.ts` SLC neighborhood edit folded into the same atomic commit. (completed 2026-05-03)
+- [ ] **Phase 34: JV Partner Lead Pipeline** *(added 2026-05-03)* - External JV "driver" partners (modeled as internal `@no-bshomes.com` users with a NEW `jv_partner` role, separate from existing `sales`) submit motivated-seller leads via mobile-first form (address + front-of-property photo + condition notes). Brian triages incoming submissions against acceptance criteria; accepted leads enter the existing property/lead pipeline. System tracks each lead through three payment milestones — qualified ($10), active follow-up i.e. negotiation file opened ($15), deal closes ($500) — and surfaces a per-partner payment ledger plus monthly payment-run report (1st-of-month batch, paid/unpaid checkboxes). Account provisioning unchanged: Brian manually creates JV partners in /admin/users with the `jv_partner` role assigned. Implements the No-BS Homes JV Partner Lead Referral Agreement.
 
 ## Phase Details
 
@@ -655,4 +656,33 @@ Plans:
 
 Plans:
 - [x] 33-01-PLAN.md — Batched dashboard activity query (PERF-01) + pg pool revert (PERF-02) + orphaned seed-config commit (OPS-07), all in one atomic shipping unit
+
+### Phase 34: JV Partner Lead Pipeline *(added 2026-05-03)*
+
+**Goal:** Brian and his JV "driver" partners can submit, triage, track, and pay for motivated-seller lead referrals end-to-end inside No BS Workbench — replacing the manual SMS-photo-Venmo workflow with a mobile lead-intake form, a triage queue, an automatic per-partner payment ledger driven by the existing deal lifecycle, and a monthly batch payment-run report — per the No-BS Homes JV Partner Lead Referral Agreement.
+
+**Depends on:** Phase 29 (RBAC + audit log — adds `jv_partner` role to `ROLE_GRANTS`), Phase 30 (admin user provisioning — Brian creates JV partner accounts in `/admin/users`), Phase 14 (mobile photo capture — reuses the front-of-property photo upload pattern), Phase 31 (unified activity feed — JV submissions log into the same feed)
+
+**Requirements:** [JV-01, JV-02, JV-03, JV-04, JV-05, JV-06, JV-07, JV-08, JV-09, JV-10, JV-11, JV-12, JV-13, JV-14, JV-15] — see `REQUIREMENTS.md > v1.4 Requirements > JV Partner Lead Pipeline`
+
+**Success Criteria** (what must be TRUE):
+  1. New `jv_partner` role exists in `app/src/lib/permissions.ts` `ROLE_GRANTS` with explicit per-action grants scoped to: submit own leads, view own ledger. NO grants for full lead pipeline, deals, buyers, contracts, Tracerfy, Skip Trace, Deal Blast, etc.
+  2. Brian provisions a JV partner account in `/admin/users` (existing console from Phase 30) by selecting the `jv_partner` role from the role dropdown — no Google auto-provision changes, no external auth surface.
+  3. A logged-in `jv_partner` reaches a mobile-first lead-submission form from the bottom nav. The form requires: full address, at least one photo of the front of the property (camera or gallery, reuses the Phase 14 upload pattern → Azure Blob), and condition notes (free-text). Submit creates a pending JV-lead record linked to the submitting user.
+  4. Brian's triage queue (`/jv-leads` or similar, owner-gated) shows pending JV submissions sorted oldest-first with submitter name, address, photo thumbnail, condition notes, dedup hint (matches against existing `properties.address` + prior JV submissions of the same parcel). Accept/Reject buttons; accept against Section 3 criteria, reject requires a reason.
+  5. Accepting a JV lead creates (or links to) a row in the existing `properties` table (with the JV photo attached and the JV partner stored as `lead_source`). The pipeline thereafter is the existing one — the JV submission carries its `jv_lead_id` link forward through any deal that materializes.
+  6. Each accepted lead automatically generates the $10 "qualified" payment milestone in the JV ledger. When a property linked to a JV lead transitions to a deal with first contact_event logged (i.e. negotiation file opened), the $15 "active follow-up" milestone is created. When a deal linked to a JV lead transitions to status `closed`, the $500 "deal closes" milestone is created. All milestones are idempotent (re-running transitions does not double-pay).
+  7. Each `jv_partner` sees their own ledger at `/jv-ledger`: list of submitted leads with current status (pending / accepted / rejected), each accepted lead's milestone status (earned / paid / not yet), running total owed for the current month. Cannot see other partners' submissions or ledgers.
+  8. Owner sees an aggregated payment-run page (`/admin/jv-payments`): for each partner, current month's earned-but-unpaid milestones with paid/unpaid checkboxes, a "Mark all paid as of {date}" action, and a printable/downloadable monthly summary. Marking paid is logged in the audit log and idempotent.
+  9. Submissions, accepts, rejects, status transitions, and payments are all written to the unified activity feed (Phase 31) and the audit log (Phase 29).
+  10. `next lint` and `tsc --noEmit` clean before commit (per `feedback_lint_before_commit.md`); `git status` clean per the post-Phase-32 hygiene rule.
+
+**Plans:** 5 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — DB schema + migration 0019 + jv_partner role + jv-milestones helpers + jv-leads blob container + admin role-picker option (JV-01, JV-02, JV-15)
+- [ ] 34-02-PLAN.md — submitJvLead server action + photo upload API + mobile submission form + bottom-nav/sidebar/middleware role gates + redirect to /jv-ledger (JV-03, JV-04, JV-13, JV-14, JV-15)
+- [ ] 34-03-PLAN.md — Triage queue at /jv-leads with dedup hints + acceptJvLead/rejectJvLead actions + property+lead upsert + qualified milestone trigger (JV-05, JV-06, JV-15)
+- [ ] 34-04-PLAN.md — active_follow_up + deal_closed milestone hooks into logActivity + updateDealStatus + per-partner ledger at /jv-ledger (JV-07, JV-08, JV-11, JV-15)
+- [ ] 34-05-PLAN.md — Payment-run admin page + race-safe markMilestonesPaid + 5 Resend notifications + end-to-end production human-verify checkpoint (JV-09, JV-10, JV-11, JV-12, JV-15)
 

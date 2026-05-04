@@ -391,6 +391,26 @@ Brian is bringing on his first hires (Stacee as Lead Manager, Chris as Sales). T
 - [x] **PERF-02**: pg connection pool config in `app/src/db/client.ts` returns to serverless-safe defaults (`max:3, idleTimeoutMillis:10000`) — the emergency `max:20/idle:300000` hotfix from commit `e092480` is reverted in the same commit as the N+1 elimination so the system never lives in a half-state.
 - [x] **OPS-07**: Orphaned working-tree edits in `app/src/db/seed-config.ts` (17 SLC neighborhood entries from 2026-04-17) are committed alongside the Phase 33 fix per the post-Phase-32 hygiene rule (`git status` clean after every phase).
 
+### JV Partner Lead Pipeline (Phase 34, added 2026-05-03)
+
+Brian's drivers ("JV partners") currently text him photos of distressed houses; he Venmos them when a deal closes. Phase 34 replaces the manual SMS+Venmo workflow with an in-app submission form, a triage queue, an automatic per-partner payment ledger, and a monthly batch payment-run report. Implements the No-BS Homes JV Partner Lead Referral Agreement.
+
+- [ ] **JV-01**: New `jv_partner` role added to `permissions.ts` `ROLE_GRANTS` with exactly two grants: `jv.submit_lead` and `jv.view_own_ledger`. NO existing pipeline grants (no Tracerfy, Skip Trace, Deal Blast, full lead pipeline access). Owner role also receives `jv.submit_lead`, `jv.view_own_ledger`, and `jv.triage`.
+- [ ] **JV-02**: Brian provisions JV partner accounts via existing `/admin/users` console (Phase 30) by selecting "JV Partner" from the role dropdown. `new-user-form.tsx` ROLE_OPTIONS extended with one entry. No new provisioning flow. No changes to Phase 30.1 Google OAuth auto-provision logic.
+- [ ] **JV-03**: A logged-in `jv_partner` reaches a mobile-first lead-submission form at `/jv-submit` from the bottom nav. The form requires full address (text, min 5 chars), at least one front-of-property photo (camera or gallery, client-side resized to 1600px JPEG 0.8 via `resizeImage()`, uploaded to a new Azure Blob `jv-leads` container), and condition notes (optional textarea, max 2000 chars). Submit is disabled client-side until both photo + address are present.
+- [ ] **JV-04**: `submitJvLead` server action validates inputs server-side and creates a `jv_leads` row with `status='pending'` linked to the submitting user. Photos are uploaded via a separate two-step API route (`/api/jv-leads/[id]/photo`) which enforces row-level scope (one partner cannot upload photos onto another partner's submission). Submissions missing address are rejected with HTTP 400.
+- [ ] **JV-05**: Brian's triage queue at `/jv-leads` (owner-gated via `jv.triage`) shows pending submissions sorted oldest-first with submitter name, full address, photo thumbnail (1-hour SAS URL), condition notes, and a dedup hint badge when the normalized address matches an existing `properties.address` or another non-pending `jv_leads` row. Accept and Reject buttons present per row; Reject opens an inline reason input (min 3 chars, max 500).
+- [ ] **JV-06**: `acceptJvLead` action upserts a `properties` row (matched by JS-side normalized-address fuzzy match against existing properties; otherwise INSERTs a new row with synthetic `parcel_id = 'jv-{jv_lead_id}'`) AND a `leads` row with `lead_source='jv_partner'`. Sets `jv_leads.status='accepted'`, `property_id`, `accepted_at`, `accepted_by_user_id`. Idempotent on re-run (returns `alreadyAccepted: true` without duplicate inserts).
+- [ ] **JV-07**: Three `jv_lead_milestones` rows are managed per accepted lead, all using `INSERT ... ON CONFLICT DO NOTHING` keyed on UNIQUE(`jv_lead_id`, `milestone_type`): (a) `qualified` (`amount_cents=1000`) created on accept; (b) `active_follow_up` (`amount_cents=1500`) created when the first OUTBOUND `contact_event` (types: `called_client`, `left_voicemail`, `emailed_client`, `sent_text`, `met_in_person` — NOT `received_email`) is logged for the linked property/lead; (c) `deal_closed` (`amount_cents=50000`) created when the linked deal's `status` transitions to `'closed'`. Termination clause honored: milestone hooks do NOT check `users.isActive` on the submitter — deactivated partners' accepted leads continue to accrue.
+- [ ] **JV-08**: Each `jv_partner` sees their own ledger at `/jv-ledger`: all their submitted leads with status pills, each accepted lead's three milestone rows (earned/paid/not yet), and a current-month-owed running total. Row-level scope enforced server-side: query always filters by `submitter_user_id = session.user.id` for non-owner viewers; owner can view any partner's ledger via `?userId={id}` partner-picker.
+- [ ] **JV-09**: Owner sees aggregated payment-run page at `/admin/jv-payments` (gated via `user.manage`): per-partner list of unpaid milestones earned ≤ today (default current calendar month inclusive) with checkboxes + payment-method input (pre-fills from `users.jv_payment_method`) + "Mark $X paid" batch action. `markMilestonesPaid` UPDATE uses `WHERE paid_at IS NULL` for race-safety against concurrent clicks. Idempotent. Audit-logged once per batch via `logAudit()`.
+- [ ] **JV-10**: Payment-run page renders a printable monthly summary per partner — `@media print` CSS hides UI controls and renders a clean per-partner table suitable for filing.
+- [ ] **JV-11**: All JV mutations (submit, accept, reject, milestone-created, milestone-paid) are written to the audit log via existing `logAudit()` from Phase 29. Property-level events (submit, accept, reject) ALSO appear in the unified activity feed (Phase 31) for the linked property when one exists. Milestone events stay in audit-log + JV ledger only — they are NOT pushed to `MATERIAL_AUDIT_ACTIONS` to avoid polluting the team-facing activity feed with internal payment ledger noise.
+- [ ] **JV-12**: Five Resend email notifications wired (all fire-and-forget, all use `getResend()` null-safe pattern from `email-actions.ts`): (a) new submission → Brian; (b) accept → partner ("$10 queued"); (c) reject → partner with reason; (d) milestone earned ($15 active_follow_up OR $500 deal_closed) → partner — but NOT $10 qualified to avoid double-email with the accept notification; (e) payment marked paid → partner, itemized.
+- [ ] **JV-13**: `jv_partner` bottom nav (`bottom-nav.tsx`) and sidebar (`app-sidebar.tsx`) render only "Submit Lead" (`/jv-submit`) and "My Ledger" (`/jv-ledger`) via an `isJvPartner` boolean prop computed in `(dashboard)/layout.tsx` (`roles.includes('jv_partner') && !roles.includes('owner')`). All other nav items hidden.
+- [ ] **JV-14**: Middleware redirects `jv_partner` (without owner role) from `/` to `/jv-ledger` on login. Single 4-line block added to `middleware.ts` after the existing empty-roles redirect.
+- [ ] **JV-15**: `next lint` and `tsc --noEmit` clean before every commit (per `feedback_lint_before_commit.md`); `git status` clean post-phase (per `feedback_check_uncommitted_after_phase.md`); end-to-end production smoke test passes (Brian provisions test JV partner, submits a lead from phone, accepts, fires a milestone via contact event, marks paid, receives all 3 expected emails as the partner).
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -739,11 +759,27 @@ Note: RP-06 and RP-07 are emergent display outcomes of Phase 25+26 — verified 
 | PERF-01 | Phase 33 | Complete |
 | PERF-02 | Phase 33 | Complete |
 | OPS-07 | Phase 33 | Complete |
+| JV-01 | Phase 34 | Planned |
+| JV-02 | Phase 34 | Planned |
+| JV-03 | Phase 34 | Planned |
+| JV-04 | Phase 34 | Planned |
+| JV-05 | Phase 34 | Planned |
+| JV-06 | Phase 34 | Planned |
+| JV-07 | Phase 34 | Planned |
+| JV-08 | Phase 34 | Planned |
+| JV-09 | Phase 34 | Planned |
+| JV-10 | Phase 34 | Planned |
+| JV-11 | Phase 34 | Planned |
+| JV-12 | Phase 34 | Planned |
+| JV-13 | Phase 34 | Planned |
+| JV-14 | Phase 34 | Planned |
+| JV-15 | Phase 34 | Planned |
 
 **v1.4 Coverage:**
-- v1.4 requirements: 25 total (RBAC-01..10, AUTH-04, AUTH-05, ACT-01..05, MGMT-01..05, PERF-01, PERF-02, OPS-07)
-- Mapped to phases: 25
+- v1.4 requirements: 40 total (RBAC-01..10, AUTH-04, AUTH-05, ACT-01..05, MGMT-01..05, PERF-01, PERF-02, OPS-07, JV-01..15)
+- Mapped to phases: 40
 - Unmapped: 0
 
 ---
-*Last updated: 2026-05-03 — back-filled v1.4 requirements (Phases 29-33): RBAC-01..10, AUTH-04..05, ACT-01..05, MGMT-01..05, PERF-01..02, OPS-07*
+*Last updated: 2026-05-03 — added Phase 34 (JV Partner Lead Pipeline): JV-01..JV-15*
+*Previously updated: 2026-05-03 — back-filled v1.4 requirements (Phases 29-33): RBAC-01..10, AUTH-04..05, ACT-01..05, MGMT-01..05, PERF-01..02, OPS-07*
