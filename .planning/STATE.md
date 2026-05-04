@@ -8,7 +8,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v1.4 — Team & Access
 **Current phase:** 34-jv-partner-lead-pipeline
-**Current plan:** Plan 3/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-03-SUMMARY.md`
+**Current plan:** Plan 4/5 complete — see `.planning/phases/34-jv-partner-lead-pipeline/34-04-SUMMARY.md`
 **Status:** active
 
 ## Progress
@@ -22,7 +22,7 @@ Phase 30.1: [####################] Plan 1/1 complete
 Phase 31: [####################] Plan 1/1 complete
 Phase 32: [####################] Plan 1/1 complete
 Phase 33: [####################] Plan 1/1 complete
-Phase 34: [############        ] Plan 3/5 complete
+Phase 34: [################    ] Plan 4/5 complete
 
 ## Decisions
 
@@ -75,6 +75,10 @@ Phase 34: [############        ] Plan 3/5 complete
 - [Phase 34-03]: Dedup uses JS-side Set match (not SQL ANY) — 165KB RAM for full properties.address load, trivial for 5-user tool
 - [Phase 34-03]: acceptJvLead synthetic parcel_id 'jv-{jv_lead_id}' — UUID prefix makes it unambiguous vs real SLCO/county IDs
 - [Phase 34-03]: TODO(34-05) markers added for notifyJvLeadAccepted + notifyJvLeadRejected in jv-actions.ts (now 3 total)
+- [Phase 34-04]: Milestone hooks inserted AFTER logAudit in both files — idempotent hook never affects audit log correctness
+- [Phase 34-04]: deal-actions hook fetches deal.propertyId in separate SELECT (not modifying 'existing' SELECT) — minimal disruption to critical path
+- [Phase 34-04]: listJvPartners includes inactive users — owner must audit terminated partner ledgers (Section 7)
+- [Phase 34-04]: getJvLedgerForUser uses inArray() for bulk milestone fetch — 2 round-trips total, not N+1
 
 ## Performance Metrics
 
@@ -96,6 +100,7 @@ Phase 34: [############        ] Plan 3/5 complete
 | Phase 34 P01 | 25min | 3 tasks | 7 files |
 | Phase 34 P02 | 3min  | 3 tasks | 8 files |
 | Phase 34 P03 | 4min  | 3 tasks | 5 files |
+| Phase 34 P04 | 3min  | 3 tasks | 5 files |
 
 ## Roadmap Evolution
 
@@ -124,3 +129,4 @@ Phase 34: [############        ] Plan 3/5 complete
 - 2026-05-03: Plan 34-01 complete — migration 0019 (jv_leads + jv_lead_milestones + users.jv_payment_method) applied to prod; jv_partner RBAC role + 3 jv.* actions; gates.ts 3 new booleans; blob-storage jv-leads container; jv-milestones.ts 3 idempotent creators; admin role picker; commits d5c6e37, 8e0c765, b939785; tsc clean
 - 2026-05-03: Plan 34-02 complete — submitJvLead server action, photo upload API route (row-level ownership), JvSubmitForm (photo-first mobile layout, resizeImage, two-step submit), /jv-submit page, isJvPartner nav (2-item bottom nav + sidebar), middleware redirect / → /jv-ledger for jv_partner; commits 3693e93, 6a8811f, 61f7ac8; tsc clean
 - 2026-05-04: Plan 34-03 complete — jv-queries.ts (getJvLeadsForTriage + getJvLeadById), acceptJvLead + rejectJvLead server actions (property upsert, synthetic parcel_id='jv-{uuid}', $10 milestone, idempotent), JvTriageTable client component (photo thumbs, dedup badges, inline reject reason), /jv-leads owner-gated page; commits 2d8a702, bbdc6f7, fe7569b; tsc clean
+- 2026-05-04: Plan 34-04 complete — active_follow_up hook in logActivity (OUTBOUND_CONTACT_EVENT_TYPES set, try/catch, JV lead join via propertyId), deal_closed hook in updateDealStatus (separate propertyId fetch, previousStatus guard), jv-queries.ts extended (JvLedgerLead, listJvPartners, getJvLedgerForUser), JvLedgerTable client component (summary card + per-lead milestone cards), /jv-ledger server page (partner self-view + owner picker); commits 4619d7b, 3a97c9a, 620b0f3; tsc clean
