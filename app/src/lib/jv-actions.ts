@@ -2,17 +2,18 @@
 
 import { auth } from "@/auth";
 import { db } from "@/db/client";
-import { jvLeads, properties, leads, users } from "@/db/schema";
+import { jvLeads, jvLeadMilestones, properties, leads, users } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
 import { userCan, type Role } from "@/lib/permissions";
 import { logAudit } from "@/lib/audit-log";
 import { createQualifiedMilestone } from "@/lib/jv-milestones";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, isNull } from "drizzle-orm";
 import {
   notifyJvLeadSubmitted,
   notifyJvLeadAccepted,
   notifyJvLeadRejected,
+  notifyJvPaymentIssued,
 } from "@/lib/email-actions";
 
 function normalizeAddress(address: string): string {
@@ -324,4 +325,107 @@ function normalizeForMatchInline(address: string): string {
     .replace(/\bavenue\b/g, "ave")
     .replace(/\bdrive\b/g, "dr")
     .replace(/\bboulevard\b/g, "blvd");
+}
+
+// ---------------------------------------------------------------------------
+// markMilestonesPaid
+// ---------------------------------------------------------------------------
+
+const markMilestonesPaidSchema = z.object({
+  milestoneIds: z.array(z.uuid()).min(1).max(500),
+  paymentMethod: z.string().trim().min(1).max(200),
+  paidAt: z.iso.datetime().optional(), // defaults to now()
+});
+
+export async function markMilestonesPaid(
+  input: z.infer<typeof markMilestonesPaidSchema>
+): Promise<{ updatedCount: number; totalCents: number }> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const roles = (session.user.roles ?? []) as Role[];
+  if (!userCan(roles, "user.manage")) throw new Error("Forbidden"); // owner-only
+  const actorUserId = session.user.id as string;
+  const { milestoneIds, paymentMethod, paidAt } = markMilestonesPaidSchema.parse(input);
+  const paidAtDate = paidAt ? new Date(paidAt) : new Date();
+
+  // Race-safe: WHERE paid_at IS NULL — concurrent calls can only win once per row
+  const updated = await db
+    .update(jvLeadMilestones)
+    .set({ paidAt: paidAtDate, paidByUserId: actorUserId, paymentMethod })
+    .where(and(inArray(jvLeadMilestones.id, milestoneIds), isNull(jvLeadMilestones.paidAt)))
+    .returning({
+      id: jvLeadMilestones.id,
+      jvLeadId: jvLeadMilestones.jvLeadId,
+      amountCents: jvLeadMilestones.amountCents,
+      milestoneType: jvLeadMilestones.milestoneType,
+    });
+
+  const totalCents = updated.reduce((sum, m) => sum + m.amountCents, 0);
+
+  // Audit once for the whole batch
+  await logAudit({
+    actorUserId,
+    action: "jv_lead.payment_marked_paid",
+    entityType: "jv_lead_milestone",
+    entityId: null,
+    newValue: {
+      milestoneIds: updated.map((m) => m.id),
+      totalCents,
+      paymentMethod,
+      paidAt: paidAtDate.toISOString(),
+    },
+  });
+
+  // Group by partner for payment-issued emails
+  const jvLeadIds = [...new Set(updated.map((m) => m.jvLeadId))];
+  if (jvLeadIds.length > 0) {
+    const partnersForBatch = await db
+      .select({
+        submitterUserId: jvLeads.submitterUserId,
+        email: users.email,
+        jvLeadId: jvLeads.id,
+        address: jvLeads.address,
+      })
+      .from(jvLeads)
+      .innerJoin(users, eq(users.id, jvLeads.submitterUserId))
+      .where(inArray(jvLeads.id, jvLeadIds));
+
+    // Group line items per partner
+    const byPartner = new Map<
+      string,
+      {
+        email: string;
+        lineItems: { milestoneType: string; address: string; amountCents: number }[];
+        totalCents: number;
+      }
+    >();
+    for (const m of updated) {
+      const pj = partnersForBatch.find((p) => p.jvLeadId === m.jvLeadId);
+      if (!pj) continue;
+      const entry = byPartner.get(pj.submitterUserId) ?? {
+        email: pj.email,
+        lineItems: [],
+        totalCents: 0,
+      };
+      entry.lineItems.push({
+        milestoneType: m.milestoneType,
+        address: pj.address,
+        amountCents: m.amountCents,
+      });
+      entry.totalCents += m.amountCents;
+      byPartner.set(pj.submitterUserId, entry);
+    }
+    for (const partner of byPartner.values()) {
+      await notifyJvPaymentIssued({
+        partnerEmail: partner.email,
+        totalCents: partner.totalCents,
+        paymentMethod,
+        lineItems: partner.lineItems,
+      });
+    }
+  }
+
+  revalidatePath("/admin/jv-payments");
+  revalidatePath("/jv-ledger");
+  return { updatedCount: updated.length, totalCents };
 }

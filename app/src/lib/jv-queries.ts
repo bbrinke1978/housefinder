@@ -4,7 +4,7 @@
 
 import { db } from "@/db/client";
 import { jvLeads, jvLeadMilestones, properties, users } from "@/db/schema";
-import { eq, asc, ne, desc, inArray, sql } from "drizzle-orm";
+import { eq, asc, ne, desc, inArray, sql, isNull, lte, and } from "drizzle-orm";
 import { generateJvLeadSasUrl } from "@/lib/blob-storage";
 
 // ---------------------------------------------------------------------------
@@ -230,6 +230,92 @@ export async function getJvLedgerForUser(userId: string): Promise<JvLedgerLead[]
       earnedTotalCents,
       paidTotalCents,
       currentMonthOwedCents,
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// JvPaymentRunPartner — shape returned by getJvPaymentRun
+// ---------------------------------------------------------------------------
+
+export interface JvPaymentRunPartner {
+  userId: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  jvPaymentMethod: string | null; // pre-fills the payment method form field
+  unpaidMilestones: {
+    id: string;
+    jvLeadId: string;
+    address: string;
+    milestoneType: "qualified" | "active_follow_up" | "deal_closed";
+    amountCents: number;
+    earnedAt: Date;
+  }[];
+  unpaidTotalCents: number;
+}
+
+// ---------------------------------------------------------------------------
+// getJvPaymentRun — per-partner unpaid milestones earned ≤ end of given month.
+// Defaults to current calendar month. Partners with no unpaid milestones are
+// included (unpaidMilestones: [], unpaidTotalCents: 0) so Brian sees the full list.
+// ---------------------------------------------------------------------------
+
+export async function getJvPaymentRun(
+  asOf: Date = new Date()
+): Promise<JvPaymentRunPartner[]> {
+  // 1. List all jv_partner users (active and inactive — termination clause)
+  const partners = await listJvPartners();
+  if (partners.length === 0) return [];
+
+  // 2. Pull jv_payment_method for each partner
+  const partnerSettings = await db
+    .select({ id: users.id, jvPaymentMethod: users.jvPaymentMethod })
+    .from(users)
+    .where(inArray(users.id, partners.map((p) => p.id)));
+  const methodById = new Map(partnerSettings.map((p) => [p.id, p.jvPaymentMethod ?? null]));
+
+  // 3. Fetch all unpaid milestones earned ≤ asOf, joined with their leads
+  const rows = await db
+    .select({
+      milestoneId: jvLeadMilestones.id,
+      jvLeadId: jvLeadMilestones.jvLeadId,
+      milestoneType: jvLeadMilestones.milestoneType,
+      amountCents: jvLeadMilestones.amountCents,
+      earnedAt: jvLeadMilestones.earnedAt,
+      submitterUserId: jvLeads.submitterUserId,
+      address: jvLeads.address,
+    })
+    .from(jvLeadMilestones)
+    .innerJoin(jvLeads, eq(jvLeads.id, jvLeadMilestones.jvLeadId))
+    .where(
+      and(
+        isNull(jvLeadMilestones.paidAt),
+        lte(jvLeadMilestones.earnedAt, asOf)
+      )
+    )
+    .orderBy(asc(jvLeadMilestones.earnedAt));
+
+  // 4. Group milestones by partner
+  return partners.map((p) => {
+    const ms = rows
+      .filter((r) => r.submitterUserId === p.id)
+      .map((r) => ({
+        id: r.milestoneId,
+        jvLeadId: r.jvLeadId,
+        address: r.address,
+        milestoneType: r.milestoneType as JvPaymentRunPartner["unpaidMilestones"][number]["milestoneType"],
+        amountCents: r.amountCents,
+        earnedAt: r.earnedAt,
+      }));
+    return {
+      userId: p.id,
+      name: p.name,
+      email: p.email,
+      isActive: p.isActive,
+      jvPaymentMethod: methodById.get(p.id) ?? null,
+      unpaidMilestones: ms,
+      unpaidTotalCents: ms.reduce((sum, m) => sum + m.amountCents, 0),
     };
   });
 }
