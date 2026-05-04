@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Phone, Mail, MapPin, MessageSquare, Clock } from "lucide-react";
+import { auth } from "@/auth";
+import { Briefcase, Phone, Mail, MapPin, MessageSquare, Clock } from "lucide-react";
 import { getInboundLead } from "@/lib/queries";
+import { gates } from "@/lib/gates";
 import { BackButton } from "@/components/back-button";
 import { LeadNotes } from "@/components/lead-notes";
 import { InboundLeadStatusSelect } from "@/components/inbound-lead-status-select";
@@ -18,7 +21,8 @@ export default async function InboundLeadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [lead, activityFeed] = await Promise.all([
+  const [session, lead, activityFeed] = await Promise.all([
+    auth(),
     getInboundLead(id),
     getActivityFeedForLead(id).catch(() => []),
   ]);
@@ -26,6 +30,8 @@ export default async function InboundLeadDetailPage({
   if (!lead) {
     notFound();
   }
+
+  const { canCreateDeal } = gates(session);
 
   const isVoicemail = lead.leadSource === "voicemail";
   const badgeLabel = isVoicemail ? "Voicemail" : "Website";
@@ -61,6 +67,15 @@ export default async function InboundLeadDetailPage({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canCreateDeal && (
+            <Link
+              href={`/deals/new?leadId=${lead.id}`}
+              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <Briefcase className="h-4 w-4" />
+              Start Deal
+            </Link>
+          )}
           <InboundLeadStatusSelect leadId={lead.id} currentStatus={lead.status} />
           <DeleteInboundLeadButton
             leadId={lead.id}

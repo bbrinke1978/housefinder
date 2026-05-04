@@ -1,18 +1,18 @@
 import { db } from "@/db/client";
 import { ownerContacts } from "@/db/schema";
-import { eq, and, isNotNull, not, like } from "drizzle-orm";
-import { getPropertyDetail } from "@/lib/queries";
+import { eq } from "drizzle-orm";
+import { getPropertyDetail, getInboundLead } from "@/lib/queries";
 import { getTracerfyStatus } from "@/lib/tracerfy-actions";
 import { NewDealForm } from "@/components/new-deal-form";
 
 export const dynamic = "force-dynamic";
 
 interface NewDealPageProps {
-  searchParams: Promise<{ propertyId?: string }>;
+  searchParams: Promise<{ propertyId?: string; leadId?: string }>;
 }
 
 export default async function NewDealPage({ searchParams }: NewDealPageProps) {
-  const { propertyId } = await searchParams;
+  const { propertyId, leadId } = await searchParams;
 
   let prefill: {
     address?: string;
@@ -72,6 +72,19 @@ export default async function NewDealPage({ searchParams }: NewDealPageProps) {
       );
 
       hasContacts = hasPhone || hasEmail;
+    }
+  } else if (leadId) {
+    // Inbound-lead prefill (voicemail / website form): no property exists yet,
+    // pull contact + address from the lead notes blob.
+    const lead = await getInboundLead(leadId);
+    if (lead) {
+      prefill = {
+        address: lead.address ?? undefined,
+        city: lead.city ?? undefined,
+        sellerName: lead.name ?? undefined,
+        sellerPhone: lead.phone ?? undefined,
+      };
+      hasContacts = !!(lead.phone || lead.address);
     }
   }
 
