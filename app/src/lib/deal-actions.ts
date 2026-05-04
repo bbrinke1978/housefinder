@@ -19,8 +19,10 @@ import {
   expenses,
   budgets,
   budgetCategories,
+  jvLeads,
 } from "@/db/schema";
 import { eq, desc, and, isNull, inArray } from "drizzle-orm";
+import { createDealClosedMilestone } from "@/lib/jv-milestones";
 import { randomUUID } from "crypto";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
@@ -371,6 +373,37 @@ export async function updateDealStatus(
     oldValue: { status: previousStatus },
     newValue: { status: parsed.status },
   });
+
+  // ── JV milestone hook: $500 deal_closed when a JV-sourced deal closes ──
+  // Section 4 of the JV agreement: paid in addition to any qualified ($10) and
+  // active_follow_up ($15) milestones already earned. Idempotent via
+  // UNIQUE(jv_lead_id, milestone_type) — re-saving a closed deal does NOT double-pay.
+  if (parsed.status === "closed" && previousStatus !== "closed") {
+    try {
+      // Fetch deal.propertyId separately to avoid modifying the existing 'existing' SELECT above
+      const [dealForJv] = await db
+        .select({ propertyId: deals.propertyId })
+        .from(deals)
+        .where(eq(deals.id, parsed.dealId))
+        .limit(1);
+      if (dealForJv?.propertyId) {
+        const [linkedJvLead] = await db
+          .select({ id: jvLeads.id })
+          .from(jvLeads)
+          .where(and(
+            eq(jvLeads.propertyId, dealForJv.propertyId),
+            eq(jvLeads.status, "accepted"),
+          ))
+          .limit(1);
+        if (linkedJvLead) {
+          await createDealClosedMilestone(linkedJvLead.id, session.user.id ?? null);
+        }
+      }
+    } catch (err) {
+      // Milestone hook failures must NOT block the deal status update
+      console.error("[updateDealStatus] JV milestone hook failed:", err);
+    }
+  }
 
   // --- Auto-fill assignees on status transitions ---
   // When transitioning to "marketing" and disposition_user_id is null, attempt to
