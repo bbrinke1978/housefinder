@@ -10,7 +10,8 @@ export type Role =
   | "lead_manager"
   | "transaction_coordinator"
   | "sales"
-  | "assistant";
+  | "assistant"
+  | "jv_partner";
 
 export type Action =
   // leads
@@ -47,7 +48,11 @@ export type Action =
   | "scraper_config.manage"
   | "audit_log.view"
   // feedback
-  | "feedback.triage";
+  | "feedback.triage"
+  // jv partner
+  | "jv.submit_lead"
+  | "jv.view_own_ledger"
+  | "jv.triage";
 
 const ROLE_GRANTS: Record<Role, Action[]> = {
   owner: [
@@ -56,7 +61,7 @@ const ROLE_GRANTS: Record<Role, Action[]> = {
     "buyer.create_or_edit", "buyer.delete", "contract.generate", "contract.sign_as_agent",
     "deal.edit_closing_logistics", "campaign.send", "blast.send", "tracerfy.run",
     "analytics.view_all", "user.manage", "scraper_config.manage", "audit_log.view",
-    "feedback.triage",
+    "feedback.triage", "jv.submit_lead", "jv.view_own_ledger", "jv.triage",
   ],
   acquisition_manager: [
     "lead.view_all", "lead.edit_status", "deal.view_all", "deal.create",
@@ -81,6 +86,7 @@ const ROLE_GRANTS: Record<Role, Action[]> = {
     "deal.view_all", "tracerfy.run", "campaign.send", "analytics.view_own",
   ],
   assistant: ["lead.view_all", "deal.view_all", "buyer.view_all"],
+  jv_partner: ["jv.submit_lead", "jv.view_own_ledger"],
 };
 
 /**

@@ -24,6 +24,9 @@ export interface Gates {
   canManageUsers: boolean;
   canViewAuditLog: boolean;
   canTriageFeedback: boolean;
+  canSubmitJvLead: boolean;
+  canViewJvLedger: boolean;
+  canTriageJvLeads: boolean;
   isOwner: boolean;
 }
 
@@ -44,6 +47,9 @@ export function gates(session: Session | null): Gates {
     canManageUsers: sessionCan(session, "user.manage"),
     canViewAuditLog: sessionCan(session, "audit_log.view"),
     canTriageFeedback: sessionCan(session, "feedback.triage"),
+    canSubmitJvLead: sessionCan(session, "jv.submit_lead"),
+    canViewJvLedger: sessionCan(session, "jv.view_own_ledger"),
+    canTriageJvLeads: sessionCan(session, "jv.triage"),
     isOwner: roles.includes("owner"),
   };
 }

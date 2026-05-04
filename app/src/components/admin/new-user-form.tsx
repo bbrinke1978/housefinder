@@ -15,6 +15,7 @@ const ROLE_OPTIONS = [
   { value: "transaction_coordinator", label: "Transaction Coordinator" },
   { value: "sales", label: "Sales" },
   { value: "assistant", label: "Assistant" },
+  { value: "jv_partner", label: "JV Partner" },
 ];
 
 export function NewUserForm() {
