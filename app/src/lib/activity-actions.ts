@@ -15,8 +15,9 @@
  */
 
 import { db } from "@/db/client";
-import { contactEvents, leadNotes } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { contactEvents, leadNotes, jvLeads, leads as leadsTable } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { createActiveFollowUpMilestone } from "@/lib/jv-milestones";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod/v4";
@@ -53,6 +54,17 @@ const TYPE_TO_EVENT_TYPE: Record<string, string> = {
   meeting: "met_in_person",
   voicemail: "left_voicemail",
 };
+
+// Outbound contact_event types — these trigger the JV active_follow_up milestone.
+// 'received_email' is INBOUND (owner → us) and per Section 4 of the JV agreement
+// does not count as "Brian makes contact with the property owner".
+const OUTBOUND_CONTACT_EVENT_TYPES = new Set([
+  "called_client",
+  "left_voicemail",
+  "emailed_client",
+  "sent_text",
+  "met_in_person",
+]);
 
 // ---------------------------------------------------------------------------
 // logActivity
@@ -140,6 +152,33 @@ export async function logActivity(
         contactEventId: newId,
       },
     });
+
+    // ── JV milestone hook: $15 active_follow_up on first outbound contact for a JV-linked property ──
+    // Section 4 of the JV agreement: paid when Brian "makes contact with the property owner and opens
+    // a negotiation file". Idempotent via UNIQUE(jv_lead_id, milestone_type) — re-logging contact events
+    // for the same lead does NOT double-pay.
+    if (OUTBOUND_CONTACT_EVENT_TYPES.has(eventType)) {
+      try {
+        // Find an accepted jv_lead linked to the same property as this lead
+        const linkedJvLead = await db
+          .select({ id: jvLeads.id })
+          .from(jvLeads)
+          .innerJoin(leadsTable, eq(leadsTable.propertyId, jvLeads.propertyId))
+          .where(and(
+            eq(leadsTable.id, parsed.leadId),
+            eq(jvLeads.status, "accepted"),
+          ))
+          .limit(1);
+        if (linkedJvLead[0]) {
+          await createActiveFollowUpMilestone(linkedJvLead[0].id, actorUserId);
+          // Note: createActiveFollowUpMilestone is itself idempotent and fire-and-forget audit-logged.
+          // We do NOT branch on result.created here — Plan 05's notification logic owns the email side.
+        }
+      } catch (err) {
+        // Milestone hook failures must NOT block the contact event from being logged
+        console.error("[logActivity] JV milestone hook failed:", err);
+      }
+    }
   }
 
   revalidatePath("/");
