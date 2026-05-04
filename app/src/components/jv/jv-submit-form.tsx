@@ -55,7 +55,7 @@ async function resizeImage(file: File): Promise<Blob> {
   });
 }
 
-interface JvSubmitFormProps {} // no props — fully self-contained
+type JvSubmitFormProps = Record<string, never>; // no props — fully self-contained
 
 export function JvSubmitForm(_props: JvSubmitFormProps) {
   const router = useRouter();
