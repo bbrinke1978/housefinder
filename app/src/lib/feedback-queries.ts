@@ -87,11 +87,7 @@ export interface FeedbackListFilters {
   reporterId?: string;
   search?: string;
   includeDeleted?: boolean;
-  /**
-   * archive: undefined → hide shipped/wontfix/duplicate (default)
-   *          true       → show ONLY shipped/wontfix/duplicate
-   *          false      → no archive filter at all (legacy/all-statuses)
-   */
+  /** archive: false/undefined → hide shipped/wontfix/duplicate; true → show ONLY those. */
   archive?: boolean;
 }
 
@@ -136,14 +132,13 @@ export async function listFeedbackItems(
       and(
         // Soft-delete filter
         includeDeleted ? undefined : isNull(feedbackItems.deletedAt),
-        // Archive scope: when an explicit status[] filter is set, honor it instead of the archive scope
+        // Archive scope: explicit status[] filter wins; otherwise hide archived by default,
+        // or show only archived when archive=true.
         status && status.length > 0
           ? inArray(feedbackItems.status, status as FeedbackStatus[])
-          : archive === true
+          : archive
             ? inArray(feedbackItems.status, ARCHIVED_STATUSES)
-            : archive === false
-              ? undefined
-              : notInArray(feedbackItems.status, ARCHIVED_STATUSES),
+            : notInArray(feedbackItems.status, ARCHIVED_STATUSES),
         // Type filter
         type && type.length > 0
           ? inArray(feedbackItems.type, type as FeedbackType[])
@@ -304,6 +299,26 @@ export async function getFeedbackItemDetail(
     attachments,
     activity: activityRaw as unknown as FeedbackActivityEntry[],
   };
+}
+
+// -- countArchivedFeedback --
+
+/**
+ * countArchivedFeedback — number of items in shipped/wontfix/duplicate, excluding soft-deleted.
+ * Used by the "Archive (N)" toggle on the feedback list.
+ */
+export async function countArchivedFeedback(): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(feedbackItems)
+    .where(
+      and(
+        isNull(feedbackItems.deletedAt),
+        inArray(feedbackItems.status, ARCHIVED_STATUSES)
+      )
+    );
+
+  return result[0]?.count ?? 0;
 }
 
 // -- countOpenFeedbackForUser --

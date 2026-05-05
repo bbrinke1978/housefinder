@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { listFeedbackItems } from "@/lib/feedback-queries";
+import { listFeedbackItems, countArchivedFeedback } from "@/lib/feedback-queries";
 import type { FeedbackListFilters } from "@/lib/feedback-queries";
 import { FeedbackList } from "@/components/feedback/feedback-list";
 import Link from "next/link";
@@ -32,10 +32,13 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
     priority:  getCsv(params.priority),
     search:    getString(params.q),
     reporterId: getString(params.mine) === "true" ? (session.user.id as string) : undefined,
-    archive,
+    archive: archive ? true : undefined,
   };
 
-  const items = await listFeedbackItems(filters);
+  const [items, archivedCount] = await Promise.all([
+    listFeedbackItems(filters),
+    countArchivedFeedback(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,6 +70,7 @@ export default async function FeedbackPage({ searchParams }: FeedbackPageProps) 
         filters={filters}
         isMine={getString(params.mine) === "true"}
         isArchive={archive}
+        archivedCount={archivedCount}
       />
     </div>
   );

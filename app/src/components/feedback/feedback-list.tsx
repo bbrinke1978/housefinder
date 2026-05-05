@@ -15,6 +15,7 @@ interface FeedbackListProps {
   filters: FeedbackListFilters;
   isMine: boolean;
   isArchive: boolean;
+  archivedCount: number;
 }
 
 const STATUS_OPTIONS = [
@@ -142,7 +143,7 @@ function formatDisplayNumber(n: number): string {
 
 // -- Main component --
 
-export function FeedbackList({ items, filters, isMine, isArchive }: FeedbackListProps) {
+export function FeedbackList({ items, filters, isMine, isArchive, archivedCount }: FeedbackListProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -259,7 +260,7 @@ export function FeedbackList({ items, filters, isMine, isArchive }: FeedbackList
               : "border-input bg-background text-foreground hover:bg-muted"
           }`}
         >
-          Archive
+          Archive{archivedCount > 0 ? ` (${archivedCount})` : ""}
         </button>
 
         {/* Result count */}
